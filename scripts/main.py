@@ -72,7 +72,7 @@ if __name__ == "__main__":
             kafka_topics_list = kafka_obj.add_topics_to_report()
 
         #-------------------------Trino Queries--------------------------
-
+        trino_queries=None
         if variables["load_type"] != "KubeQuery":
             print("Performing trino queries ...")
             calc = TRINO(curr_ist_start_time=variables["start_time_str_ist"],curr_ist_end_time=end_time_str,prom_con_obj=prom_con_obj)
