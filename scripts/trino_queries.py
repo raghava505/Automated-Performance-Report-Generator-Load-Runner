@@ -2,6 +2,7 @@ import requests
 from datetime import datetime
 import json
 import paramiko
+import pytz
 
 class TRINO:
     def __init__(self,curr_ist_start_time,curr_ist_end_time,prom_con_obj):
@@ -14,6 +15,8 @@ class TRINO:
         self.port=prom_con_obj.ssh_port
         self.username = prom_con_obj.abacus_username
         self.password  = prom_con_obj.abacus_password
+        self.ist_timezone = pytz.timezone('Asia/Kolkata')
+        self.utc_timezone = pytz.utc
 
         with open(self.test_env_file_path, 'r') as file:
             self.stack_details = json.load(file)
@@ -25,9 +28,17 @@ class TRINO:
         ssh_client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
         n = self.stack_details['dnodes'][0]
 
-        ist_time_format = '%Y-%m-%d %H:%M'
-        start_time_utc = (datetime.strptime(self.curr_ist_start_time, ist_time_format))
-        end_time_utc = (datetime.strptime(self.curr_ist_end_time, ist_time_format))
+        ist_time = self.ist_timezone.localize(datetime.strptime(self.curr_ist_start_time, '%Y-%m-%d %H:%M'))
+        utc_time = ist_time.astimezone(self.utc_timezone)
+        start_time_utc = utc_time.strftime('%Y-%m-%d %H:%M')
+
+        ist_time = self.ist_timezone.localize(datetime.strptime(self.curr_ist_end_time, '%Y-%m-%d %H:%M'))
+        utc_time = ist_time.astimezone(self.utc_timezone)
+        end_time_utc = utc_time.strftime('%Y-%m-%d %H:%M')
+
+        # ist_time_format = '%Y-%m-%d %H:%M'
+        # start_time_utc = (datetime.strptime(self.curr_ist_start_time, ist_time_format))
+        # end_time_utc = (datetime.strptime(self.curr_ist_end_time, ist_time_format))
         
 
         try:
