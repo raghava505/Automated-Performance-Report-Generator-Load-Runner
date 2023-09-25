@@ -76,7 +76,7 @@ if __name__ == "__main__":
         if variables["load_type"] != "KubeQuery":
             print("Performing trino queries ...")
             calc = TRINO(curr_ist_start_time=variables["start_time_str_ist"],curr_ist_end_time=end_time_str,prom_con_obj=prom_con_obj)
-            trino_queries = calc.make_calculations()
+            trino_queries = calc.fetch_trino_queries()
 
         #--------------------------------cpu and mem node-wise---------------------------------------
         print("Fetching resource usages data ...")

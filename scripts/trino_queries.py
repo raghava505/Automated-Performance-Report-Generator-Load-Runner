@@ -1,4 +1,3 @@
-import requests
 from datetime import datetime
 import json
 import paramiko
@@ -22,7 +21,7 @@ class TRINO:
             self.stack_details = json.load(file)
 
             
-    def trino_queries(self):
+    def fetch_trino_queries(self):
         save_dict = {}
         ssh_client = paramiko.SSHClient()
         ssh_client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
@@ -40,7 +39,6 @@ class TRINO:
         # start_time_utc = (datetime.strptime(self.curr_ist_start_time, ist_time_format))
         # end_time_utc = (datetime.strptime(self.curr_ist_end_time, ist_time_format))
         
-
         try:
             ssh_client.connect(node, 22, "abacus", "abacus")
             command = f"sudo -u monkey TRINO_PASSWORD={self.stack_details['trino_password']} /opt/uptycs/cloud/utilities/trino-cli --insecure --server https://localhost:5665 --schema upt_system --user upt_read_{self.stack_details['domain']} --catalog uptycs --password --truststore-password sslpassphrase --truststore-path /opt/uptycs/etc/presto/presto.jks --execute \"select source,query_operation,count(*) from presto_query_logs where upt_time > timestamp '{start_time_utc}' and upt_time< timestamp '{end_time_utc}' group by source,query_operation order by source;\""
@@ -55,17 +53,14 @@ class TRINO:
                 print("Errors:")
                 print(errors)
 
-            
             lines = output.strip().split('\n')
-            
-            
+                        
             for line in lines:
                 parts = line.strip().split(',')
                 if len(parts) == 3:
                     key1 = parts[0].strip('"')
                     key2 = parts[1].strip('"')
                     value = int(parts[2].strip('"'))
-                    
                     
                     if key1 not in save_dict:
                         save_dict[key1] = {}
@@ -76,23 +71,4 @@ class TRINO:
         finally:
             ssh_client.close()
 
-        
         return save_dict
-
-
-    def save(self,_ ,current_build_data):
-        save_dict=_
-        current_build_data[f"Trino Queries"] = save_dict
-        return current_build_data
-    
-    def make_calculations(self):
-        
-        current_build_data={}
-        current_build_data=self.save(self.trino_queries(),current_build_data)
-        print("Trino Queries output : ")
-        print(json.dumps(current_build_data, indent=4))
-
-        return current_build_data
-    
-
-
