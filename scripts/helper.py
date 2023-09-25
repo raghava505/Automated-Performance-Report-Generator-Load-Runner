@@ -49,7 +49,7 @@ def extract_node_detail(data,node_type,prom_con_obj):
             finally:
                 client.close()
         except socket.gaierror:
-            print(f"Could not resolve {hostname}")
+            print(f"ERROR : Could not resolve {hostname}")
         if 'c2' in hostname:return_dict[hostname]['clst'] = "2"
         else:return_dict[hostname]['clst'] = "1"
     return return_dict

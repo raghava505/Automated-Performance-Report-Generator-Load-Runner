@@ -43,6 +43,8 @@ class DISK:
             'time' : timestamp
         }
         response = requests.get(self.PROMETHEUS + self.API_PATH, params=PARAMS)
+        print(f"Excecuting query : {query} at timestamp {timestamp} , Status code : {response.status_code}")
+        if response.status_code != 200:print("ERROR : Request failed")
         result = response.json()['data']['result']
 
         for res in result:
@@ -63,7 +65,8 @@ class DISK:
             used_space_before_load = self.extract_data(self.kafka_disk_used_percentage,self.curr_ist_start_time,'host_name')
             used_space_after_load = self.extract_data(self.kafka_disk_used_percentage,self.curr_ist_end_time,'host_name')
             nodes = [node for node in used_space_before_load]
-        print(f"Total {TYPE} space configured: {total_space}")
+        print(f"Total {TYPE} space configured: ")
+        print(json.dumps(total_space, indent=4))
         print(f"nodes : {nodes}")
         save_dict={}
         bytes_in_a_tb=1e+12
@@ -80,7 +83,8 @@ class DISK:
                 percentage_used_after_load=used_space_after_load[node]
             used_space=(percentage_used_after_load-percentage_used_before_load)*total*(1024/100)
             save_dict[node] = {f"{TYPE}_total_space_configured_in_tb" : total , f"{TYPE}_disk_used_percentage_before_load" :percentage_used_before_load,f"{TYPE}_disk_used_percentage_after_load":percentage_used_after_load,f"{TYPE} used_space_during_load_in_gb":used_space}
-        print("Final dictionary to save : " , save_dict)
+        print("Final dictionary to save : " , )
+        print(json.dumps(save_dict, indent=4))
         return TYPE,save_dict
 
     def pg_disk_calc(self,TYPE):
@@ -100,7 +104,8 @@ class DISK:
             print(f"for node {node}, data_used_after_load_in_bytes : {data_used_after_load_in_bytes[node]} , data_used_before_load_in_bytes : {data_used_before_load_in_bytes[node]}")
             save_dict[node] = {"/pg (used in GB)" : total_pg_partition_disk_used,
                                "/data (used in GB)" : total_data_partition_disk_used}
-        print("Final dictionary to save : " , save_dict)
+        print("Final dictionary to save : " , )
+        print(json.dumps(save_dict, indent=4))
         return TYPE,save_dict
 
     def save(self,_ ,current_build_data):

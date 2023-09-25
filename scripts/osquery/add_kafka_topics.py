@@ -8,7 +8,7 @@ class kafka_topics:
         self.port=prom_con_obj.ssh_port
         self.username = prom_con_obj.abacus_username
         self.password  = prom_con_obj.abacus_password
-        self.remote_directory = f'/home/{self.username}'
+        # self.remote_directory = f'/home/{self.username}'
 
     def add_topics_to_report(self):
         ssh = paramiko.SSHClient()
@@ -17,7 +17,8 @@ class kafka_topics:
             print(f"Executing kafka topics script in host {self.host}")
             ssh.connect(self.host, self.port, self.username, self.password)
             sftp = ssh.open_sftp()
-            remote_script_path = f'{self.remote_directory}/get_kafka_topics.py'
+            # remote_script_path = f'{self.remote_directory}/get_kafka_topics.py'
+            remote_script_path="get_kafka_topics.py"
             sftp.put(self.local_script_path, remote_script_path)
             print(f"The script '{remote_script_path}' has been uploaded to the remote server.")
             remote_command = f'python3 {remote_script_path}'
@@ -28,6 +29,7 @@ class kafka_topics:
             exit_status = stdout.channel.recv_exit_status()
             output = stdout.read().decode()
             output_list = [line for line in output.split('\n') if line.strip()]
+            print("Kafka topics found are : " , output_list)
         except Exception as e:
             print("ERROR : " , str(e))
             return []

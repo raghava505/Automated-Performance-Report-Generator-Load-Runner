@@ -87,7 +87,7 @@ if __name__ == "__main__":
         print("Fetching charts data ...")
         charts_obj = Charts(start_timestamp=start_timestamp,end_timestamp=end_timestamp,prom_con_obj=prom_con_obj,
                 add_extra_time_for_charts_at_end_in_min=variables["add_extra_time_for_charts_at_end_in_min"],fs=fs)
-        complete_charts_data_dict=charts_obj.capture_charts_and_save()
+        complete_charts_data_dict,all_gridfs_fileids=charts_obj.capture_charts_and_save()
         #--------------------------------take screenshots---------------------------------------
         print("Capturing compaction status screenshots  ...")
         cp_obj = take_screenshots(start_time=start_time,end_time=end_time,fs=fs,elk_url=test_env_json_details["elk_url"])
@@ -132,6 +132,11 @@ if __name__ == "__main__":
             print(f"Document pushed to mongo successfully into database:{database_name}, collection:{collection_name} with id {inserted_id}")
         except Exception as e:
             print(f"ERROR : Failed to insert document into database {database_name}, collection:{collection_name} , {str(e)}")
+            print("Deleting stored chart data ...")
+            for file_id in all_gridfs_fileids:
+                print("deleting ", file_id)
+                db.fs.chunks.delete_many({'files_id': file_id})
+                db.fs.files.delete_one({'_id': file_id})
         client.close()
         #-----------------------------------------------------------------
         f3_at = time.perf_counter()

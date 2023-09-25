@@ -21,6 +21,13 @@ cpu_queries.update(dict([(app,f"{key}(uptycs_app_cpu{{app_name=~'{app}'}}) by (h
 container_memory_queries = {'container' : "sum(uptycs_docker_mem_used{}/(1000*1000*1000)) by (container_name)",}
 container_cpu_queries = {'container' : "sum(uptycs_docker_cpu_stats{}) by (container_name)",}
 
+all_queries_to_execute={
+    "memory_queries":memory_queries,
+    "cpu_queries":cpu_queries,
+    "container_memory_queries":container_memory_queries,
+    "container_cpu_queries":container_cpu_queries
+}
+
 class MC_comparisions:
     def __init__(self,prom_con_obj,start_timestamp,end_timestamp):
         self.curr_ist_start_time=start_timestamp
@@ -45,6 +52,8 @@ class MC_comparisions:
                 'step':15
             }
             response = requests.get(self.PROMETHEUS + self.API_PATH, params=PARAMS)
+            print(f"-------processing {tag} for {query} (timestamp : {self.curr_ist_start_time} to {self.curr_ist_end_time}), Status code : {response.status_code}")
+            if response.status_code != 200:print("ERROR : Request failed")
             result = response.json()['data']['result']
             if query==HOST:
                 print("All hosts : ", [r['metric']['host_name'] for r in result])
@@ -82,6 +91,7 @@ class MC_comparisions:
         #calculate overall pnodes,dnodes,pgnodes usage
         new_data = final[HOST]
         for node_type in ["pnodes" , "dnodes" , "pgnodes"]:
+            print(f"Calculating overall {tag} usages for node-type : {node_type}")
             new_sum=0
             for node in self.nodes_data[node_type]:
                 try:
@@ -89,6 +99,7 @@ class MC_comparisions:
                 except KeyError as e:
                     print(f"ERROR : key {node} not found in : {new_data}")
             return_overall[node_type] = {f"{unit}":new_sum}
+            print(f"{node_type} : {new_sum} {unit}")
         return final,return_overall
 
     def extract_container_data(self,queries,tag,unit):
@@ -102,6 +113,8 @@ class MC_comparisions:
                 'step':15
             }
             response = requests.get(self.PROMETHEUS + self.API_PATH, params=PARAMS)
+            print(f"----------processing {tag} for {query} (timestamp : {self.curr_ist_start_time} to {self.curr_ist_end_time}), Status code : {response.status_code}")
+            if response.status_code != 200:print("ERROR : Request failed")
             result = response.json()['data']['result']
             for res in result:
                 container_name = res['metric']['container_name']
@@ -118,6 +131,8 @@ class MC_comparisions:
         return final 
     
     def make_comparisions(self):
+        print("All usage queries to be executed are : ")
+        print(json.dumps(all_queries_to_execute, indent=4))
         memory_data,overall_memory_data = self.extract_data(memory_queries,memory_tag,memory_unit)
         cpu_data,overall_cpu_data = self.extract_data(cpu_queries,cpu_tag,cpu_unit)
         container_memory_data =  self.extract_container_data(container_memory_queries,memory_tag,memory_unit)
