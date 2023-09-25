@@ -3,6 +3,7 @@
     "domain":"jupiter",
     "stack_url": "https://jupiter.uptycs.net/",
     "elk_url": "192.168.134.50",
+    "trino_password": "297fc7f0-a061-4021-9f9c-02cb75f565b6",
     "pnodes": [
         "s1c1pn1",
         "s1c1pn2",

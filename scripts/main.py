@@ -11,6 +11,7 @@ from input import create_input_form
 from capture_charts_data import Charts
 from gridfs import GridFS
 from compaction_status import take_screenshots
+from trino_queries import TRINO
 
 if __name__ == "__main__":
     s_at = time.perf_counter()
@@ -69,6 +70,14 @@ if __name__ == "__main__":
             print("Add kafka topics ...")
             kafka_obj = kafka_topics(prom_con_obj=prom_con_obj)
             kafka_topics_list = kafka_obj.add_topics_to_report()
+
+        #-------------------------Trino Queries--------------------------
+
+        if variables["load_type"] != "KubeQuery":
+            print("Performing trino queries ...")
+            calc = TRINO(curr_ist_start_time=variables["start_time_str_ist"],curr_ist_end_time=end_time_str,prom_con_obj=prom_con_obj)
+            trino_queries = calc.make_calculations()
+
         #--------------------------------cpu and mem node-wise---------------------------------------
         print("Fetching resource usages data ...")
         comp = MC_comparisions(start_timestamp=start_timestamp,end_timestamp=end_timestamp,prom_con_obj=prom_con_obj)
@@ -111,6 +120,8 @@ if __name__ == "__main__":
             final_data_to_save.update({"disk_space_usages":disk_space_usage_dict})
         if kafka_topics_list:
             final_data_to_save.update({"kafka_topics":kafka_topics_list})
+        if trino_queries:
+            final_data_to_save.update({"Trino_queries":trino_queries})
 
         final_data_to_save.update({"charts":complete_charts_data_dict})
         final_data_to_save.update({"images":compaction_status_image})
