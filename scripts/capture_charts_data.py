@@ -70,7 +70,7 @@ other_chart_queries={"Active Client Connections":"uptycs_pgb_cl_active","Average
                      }
 
 all_chart_queries={
-    "live_asset_count":live_asset_count_query,
+    "basic_charts":live_asset_count_query,
     "memory_charts":memory_chart_queries,
     "cpu_charts":cpu_chart_queries,
     "inject_drain_rate_and_lag_charts":inject_drain_rate_and_lag_chart_queries,
@@ -106,7 +106,7 @@ class Charts:
             if response.status_code != 200:print("ERROR : Request failed")
             result = response.json()['data']['result']
             for host in result:
-                file_id = self.fs.put(str(host["values"]).encode('utf-8'), filename='array.json')
+                file_id = self.fs.put(str(host["values"]).encode('utf-8'), filename=f'{query}.json')
                 host["values"] = file_id
                 file_ids.append(file_id)
             final[query] = result
