@@ -1,9 +1,9 @@
 {
     "stack": "S1",
-    "domain":"jupiter",
+    "domain": "jupiter",
     "stack_url": "https://jupiter.uptycs.net/",
     "elk_url": "192.168.134.50",
-    "trino_password": "297fc7f0-a061-4021-9f9c-02cb75f565b6",
+    "trino_password": "a68dc948-6a5e-498e-873b-501aac439efd",
     "pnodes": [
         "s1c1pn1",
         "s1c1pn2",
@@ -64,11 +64,11 @@
     "s1configdb1": {
         "storage": {
             "root_partition": "365G",
-            "pg": "3.5T",
-            "data": "3.5T"
+            "pg": "5.5T",
+            "data": "5.5T"
         },
-        "ram": "188",
-        "cores": "32",
+        "ram": "125",
+        "cores": "48",
         "clst": "1"
     },
     "s1configdb2": {
