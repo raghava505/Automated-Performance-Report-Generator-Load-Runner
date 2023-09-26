@@ -135,8 +135,9 @@ if __name__ == "__main__":
             print("Deleting stored chart data ...")
             for file_id in all_gridfs_fileids:
                 print("deleting ", file_id)
-                db.fs.chunks.delete_many({'files_id': file_id})
-                db.fs.files.delete_one({'_id': file_id})
+                # db.fs.chunks.delete_many({'files_id': file_id})
+                # db.fs.files.delete_one({'_id': file_id})
+                fs.delete(file_id=file_id)
         client.close()
         #-----------------------------------------------------------------
         f3_at = time.perf_counter()
