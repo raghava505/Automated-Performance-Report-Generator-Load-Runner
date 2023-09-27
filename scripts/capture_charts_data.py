@@ -5,7 +5,7 @@ import json
 common_app_names={
             "sum":["orc-compaction" ,"uptycs-configdb",  ".*osqLogger.*", "kafka","spark-worker",".*ruleEngine.*",
                 "data-archival",".*redis-server.*","/opt/uptycs/cloud/go/bin/complianceSummaryConsumer","tls",".*airflow.*",
-                "eventsDbIngestion"  , "trino" , "osqueryIngestion"],
+                 "trino" , "osqueryIngestion"],
             "avg":[]
         }
 

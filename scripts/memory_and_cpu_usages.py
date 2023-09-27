@@ -8,7 +8,7 @@ memory_unit = "GB"
 cpu_unit = "cores"
 
 app_names={
-            "sum":[ ".*osqLogger.*", "kafka",".*ruleEngine.*","tls","eventsDbIngestion"  , "trino" , "osqueryIngestion"],
+            "sum":[ ".*osqLogger.*", "kafka",".*ruleEngine.*","tls", "trino" , "osqueryIngestion"],
             "avg":[]
           }
 
