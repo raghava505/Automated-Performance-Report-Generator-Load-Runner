@@ -101,15 +101,19 @@ class Charts:
                 'end': ete,
                 'step':15
             }
-            response = requests.get(self.PROMETHEUS + self.API_PATH, params=PARAMS)
-            print(f"processing {query} chart data (timestamp : {ste} to {ete}), Status code : {response.status_code}")
-            if response.status_code != 200:print("ERROR : Request failed")
-            result = response.json()['data']['result']
-            for host in result:
-                file_id = self.fs.put(str(host["values"]).encode('utf-8'), filename=f'{query}.json')
-                host["values"] = file_id
-                file_ids.append(file_id)
-            final[query] = result
+            try:
+                response = requests.get(self.PROMETHEUS + self.API_PATH, params=PARAMS)
+                print(f"processing {query} chart data (timestamp : {ste} to {ete}), Status code : {response.status_code}")
+                if response.status_code != 200:print("ERROR : Request failed")
+                else:
+                    result = response.json()['data']['result']
+                    for host in result:
+                        file_id = self.fs.put(str(host["values"]).encode('utf-8'), filename=f'{query}.json')
+                        host["values"] = file_id
+                        file_ids.append(file_id)
+                    final[query] = result
+            except Exception as e:
+                print(f"ERROR : Failed fetching data for {query} , {str(e)}")
         return final,file_ids
             
     def capture_charts_and_save(self): 

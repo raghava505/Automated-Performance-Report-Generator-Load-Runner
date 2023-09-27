@@ -10,7 +10,6 @@ from disk_space import DISK
 from input import create_input_form
 from capture_charts_data import Charts
 from gridfs import GridFS
-from compaction_status import take_screenshots
 from trino_queries import TRINO
 
 if __name__ == "__main__":
@@ -83,54 +82,58 @@ if __name__ == "__main__":
         comp = MC_comparisions(start_timestamp=start_timestamp,end_timestamp=end_timestamp,prom_con_obj=prom_con_obj)
         mem_cpu_usages_dict,overall_usage_dict=comp.make_comparisions()
         #--------------------------------Capture charts data---------------------------------------
-        fs = GridFS(db)
-        print("Fetching charts data ...")
-        charts_obj = Charts(start_timestamp=start_timestamp,end_timestamp=end_timestamp,prom_con_obj=prom_con_obj,
-                add_extra_time_for_charts_at_end_in_min=variables["add_extra_time_for_charts_at_end_in_min"],fs=fs)
-        complete_charts_data_dict,all_gridfs_fileids=charts_obj.capture_charts_and_save()
-        #--------------------------------take screenshots---------------------------------------
-        print("Capturing compaction status screenshots  ...")
-        cp_obj = take_screenshots(start_time=start_time,end_time=end_time,fs=fs,elk_url=test_env_json_details["elk_url"])
-        compaction_status_image=cp_obj.get_compaction_status()
-        #-------------------------- Saving the json data to mongo -------------------------
-        print("Saving data to mongoDB ...")
-        load_details =  {
-            "stack":test_env_json_details["stack"],
-            "sprint": variables['sprint'],
-            "build": variables['build'],
-            "load_name":f"{variables['load_name']}",
-            "load_type":f"{variables['load_type']}",
-            "load_duration_in_hrs":variables['load_duration_in_hrs'],
-            "load_start_time_ist" : f"{variables['start_time_str_ist']}",
-            "load_end_time_ist" : f"{end_time_str}",
-            "run":run,
-            }
-        with open(f"{prom_con_obj.base_stack_config_path}/load_specific_details.json" , 'r') as file:
-            load_specific_details = json.load(file)
-        load_details.update(load_specific_details[variables['load_name']])
-
-        final_data_to_save = {
-            "load_details":load_details,
-            "test_environment_details":test_env_json_details
-        }
-
-        final_data_to_save.update(overall_usage_dict)
-
-        if disk_space_usage_dict:
-            final_data_to_save.update({"disk_space_usages":disk_space_usage_dict})
-        if kafka_topics_list:
-            final_data_to_save.update({"kafka_topics":kafka_topics_list})
-        if trino_queries:
-            final_data_to_save.update({"Trino_queries":trino_queries})
-
-        final_data_to_save.update({"charts":complete_charts_data_dict})
-        final_data_to_save.update({"images":compaction_status_image})
-        final_data_to_save.update(mem_cpu_usages_dict)
-
-        all_gridfs_referenced_ids=all_gridfs_fileids[:] + [compaction_status_image["compaction_status_chart"]]
-        final_data_to_save.update({"all_gridfs_referenced_ids":all_gridfs_referenced_ids})
-        
+        all_gridfs_fileids=[]
         try:
+            fs = GridFS(db)
+            print("Fetching charts data ...")
+            charts_obj = Charts(start_timestamp=start_timestamp,end_timestamp=end_timestamp,prom_con_obj=prom_con_obj,
+                    add_extra_time_for_charts_at_end_in_min=variables["add_extra_time_for_charts_at_end_in_min"],fs=fs)
+            complete_charts_data_dict,all_gridfs_fileids=charts_obj.capture_charts_and_save()
+            print("Fetched all charts data successfully !")
+            print("All the gridfs chart fields are : " , all_gridfs_fileids)
+            #--------------------------------take screenshots---------------------------------------
+            # print("Capturing compaction status screenshots  ...")
+            # cp_obj = take_screenshots(start_time=start_time,end_time=end_time,fs=fs,elk_url=test_env_json_details["elk_url"])
+            # compaction_status_image=cp_obj.get_compaction_status()
+            #-------------------------- Saving the json data to mongo -------------------------
+            print("Saving data to mongoDB ...")
+            load_details =  {
+                "stack":test_env_json_details["stack"],
+                "sprint": variables['sprint'],
+                "build": variables['build'],
+                "load_name":f"{variables['load_name']}",
+                "load_type":f"{variables['load_type']}",
+                "load_duration_in_hrs":variables['load_duration_in_hrs'],
+                "load_start_time_ist" : f"{variables['start_time_str_ist']}",
+                "load_end_time_ist" : f"{end_time_str}",
+                "run":run,
+                }
+            with open(f"{prom_con_obj.base_stack_config_path}/load_specific_details.json" , 'r') as file:
+                load_specific_details = json.load(file)
+            load_details.update(load_specific_details[variables['load_name']])
+
+            final_data_to_save = {
+                "load_details":load_details,
+                "test_environment_details":test_env_json_details
+            }
+
+            final_data_to_save.update(overall_usage_dict)
+
+            if disk_space_usage_dict:
+                final_data_to_save.update({"disk_space_usages":disk_space_usage_dict})
+            if kafka_topics_list:
+                final_data_to_save.update({"kafka_topics":kafka_topics_list})
+            if trino_queries:
+                final_data_to_save.update({"Trino_queries":trino_queries})
+
+            final_data_to_save.update({"charts":complete_charts_data_dict})
+            # final_data_to_save.update({"images":compaction_status_image})
+            final_data_to_save.update(mem_cpu_usages_dict)
+
+            # all_gridfs_referenced_ids=all_gridfs_fileids[:] + [compaction_status_image["compaction_status_chart"]]
+            all_gridfs_referenced_ids=all_gridfs_fileids[:]
+            final_data_to_save.update({"all_gridfs_referenced_ids":all_gridfs_referenced_ids})
+            1/0
             inserted_id = collection.insert_one(final_data_to_save).inserted_id
             print(f"Document pushed to mongo successfully into database:{database_name}, collection:{collection_name} with id {inserted_id}")
         except Exception as e:
@@ -138,11 +141,9 @@ if __name__ == "__main__":
             print("Deleting stored chart data ...")
             for file_id in all_gridfs_fileids:
                 print("deleting ", file_id)
-                # db.fs.chunks.delete_many({'files_id': file_id})
-                # db.fs.files.delete_one({'_id': file_id})
                 fs.delete(file_id=file_id)
-        client.close()
-        #-----------------------------------------------------------------
-        f3_at = time.perf_counter()
-        print(f"Collecting the report data took : {round(f3_at - s_at,2)} seconds in total")
+        finally:
+            f3_at = time.perf_counter()
+            print(f"Collecting the report data took : {round(f3_at - s_at,2)} seconds in total")
+            client.close()
     
