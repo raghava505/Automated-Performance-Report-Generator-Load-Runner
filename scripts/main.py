@@ -11,6 +11,7 @@ from input import create_input_form
 from capture_charts_data import Charts
 from gridfs import GridFS
 from trino_queries import TRINO
+import pytz
 
 if __name__ == "__main__":
     s_at = time.perf_counter()
@@ -27,11 +28,21 @@ if __name__ == "__main__":
 
     start_time_str = variables["start_time_str_ist"]
     end_time_str = end_time.strftime(format_data)
-    start_timestamp = int(start_time.timestamp())
-    end_timestamp = int(end_time.timestamp())
+
+    ist_timezone = pytz.timezone('Asia/Kolkata')
+    utc_timezone = pytz.utc
+
+    start_ist_time = ist_timezone.localize(datetime.strptime(start_time_str, '%Y-%m-%d %H:%M'))
+    start_timestamp = int(start_ist_time.timestamp())
+    start_utc_time = start_ist_time.astimezone(utc_timezone)
+
+    end_ist_time = ist_timezone.localize(datetime.strptime(end_time_str, '%Y-%m-%d %H:%M'))
+    end_timestamp = int(end_ist_time.timestamp())
+    end_utc_time = end_ist_time.astimezone(utc_timezone)
 
     print("------ starttime and endtime strings in IST are : ", start_time_str , end_time_str)
-    print("------ starttime and endtime unix time stamps are : ", start_timestamp , end_timestamp)
+    print("------ starttime and endtime strings in UTC are : ", start_utc_time , end_utc_time)
+    print("------ starttime and endtime unix time stamps based on ist time are : ", start_timestamp , end_timestamp)
     #-------------------------------------------------------------------------------------------------
     with open(TEST_ENV_FILE_PATH , 'r') as file:
         test_env_json_details = json.load(file)
