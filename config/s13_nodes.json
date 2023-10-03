@@ -1,5 +1,7 @@
 {
     "stack": "S13",
+    "clusters":1,
+    "SU":3,
     "domain": "alphacentauri",
     "stack_url": "https://alphacentauri.uptycs.net/",
     "elk_url": "192.168.140.73",

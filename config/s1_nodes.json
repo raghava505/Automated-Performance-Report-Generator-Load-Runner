@@ -1,5 +1,7 @@
 {
     "stack": "S1",
+    "clusters":2,
+    "SU":6,
     "domain": "jupiter",
     "stack_url": "https://jupiter.uptycs.net/",
     "elk_url": "192.168.134.50",

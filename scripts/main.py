@@ -110,6 +110,9 @@ if __name__ == "__main__":
             print("Saving data to mongoDB ...")
             load_details =  {
                 "stack":test_env_json_details["stack"],
+                "stack_url":test_env_json_details["stack_url"],
+                "clusters":test_env_json_details["clusters"],
+                "SU":test_env_json_details["SU"],
                 "sprint": variables['sprint'],
                 "build": variables['build'],
                 "load_name":f"{variables['load_name']}",
