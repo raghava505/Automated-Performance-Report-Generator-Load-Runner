@@ -99,7 +99,7 @@ class Charts:
                 'query': queries[query],
                 'start': ste,
                 'end': ete,
-                'step':15
+                'step':60
             }
             try:
                 response = requests.get(self.PROMETHEUS + self.API_PATH, params=PARAMS)
