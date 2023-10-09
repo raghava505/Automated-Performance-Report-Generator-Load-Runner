@@ -2,6 +2,7 @@ import pymongo
 from gridfs import GridFS
 from settings import configuration
 from bson.objectid import ObjectId
+import shutil,os
 
 prom_con_obj=configuration()
 
@@ -30,6 +31,15 @@ if decision == "y":
             fs.delete(file_id=file_id)
             
         result = collection.delete_one({'_id': ObjectId(document_id)})
+        BASE_GRAPHS_PATH = os.path.join(os.path.dirname(prom_con_obj.ROOT_PATH),'graphs')
+        path=f"{BASE_GRAPHS_PATH}/{database_name}/{collection_name}/{document_id}"
+        try:
+            shutil.rmtree(path)
+            print(f"Folder deleted: {path}")
+        except FileNotFoundError:
+            print(f"Folder not found: {path}")
+        except Exception as e:
+            print(f"An error occurred while deleting the folder: {e}")
         if result.deleted_count == 1:
             print(f"Document with ID '{document_id}' deleted successfully.")
         else:

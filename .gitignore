@@ -4,3 +4,7 @@ other/test.py
 other/test2.py
 other/get_current_pg_disk_s1.py
 config/test.json
+other/images/*
+other/create_chart.py
+other/test3.py
+other/.DS_Store

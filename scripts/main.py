@@ -12,6 +12,8 @@ from capture_charts_data import Charts
 from gridfs import GridFS
 from trino_queries import TRINO
 import pytz
+import os
+from create_chart import create_images_and_save
 
 if __name__ == "__main__":
     s_at = time.perf_counter()
@@ -149,6 +151,11 @@ if __name__ == "__main__":
             final_data_to_save.update({"all_gridfs_referenced_ids":all_gridfs_referenced_ids})
             inserted_id = collection.insert_one(final_data_to_save).inserted_id
             print(f"Document pushed to mongo successfully into database:{database_name}, collection:{collection_name} with id {inserted_id}")
+            #---------------CREATING GRAPHS-----------------
+            BASE_GRAPHS_PATH = os.path.join(os.path.dirname(prom_con_obj.ROOT_PATH),'graphs')
+            path=f"{BASE_GRAPHS_PATH}/{database_name}/{collection_name}/{inserted_id}"
+            os.makedirs(path,exist_ok=True)
+            create_images_and_save(path,inserted_id,collection,fs)
         except Exception as e:
             print(f"ERROR : Failed to insert document into database {database_name}, collection:{collection_name} , {str(e)}")
             print("Deleting stored chart data ...")
