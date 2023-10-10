@@ -1,0 +1,13 @@
+{
+    "id": "6fb08c41-fc3f-43bd-ae30-ef963fb43f38",
+    "userId": "5b7d37d7-9ce6-4989-bc1b-67cc85376784",
+    "customerId": "5ec0e3d7-93eb-4d77-8c2d-8e8fff280b05",
+    "active": true,
+    "isInternal": false,
+    "key": "GGVETSWXSF2EOOGIL2IJEDEB4C22IAKY",
+    "secret": "O8AZJHK/IKXX5PuRbUN1F9MZV16rPKiV/ZD+ZQLR3LK/Kk7P8a8x8isSALgZ2Gx6",
+    "updatedAt": "2023-07-24T06:52:53.154Z",
+    "createdAt": "2023-07-24T06:52:53.154Z",
+    "domainSuffix": ".uptycs.net",
+    "domain": "mercury"
+  }
