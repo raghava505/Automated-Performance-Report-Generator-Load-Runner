@@ -91,7 +91,7 @@ if __name__ == "__main__":
             calc = TRINO(curr_ist_start_time=variables["start_time_str_ist"],curr_ist_end_time=end_time_str,prom_con_obj=prom_con_obj)
             trino_queries = calc.fetch_trino_queries()
 
-        #-------------------------Accuracies----------------------------
+        #-------------------------Cloudquery Accuracies----------------------------
         accuracies=None
         if variables["load_type"] == "CloudQuery":
             print("Calculating accuracies for cloudquery ...")
