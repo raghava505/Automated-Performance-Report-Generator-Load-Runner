@@ -17,7 +17,6 @@ import os
 from create_chart import create_images_and_save
 
 if __name__ == "__main__":
-    s_at = time.perf_counter()
     variables , prom_con_obj =create_input_form()
     if not variables or not prom_con_obj : 
         print("Received NoneType objects, terminating the program ...")
@@ -25,6 +24,7 @@ if __name__ == "__main__":
     TEST_ENV_FILE_PATH   = prom_con_obj.test_env_file_path
     print("Test environment file path is : " + TEST_ENV_FILE_PATH)
     #---------------------start time and endtime (timestamps) for prometheus queries-------------------
+    s_at = time.perf_counter()
     format_data = "%Y-%m-%d %H:%M"
     start_time = datetime.strptime(variables["start_time_str_ist"], format_data)
     end_time = start_time + timedelta(hours=variables["load_duration_in_hrs"])

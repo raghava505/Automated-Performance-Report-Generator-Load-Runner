@@ -66,7 +66,18 @@ other_chart_queries={"Active Client Connections":"uptycs_pgb_cl_active","Average
                      "Redis client connections for tls":"sum(uptycs_app_redis_clients{app_name='/opt/uptycs/cloud/tls/tls.js'}) by (host_name)",
                      "Configdb Pg wal folder size":"configdb_wal_folder","Configdb number of wal files":"configdb_wal_file{}",
                      "Top 10 redis client connections by app":"sort(topk(9,sum(uptycs_app_redis_clients{}) by (app_name)))",
-                     "Configdb folder size":"configdb_size"
+                     "Configdb folder size":"configdb_size",
+                     "iowait time":"uptycs_iowait{}",
+                     "iowait util%":"uptycs_iowait_util_percent{}",
+                     "Waiting Client Connections":"uptycs_pgb_cl_waiting",
+                     "Disk read wait time":"uptycs_r_await{}",
+                     "Disk write wait time":"uptycs_w_await{}",
+                     "Idle server connections":"uptycs_pgb_sv_idle",
+                     "Active Server Connections":"uptycs_pgb_sv_active",
+                     "Disk blocks in configdb":"uptycs_configdb_stats{col =~ \"blks.*\"}",
+                     "Transaction count in configdb":"uptycs_configdb_stats{col =~ \"xact.*\"}",
+                     "Row count in configdb":"uptycs_configdb_stats{col =~ \"tup.*\"}",
+                     "Assets table stats":"uptycs_psql_table_stats"
                      }
 
 all_chart_queries={

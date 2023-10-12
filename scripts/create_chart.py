@@ -41,7 +41,7 @@ def create_images_and_save(path,doc_id,collection,fs):
                 x_values_ist = x_values_utc + (offset_ist_minutes / (60 * 24))  # Convert minutes to days
                 y = [float(point[1]) for point in large_array]
                 plt.plot_date(x_values_ist, y, linestyle='solid',label=metric,markersize=3)
-                plt.gca().xaxis.set_major_locator(MinuteLocator(interval=60))
+                plt.gca().xaxis.set_major_locator(MinuteLocator(interval=30))
                 date_formatter = DateFormatter('%H:%M')
                 plt.gca().xaxis.set_major_formatter(date_formatter)
 
