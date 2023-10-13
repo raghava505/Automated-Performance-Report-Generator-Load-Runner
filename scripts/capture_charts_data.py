@@ -77,7 +77,8 @@ other_chart_queries={"Active Client Connections":"uptycs_pgb_cl_active","Average
                      "Disk blocks in configdb":"uptycs_configdb_stats{col =~ \"blks.*\"}",
                      "Transaction count in configdb":"uptycs_configdb_stats{col =~ \"xact.*\"}",
                      "Row count in configdb":"uptycs_configdb_stats{col =~ \"tup.*\"}",
-                     "Assets table stats":"uptycs_psql_table_stats"
+                     "Assets table stats":"uptycs_psql_table_stats",
+                     "PG and data partition disk usage in configdb" : "uptycs_used_disk_bytes{node_type=\"pg\",partition=\"/data\"} or uptycs_used_disk_bytes{node_type=\"pg\",partition=\"/pg\"}"
                      }
 
 all_chart_queries={
