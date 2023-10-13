@@ -1,7 +1,7 @@
 # Steps to save your load report data into the database.
 
 ## step 1 
-Login to the host and navigate to the project directory("../save-report-data-to-mongo") 
+clone this repository into your local machine
 
 ## step 2
 

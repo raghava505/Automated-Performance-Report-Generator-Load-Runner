@@ -8,3 +8,6 @@ other/images/*
 other/create_chart.py
 other/test3.py
 other/.DS_Store
+scripts/cloudquery/__pycache__/*
+config/s11_nodes.json
+config/sdev2_nodes.json
