@@ -80,7 +80,7 @@ if __name__ == "__main__":
         #--------------------------------- add kafka topics ---------------------------------------
         kafka_topics_list=None
         if variables["load_type"]=="Osquery":
-            print("Add kafka topics ...")
+            print("Fetching kafka topics ...")
             kafka_obj = kafka_topics(prom_con_obj=prom_con_obj)
             kafka_topics_list = kafka_obj.add_topics_to_report()
 
@@ -110,8 +110,7 @@ if __name__ == "__main__":
             charts_obj = Charts(start_timestamp=start_timestamp,end_timestamp=end_timestamp,prom_con_obj=prom_con_obj,
                     add_extra_time_for_charts_at_end_in_min=variables["add_extra_time_for_charts_at_end_in_min"],fs=fs)
             complete_charts_data_dict,all_gridfs_fileids=charts_obj.capture_charts_and_save()
-            print("Fetched all charts data successfully !")
-            print("All the gridfs chart fields are : " , all_gridfs_fileids)
+            print("Saved charts data successfully !")
             #--------------------------------take screenshots---------------------------------------
             # print("Capturing compaction status screenshots  ...")
             # cp_obj = take_screenshots(start_time=start_time,end_time=end_time,fs=fs,elk_url=test_env_json_details["elk_url"])
