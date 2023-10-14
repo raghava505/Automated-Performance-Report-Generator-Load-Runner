@@ -15,7 +15,8 @@ cpu_app_names['avg'].extend([])
 cpu_app_names['sum'].extend(["pgbouncer","spark-master","/usr/local/bin/pushgateway"])
 
 basic_chart_queries = {"live assets count":("sum(uptycs_live_count)" , []),
-                       "kafka lag for all groups(osquery) ": ("uptycs_kafka_group_lag{group!~\".*cloud.*|.*kube.*\"} or uptycs_mon_spark_lag{topic!~\".*cloud.*|.*kube.*\"}" , ["cluster_id","group","topic"])
+                       "kafka group lag for all groups(osquery) ": ("uptycs_kafka_group_lag{group!~\".*cloud.*|.*kube.*\"}" , ["cluster_id","group"]),
+                       "mon spark lag for all groups(osquery)":("uptycs_mon_spark_lag{topic!~\".*cloud.*|.*kube.*\"}" , ["cluster_id","topic"])
                        }
 
 node_level_RAM_used_percentage_queries = dict([(f"{node} Node RAM used percentage",(f"((uptycs_memory_used{{node_type='{node}'}}/uptycs_total_memory{{node_type='{node}'}})*100)" , ["host_name"]) ) for node in ['process','data','pg']])
@@ -146,8 +147,7 @@ class Charts:
                             try:
                                 legend_text += f"-{host['metric'][key]}"
                             except:
-                                print(f"Key error : {key} no present in ")
-                                print(host['metric'])
+                                print(f"Key {key} not present in o/p of the query {queries[query][0]}. please check the provided legend attribute")
                         host["legend"]=legend_text
                     final[query] = result
             except Exception as e:
