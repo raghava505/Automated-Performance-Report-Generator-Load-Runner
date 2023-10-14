@@ -162,10 +162,15 @@ if __name__ == "__main__":
             inserted_id = collection.insert_one(final_data_to_save).inserted_id
             print(f"Document pushed to mongo successfully into database:{database_name}, collection:{collection_name} with id {inserted_id}")
             #---------------CREATING GRAPHS-----------------
-            BASE_GRAPHS_PATH = os.path.join(os.path.dirname(prom_con_obj.ROOT_PATH),'graphs')
-            path=f"{BASE_GRAPHS_PATH}/{database_name}/{collection_name}/{inserted_id}"
-            os.makedirs(path,exist_ok=True)
-            create_images_and_save(path,inserted_id,collection,fs)
+            try:
+                print("Generating graphs from the saved data ...")
+                BASE_GRAPHS_PATH = os.path.join(os.path.dirname(prom_con_obj.ROOT_PATH),'graphs')
+                path=f"{BASE_GRAPHS_PATH}/{database_name}/{collection_name}/{inserted_id}"
+                os.makedirs(path,exist_ok=True)
+                create_images_and_save(path,inserted_id,collection,fs)
+                print("Done!")
+            except Exception as e:
+                print(f"Error while generating graphs into {path} : {str(e)}")
         except Exception as e:
             print(f"ERROR : Failed to insert document into database {database_name}, collection:{collection_name} , {str(e)}")
             print("Deleting stored chart data ...")

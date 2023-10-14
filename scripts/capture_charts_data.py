@@ -119,14 +119,15 @@ class Charts:
         ete = self.curr_ist_end_time + (self.add_extra_time_for_charts_at_end_in_min * (60))
 
         for query in queries:
-            PARAMS = {
-                'query': queries[query][0],
-                'start': ste,
-                'end': ete,
-                'step':60
-            }
-            legend_list = queries[query][1]
             try:
+                PARAMS = {
+                    'query': queries[query][0],
+                    'start': ste,
+                    'end': ete,
+                    'step':60
+                }
+                legend_list = queries[query][1]
+                
                 response = requests.get(self.PROMETHEUS + self.API_PATH, params=PARAMS)
                 print(f"processing {query} chart data (timestamp : {ste} to {ete}), Status code : {response.status_code}")
                 if response.status_code != 200:print("ERROR : Request failed")
@@ -145,11 +146,12 @@ class Charts:
                             try:
                                 legend_text += f"-{host['metric'][key]}"
                             except:
-                                print(f"error : legend not available error for key : {key}")
+                                print(f"Key error : {key} no present in ")
+                                print(host['metric'])
                         host["legend"]=legend_text
                     final[query] = result
             except Exception as e:
-                print(f"ERROR : Failed fetching data for {query} , {str(e)}")
+                print(f"Error occured while processing data for {query} , {str(e)}")
         return final,file_ids
             
     def capture_charts_and_save(self): 
