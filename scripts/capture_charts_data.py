@@ -14,15 +14,15 @@ cpu_app_names=copy.deepcopy(common_app_names)
 cpu_app_names['avg'].extend([])
 cpu_app_names['sum'].extend(["pgbouncer","spark-master","/usr/local/bin/pushgateway"])
 
-basic_chart_queries = {"live assets count":"sum(uptycs_live_count)",
-                       "kafka lag for all groups(osquery) : ":"uptycs_kafka_group_lag{group!~\".*cloud.*|.*kube.*\"} or uptycs_mon_spark_lag{topic!~\".*cloud.*|.*kube.*\"}"
+basic_chart_queries = {"live assets count":("sum(uptycs_live_count)" , []),
+                       "kafka lag for all groups(osquery) ": ("uptycs_kafka_group_lag{group!~\".*cloud.*|.*kube.*\"} or uptycs_mon_spark_lag{topic!~\".*cloud.*|.*kube.*\"}" , ["cluster_id","group","topic"])
                        }
 
-node_level_RAM_used_percentage_queries = dict([(f"{node} Node RAM used percentage",f"((uptycs_memory_used{{node_type='{node}'}}/uptycs_total_memory{{node_type='{node}'}})*100)") for node in ['process','data','pg']])
-app_level_RAM_used_percentage_queries= dict([(f"Memory Used by {app}",f"{key}(uptycs_app_memory{{app_name=~'{app}'}}) by (host_name)") for key,app_list in memory_app_names.items() for app in app_list])
+node_level_RAM_used_percentage_queries = dict([(f"{node} Node RAM used percentage",(f"((uptycs_memory_used{{node_type='{node}'}}/uptycs_total_memory{{node_type='{node}'}})*100)" , ["host_name"]) ) for node in ['process','data','pg']])
+app_level_RAM_used_percentage_queries= dict([(f"Memory Used by {app}",(f"{key}(uptycs_app_memory{{app_name=~'{app}'}}) by (host_name)" , ["host_name"]) ) for key,app_list in memory_app_names.items() for app in app_list])
 more_memory_queries={
-    "Kafka Disk Used Percentage":"uptycs_percentage_used{partition=~'/data/kafka'}",
-    "Debezium memory usage":"uptycs_docker_mem_used{container_name='debezium'}",
+    "Kafka Disk Used Percentage":("uptycs_percentage_used{partition=~'/data/kafka'}" , ["host_name"]),
+    "Debezium memory usage":("uptycs_docker_mem_used{container_name='debezium'}" , ["host_name"]),
 }
 
 # memory_chart_queries={}
@@ -32,10 +32,10 @@ more_memory_queries={
 
 app_level_RAM_used_percentage_queries.update(more_memory_queries)
 
-node_level_CPU_busy_percentage_queries=dict([(f"{node} Node CPU busy percentage",f"100-uptycs_idle_cpu{{node_type='{node}'}}") for node in ['process','data','pg']])
-app_level_CPU_used_cores_queries=dict([(f"CPU used by {app}",f"{key}(uptycs_app_cpu{{app_name=~'{app}'}}) by (host_name)") for key,app_list in cpu_app_names.items() for app in app_list])
+node_level_CPU_busy_percentage_queries=dict([(f"{node} Node CPU busy percentage",(f"100-uptycs_idle_cpu{{node_type='{node}'}}",["host_name"]) ) for node in ['process','data','pg']])
+app_level_CPU_used_cores_queries=dict([(f"CPU used by {app}", (f"{key}(uptycs_app_cpu{{app_name=~'{app}'}}) by (host_name)" , ["host_name"]) ) for key,app_list in cpu_app_names.items() for app in app_list])
 more_cpu_queries={
-    "Debezium cpu usage":"uptycs_docker_cpu_stats{container_name='debezium'}",
+    "Debezium cpu usage":("uptycs_docker_cpu_stats{container_name='debezium'}" , ["host_name"]),
 }
 
 # cpu_chart_queries={}
@@ -46,45 +46,47 @@ more_cpu_queries={
 app_level_CPU_used_cores_queries.update(more_cpu_queries)
 
 inject_drain_rate_and_lag_chart_queries={
-    "Spark Inject Rate for agent Osquery":"uptycs_mon_spark_inject_rate{topic='agentosquery'}",
-    "Spark Drain Rate for agent Osquery":"uptycs_mon_spark_drain_rate{topic='agentosquery'}",
-    "Spark Lag for Agent Osquery":"uptycs_mon_spark_lag{topic='agentosquery'}",
+    "Spark Inject Rate for agent Osquery":("uptycs_mon_spark_inject_rate{topic='agentosquery'}",["__name__","cluster_id","topic"]),
+    "Spark Drain Rate for agent Osquery":("uptycs_mon_spark_drain_rate{topic='agentosquery'}" , ["__name__","cluster_id","topic"]),
+    "Spark Lag for Agent Osquery":("uptycs_mon_spark_lag{topic='agentosquery'}",["__name__","cluster_id","topic"]),
 
-    "Spark Inject Rate for Events":"uptycs_mon_spark_inject_rate{topic='event'}",
-    "Spark Drain Rate for Events":"uptycs_mon_spark_drain_rate{topic='event'}",
-    "Spark lag for events":"uptycs_mon_spark_lag{topic='event'}",
+    "Spark Inject Rate for Events":("uptycs_mon_spark_inject_rate{topic='event'}",["__name__","cluster_id","topic"]),
+    "Spark Drain Rate for Events":("uptycs_mon_spark_drain_rate{topic='event'}",["__name__","cluster_id","topic"]),
+    "Spark lag for events":("uptycs_mon_spark_lag{topic='event'}",["__name__","cluster_id","topic"]),
 
-    "Inject Rate for Db-Alerts group":"uptycs_kafka_group_inject_rate{group='db-alerts'}",
-    "Drain Rate for Db-Alerts group":"uptycs_kafka_group_drain_rate{group='db-alerts'}",
-    "kafka lag for Db-alerts group":"uptycs_kafka_group_lag{group='db-alerts'}",
+    "Inject Rate for Db-Alerts group":("uptycs_kafka_group_inject_rate{group='db-alerts'}",["__name__","cluster_id","group"]),
+    "Drain Rate for Db-Alerts group":("uptycs_kafka_group_drain_rate{group='db-alerts'}",["__name__","cluster_id","group"]),
+    "kafka lag for Db-alerts group":("uptycs_kafka_group_lag{group='db-alerts'}",["__name__","cluster_id","group"]),
 
-    "Inject rate for ruleengine group":"uptycs_kafka_group_inject_rate{group='ruleengine'}",
-    "Drain rate for ruleengine group":"uptycs_kafka_group_drain_rate{group='ruleengine'}",
-    "Kafka lag for ruleengine group":"uptycs_kafka_group_lag{group='ruleengine'}",
+    "Inject rate for ruleengine group":("uptycs_kafka_group_inject_rate{group='ruleengine'}",["__name__","cluster_id","group"]),
+    "Drain rate for ruleengine group":("uptycs_kafka_group_drain_rate{group='ruleengine'}",["__name__","cluster_id","group"]),
+    "Kafka lag for ruleengine group":("uptycs_kafka_group_lag{group='ruleengine'}",["__name__","cluster_id","group"]),
 
-    "Kafka Inject rate for debezium group":"uptycs_kafka_group_inject_rate{group='debeziumconsumer'}",
-    "Kafka Drain rate for debezium group":"uptycs_kafka_group_drain_rate{group='debeziumconsumer'}",
-    "Debezium Aggregate Lag":"uptycs_kafka_group_lag{group='debeziumconsumer'}",
+    "Kafka Inject rate for debezium group":("uptycs_kafka_group_inject_rate{group='debeziumconsumer'}" , ["__name__","cluster_id","group"]),
+    "Kafka Drain rate for debezium group":("uptycs_kafka_group_drain_rate{group='debeziumconsumer'}",["__name__","cluster_id","group"]),
+    "Debezium Aggregate Lag":("uptycs_kafka_group_lag{group='debeziumconsumer'}",["__name__","cluster_id","group"]),
 }
 
-other_chart_queries={"Active Client Connections":"uptycs_pgb_cl_active","Average records in pg bouncer":"uptycs_pbouncer_stats{col=~'avg.*', col!~'.*time'}",
-                     "Average time spent by pg bouncer":"uptycs_pbouncer_stats{col=~'avg.*time'}",
-                     "Redis client connections for tls":"sum(uptycs_app_redis_clients{app_name='/opt/uptycs/cloud/tls/tls.js'}) by (host_name)",
-                     "Configdb Pg wal folder size":"configdb_wal_folder","Configdb number of wal files":"configdb_wal_file{}",
-                     "Top 10 redis client connections by app":"sort(topk(9,sum(uptycs_app_redis_clients{}) by (app_name)))",
-                     "Configdb folder size":"configdb_size",
-                     "iowait time":"uptycs_iowait{}",
-                     "iowait util%":"uptycs_iowait_util_percent{}",
-                     "Waiting Client Connections":"uptycs_pgb_cl_waiting",
-                     "Disk read wait time":"uptycs_r_await{}",
-                     "Disk write wait time":"uptycs_w_await{}",
-                     "Idle server connections":"uptycs_pgb_sv_idle",
-                     "Active Server Connections":"uptycs_pgb_sv_active",
-                     "Disk blocks in configdb":"uptycs_configdb_stats{col =~ \"blks.*\"}",
-                     "Transaction count in configdb":"uptycs_configdb_stats{col =~ \"xact.*\"}",
-                     "Row count in configdb":"uptycs_configdb_stats{col =~ \"tup.*\"}",
-                     "Assets table stats":"uptycs_psql_table_stats",
-                     "PG and data partition disk usage in configdb" : "uptycs_used_disk_bytes{node_type=\"pg\",partition=\"/data\"} or uptycs_used_disk_bytes{node_type=\"pg\",partition=\"/pg\"}"
+other_chart_queries={"Active Client Connections":("uptycs_pgb_cl_active" , ["host_name","db","db_user"]),
+                     "Redis client connections for tls":("sum(uptycs_app_redis_clients{app_name='/opt/uptycs/cloud/tls/tls.js'}) by (host_name)" , ["host_name"]),
+                     "Configdb Pg wal folder size":("configdb_wal_folder",["host_name"]),
+                     "Configdb number of wal files":("configdb_wal_file{}" , ["host_name"]),
+                     "Top 10 redis client connections by app":("sort(topk(9,sum(uptycs_app_redis_clients{}) by (app_name)))" , ["app_name"]),
+                     "Configdb folder size":("configdb_size" , ["host_name"]),
+                     "Average records in pg bouncer":("uptycs_pbouncer_stats{col=~'avg.*', col!~'.*time'}" , ["col"]),
+                     "Average time spent by pg bouncer":("uptycs_pbouncer_stats{col=~'avg.*time'}" , ["col"]),
+                     "iowait time":("uptycs_iowait{}" , ["host_name"]),
+                     "iowait util%":("uptycs_iowait_util_percent{}" , ["host_name" , "device"]),
+                     "Waiting Client Connections":("uptycs_pgb_cl_waiting", ["db" , "db_user"]),
+                     "Disk read wait time":("uptycs_r_await{}" , ["host_name" , "device"]),
+                     "Disk write wait time":("uptycs_w_await{}", ["host_name" , "device"]),
+                     "Idle server connections":("uptycs_pgb_sv_idle", ["db" , "db_user"]),
+                     "Active Server Connections":("uptycs_pgb_sv_active", ["db" , "db_user"]),
+                     "Disk blocks in configdb":("uptycs_configdb_stats{col =~ \"blks.*\"}",["col"]),
+                     "Transaction count in configdb":("uptycs_configdb_stats{col =~ \"xact.*\"}",["col"]),
+                     "Row count in configdb":("uptycs_configdb_stats{col =~ \"tup.*\"}",["col"]),
+                     "Assets table stats":("uptycs_psql_table_stats",["col"]),
+                     "PG and data partition disk usage in configdb" : ("uptycs_used_disk_bytes{node_type=\"pg\",partition=\"/data\"} or uptycs_used_disk_bytes{node_type=\"pg\",partition=\"/pg\"}" , ["partition","host_name"])
                      }
 
 all_chart_queries={
@@ -118,11 +120,12 @@ class Charts:
 
         for query in queries:
             PARAMS = {
-                'query': queries[query],
+                'query': queries[query][0],
                 'start': ste,
                 'end': ete,
                 'step':60
             }
+            legend_list = queries[query][1]
             try:
                 response = requests.get(self.PROMETHEUS + self.API_PATH, params=PARAMS)
                 print(f"processing {query} chart data (timestamp : {ste} to {ete}), Status code : {response.status_code}")
@@ -133,6 +136,17 @@ class Charts:
                         file_id = self.fs.put(str(host["values"]).encode('utf-8'), filename=f'{query}.json')
                         host["values"] = file_id
                         file_ids.append(file_id)
+                        try:
+                            legend_text=str(host['metric'][legend_list[0]])
+                        except:
+                            print("error: list index out of range error while trying to access 1st element of the legend list")
+                            legend_text=""
+                        for key in legend_list[1:]:
+                            try:
+                                legend_text += f"-{host['metric'][key]}"
+                            except:
+                                print(f"error : legend not available error for key : {key}")
+                        host["legend"]=legend_text
                     final[query] = result
             except Exception as e:
                 print(f"ERROR : Failed fetching data for {query} , {str(e)}")
