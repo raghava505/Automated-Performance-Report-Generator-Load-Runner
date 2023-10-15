@@ -3,6 +3,7 @@ sys.path.append('cloudquery/')
 from .api_func import *
 from .configs import *
 import configs
+from .get_logs import LOGScriptRunner
 from pathlib import Path
 from datetime import datetime
 import os
@@ -158,20 +159,19 @@ class ACCURACY:
         self.expected()
         self.tables_accuracy(expected_data,file)
         return expected_data
-        # df = pd.DataFrame(data=expected_data)
-        # df.to_excel("excelsheets/" + domain + "single_tables_accuracy.xlsx", index=False)
+        
 
     def multi_tables_accuracy_xl(self,file):
         expected_data = {}
         self.expected()
         self.multi_accuracy(expected_data,file)
         return expected_data
-        # df = pd.DataFrame(data=expected_data)
-        # df.to_excel("excelsheets/" + domain + "multi_tables_accuracy.xlsx", index=False)
-
-    def calculate_accuracy(self):
         
 
+    def calculate_accuracy(self):
+
+        obj = LOGScriptRunner(self.variables['load_name'])
+        obj.get_log()
         if(self.load_name=="AWS_MultiCustomer" or "GCP_MultiCustomer"):
             self.api_path=api_path_multi
             
@@ -189,13 +189,3 @@ class ACCURACY:
         return save_dict
 
 
-
-
-
-   
-# if __name__=="__main__":
-#     fs = open(api_path)
-#     file = fs.read()
-
-#     #single_tables_accuracy_xl(file)
-#     multi_tables_accuracy_xl(file)

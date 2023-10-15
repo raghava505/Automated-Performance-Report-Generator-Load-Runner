@@ -12,6 +12,7 @@ from capture_charts_data import Charts
 from gridfs import GridFS
 from trino_queries import TRINO
 from cloudquery.shrav_auto import ACCURACY
+from cloudquery.db_operations_time import DB_OPERATIONS_TIME
 import pytz
 import os
 from create_chart import create_images_and_save
@@ -98,6 +99,18 @@ if __name__ == "__main__":
             accu= ACCURACY(start_timestamp=start_utc_time,end_timestamp=end_utc_time,prom_con_obj=prom_con_obj,variables=variables)
             accuracies = accu.calculate_accuracy()
 
+        #--------------------------------------Inventory Counts--------------------------------------
+        
+        #--------------------------------------STS Records-------------------------------------------
+
+        #-----------------------------Processing Time for Db Operations------------------------------
+        db_op = None
+        if variables["load_name"] == "CloudQuery":
+            print("Processing time for Db Operations ...")
+            calc = DB_OPERATIONS_TIME(start_timestamp=start_timestamp,end_timestamp=end_timestamp,prom_con_obj=prom_con_obj)
+            db_op=calc.db_operations()
+
+
         #--------------------------------cpu and mem node-wise---------------------------------------
         print("Fetching resource usages data ...")
         comp = MC_comparisions(start_timestamp=start_timestamp,end_timestamp=end_timestamp,prom_con_obj=prom_con_obj)
@@ -150,6 +163,8 @@ if __name__ == "__main__":
                 final_data_to_save.update({"Trino_queries":trino_queries})
             if accuracies:
                 final_data_to_save.update({"Table Accuracies":accuracies})
+            if db_op:
+                final_data_to_save.update({"Processing Time of Db Operations":db_op})
 
             final_data_to_save.update({"charts":complete_charts_data_dict})
             # final_data_to_save.update({"images":compaction_status_image})

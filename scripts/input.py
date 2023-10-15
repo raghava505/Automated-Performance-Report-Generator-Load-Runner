@@ -4,7 +4,7 @@ import os
 bool_options=[False,True]
 load_type_options = {   
                         'Osquery':['ControlPlane', 'SingleCustomer', 'MultiCustomer'],
-                        'CloudQuery':['AWS_MultiCustomer','GCP_MultiCustomer'],
+                        'CloudQuery':['AWS_MultiCustomer','GCP_MultiCustomer','AWS_SingleCustomer'],
                         "Combined":['Osquery+CloudQuery'],
                         'KubeQuery':['kubequery_SingleCustomer'] 
                      }
