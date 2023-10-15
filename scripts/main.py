@@ -13,6 +13,7 @@ from gridfs import GridFS
 from trino_queries import TRINO
 from cloudquery.shrav_auto import ACCURACY
 from cloudquery.db_operations_time import DB_OPERATIONS_TIME
+from cloudquery.events_count import EVE_COUNTS
 import pytz
 import os
 from create_chart import create_images_and_save
@@ -99,8 +100,13 @@ if __name__ == "__main__":
             accu= ACCURACY(start_timestamp=start_utc_time,end_timestamp=end_utc_time,prom_con_obj=prom_con_obj,variables=variables)
             accuracies = accu.calculate_accuracy()
 
-        #--------------------------------------Inventory Counts--------------------------------------
-        
+        #--------------------------------------Events Counts--------------------------------------
+        evecount = None
+        if variables["load_name"] == "CloudQuery":
+            print("Calculating the counts of various events during the load ...")
+            calc = EVE_COUNTS(variables=variables)
+            evecount = calc.get_events_count()
+
         #--------------------------------------STS Records-------------------------------------------
 
         #-----------------------------Processing Time for Db Operations------------------------------
@@ -159,12 +165,15 @@ if __name__ == "__main__":
                 final_data_to_save.update({"disk_space_usages":disk_space_usage_dict})
             if kafka_topics_list:
                 final_data_to_save.update({"kafka_topics":kafka_topics_list})
+            if evecount:
+                final_data_to_save.update({"Events Counts":evecount})
             if trino_queries:
                 final_data_to_save.update({"Trino_queries":trino_queries})
             if accuracies:
                 final_data_to_save.update({"Table Accuracies":accuracies})
             if db_op:
                 final_data_to_save.update({"Processing Time of Db Operations":db_op})
+            
 
             final_data_to_save.update({"charts":complete_charts_data_dict})
             # final_data_to_save.update({"images":compaction_status_image})

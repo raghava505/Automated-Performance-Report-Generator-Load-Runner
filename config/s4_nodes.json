@@ -1,7 +1,7 @@
 {
     "stack": "S4",
-    "clusters":2,
-    "SU":6,
+    "clusters": 2,
+    "SU": 6,
     "domain": "mercury",
     "stack_url": "https://mercury.uptycs.net/",
     "elk_url": "192.168.136.53",
@@ -356,19 +356,11 @@
         "clst": "1"
     },
     "s2logstash1": {
-        "storage": {
-            "root_partition": "295G"
-        },
-        "ram": "47",
-        "cores": "8",
+        "storage": {},
         "clst": "1"
     },
     "s2logstash2": {
-        "storage": {
-            "root_partition": "295G"
-        },
-        "ram": "47",
-        "cores": "8",
+        "storage": {},
         "clst": "1"
     }
 }
