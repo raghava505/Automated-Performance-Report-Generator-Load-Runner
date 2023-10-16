@@ -14,6 +14,7 @@ from trino_queries import TRINO
 from cloudquery.shrav_auto import ACCURACY
 from cloudquery.db_operations_time import DB_OPERATIONS_TIME
 from cloudquery.events_count import EVE_COUNTS
+from cloudquery.sts_records import STS_RECORDS
 import pytz
 import os
 from create_chart import create_images_and_save
@@ -102,12 +103,18 @@ if __name__ == "__main__":
 
         #--------------------------------------Events Counts--------------------------------------
         evecount = None
-        if variables["load_name"] == "CloudQuery":
+        if variables["load_type"] == "CloudQuery":
             print("Calculating the counts of various events during the load ...")
             calc = EVE_COUNTS(variables=variables)
             evecount = calc.get_events_count()
 
         #--------------------------------------STS Records-------------------------------------------
+        sts = None
+        if variables["load_name"] == "AWS_MultiCustomer":
+            print("Calculating STS Records ...")
+            calc = STS_RECORDS(start_timestamp=start_utc_time,end_timestamp=end_utc_time,prom_con_obj=prom_con_obj,variables=variables)
+            sts = calc.calc_stsrecords()
+
 
         #-----------------------------Processing Time for Db Operations------------------------------
         db_op = None
@@ -167,6 +174,8 @@ if __name__ == "__main__":
                 final_data_to_save.update({"kafka_topics":kafka_topics_list})
             if evecount:
                 final_data_to_save.update({"Events Counts":evecount})
+            if sts:
+                final_data_to_save.update({"STS Records":sts})
             if trino_queries:
                 final_data_to_save.update({"Trino_queries":trino_queries})
             if accuracies:
