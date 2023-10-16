@@ -1,5 +1,7 @@
-from api_func import *
-from configs import *
+import sys
+sys.path.append('cloudquery/') 
+from .api_func import *
+from .configs import *
 from pathlib import Path
 from datetime import datetime
 import os
