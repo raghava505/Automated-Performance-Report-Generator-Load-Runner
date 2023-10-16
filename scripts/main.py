@@ -110,10 +110,10 @@ if __name__ == "__main__":
 
         #--------------------------------------STS Records-------------------------------------------
         sts = None
-        if variables["load_name"] == "AWS_MultiCustomer":
-            print("Calculating STS Records ...")
-            calc = STS_RECORDS(start_timestamp=start_utc_time,end_timestamp=end_utc_time,prom_con_obj=prom_con_obj,variables=variables)
-            sts = calc.calc_stsrecords()
+        # if variables["load_name"] == "AWS_MultiCustomer":
+        #     print("Calculating STS Records ...")
+        #     calc = STS_RECORDS(start_timestamp=start_utc_time,end_timestamp=end_utc_time,prom_con_obj=prom_con_obj,variables=variables)
+        #     sts = calc.calc_stsrecords()
 
 
         #-----------------------------Processing Time for Db Operations------------------------------
