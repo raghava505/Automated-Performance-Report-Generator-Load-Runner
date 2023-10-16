@@ -170,7 +170,7 @@ class ACCURACY:
 
     def calculate_accuracy(self):
 
-        obj = LOGScriptRunner(self.variables['load_name'])
+        obj = LOGScriptRunner(self.load_name)
         obj.get_log()
         if(self.load_name=="AWS_MultiCustomer" or "GCP_MultiCustomer"):
             self.api_path=api_path_multi
