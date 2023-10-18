@@ -49,7 +49,7 @@ class MC_comparisions:
                 'query': queries[query],
                 'start': self.curr_ist_start_time,
                 'end': self.curr_ist_end_time,
-                'step':15
+                'step':30
             }
             response = requests.get(self.PROMETHEUS + self.API_PATH, params=PARAMS)
             print(f"-------processing {tag} for {query} (timestamp : {self.curr_ist_start_time} to {self.curr_ist_end_time}), Status code : {response.status_code}")
@@ -110,7 +110,7 @@ class MC_comparisions:
                 'query': queries[query],
                 'start': self.curr_ist_start_time,
                 'end': self.curr_ist_end_time,
-                'step':15
+                'step':30
             }
             response = requests.get(self.PROMETHEUS + self.API_PATH, params=PARAMS)
             print(f"----------processing {tag} for {query} (timestamp : {self.curr_ist_start_time} to {self.curr_ist_end_time}), Status code : {response.status_code}")
