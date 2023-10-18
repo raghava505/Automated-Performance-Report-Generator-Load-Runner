@@ -12,3 +12,4 @@ scripts/cloudquery/__pycache__/*
 config/s11_nodes.json
 config/sdev2_nodes.json
 publish-report-to-confluence/*
+scripts/expected_logs/*
