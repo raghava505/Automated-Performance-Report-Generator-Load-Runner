@@ -2,7 +2,7 @@ import sys
 sys.path.append('cloudquery/') 
 from .api_func import *
 from .configs import *
-import configs
+from . import configs
 from .get_logs import LOGScriptRunner
 from pathlib import Path
 from datetime import datetime
