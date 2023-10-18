@@ -31,7 +31,7 @@ class kafka_topics:
             output_list = [line for line in output.split('\n') if line.strip()]
             print("Kafka topics found are : " , output_list)
         except Exception as e:
-            print("ERROR : " , str(e))
+            print("Error while fetching kafka topics : " , str(e))
             return []
         finally:
             ssh.close()

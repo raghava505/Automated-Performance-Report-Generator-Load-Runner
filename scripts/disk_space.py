@@ -60,6 +60,8 @@ class DISK:
             remaining_space_before_load = self.extract_data(self.remaining_hdfs_space_query,self.curr_ist_start_time,'hdfsdatanode')
             remaining_space_after_load = self.extract_data(self.remaining_hdfs_space_query,self.curr_ist_end_time,'hdfsdatanode')
             nodes = [node for node in remaining_space_before_load]
+            print("remaining before load " , remaining_space_before_load)
+            print("remaining after load " , remaining_space_after_load)
         elif TYPE=="kafka":
             total_space=self.kafka_total_space
             used_space_before_load = self.extract_data(self.kafka_disk_used_percentage,self.curr_ist_start_time,'host_name')
