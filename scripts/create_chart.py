@@ -22,9 +22,9 @@ def create_images_and_save(path,doc_id,collection,fs):
     cursor=collection.find_one({"_id" : ObjectId(doc_id)})
     total_charts=0
     charts_data=cursor["charts"]
-    category_count=1
+    # category_count=1
     for category in charts_data:
-        os.makedirs(f"{path}/{category_count}-{category}" , exist_ok=True)
+        os.makedirs(f"{path}/{category}" , exist_ok=True)
         for title in charts_data[category]:
             print(f"Generating graph for : {title}")
             total_charts+=1
@@ -66,12 +66,12 @@ def create_images_and_save(path,doc_id,collection,fs):
                 end_time_in_charts = date2num(max(x).replace(minute=end_min_to_replace,hour=end_hr_to_replace))+(offset_ist_minutes / (60 * 24))
                 plt.xlim((start_time_in_charts,end_time_in_charts))
                 
-                plt.savefig(f"{path}/{category_count}-{category}/{file_name}.png", bbox_inches='tight', pad_inches=0.1)
+                plt.savefig(f"{path}/{category}/{file_name}.png", bbox_inches='tight', pad_inches=0.1)
             except Exception as e:
                 print(f"Error while generating graph for {title} : {str(e)}")
             finally:
                 plt.close()
-        category_count+=1
+        # category_count+=1
 
     print("Total number of charts generated : " , total_charts)
 
