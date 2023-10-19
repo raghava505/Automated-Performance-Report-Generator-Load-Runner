@@ -7,32 +7,12 @@
     "elk_url": "192.168.134.50",
     "trino_password": "a68dc948-6a5e-498e-873b-501aac439efd",
     "pnodes": [
-        "s1c1pn1",
-        "s1c1pn2",
-        "s1c1pn3",
-        "s1c1pn4",
-        "s1c1pn5",
-        "s1c1pn6",
-        "s1c2pn1",
-        "s1c2pn2",
-        "s1c2pn3",
-        "s1c2pn4",
-        "s1c2pn5",
-        "s1c2pn6"
+        "s1c1pn1","s1c1pn2","s1c1pn3","s1c1pn4","s1c1pn5","s1c1pn6",
+        "s1c2pn1","s1c2pn2","s1c2pn3","s1c2pn4","s1c2pn5","s1c2pn6"
     ],
     "dnodes": [
-        "s1c1dn1",
-        "s1c1dn2",
-        "s1c1dn3",
-        "s1c1dn4",
-        "s1c1dn5",
-        "s1c1dn6",
-        "s1c2dn1",
-        "s1c2dn2",
-        "s1c2dn3",
-        "s1c2dn4",
-        "s1c2dn5",
-        "s1c2dn6"
+        "s1c1dn1","s1c1dn2","s1c1dn3","s1c1dn4","s1c1dn5","s1c1dn6",
+        "s1c2dn1","s1c2dn2","s1c2dn3","s1c2dn4","s1c2dn5","s1c2dn6"
     ],
     "pgnodes": [
         "s1configdb1",
@@ -42,17 +22,9 @@
         "s1monitor"
     ],
     "other_nodes": [
-        "s1elasticsearch",
-        "s1kibana",
-        "s1logstash1",
-        "s1logstash2",
-        "s1stsnode1",
-        "s1stsnode2",
-        "s1stsnode3",
-        "s1cloudquery",
-        "s1mlnode1",
-        "s1mlnode2",
-        "s1superset"
+        "s1elasticsearch","s1kibana","s1logstash1","s1logstash2",
+        "s1stsnode1","s1stsnode2","s1stsnode3",
+        "s1cloudquery","s1mlnode1","s1mlnode2","s1superset"
     ],
     "s1monitor": {
         "storage": {
