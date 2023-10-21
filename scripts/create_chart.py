@@ -16,16 +16,34 @@ def convert_to_ist_time(timestamp):
 
 def format_y_ticks(value,pos):
     if value >= 1e9:
-        return f'{value/1e9:.0f}B'
+        return f'{value/1e9:.2f}B'
     elif value >= 1e6:
-        return f'{value/1e6:.0f}M'
+        return f'{value/1e6:.2f}M'
     elif value >= 1e3:
-        return f'{value/1e3:.0f}K'
+        return f'{value/1e3:.2f}K'
     else:
-        return str(value)
+        return str(int(value))
+
+# outer_background_color="#111217"
+outer_background_color="#191b1f"
+text_color="#ccccdc"
+inner_background_color = "#191b1f"
+gridline_color = "#404144"
+gridline_width = 0.01
+
+fig_width=36
+character_width = 28
+initial_legend_fontsize=17
+fontsize_decrease_rate_with_rows=0.165
+ncol_increase_rate_with_rows=0.28
 
 def create_images_and_save(path,doc_id,collection,fs):
     sns.set_style("darkgrid")
+    sns.plotting_context("talk")
+    sns.set(rc={"text.color": text_color})
+    sns.set_style({"axes.facecolor": inner_background_color})
+    sns.set_style({"grid.color": gridline_color})
+    sns.set_style({"grid.linewidth": gridline_width})
     # client = MongoClient(conn_string)
     # database = client[database_name]
     # fs = GridFS(database)
@@ -39,8 +57,10 @@ def create_images_and_save(path,doc_id,collection,fs):
         for title in charts_data[category]:
             print(f"Generating graph for : {title}")
             total_charts+=1
-            plt.figure(figsize=(40, 20))
+            plt.figure(figsize=(fig_width, fig_width//2))
             try:
+                num_lines=0
+                sum_legends_length=0
                 for line in  charts_data[category][title]:
                     file_id = line["values"]
                     retrieved_data = fs.get(ObjectId(file_id)).read()
@@ -50,20 +70,28 @@ def create_images_and_save(path,doc_id,collection,fs):
                     offset_ist_minutes = 330  # 5 hours and 30 minutes offset in minutes
                     x_values_ist = x_values_utc + (offset_ist_minutes / (60 * 24))  # Convert minutes to days
                     y = [float(point[1]) for point in large_array]
-                    plt.plot_date(x_values_ist, y, linestyle='solid',label=line["legend"],markersize=1,linewidth=3)
-                    
+                    plt.plot_date(x_values_ist, y, linestyle='solid',label=line["legend"],markersize=0.1,linewidth=2)
+                    sum_legends_length += len(str(line["legend"]))
+                    num_lines+=1
                 plt.gca().xaxis.set_major_locator(MinuteLocator(interval=30))
                 date_formatter = DateFormatter('%H:%M')
                 plt.gca().xaxis.set_major_formatter(date_formatter)
                 plt.gca().get_yaxis().set_major_formatter(FuncFormatter(format_y_ticks))
-                
-                # plt.xlabel('Time →',fontsize=12)
-                # plt.ylabel('Value →',fontsize=12)
-                plt.title(str(title).title(),fontsize=24,fontweight='bold',pad=20)
-                plt.legend(loc='upper center', bbox_to_anchor=(0.5, -0.025), ncol=12, fontsize=14)  # Adjust fontsize as needed
+                plt.title("\n"+str(title).title(),fontsize=22,fontweight='bold',pad=40,fontfamily='Trebuchet MS',y=1)
+
+                average_legend_length = (sum_legends_length/num_lines)
+                available_width_points = (fig_width * plt.rcParams['figure.dpi'])/character_width
+                ncol=(available_width_points/average_legend_length)
+                rows=(num_lines/ncol)+1
+                fontsize = initial_legend_fontsize - (fontsize_decrease_rate_with_rows * rows)
+                ncol = ncol + (ncol_increase_rate_with_rows * rows)
+
+                leg=plt.legend(loc='upper center', bbox_to_anchor=(0.5, -0.030), ncol=ncol, fontsize=fontsize,handlelength=1,frameon=False)
+                for legobj in leg.legendHandles:
+                    legobj.set_linewidth(6.0) 
                 file_name = title.replace("/", "-")
-                plt.xticks(fontsize=16,fontweight='bold')
-                plt.yticks(fontsize=16,fontweight='bold')
+                plt.xticks(fontsize=16,fontweight='bold',color=text_color)
+                plt.yticks(fontsize=16,fontweight='bold',color=text_color)
                 plt.tight_layout()
 
                 if min(x).minute >30:start_min_to_replace=30
@@ -78,7 +106,13 @@ def create_images_and_save(path,doc_id,collection,fs):
                     end_min_to_replace = 0
                 end_time_in_charts = date2num(max(x).replace(minute=end_min_to_replace,hour=end_hr_to_replace))+(offset_ist_minutes / (60 * 24))
                 plt.xlim((start_time_in_charts,end_time_in_charts))
-                
+                ax = plt.gca()
+                for spine in ax.spines.values():
+                    spine.set_color(gridline_color)
+                plt.gca().spines['right'].set_visible(False)
+                plt.gca().spines['left'].set_visible(False)
+                plt.gca().spines['top'].set_visible(False)                
+                plt.gcf().set_facecolor(outer_background_color)
                 plt.savefig(f"{path}/{category}/{file_name}.png", bbox_inches='tight', pad_inches=0.1)
             except Exception as e:
                 print(f"Error while generating graph for {title} : {str(e)}")
@@ -88,15 +122,15 @@ def create_images_and_save(path,doc_id,collection,fs):
 
     print("Total number of charts generated : " , total_charts)
 
-import time,pymongo
-from gridfs import GridFS
+# import time,pymongo
+# from gridfs import GridFS
 
-s_at = time.perf_counter()
-path = "/Users/masabathulararao/Documents/Loadtest/save-report-data-to-mongo/other/images"
-client = pymongo.MongoClient("mongodb://localhost:27017")
-database = client["Osquery_LoadTests"]
-fs = GridFS(database)
-collection = database["MultiCustomer"]
-create_images_and_save(path,"6530ce2a6c4124a8bbfe6aa1",collection,fs)
-f3_at = time.perf_counter()
-print(f"Collecting the report data took : {round(f3_at - s_at,2)} seconds in total")
+# s_at = time.perf_counter()
+# path = "/Users/masabathulararao/Documents/Loadtest/save-report-data-to-mongo/other/images"
+# client = pymongo.MongoClient("mongodb://localhost:27017")
+# database = client["Osquery_LoadTests"]
+# fs = GridFS(database)
+# collection = database["MultiCustomer"]
+# create_images_and_save(path,"6530ce2a6c4124a8bbfe6aa1",collection,fs)
+# f3_at = time.perf_counter()
+# print(f"Collecting the report data took : {round(f3_at - s_at,2)} seconds in total")
