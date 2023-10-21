@@ -31,11 +31,16 @@ inner_background_color = "#191b1f"
 gridline_color = "#404144"
 gridline_width = 0.01
 
-fig_width=36
-character_width = 28
-initial_legend_fontsize=17
-fontsize_decrease_rate_with_rows=0.165
-ncol_increase_rate_with_rows=0.28
+fig_width=20
+# character_width = 28
+# initial_legend_fontsize=17
+# fontsize_decrease_rate_with_rows=0.165
+# ncol_increase_rate_with_rows=0.28
+
+character_width = fig_width/1.285
+initial_legend_fontsize=fig_width/2.117
+fontsize_decrease_rate_with_rows=fig_width/250
+ncol_increase_rate_with_rows=fig_width/100
 
 def create_images_and_save(path,doc_id,collection,fs):
     sns.set_style("darkgrid")
@@ -70,28 +75,32 @@ def create_images_and_save(path,doc_id,collection,fs):
                     offset_ist_minutes = 330  # 5 hours and 30 minutes offset in minutes
                     x_values_ist = x_values_utc + (offset_ist_minutes / (60 * 24))  # Convert minutes to days
                     y = [float(point[1]) for point in large_array]
-                    plt.plot_date(x_values_ist, y, linestyle='solid',label=line["legend"],markersize=0.1,linewidth=2)
+                    plt.plot_date(x_values_ist, y, linestyle='solid',label=line["legend"],markersize=0.1,linewidth=fig_width/18)
                     sum_legends_length += len(str(line["legend"]))
                     num_lines+=1
                 plt.gca().xaxis.set_major_locator(MinuteLocator(interval=30))
                 date_formatter = DateFormatter('%H:%M')
                 plt.gca().xaxis.set_major_formatter(date_formatter)
                 plt.gca().get_yaxis().set_major_formatter(FuncFormatter(format_y_ticks))
-                plt.title("\n"+str(title).title(),fontsize=22,fontweight='bold',pad=40,fontfamily='Trebuchet MS',y=1)
-
-                average_legend_length = (sum_legends_length/num_lines)
-                available_width_points = (fig_width * plt.rcParams['figure.dpi'])/character_width
-                ncol=(available_width_points/average_legend_length)
-                rows=(num_lines/ncol)+1
-                fontsize = initial_legend_fontsize - (fontsize_decrease_rate_with_rows * rows)
-                ncol = ncol + (ncol_increase_rate_with_rows * rows)
-
-                leg=plt.legend(loc='upper center', bbox_to_anchor=(0.5, -0.030), ncol=ncol, fontsize=fontsize,handlelength=1,frameon=False)
-                for legobj in leg.legendHandles:
-                    legobj.set_linewidth(6.0) 
+                plt.title("\n"+str(title).title(),fontsize=fig_width/1.6,fontweight='bold',pad=fig_width/0.9,fontfamily='Trebuchet MS',y=1)
+                if num_lines == 0:
+                    print(f"ERROR : Unable to find data for chart {title} : 0 lines found" )
+                    continue
+                if sum_legends_length == 0:
+                    print(f"WARNING : No legend text found for the chart {title} , sum_legends_length is 0")
+                else:
+                    average_legend_length = (sum_legends_length/num_lines)
+                    available_width_points = (fig_width * plt.rcParams['figure.dpi'])/character_width
+                    ncol=(available_width_points/average_legend_length)
+                    rows=(num_lines/ncol)+1
+                    fontsize = initial_legend_fontsize - (fontsize_decrease_rate_with_rows * rows)
+                    ncol = ncol + (ncol_increase_rate_with_rows * rows)
+                    leg=plt.legend(loc='upper center', bbox_to_anchor=(0.5, -0.030), ncol=ncol, fontsize=fontsize,handlelength=1,frameon=False)
+                    for legobj in leg.legendHandles:
+                        legobj.set_linewidth(fig_width/6) 
                 file_name = title.replace("/", "-")
-                plt.xticks(fontsize=16,fontweight='bold',color=text_color)
-                plt.yticks(fontsize=16,fontweight='bold',color=text_color)
+                plt.xticks(fontsize=fig_width/2.25,fontweight='bold',color=text_color)
+                plt.yticks(fontsize=fig_width/2.25,fontweight='bold',color=text_color)
                 plt.tight_layout()
 
                 if min(x).minute >30:start_min_to_replace=30
