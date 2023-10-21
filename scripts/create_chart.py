@@ -60,7 +60,7 @@ def create_images_and_save(path,doc_id,collection,fs):
                 # plt.xlabel('Time →',fontsize=12)
                 # plt.ylabel('Value →',fontsize=12)
                 plt.title(str(title).title(),fontsize=24,fontweight='bold',pad=20)
-                plt.legend(loc='upper center', bbox_to_anchor=(0.5, -0.025), ncol=12, fontsize=14,mode='expand')  # Adjust fontsize as needed
+                plt.legend(loc='upper center', bbox_to_anchor=(0.5, -0.025), ncol=12, fontsize=14)  # Adjust fontsize as needed
                 file_name = title.replace("/", "-")
                 plt.xticks(fontsize=16,fontweight='bold')
                 plt.yticks(fontsize=16,fontweight='bold')
