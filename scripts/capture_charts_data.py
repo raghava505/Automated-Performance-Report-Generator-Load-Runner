@@ -14,12 +14,12 @@ cpu_app_names=copy.deepcopy(common_app_names)
 cpu_app_names['avg'].extend([])
 cpu_app_names['sum'].extend(["pgbouncer","spark-master","/usr/local/bin/pushgateway"])
 
-basic_chart_queries = {"live assets count":("sum(uptycs_live_count)" , []),
-                       "kafka group lag for all groups(osquery) ": ("uptycs_kafka_group_lag{group!~\".*cloud.*|.*kube.*\"}" , ["cluster_id","group"]),
-                       "mon spark lag for all groups(osquery)":("uptycs_mon_spark_lag{topic!~\".*cloud.*|.*kube.*\"}" , ["cluster_id","topic"])
+basic_chart_queries = {"Live Assets Count":("sum(uptycs_live_count)" , []),
+                       "Kafka group Lag for all groups(Osquery) ": ("uptycs_kafka_group_lag{group!~\".*cloud.*|.*kube.*\"}" , ["group","cluster_id"]),
+                       "Mon Spark Lag for all groups(Osquery)":("uptycs_mon_spark_lag{topic!~\".*cloud.*|.*kube.*\"}" , ["topic","cluster_id"])
                        }
 
-node_level_RAM_used_percentage_queries = dict([(f"{node} Node RAM used percentage",(f"((uptycs_memory_used{{node_type='{node}'}}/uptycs_total_memory{{node_type='{node}'}})*100)" , ["host_name"]) ) for node in ['process','data','pg']])
+node_level_RAM_used_percentage_queries = dict([(f"{node} node RAM used percentage",(f"((uptycs_memory_used{{node_type='{node}'}}/uptycs_total_memory{{node_type='{node}'}})*100)" , ["host_name"]) ) for node in ['process','data','pg']])
 app_level_RAM_used_percentage_queries= dict([(f"Memory Used by {app}",(f"{key}(uptycs_app_memory{{app_name=~'{app}'}}) by (host_name)" , ["host_name"]) ) for key,app_list in memory_app_names.items() for app in app_list])
 more_memory_queries={
     "Kafka Disk Used Percentage":("uptycs_percentage_used{partition=~'/data/kafka'}" , ["host_name"]),
@@ -33,10 +33,10 @@ more_memory_queries={
 
 app_level_RAM_used_percentage_queries.update(more_memory_queries)
 
-node_level_CPU_busy_percentage_queries=dict([(f"{node} Node CPU busy percentage",(f"100-uptycs_idle_cpu{{node_type='{node}'}}",["host_name"]) ) for node in ['process','data','pg']])
-app_level_CPU_used_cores_queries=dict([(f"CPU used by {app}", (f"{key}(uptycs_app_cpu{{app_name=~'{app}'}}) by (host_name)" , ["host_name"]) ) for key,app_list in cpu_app_names.items() for app in app_list])
+node_level_CPU_busy_percentage_queries=dict([(f"{node} node CPU busy percentage",(f"100-uptycs_idle_cpu{{node_type='{node}'}}",["host_name"]) ) for node in ['process','data','pg']])
+app_level_CPU_used_cores_queries=dict([(f"CPU Used by {app}", (f"{key}(uptycs_app_cpu{{app_name=~'{app}'}}) by (host_name)" , ["host_name"]) ) for key,app_list in cpu_app_names.items() for app in app_list])
 more_cpu_queries={
-    "Debezium cpu usage":("uptycs_docker_cpu_stats{container_name='debezium'}" , ["host_name"]),
+    "Debezium CPU usage":("uptycs_docker_cpu_stats{container_name='debezium'}" , ["host_name"]),
 }
 
 # cpu_chart_queries={}
@@ -91,15 +91,15 @@ other_chart_queries={"Active Client Connections":("uptycs_pgb_cl_active" , ["hos
                      }
 
 all_chart_queries={
-    "basic_charts":basic_chart_queries,
-    "node-level memory charts":node_level_RAM_used_percentage_queries,
-    "node-level CPU charts":node_level_CPU_busy_percentage_queries,
-    "application-level memory charts":app_level_RAM_used_percentage_queries,
-    "application-level CPU charts":app_level_CPU_used_cores_queries,
+    "Basic Charts":basic_chart_queries,
+    "Node-level Memory Charts":node_level_RAM_used_percentage_queries,
+    "Node-level CPU Charts":node_level_CPU_busy_percentage_queries,
+    "Application-level Memory Charts":app_level_RAM_used_percentage_queries,
+    "Application-level CPU Charts":app_level_CPU_used_cores_queries,
     # "memory_charts":memory_chart_queries,
     # "cpu_charts":cpu_chart_queries,
-    "inject_drain_rate_and_lag_charts":inject_drain_rate_and_lag_chart_queries,
-    "other_charts":other_chart_queries
+    "Inject-Drain rate and Lag Charts":inject_drain_rate_and_lag_chart_queries,
+    "Other Charts":other_chart_queries
 }
 
 class Charts:
