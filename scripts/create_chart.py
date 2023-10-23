@@ -131,15 +131,15 @@ def create_images_and_save(path,doc_id,collection,fs):
 
     print("Total number of charts generated : " , total_charts)
 
-import time,pymongo
-from gridfs import GridFS
+# import time,pymongo
+# from gridfs import GridFS
 
-s_at = time.perf_counter()
-path = "/Users/masabathulararao/Documents/Loadtest/save-report-data-to-mongo/other/images"
-client = pymongo.MongoClient("mongodb://localhost:27017")
-database = client["Osquery_LoadTests"]
-fs = GridFS(database)
-collection = database["MultiCustomer"]
-create_images_and_save(path,"6530ce2a6c4124a8bbfe6aa1",collection,fs)
-f3_at = time.perf_counter()
-print(f"Collecting the report data took : {round(f3_at - s_at,2)} seconds in total")
+# s_at = time.perf_counter()
+# path = "/Users/masabathulararao/Documents/Loadtest/save-report-data-to-mongo/other/images"
+# client = pymongo.MongoClient("mongodb://localhost:27017")
+# database = client["Osquery_LoadTests"]
+# fs = GridFS(database)
+# collection = database["MultiCustomer"]
+# create_images_and_save(path,"6530ce2a6c4124a8bbfe6aa1",collection,fs)
+# f3_at = time.perf_counter()
+# print(f"Collecting the report data took : {round(f3_at - s_at,2)} seconds in total")
