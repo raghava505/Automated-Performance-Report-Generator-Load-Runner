@@ -82,7 +82,7 @@ def create_images_and_save(path,doc_id,collection,fs):
                 date_formatter = DateFormatter('%H:%M')
                 plt.gca().xaxis.set_major_formatter(date_formatter)
                 plt.gca().get_yaxis().set_major_formatter(FuncFormatter(format_y_ticks))
-                plt.title("\n"+str(title),fontsize=fig_width/1.6,fontweight='bold',pad=fig_width/0.9,fontfamily='arial',y=1)
+                plt.title("\n"+str(title),fontsize=fig_width/1.6,fontweight='bold',pad=fig_width/0.9,y=1)
                 if num_lines == 0:
                     print(f"ERROR : Unable to find data for chart {title} : 0 lines found" )
                     continue
@@ -99,8 +99,8 @@ def create_images_and_save(path,doc_id,collection,fs):
                     for legobj in leg.legendHandles:
                         legobj.set_linewidth(fig_width/6) 
                 file_name = title.replace("/", "-")
-                plt.xticks(fontsize=fig_width/2.06,color=text_color,fontfamily='arial',fontweight='bold')
-                plt.yticks(fontsize=fig_width/2.06,color=text_color,fontfamily='arial',fontweight='bold')
+                plt.xticks(fontsize=fig_width/2.06,color=text_color,fontweight='bold')
+                plt.yticks(fontsize=fig_width/2.06,color=text_color,fontweight='bold')
                 plt.tight_layout()
 
                 if min(x).minute >30:start_min_to_replace=30
@@ -131,15 +131,15 @@ def create_images_and_save(path,doc_id,collection,fs):
 
     print("Total number of charts generated : " , total_charts)
 
-# import time,pymongo
-# from gridfs import GridFS
+import time,pymongo
+from gridfs import GridFS
 
-# s_at = time.perf_counter()
-# path = "/Users/masabathulararao/Documents/Loadtest/save-report-data-to-mongo/other/images"
-# client = pymongo.MongoClient("mongodb://localhost:27017")
-# database = client["Osquery_LoadTests"]
-# fs = GridFS(database)
-# collection = database["MultiCustomer"]
-# create_images_and_save(path,"6530ce2a6c4124a8bbfe6aa1",collection,fs)
-# f3_at = time.perf_counter()
-# print(f"Collecting the report data took : {round(f3_at - s_at,2)} seconds in total")
+s_at = time.perf_counter()
+path = "/Users/masabathulararao/Documents/Loadtest/save-report-data-to-mongo/other/images"
+client = pymongo.MongoClient("mongodb://localhost:27017")
+database = client["Osquery_LoadTests"]
+fs = GridFS(database)
+collection = database["MultiCustomer"]
+create_images_and_save(path,"6530ce2a6c4124a8bbfe6aa1",collection,fs)
+f3_at = time.perf_counter()
+print(f"Collecting the report data took : {round(f3_at - s_at,2)} seconds in total")
