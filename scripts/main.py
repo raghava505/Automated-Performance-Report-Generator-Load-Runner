@@ -159,7 +159,10 @@ if __name__ == "__main__":
                 }
             with open(f"{prom_con_obj.base_stack_config_path}/load_specific_details.json" , 'r') as file:
                 load_specific_details = json.load(file)
-            load_details.update(load_specific_details[variables['load_name']])
+            try:
+                load_details.update(load_specific_details[variables['load_name']])
+            except:
+                print(f"WARNING : Load specific details for {variables['load_name']} not found!")
 
             final_data_to_save = {
                 "load_details":load_details,

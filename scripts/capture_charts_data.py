@@ -91,7 +91,7 @@ other_chart_queries={"Active Client Connections":("uptycs_pgb_cl_active" , ["hos
                      }
 
 all_chart_queries={
-    "Basic Charts":basic_chart_queries,
+    "Live Assets and Lag for all groups":basic_chart_queries,
     "Node-level Memory Charts":node_level_RAM_used_percentage_queries,
     "Node-level CPU Charts":node_level_CPU_busy_percentage_queries,
     "Application-level Memory Charts":app_level_RAM_used_percentage_queries,
