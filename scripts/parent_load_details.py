@@ -31,8 +31,7 @@ class parent:
     @staticmethod
     def get_basic_chart_queries():
         return {"Live Assets Count":("sum(uptycs_live_count)" , []),
-                "Kafka group Lag for all groups(Osquery) ": ("uptycs_kafka_group_lag{group!~\".*cloud.*|.*kube.*\"}" , ["group","cluster_id"]),
-                "Mon Spark Lag for all groups(Osquery)":("uptycs_mon_spark_lag{topic!~\".*cloud.*|.*kube.*\"}" , ["topic","cluster_id"])
+                "Kafka Lag for all groups":"uptycs_kafka_group_lag{group!~\"db-events|cloudconnectorsgroup\"} or uptycs_mon_spark_lag{ topic=\"event\"} or uptycs_mon_spark_lag{topic!~\"event|cloudconnectorsink|agentosquery\"}",
                 }
     
     @classmethod
@@ -63,29 +62,61 @@ class parent:
         app_level_CPU_used_cores_queries.update(more_cpu_queries)
         return app_level_CPU_used_cores_queries
     
+    @classmethod
+    @property
+    def mon_spark_topic_names(cls):
+        return ['agentosquery','event']
+    
+    @classmethod
+    @property
+    def kafka_group_names(cls):
+        return ['db-alerts','ruleengine','debeziumconsumer']
+
     @staticmethod
-    def get_inject_drain_rate_and_lag_chart_queries():
+    def get_inject_drain_and_lag_uptycs_mon_spark(topic):
         return {
-            "Spark Inject Rate for agent Osquery":("uptycs_mon_spark_inject_rate{topic='agentosquery'}",["__name__","cluster_id","topic"]),
-            "Spark Drain Rate for agent Osquery":("uptycs_mon_spark_drain_rate{topic='agentosquery'}" , ["__name__","cluster_id","topic"]),
-            "Spark Lag for Agent Osquery":("uptycs_mon_spark_lag{topic='agentosquery'}",["__name__","cluster_id","topic"]),
-
-            "Spark Inject Rate for Events":("uptycs_mon_spark_inject_rate{topic='event'}",["__name__","cluster_id","topic"]),
-            "Spark Drain Rate for Events":("uptycs_mon_spark_drain_rate{topic='event'}",["__name__","cluster_id","topic"]),
-            "Spark lag for events":("uptycs_mon_spark_lag{topic='event'}",["__name__","cluster_id","topic"]),
-
-            "Inject Rate for Db-Alerts group":("uptycs_kafka_group_inject_rate{group='db-alerts'}",["__name__","cluster_id","group"]),
-            "Drain Rate for Db-Alerts group":("uptycs_kafka_group_drain_rate{group='db-alerts'}",["__name__","cluster_id","group"]),
-            "kafka lag for Db-alerts group":("uptycs_kafka_group_lag{group='db-alerts'}",["__name__","cluster_id","group"]),
-
-            "Inject rate for ruleengine group":("uptycs_kafka_group_inject_rate{group='ruleengine'}",["__name__","cluster_id","group"]),
-            "Drain rate for ruleengine group":("uptycs_kafka_group_drain_rate{group='ruleengine'}",["__name__","cluster_id","group"]),
-            "Kafka lag for ruleengine group":("uptycs_kafka_group_lag{group='ruleengine'}",["__name__","cluster_id","group"]),
-
-            "Kafka Inject rate for debezium group":("uptycs_kafka_group_inject_rate{group='debeziumconsumer'}" , ["__name__","cluster_id","group"]),
-            "Kafka Drain rate for debezium group":("uptycs_kafka_group_drain_rate{group='debeziumconsumer'}",["__name__","cluster_id","group"]),
-            "Debezium Aggregate Lag":("uptycs_kafka_group_lag{group='debeziumconsumer'}",["__name__","cluster_id","group"]),
+            f"Spark Inject Rate for {topic} topic":(f"uptycs_mon_spark_inject_rate{{topic='{topic}'}}",["__name__","cluster_id","topic"]),
+            f"Spark Drain Rate for {topic} topic":(f"uptycs_mon_spark_drain_rate{{topic='{topic}'}}",["__name__","cluster_id","topic"]),
+            f"Spark Lag for {topic} topic":(f"uptycs_mon_spark_lag{{topic='{topic}'}}",["__name__","cluster_id","topic"]),
         }
+    
+    @staticmethod
+    def get_inject_drain_and_lag_uptycs_kafka_group(group):
+        return {
+            f"Kafka Inject Rate for {group} group":(f"uptycs_kafka_group_inject_rate{{group='{group}'}}",["__name__","cluster_id","group"]),
+            f"Kafka Drain Rate for {group} group":(f"uptycs_kafka_group_drain_rate{{group='{group}'}}",["__name__","cluster_id","group"]),
+            f"Kafka Lag for {group} group":(f"uptycs_kafka_group_lag{{group='{group}'}}",["__name__","cluster_id","group"]),
+        }
+        
+    @classmethod
+    def get_inject_drain_rate_and_lag_chart_queries(cls):
+        queries={}
+        for topic in cls.mon_spark_topic_names:
+            queries.update(cls.get_inject_drain_and_lag_uptycs_mon_spark(topic))
+        for group in cls.kafka_group_names:
+            queries.update(cls.get_inject_drain_and_lag_uptycs_kafka_group(group))
+        return copy.deepcopy(queries)
+        # return {
+        #     "Spark Inject Rate for agent Osquery":("uptycs_mon_spark_inject_rate{topic='agentosquery'}",["__name__","cluster_id","topic"]),
+        #     "Spark Drain Rate for agent Osquery":("uptycs_mon_spark_drain_rate{topic='agentosquery'}" , ["__name__","cluster_id","topic"]),
+        #     "Spark Lag for Agent Osquery":("uptycs_mon_spark_lag{topic='agentosquery'}",["__name__","cluster_id","topic"]),
+
+        #     "Spark Inject Rate for Events":("uptycs_mon_spark_inject_rate{topic='event'}",["__name__","cluster_id","topic"]),
+        #     "Spark Drain Rate for Events":("uptycs_mon_spark_drain_rate{topic='event'}",["__name__","cluster_id","topic"]),
+        #     "Spark lag for events":("uptycs_mon_spark_lag{topic='event'}",["__name__","cluster_id","topic"]),
+
+        #     "Inject Rate for Db-Alerts group":("uptycs_kafka_group_inject_rate{group='db-alerts'}",["__name__","cluster_id","group"]),
+        #     "Drain Rate for Db-Alerts group":("uptycs_kafka_group_drain_rate{group='db-alerts'}",["__name__","cluster_id","group"]),
+        #     "kafka lag for Db-alerts group":("uptycs_kafka_group_lag{group='db-alerts'}",["__name__","cluster_id","group"]),
+
+        #     "Inject rate for ruleengine group":("uptycs_kafka_group_inject_rate{group='ruleengine'}",["__name__","cluster_id","group"]),
+        #     "Drain rate for ruleengine group":("uptycs_kafka_group_drain_rate{group='ruleengine'}",["__name__","cluster_id","group"]),
+        #     "Kafka lag for ruleengine group":("uptycs_kafka_group_lag{group='ruleengine'}",["__name__","cluster_id","group"]),
+
+        #     "Kafka Inject rate for debezium group":("uptycs_kafka_group_inject_rate{group='debeziumconsumer'}" , ["__name__","cluster_id","group"]),
+        #     "Kafka Drain rate for debezium group":("uptycs_kafka_group_drain_rate{group='debeziumconsumer'}",["__name__","cluster_id","group"]),
+        #     "Debezium Aggregate Lag":("uptycs_kafka_group_lag{group='debeziumconsumer'}",["__name__","cluster_id","group"]),
+        # }
     
     @staticmethod
     def get_other_chart_queries():
@@ -113,7 +144,7 @@ class parent:
     @classmethod
     def get_all_chart_queries(cls):
         return {
-            "Live Assets and Lag for all groups":cls.get_basic_chart_queries(),
+            "Live Assets and Kafka lag for all groups":cls.get_basic_chart_queries(),
             "Node-level Memory Charts":cls.get_node_level_RAM_used_percentage_queries(),
             "Node-level CPU Charts":cls.get_node_level_CPU_busy_percentage_queries(),
             "Application-level Memory Charts":cls.get_app_level_RAM_used_percentage_queries(),
