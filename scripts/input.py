@@ -1,12 +1,24 @@
 from settings import configuration
 import os
+from parent_load_details import parent
+from osquery.osquery_child_class import osquery_child
+from cloudquery.cloudquery_child_class import cloudquery_child
+from kubequery.kubequery_child_class import kubequery_child
 
 bool_options=[False,True]
 load_type_options = {   
-                        'Osquery':['ControlPlane', 'SingleCustomer', 'MultiCustomer'],
-                        'CloudQuery':['AWS_MultiCustomer','GCP_MultiCustomer','AWS_SingleCustomer'],
-                        "Combined":['Osquery+CloudQuery'],
-                        'KubeQuery':['kubequery_SingleCustomer'] 
+                        'Osquery':{
+                                        'subtypes':['ControlPlane', 'SingleCustomer', 'MultiCustomer'],
+                                        'class':osquery_child
+                                  },
+                        'CloudQuery':{
+                                        'subtypes':['AWS_MultiCustomer','GCP_MultiCustomer','AWS_SingleCustomer'],
+                                        'class':cloudquery_child
+                                     },
+                        'KubeQuery':{
+                                        'subtypes':['kubequery_SingleCustomer'],
+                                        'class':kubequery_child
+                                    } 
                      }
 
 all_files = os.listdir(configuration().base_stack_config_path)
@@ -38,11 +50,11 @@ def create_input_form():
                 input_value = list(load_type_options.keys())[input_index]
             elif key == "load_name":
                 helper_text=''
-                for i,val in enumerate(load_type_options[details["load_type"]]):
+                for i,val in enumerate(load_type_options[details["load_type"]]['subtypes']):
                     helper_text += f"\n {i} : {val}"
                 helper_text += "\n select one option "
                 input_index = int(input(f"Enter : {' '.join(str(key).split('_')).title()} {helper_text} : ").strip())
-                input_value = load_type_options[details["load_type"]][input_index]
+                input_value = load_type_options[details["load_type"]]['subtypes'][input_index]
             elif key == "test_env_file_name":
                 helper_text=''
                 for i,val in enumerate(test_env_path_options):
@@ -73,14 +85,20 @@ def create_input_form():
 
     if user_input =='y':
         print("Continuing ...")
+        try:
+            load_cls = load_type_options[details["load_type"]]['class']
+            print(f"Using load class : {load_cls}")
+        except:
+            print(f"WARNING: load class for {load_type_options[details['load_type']]} is not found , hence using the parent class : {parent}")
+            load_cls = parent
         prom_con_obj = configuration(test_env_file_name=details['test_env_file_name'] , fetch_node_parameters_before_generating_report=details['fetch_node_parameters_before_generating_report'])
-        return details,prom_con_obj
+        return details,prom_con_obj,load_cls
     elif user_input =='n':
         print("OK! Enter the modified details ...")
         return create_input_form()
     else:
         print("INVALID INPUT!")
-        return None,None
+        return None,None,None
 
 if __name__ == "__main__":
     details = create_input_form()

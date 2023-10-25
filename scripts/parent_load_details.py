@@ -1,0 +1,152 @@
+import copy
+from collections import defaultdict
+
+class parent:
+    @classmethod
+    @property
+    def common_app_names(cls):
+        return  {"sum":["orc-compaction" ,"uptycs-configdb",  ".*osqLogger.*", "kafka","spark-worker",".*ruleEngine.*",
+                        "data-archival",".*redis-server.*","/opt/uptycs/cloud/go/bin/complianceSummaryConsumer","tls",".*airflow.*",
+                        "trino" , "osqueryIngestion"],
+                "avg":[]
+                }
+    
+    @classmethod
+    @property
+    def hostname_types(cls):
+        return ["process","data","pg"]
+    
+    @classmethod
+    @property
+    def memory_app_names(cls):
+        return copy.deepcopy(cls.common_app_names)
+    
+    @classmethod
+    @property
+    def cpu_app_names(cls):
+        app_names =copy.deepcopy(cls.common_app_names)
+        app_names['sum'].extend(["pgbouncer","spark-master","/usr/local/bin/pushgateway"])
+        return app_names
+
+    @staticmethod
+    def get_basic_chart_queries():
+        return {"Live Assets Count":("sum(uptycs_live_count)" , []),
+                "Kafka group Lag for all groups(Osquery) ": ("uptycs_kafka_group_lag{group!~\".*cloud.*|.*kube.*\"}" , ["group","cluster_id"]),
+                "Mon Spark Lag for all groups(Osquery)":("uptycs_mon_spark_lag{topic!~\".*cloud.*|.*kube.*\"}" , ["topic","cluster_id"])
+                }
+    
+    @classmethod
+    def get_node_level_RAM_used_percentage_queries(cls):
+        return dict([(f"{node} node RAM used percentage",(f"((uptycs_memory_used{{node_type='{node}'}}/uptycs_total_memory{{node_type='{node}'}})*100)" , ["host_name"]) ) for node in cls.hostname_types])
+    
+    @classmethod
+    def get_app_level_RAM_used_percentage_queries(cls):
+        app_level_RAM_used_percentage_queries= dict([(f"Memory Used by {app}",(f"{key}(uptycs_app_memory{{app_name=~'{app}'}}) by (host_name)" , ["host_name"]) ) for key,app_list in cls.memory_app_names.items() for app in app_list])
+        more_memory_queries={
+            "Kafka Disk Used Percentage":("uptycs_percentage_used{partition=~'/data/kafka'}" , ["host_name"]),
+            "Debezium memory usage":("uptycs_docker_mem_used{container_name='debezium'}" , ["host_name"]),
+        }
+        app_level_RAM_used_percentage_queries.update(more_memory_queries)
+        return app_level_RAM_used_percentage_queries
+
+    @classmethod
+    def get_node_level_CPU_busy_percentage_queries(cls):
+        return dict([(f"{node} node CPU busy percentage",(f"100-uptycs_idle_cpu{{node_type='{node}'}}",["host_name"]) ) for node in cls.hostname_types])
+    
+    @classmethod
+    def get_app_level_CPU_used_cores_queries(cls):
+        app_level_CPU_used_cores_queries=dict([(f"CPU Used by {app}", (f"{key}(uptycs_app_cpu{{app_name=~'{app}'}}) by (host_name)" , ["host_name"]) ) for key,app_list in cls.cpu_app_names.items() for app in app_list])
+        more_cpu_queries={
+            "Debezium CPU usage":("uptycs_docker_cpu_stats{container_name='debezium'}" , ["host_name"]),
+        }
+
+        app_level_CPU_used_cores_queries.update(more_cpu_queries)
+        return app_level_CPU_used_cores_queries
+    
+    @staticmethod
+    def get_inject_drain_rate_and_lag_chart_queries():
+        return {
+            "Spark Inject Rate for agent Osquery":("uptycs_mon_spark_inject_rate{topic='agentosquery'}",["__name__","cluster_id","topic"]),
+            "Spark Drain Rate for agent Osquery":("uptycs_mon_spark_drain_rate{topic='agentosquery'}" , ["__name__","cluster_id","topic"]),
+            "Spark Lag for Agent Osquery":("uptycs_mon_spark_lag{topic='agentosquery'}",["__name__","cluster_id","topic"]),
+
+            "Spark Inject Rate for Events":("uptycs_mon_spark_inject_rate{topic='event'}",["__name__","cluster_id","topic"]),
+            "Spark Drain Rate for Events":("uptycs_mon_spark_drain_rate{topic='event'}",["__name__","cluster_id","topic"]),
+            "Spark lag for events":("uptycs_mon_spark_lag{topic='event'}",["__name__","cluster_id","topic"]),
+
+            "Inject Rate for Db-Alerts group":("uptycs_kafka_group_inject_rate{group='db-alerts'}",["__name__","cluster_id","group"]),
+            "Drain Rate for Db-Alerts group":("uptycs_kafka_group_drain_rate{group='db-alerts'}",["__name__","cluster_id","group"]),
+            "kafka lag for Db-alerts group":("uptycs_kafka_group_lag{group='db-alerts'}",["__name__","cluster_id","group"]),
+
+            "Inject rate for ruleengine group":("uptycs_kafka_group_inject_rate{group='ruleengine'}",["__name__","cluster_id","group"]),
+            "Drain rate for ruleengine group":("uptycs_kafka_group_drain_rate{group='ruleengine'}",["__name__","cluster_id","group"]),
+            "Kafka lag for ruleengine group":("uptycs_kafka_group_lag{group='ruleengine'}",["__name__","cluster_id","group"]),
+
+            "Kafka Inject rate for debezium group":("uptycs_kafka_group_inject_rate{group='debeziumconsumer'}" , ["__name__","cluster_id","group"]),
+            "Kafka Drain rate for debezium group":("uptycs_kafka_group_drain_rate{group='debeziumconsumer'}",["__name__","cluster_id","group"]),
+            "Debezium Aggregate Lag":("uptycs_kafka_group_lag{group='debeziumconsumer'}",["__name__","cluster_id","group"]),
+        }
+    
+    @staticmethod
+    def get_other_chart_queries():
+        return {"Active Client Connections":("uptycs_pgb_cl_active" , ["host_name","db","db_user"]),
+                        "Redis client connections for tls":("sum(uptycs_app_redis_clients{app_name='/opt/uptycs/cloud/tls/tls.js'}) by (host_name)" , ["host_name"]),
+                        "Configdb Pg wal folder size":("configdb_wal_folder",["host_name"]),
+                        "Configdb number of wal files":("configdb_wal_file{}" , ["host_name"]),
+                        "Top 10 redis client connections by app":("sort(topk(9,sum(uptycs_app_redis_clients{}) by (app_name)))" , ["app_name"]),
+                        "Configdb folder size":("configdb_size" , ["host_name"]),
+                        "Average records in pg bouncer":("uptycs_pbouncer_stats{col=~'avg.*', col!~'.*time'}" , ["col"]),
+                        "Average time spent by pg bouncer":("uptycs_pbouncer_stats{col=~'avg.*time'}" , ["col"]),
+                        "iowait time":("uptycs_iowait{}" , ["host_name"]),
+                        "iowait util%":("uptycs_iowait_util_percent{}" , ["host_name" , "device"]),
+                        "Waiting Client Connections":("uptycs_pgb_cl_waiting", ["db" , "db_user"]),
+                        "Disk read wait time":("uptycs_r_await{}" , ["host_name" , "device"]),
+                        "Disk write wait time":("uptycs_w_await{}", ["host_name" , "device"]),
+                        "Idle server connections":("uptycs_pgb_sv_idle", ["db" , "db_user"]),
+                        "Active Server Connections":("uptycs_pgb_sv_active", ["db" , "db_user"]),
+                        "Disk blocks in configdb":("uptycs_configdb_stats{col =~ \"blks.*\"}",["col"]),
+                        "Transaction count in configdb":("uptycs_configdb_stats{col =~ \"xact.*\"}",["col"]),
+                        "Row count in configdb":("uptycs_configdb_stats{col =~ \"tup.*\"}",["col"]),
+                        "Assets table stats":("uptycs_psql_table_stats",["col"]),
+                        "PG and data partition disk usage in configdb" : ("uptycs_used_disk_bytes{node_type=\"pg\",partition=\"/data\"} or uptycs_used_disk_bytes{node_type=\"pg\",partition=\"/pg\"}" , ["partition","host_name"])
+                        }
+    @classmethod
+    def get_all_chart_queries(cls):
+        return {
+            "Live Assets and Lag for all groups":cls.get_basic_chart_queries(),
+            "Node-level Memory Charts":cls.get_node_level_RAM_used_percentage_queries(),
+            "Node-level CPU Charts":cls.get_node_level_CPU_busy_percentage_queries(),
+            "Application-level Memory Charts":cls.get_app_level_RAM_used_percentage_queries(),
+            "Application-level CPU Charts":cls.get_app_level_CPU_used_cores_queries(),
+            "Inject-Drain rate and Lag Charts":cls.get_inject_drain_rate_and_lag_chart_queries(),
+            "Other Charts":cls.get_other_chart_queries()
+        }
+
+
+    load_specific_details=defaultdict(lambda:{})
+
+    @classmethod
+    def get_load_specific_details(cls,load_name):
+        return cls.load_specific_details[load_name]
+    
+    @classmethod
+    def get_dictionary_of_observations(cls):
+        list_of_observations_to_make =['Check for Ingestion lag',
+                                       'Check for Rule engine Lag',
+                                       'Check for db-events Lag',
+                                       'Check for equal distribution of HDFS disk usage',
+                                       'Data loss check for raw tables like processes, process_env etc (accuracy)',
+                                       'Data loss check for processed data like events, alerts and incidents etc (accuracy)',
+                                       "Check if CPU/memory utilisation in line with previous sprints. If not, are the differences expected?",
+                                       'Check for variations in the Count of queries executed on presto',
+                                       'Triage bugs and check for blockers',
+                                       'Check if PG master is in sync with replica',
+                                       'Check for memory leaks',
+                                       'Check for variation in HDFS disk usage',
+                                       'Check for variation in PG disk usage',
+                                       'Check for variation in Kafka disk usage',
+                                       'Check for new kafka topics',
+                                       'Check for steady state of live assets count'
+                                       ]
+        observations_dict=dict([(observation,{"Status":None , "Comments":None}) for observation in list_of_observations_to_make])
+        return observations_dict

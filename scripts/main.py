@@ -20,7 +20,7 @@ import os
 from create_chart import create_images_and_save
 
 if __name__ == "__main__":
-    variables , prom_con_obj =create_input_form()
+    variables , prom_con_obj,load_cls =create_input_form()
     if not variables or not prom_con_obj : 
         print("Received NoneType objects, terminating the program ...")
         sys.exit()
@@ -135,7 +135,7 @@ if __name__ == "__main__":
             print("Fetching charts data ...")
             charts_obj = Charts(start_timestamp=start_timestamp,end_timestamp=end_timestamp,prom_con_obj=prom_con_obj,
                     add_extra_time_for_charts_at_end_in_min=variables["add_extra_time_for_charts_at_end_in_min"],fs=fs)
-            complete_charts_data_dict,all_gridfs_fileids=charts_obj.capture_charts_and_save()
+            complete_charts_data_dict,all_gridfs_fileids=charts_obj.capture_charts_and_save(load_cls.get_all_chart_queries())
             print("Saved charts data successfully !")
             #--------------------------------take screenshots---------------------------------------
             # print("Capturing compaction status screenshots  ...")
@@ -157,12 +157,12 @@ if __name__ == "__main__":
                 "load_end_time_ist" : f"{end_time_str}",
                 "run":run,
                 }
-            with open(f"{prom_con_obj.base_stack_config_path}/load_specific_details.json" , 'r') as file:
-                load_specific_details = json.load(file)
+            # with open(f"{prom_con_obj.base_stack_config_path}/load_specific_details.json" , 'r') as file:
+            #     load_specific_details = json.load(file)
             try:
-                load_details.update(load_specific_details[variables['load_name']])
+                load_details.update(load_cls.get_load_specific_details(variables['load_name']))
             except:
-                print(f"WARNING : Load specific details for {variables['load_name']} not found!")
+                print(f"WARNING : Load specific details for {variables['load_name']} in {load_cls} is not found!")
 
             final_data_to_save = {
                 "load_details":load_details,
