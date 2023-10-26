@@ -13,36 +13,47 @@ class publish_to_confluence:
             username = email_address,
             password=api_key
             )
-
-        if self.confluence.page_exists(space, parent_page_title, type=None) == False:
-            print(f"ERROR : The parent page with title '{parent_page_title}' doesn't exist! Please enter a valid page title")
-            return None
-        elif self.confluence.page_exists(space, report_title, type=None) == True:
-            print(f"ERROR : A page with title '{report_title}' already exists! Please enter a new title")
-            return None
-        else:
-            print(f"Parent page '{parent_page_title}' exists")
-        
         self.space = space
         self.title=report_title
         self.parent_title=parent_page_title
-        self.body_content="""
-                            <ac:structured-macro ac:name="toc">
-                                <ac:parameter ac:name="maxLevel">6</ac:parameter>
-                            </ac:structured-macro>
-                            """
+    
+    def check(self):
+        try:
+            if self.confluence.page_exists(self.space, self.parent_title, type=None) == False:
+                error_string=f"ERROR : The parent page with title '{self.parent_title}' doesn't exist! Please enter a valid page title"
+                return False,error_string
+            elif self.confluence.page_exists(self.space, self.title, type=None) == True:
+                error_string=f"ERROR : A page with title '{self.title}' already exists! Please enter a new title"
+                return False,error_string
+            else:
+                print(f"Parent page '{self.parent_title}' found")
+                return True,''
+        except Exception as e:
+            return False,str(e)
+        
+    def create_page(self):
+        try:
+            self.body_content="""
+                                <ac:structured-macro ac:name="toc">
+                                    <ac:parameter ac:name="maxLevel">6</ac:parameter>
+                                </ac:structured-macro>
+                                """
 
-        parent_page=self.confluence.get_page_by_title(space=space, title=self.parent_title)
-        self.parent_page_id = parent_page['id']
-        
-        print(f"Creating new child page '{self.title}', under '{self.parent_title}'")
-        created_new_page=self.confluence.create_page(space=self.space, title=self.title, 
-                                body=self.body_content,parent_id=self.parent_page_id, type='page', representation='storage',
-                                editor='v2', full_width=True,
-                                )
-        
-        self.page_id = created_new_page['id']
-        print(f"Created new page with id {self.page_id}")
+            parent_page=self.confluence.get_page_by_title(space=self.space, title=self.parent_title)
+            self.parent_page_id = parent_page['id']
+            
+            print(f"Creating new child page '{self.title}', under '{self.parent_title}'")
+            created_new_page=self.confluence.create_page(space=self.space, title=self.title, 
+                                    body=self.body_content,parent_id=self.parent_page_id, type='page', representation='storage',
+                                    editor='v2', full_width=True,
+                                    )
+            
+            self.page_id = created_new_page['id']
+            print(f"Created new page with id {self.page_id}")
+            return True,""
+        except Exception as e:
+            print("caused in creaing")
+            return False,str(e)
 
     def add_table_from_html(self,heading,html_table,collapse=False):
         print(f"adding table : {heading}")
@@ -71,7 +82,7 @@ class publish_to_confluence:
             "superior", "outstanding", "aced", "exceptional", "impressive", "top-notch",
             "proficient", "masterful", "seamless", "airtight", "error-free", "superb",
             "remarkable","success","sucess","pass","ok","yes","done","reached","fine",
-            "good","nice","not bad","authenticated","superb","super","reached","met",
+            "good","authenticated","reached","met",
             "accomplished", "fulfilled"
         ]
 
@@ -93,7 +104,8 @@ class publish_to_confluence:
             col_values = list(dataframe[status_col])
             print(col_values)
             for val in col_values:
-                html_table=html_table.replace(str(val),self.get_status_macro(val))
+                if len(str(val).strip()) > 1:
+                    html_table=html_table.replace(str(val),self.get_status_macro(val))
         self.add_table_from_html(heading=heading,html_table=html_table,collapse=collapse)
         
     def add_text(self,html_text):
