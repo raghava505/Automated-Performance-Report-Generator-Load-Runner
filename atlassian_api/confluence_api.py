@@ -17,7 +17,7 @@ class publish_to_confluence:
         self.title=report_title
         self.parent_title=parent_page_title
     
-    def check(self):
+    def create_page(self):
         try:
             if self.confluence.page_exists(self.space, self.parent_title, type=None) == False:
                 error_string=f"ERROR : The parent page with title '{self.parent_title}' doesn't exist! Please enter a valid page title"
@@ -27,11 +27,10 @@ class publish_to_confluence:
                 return False,error_string
             else:
                 print(f"Parent page '{self.parent_title}' found")
-                return True,''
+                # return True,''
         except Exception as e:
             return False,str(e)
         
-    def create_page(self):
         try:
             self.body_content="""
                                 <ac:structured-macro ac:name="toc">
@@ -52,7 +51,6 @@ class publish_to_confluence:
             print(f"Created new page with id {self.page_id}")
             return True,""
         except Exception as e:
-            print("caused in creaing")
             return False,str(e)
 
     def add_table_from_html(self,heading,html_table,collapse=False):
