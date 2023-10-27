@@ -74,6 +74,8 @@ class publish_to_confluence:
         self.body_content+=html_page
 
     def get_status_macro(self,title):
+        title=title.split('/')[1]
+        if len(str(title).strip()) < 1:return ''
         positive_words = [
             "passed", "validated", "achieved", "verified", "succeeded", "accurate",
             "effective", "excellent", "efficient", "thorough", "flawless", "optimal",
@@ -99,11 +101,12 @@ class publish_to_confluence:
     def add_table_from_dataframe(self,heading,dataframe,collapse=False,status_col=None):
         html_table = dataframe.to_html(classes='table table-striped', index=False)
         if status_col:
-            col_values = list(dataframe[status_col])
+            dataframe[status_col] = dataframe[status_col].apply(lambda x : f"sm/{x}/sm")
+            html_table = dataframe.to_html(classes='table table-striped', index=False)
+            col_values = list(dataframe[status_col].unique())
             print(col_values)
             for val in col_values:
-                if len(str(val).strip()) > 1:
-                    html_table=html_table.replace(str(val),self.get_status_macro(val))
+                html_table=html_table.replace(str(val),self.get_status_macro(val))
         self.add_table_from_html(heading=heading,html_table=html_table,collapse=collapse)
         
     def add_text(self,html_text):

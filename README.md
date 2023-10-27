@@ -1,9 +1,10 @@
 # Steps to save your load report data into the database.
 
 ## step 1
-Login to autoendtoend node and navigate to project directory (/home/abacus/LoadTests/save-report-data-to-mongo)
+1. Login to autoendtoend node and navigate to project directory (/home/abacus/LoadTests/save-report-data-to-mongo)
 Pull the latest code from github (git pull origin main).
 make sure you do not have any local changes made (git stash , git stash clear).
+2. Activate the virtual environment : run the command 'source raghava_venv/bin/activate'
 
 ## step 2
 Run "/scripts/main.py" and enter the required load details, the report data will be saved to database.
