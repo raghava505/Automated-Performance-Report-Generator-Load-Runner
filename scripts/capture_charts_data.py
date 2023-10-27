@@ -147,7 +147,7 @@ class Charts:
                             try:
                                 legend_text += f"-{host['metric'][key]}"
                             except:
-                                print(f"Key {key} not present in o/p of the query {queries[query][0]}. please check the provided legend attribute")
+                                print(f"Warning : Key {key} not present in o/p of the query {queries[query][0]}. please check the provided legend attribute")
                         host["legend"]=legend_text
                     final[query] = result
             except Exception as e:

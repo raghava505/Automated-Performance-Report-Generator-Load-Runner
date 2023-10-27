@@ -31,7 +31,7 @@ class parent:
     @staticmethod
     def get_basic_chart_queries():
         return {"Live Assets Count":("sum(uptycs_live_count)" , []),
-                "Kafka Lag for all groups":"uptycs_kafka_group_lag{group!~\"db-events|cloudconnectorsgroup\"} or uptycs_mon_spark_lag{ topic=\"event\"} or uptycs_mon_spark_lag{topic!~\"event|cloudconnectorsink|agentosquery\"}",
+                "Kafka Lag for all groups":("uptycs_kafka_group_lag{group!~'db-events|cloudconnectorsgroup'} or uptycs_mon_spark_lag{ topic='event'} or uptycs_mon_spark_lag{topic!~'event|cloudconnectorsink|agentosquery'}",['cluster_id','topic','group']),
                 }
     
     @classmethod
