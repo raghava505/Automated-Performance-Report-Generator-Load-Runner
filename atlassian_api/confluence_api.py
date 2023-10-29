@@ -98,15 +98,36 @@ class publish_to_confluence:
         '''
         return status_macro
     
-    def add_table_from_dataframe(self,heading,dataframe,collapse=False,status_col=None):
+    def get_red_green_text(self,text):
+        text = str(text.split('/')[1]).strip()
+        if str(text).endswith("⬇️"):
+            return f'<span style="color: green;">{text}</span>'
+        elif str(text).endswith("⬆️"):
+            return f'<span style="color: red;">{text}</span>'
+        else:return text
+
+    def add_table_from_dataframe(self,heading,dataframe,collapse=False,status_col=None,red_green_column_list=None):
+        if status_col and red_green_column_list and status_col in red_green_column_list:return False,"ERROR : Status col shouldn't be present in red_green_column_list" 
         html_table = dataframe.to_html(classes='table table-striped', index=False)
-        if status_col:
-            dataframe[status_col] = dataframe[status_col].apply(lambda x : f"sm/{x}/sm")
-            html_table = dataframe.to_html(classes='table table-striped', index=False)
-            col_values = list(dataframe[status_col].unique())
-            print(col_values)
-            for val in col_values:
+        if status_col or red_green_column_list:
+            status_col_values=[]
+            color_col_values=[]
+            if status_col:
+                dataframe[status_col] = dataframe[status_col].apply(lambda x : f"sm/{x}/sm")
+                status_col_values = list(dataframe[status_col].unique())
+                print(status_col_values)
+            
+            if red_green_column_list:
+                for column in red_green_column_list:
+                    dataframe[column] = dataframe[column].apply(lambda x : f"color/{x}/color")
+                    color_col_values.extend(list(dataframe[column].unique()))
+                color_col_values=list(set(color_col_values))
+                    
+            html_table = dataframe.to_html(classes='table table-striped', index=False) 
+            for val in status_col_values:
                 html_table=html_table.replace(str(val),self.get_status_macro(val))
+            for val in color_col_values:
+                html_table=html_table.replace(str(val),self.get_red_green_text(val))
         self.add_table_from_html(heading=heading,html_table=html_table,collapse=collapse)
         
     def add_text(self,html_text):
