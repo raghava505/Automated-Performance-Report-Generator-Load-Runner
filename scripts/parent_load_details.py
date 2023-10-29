@@ -165,7 +165,6 @@ class parent:
         list_of_observations_to_make =['Check for Ingestion lag',
                                        'Check for Rule engine Lag',
                                        'Check for db-events Lag',
-                                       'Check for equal distribution of HDFS disk usage',
                                        'Data loss check for raw tables like processes, process_env etc (accuracy)',
                                        'Data loss check for processed data like events, alerts and incidents etc (accuracy)',
                                        "Check if CPU/memory utilisation in line with previous sprints. If not, are the differences expected?",
@@ -179,5 +178,5 @@ class parent:
                                        'Check for new kafka topics',
                                        'Check for steady state of live assets count'
                                        ]
-        observations_dict=dict([(observation,{"Status":None , "Comments":None}) for observation in list_of_observations_to_make])
+        observations_dict=dict([(observation,{"Status":"" , "Comments":""}) for observation in list_of_observations_to_make])
         return observations_dict
