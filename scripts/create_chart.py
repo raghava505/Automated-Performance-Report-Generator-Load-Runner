@@ -1,5 +1,3 @@
-# from pymongo import MongoClient
-# from gridfs import GridFS
 from bson import ObjectId
 import matplotlib.pyplot as plt
 import datetime
@@ -25,23 +23,18 @@ def format_y_ticks(value,pos):
     else:
         return str(int(value))
 
-# outer_background_color="#111217"
 outer_background_color="#191b1f"
-text_color="#ccccdc"
+# text_color="#ccccdc"
+text_color="#EAEAEA"
 inner_background_color = "#191b1f"
 gridline_color = "#404144"
 gridline_width = 0.01
 
 fig_width=34
-# character_width = 28
-# initial_legend_fontsize=17
-# fontsize_decrease_rate_with_rows=0.165
-# ncol_increase_rate_with_rows=0.28
-
-character_width = 13.5                      #inversly prop to initial ncol
+character_width = 14.5                      #inversly prop to initial ncol
 initial_legend_fontsize=fig_width/1.90
-fontsize_decrease_rate_with_rows=fig_width/185
-ncol_increase_rate_with_rows=fig_width/0.00425
+fontsize_decrease_rate_with_rows=fig_width/165
+ncol_increase_rate_with_rows=8000
 
 def create_images_and_save(path,doc_id,collection,fs):
     sns.set_style("darkgrid")
@@ -50,14 +43,9 @@ def create_images_and_save(path,doc_id,collection,fs):
     sns.set_style({"axes.facecolor": inner_background_color})
     sns.set_style({"grid.color": gridline_color})
     sns.set_style({"grid.linewidth": gridline_width})
-    # client = MongoClient(conn_string)
-    # database = client[database_name]
-    # fs = GridFS(database)
-    # collection = database[collection_name]
     cursor=collection.find_one({"_id" : ObjectId(doc_id)})
     total_charts=0
     charts_data=cursor["charts"]
-    # category_count=1
     for category in charts_data:
         os.makedirs(f"{path}/{category}" , exist_ok=True)
         for title in charts_data[category]:
@@ -83,7 +71,7 @@ def create_images_and_save(path,doc_id,collection,fs):
                 date_formatter = DateFormatter('%H:%M')
                 plt.gca().xaxis.set_major_formatter(date_formatter)
                 plt.gca().get_yaxis().set_major_formatter(FuncFormatter(format_y_ticks))
-                plt.title("\n"+str(title),fontsize=fig_width/1.68,fontweight='bold',pad=fig_width/0.9,y=1)
+                plt.title("\n"+str(title),fontsize=fig_width/1.68,pad=fig_width/0.9,y=1)
                 if num_lines == 0:
                     print(f"ERROR : Unable to find data for chart {title} : 0 lines found" )
                     continue
@@ -93,17 +81,24 @@ def create_images_and_save(path,doc_id,collection,fs):
                     std=np.std(list_of_legend_lengths)
                     mean=np.mean(list_of_legend_lengths)
                     average_legend_length = mean+1*std
-                    available_width_points = (fig_width * plt.rcParams['figure.dpi'])/character_width
+                    available_width_points = (fig_width * 100)/character_width
                     ncol=(available_width_points/(average_legend_length+6))
                     rows=(num_lines/ncol)+1
                     fontsize = initial_legend_fontsize - (fontsize_decrease_rate_with_rows * (rows-1))
-                    final_ncol = ncol + ((ncol_increase_rate_with_rows/((average_legend_length**2.09) * (fontsize**2.21))) * (rows-1))
+                    font_diff = (initial_legend_fontsize-fontsize)
+                    if font_diff > 8:
+                        scale = 0.024
+                    else:
+                        scale=0.03
+                    final_ncol = ncol + scale*font_diff*(rows-1)
+                    print(f"ncol : {ncol}, finalncol: {final_ncol}, font diff:{initial_legend_fontsize-fontsize} , rows:{rows}")
+                    # final_ncol = ncol + ((ncol_increase_rate_with_rows/((average_legend_length**2.09) * (fontsize**2.21))) * (rows-1))
                     leg=plt.legend(loc='upper center', bbox_to_anchor=(0.5, -0.030), ncol=final_ncol, fontsize=fontsize,handlelength=1,frameon=False)
                     for legobj in leg.legendHandles:
                         legobj.set_linewidth(fig_width/6) 
                 file_name = title.replace("/", "-")
-                plt.xticks(fontsize=fig_width/1.935,color=text_color,fontweight='bold')
-                plt.yticks(fontsize=fig_width/1.935,color=text_color,fontweight='bold')
+                plt.xticks(fontsize=fig_width/1.935,color=text_color)
+                plt.yticks(fontsize=fig_width/1.935,color=text_color)
                 plt.tight_layout()
 
                 if min(x).minute >30:start_min_to_replace=30
@@ -130,13 +125,11 @@ def create_images_and_save(path,doc_id,collection,fs):
                 print(f"Error while generating graph for {title} : {str(e)}")
             finally:
                 plt.close()
-        # category_count+=1
 
     print("Total number of charts generated : " , total_charts)
 
 # import time,pymongo
 # from gridfs import GridFS
-
 # s_at = time.perf_counter()
 # path = "/Users/masabathulararao/Documents/Loadtest/save-report-data-to-mongo/other/images"
 # client = pymongo.MongoClient("mongodb://localhost:27017")
