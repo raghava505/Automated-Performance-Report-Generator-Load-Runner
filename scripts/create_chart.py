@@ -91,7 +91,7 @@ def create_images_and_save(path,doc_id,collection,fs):
                     else:
                         scale=0.03
                     final_ncol = ncol + scale*font_diff*(rows-1)
-                    print(f"ncol : {ncol}, finalncol: {final_ncol}, font diff:{initial_legend_fontsize-fontsize} , rows:{rows}")
+                    # print(f"ncol : {ncol}, finalncol: {final_ncol}, font diff:{initial_legend_fontsize-fontsize} , rows:{rows}")
                     # final_ncol = ncol + ((ncol_increase_rate_with_rows/((average_legend_length**2.09) * (fontsize**2.21))) * (rows-1))
                     leg=plt.legend(loc='upper center', bbox_to_anchor=(0.5, -0.030), ncol=final_ncol, fontsize=fontsize,handlelength=1,frameon=False)
                     for legobj in leg.legendHandles:
