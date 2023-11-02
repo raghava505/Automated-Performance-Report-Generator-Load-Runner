@@ -109,8 +109,6 @@ class Kube_Accuracy:
         return self.accuracy
 
 
-    
-obj = Kube_Accuracy('2023-10-18 18:45:00','2023-10-19 05:00:00','c','d')   
-obj.accuracy_kubernetes()
+
     
 

@@ -15,15 +15,9 @@ class SelfManaged_Accuracy:
     def __init__(self,start_timestamp,end_timestamp,prom_con_obj,variables):
         self.load_start=start_timestamp
         self.load_end=end_timestamp
-        # self.test_env_file_path=prom_con_obj.test_env_file_path
-        # self.PROMETHEUS = prom_con_obj.prometheus_path
-        # self.API_PATH = prom_con_obj.prom_point_api_path
-        # self.port=prom_con_obj.ssh_port
-        # self.username = prom_con_obj.abacus_username
-        # self.password  = prom_con_obj.abacus_password
-        self.port = 22
-        self.username = "abacus"
-        self.password  = "abacus"
+        self.port=prom_con_obj.ssh_port
+        self.username = prom_con_obj.abacus_username
+        self.password  = prom_con_obj.abacus_password
         self.target_host = "192.168.143.26"
         self.cloud_domain = "alphacentauri"
         self.expected_data = None
@@ -82,13 +76,7 @@ class SelfManaged_Accuracy:
                 "Actual Records" : self.actual_data[t],
                 "Accuracy" : (self.actual_data[t]/self.expected_data[t])*100
             }
-        print(self.accuracy)
+        #print(self.accuracy)
         return self.accuracy
-
-
-    
-obj = SelfManaged_Accuracy('2023-11-01 18:40:00','2023-11-02 05:05:00','c','d')   
-obj.accuracy_selfmanaged()
-
     
 
