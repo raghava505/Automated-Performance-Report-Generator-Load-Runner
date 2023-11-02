@@ -15,7 +15,7 @@ load_type_options = {
                                         'subtypes':['AWS_MultiCustomer','GCP_MultiCustomer','AWS_SingleCustomer'],
                                         'class':cloudquery_child
                                      },
-                        'KubeQuery_and_SelfManaged_LoadTests':{
+                        'KubeQuery_and_SelfManaged':{
                                         'subtypes':['KubeQuery_SingleCustomer','SelfManaged_SingleCustomer'],
                                         'class':kubequery_child
                                     } 
