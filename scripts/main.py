@@ -116,7 +116,7 @@ if __name__ == "__main__":
             print("Calculating accuracies for SelfManaged ...")
             accuracy = SelfManaged_Accuracy(start_timestamp=start_utc_time,end_timestamp=end_utc_time,prom_con_obj=prom_con_obj,variables=variables)
             selfmanaged_accuracies = accuracy.accuracy_selfmanaged()
-            print(selfmanaged_accuracies)
+            #print(selfmanaged_accuracies)
 
         
         #--------------------------------------Events Counts--------------------------------------
@@ -204,9 +204,9 @@ if __name__ == "__main__":
             if db_op:
                 final_data_to_save.update({"Processing Time of Db Operations":db_op})
             if kubequery_accuracies:
-                final_data_to_save.update({"Accuracy table":kubequery_accuracies})
+                final_data_to_save.update({"Table Accuracies":kubequery_accuracies})
             if selfmanaged_accuracies:
-                final_data_to_save.update({"Accuracy table":selfmanaged_accuracies})
+                final_data_to_save.update({"Table Accuracies":selfmanaged_accuracies})
 
             
 
