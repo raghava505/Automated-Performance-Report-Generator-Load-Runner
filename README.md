@@ -2,14 +2,13 @@
 
 ## step 1
 1. Login to autoendtoend node and navigate to project directory (/home/abacus/LoadTests/save-report-data-to-mongo), and make sure you are on the 'main' branch. (git checkout main)
-Pull the latest code from github (git pull origin main).
-make sure you do not have any local changes made (git stash , git stash clear).
-2. Activate the virtual environment : run the command 'source raghava_venv/bin/activate'
+2. Pull the latest code from github (git pull origin main). Make sure you do not have any local changes made (git stash).
+3. Activate the virtual environment : run the command 'source raghava_venv/bin/activate'
 
 ## step 2
 Run "/scripts/main.py" and enter the required load details, the report data will be saved to database.
 
-# configure a new stack
+# configure a new lab stack
 
 Create "<your_stack>_nodes.json" file inside "config" folder if not present(only enter the details upto "other_nodes" field).
 (NOTE 1: No need to enter the later fields i.e fields containing 'ram', 'cores', storage details)
