@@ -12,6 +12,8 @@ from capture_charts_data import Charts
 from gridfs import GridFS
 from trino_queries import TRINO
 from cloudquery.shrav_auto import ACCURACY
+from kubequery.kube_accuracy import Kube_Accuracy
+from kubequery.selfmanaged_accuracy import SelfManaged_Accuracy
 from cloudquery.db_operations_time import DB_OPERATIONS_TIME
 from cloudquery.events_count import EVE_COUNTS
 from cloudquery.sts_records import STS_RECORDS
@@ -101,6 +103,23 @@ if __name__ == "__main__":
             accu= ACCURACY(start_timestamp=start_utc_time,end_timestamp=end_utc_time,prom_con_obj=prom_con_obj,variables=variables)
             accuracies = accu.calculate_accuracy()
 
+        #-------------------------Kubequery Accuracies----------------------------
+        kubequery_accuracies=None
+        if variables["load_name"] == "KubeQuery_SingleCustomer":
+            print("Calculating accuracies for KubeQuery ...")
+            accuracy = Kube_Accuracy(start_timestamp=start_utc_time,end_timestamp=end_utc_time,prom_con_obj=prom_con_obj,variables=variables)
+            kubequery_accuracies = accuracy.accuracy_kubernetes()
+            #print(kubequery_accuracies)
+
+        #-------------------------SelfManaged Accuracies----------------------------
+        selfmanaged_accuracies=None
+        if variables["load_name"] == "SelfManaged_SingleCustomer":
+            print("Calculating accuracies for SelfManaged ...")
+            accuracy = SelfManaged_Accuracy(start_timestamp=start_utc_time,end_timestamp=end_utc_time,prom_con_obj=prom_con_obj,variables=variables)
+            selfmanaged_accuracies = accuracy.accuracy_selfmanaged()
+            #print(selfmanaged_accuracies)
+
+        
         #--------------------------------------Events Counts--------------------------------------
         evecount = None
         if variables["load_type"] == "CloudQuery":
@@ -185,6 +204,11 @@ if __name__ == "__main__":
                 final_data_to_save.update({"Table Accuracies":accuracies})
             if db_op:
                 final_data_to_save.update({"Processing Time of Db Operations":db_op})
+            if kubequery_accuracies:
+                final_data_to_save.update({"Table Accuracies":kubequery_accuracies})
+            if selfmanaged_accuracies:
+                final_data_to_save.update({"Table Accuracies":selfmanaged_accuracies})
+
             
 
             final_data_to_save.update({"charts":complete_charts_data_dict})
