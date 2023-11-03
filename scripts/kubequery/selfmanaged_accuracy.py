@@ -3,7 +3,7 @@ import sys
 sys.path.append('kubequery/') 
 import json
 import paramiko
-from selfmanaged_configs import *
+from .selfmanaged_configs import *
 from fabric import Connection
 from datetime import datetime, timedelta
 from pathlib import Path
