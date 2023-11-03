@@ -101,34 +101,9 @@ class ACCURACY:
     def table_accuracy(self,data, table, actual_true_count,actual_false_count,expected_true_count,expected_false_count):
         accuracy_true = round((actual_true_count / expected_true_count) * 100, 2)
         accuracy_false= round((actual_false_count / expected_false_count) * 100, 2)
-        data[table] = {"UPT_added_true":actual_true_count, "UPT_added_false": actual_false_count, "Expected_added_true":expected_true_count, "Expected_added_false": expected_false_count,  "accuracy true": accuracy_true, "aaccuracy false":accuracy_false}
+        data[table] = {"Actual added":actual_true_count, "Actual removed": actual_false_count, "Expected added":expected_true_count, "Expected removed": expected_false_count,  "Accuracy true": accuracy_true, "Accuracy false":accuracy_false}
         #accuracy_entry={"table": table,  "expected added": expected_true_count, "expected deleted": expected_false_count}
         #data.append(accuracy_entry)
-
-    def tables_accuracy(self,data,file):
-        
-        customer=json.loads(file)
-        
-
-        for table in self.total_counts:
-            response = self.global_query(customer,table)  
-            if table=='aws_cloudtrail_events':
-                
-                actual_true_count= response['items'][0]['rowData']['_col1']
-                actual_false_count=1
-            else:
-                if response['items'][0]['rowData']['upt_added'] == True:
-                    
-                    actual_true_count= response['items'][0]['rowData']['_col1']
-                    actual_false_count= response['items'][1]['rowData']['_col1']
-                else:
-                    actual_true_count= response['items'][1]['rowData']['_col1']
-                    actual_false_count= response['items'][0]['rowData']['_col1']
-
-
-            expected_true_count = self.total_counts[table].get("added", 1)  
-            expected_false_count = self.total_counts[table].get("removed", 1) 
-            self.table_accuracy(data, table, actual_true_count,actual_false_count,expected_true_count,expected_false_count)
 
     def multi_accuracy(self,data,file):
         
@@ -154,14 +129,7 @@ class ACCURACY:
             self.table_accuracy(data, table, upt_added_true.value,upt_added_false.value, expected_true_count,expected_false_count)
         
 
-    def single_tables_accuracy_xl(self,file):
-        expected_data = {}
-        self.expected()
-        self.tables_accuracy(expected_data,file)
-        return expected_data
-        
-
-    def multi_tables_accuracy_xl(self,file):
+    def multi_tables_accuracy(self,file):
         expected_data = {}
         self.expected()
         self.multi_accuracy(expected_data,file)
@@ -177,14 +145,14 @@ class ACCURACY:
             
             fs = open(self.api_path)
             file = fs.read()
-            save_dict=self.multi_tables_accuracy_xl(file)
+            save_dict=self.multi_tables_accuracy(file)
 
         elif(self.load_name == "AWS_SingleCustomer"):
             self.api_path=api_path_single
             
             fs = open(self.api_path)
             file = fs.read()
-            save_dict=self.single_tables_accuracy_xl(file)
+            save_dict=self.multi_tables_accuracy(file)
 
         return save_dict
 

@@ -1,4 +1,5 @@
-{
+[
+  {
     "id": "6fb08c41-fc3f-43bd-ae30-ef963fb43f38",
     "userId": "5b7d37d7-9ce6-4989-bc1b-67cc85376784",
     "customerId": "5ec0e3d7-93eb-4d77-8c2d-8e8fff280b05",
@@ -11,3 +12,4 @@
     "domainSuffix": ".uptycs.net",
     "domain": "mercury"
   }
+]

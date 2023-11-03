@@ -11,7 +11,7 @@ from input import create_input_form
 from capture_charts_data import Charts
 from gridfs import GridFS
 from trino_queries import TRINO
-from cloudquery.shrav_auto import ACCURACY
+from cloudquery.accuracy import ACCURACY
 from kubequery.kube_accuracy import Kube_Accuracy
 from kubequery.selfmanaged_accuracy import SelfManaged_Accuracy
 from cloudquery.db_operations_time import DB_OPERATIONS_TIME
