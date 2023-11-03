@@ -46,6 +46,7 @@ def create_images_and_save(path,doc_id,collection,fs):
     cursor=collection.find_one({"_id" : ObjectId(doc_id)})
     total_charts=0
     charts_data=cursor["charts"]
+    complete_time_set=set()
     for category in charts_data:
         os.makedirs(f"{path}/{category}" , exist_ok=True)
         for title in charts_data[category]:
@@ -60,6 +61,8 @@ def create_images_and_save(path,doc_id,collection,fs):
                     retrieved_data = fs.get(ObjectId(file_id)).read()
                     large_array = eval(retrieved_data.decode('utf-8'))
                     x = [convert_to_ist_time(point[0]) for point in large_array]
+                    complete_time_set.add(min(x))
+                    complete_time_set.add(max(x))
                     x_values_utc = date2num(x)
                     offset_ist_minutes = 330  # 5 hours and 30 minutes offset in minutes
                     x_values_ist = x_values_utc + (offset_ist_minutes / (60 * 24))  # Convert minutes to days
@@ -101,17 +104,17 @@ def create_images_and_save(path,doc_id,collection,fs):
                 plt.yticks(fontsize=fig_width/1.935,color=text_color)
                 plt.tight_layout()
 
-                if min(x).minute >30:start_min_to_replace=30
+                if min(complete_time_set).minute >30:start_min_to_replace=30
                 else:start_min_to_replace = 0
-                start_time_in_charts = date2num(min(x).replace(minute=start_min_to_replace))+(offset_ist_minutes / (60 * 24))
+                start_time_in_charts = date2num(min(complete_time_set).replace(minute=start_min_to_replace))+(offset_ist_minutes / (60 * 24))
 
-                if max(x).minute < 30:
-                    end_hr_to_replace=max(x).hour
+                if max(complete_time_set).minute < 30:
+                    end_hr_to_replace=max(complete_time_set).hour
                     end_min_to_replace=30
                 else:
-                    end_hr_to_replace = max(x).hour+1
+                    end_hr_to_replace = max(complete_time_set).hour+1
                     end_min_to_replace = 0
-                end_time_in_charts = date2num(max(x).replace(minute=end_min_to_replace,hour=end_hr_to_replace))+(offset_ist_minutes / (60 * 24))
+                end_time_in_charts = date2num(max(complete_time_set).replace(minute=end_min_to_replace,hour=end_hr_to_replace))+(offset_ist_minutes / (60 * 24))
                 plt.xlim((start_time_in_charts,end_time_in_charts))
                 ax = plt.gca()
                 for spine in ax.spines.values():
@@ -136,6 +139,6 @@ def create_images_and_save(path,doc_id,collection,fs):
 # database = client["Osquery_LoadTests"]
 # fs = GridFS(database)
 # collection = database["MultiCustomer"]
-# create_images_and_save(path,"653b84666c1d0c76e5ef921c",collection,fs)
+# create_images_and_save(path,"65421cbd88da4d7a2c740c0f",collection,fs)
 # f3_at = time.perf_counter()
 # print(f"Collecting the report data took : {round(f3_at - s_at,2)} seconds in total")
