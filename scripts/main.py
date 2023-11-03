@@ -12,7 +12,7 @@ from capture_charts_data import Charts
 from gridfs import GridFS
 from trino_queries import TRINO
 from cloudquery.shrav_auto import ACCURACY
-#from kubequery.kube_accuracy import Kube_Accuracy
+from kubequery.kube_accuracy import Kube_Accuracy
 from kubequery.selfmanaged_accuracy import SelfManaged_Accuracy
 from cloudquery.db_operations_time import DB_OPERATIONS_TIME
 from cloudquery.events_count import EVE_COUNTS
@@ -105,10 +105,11 @@ if __name__ == "__main__":
 
         #-------------------------Kubequery Accuracies----------------------------
         kubequery_accuracies=None
-        # if variables["load_name"] == "KubeQuery_SingleCustomer":
-        #     print("Calculating accuracies for KubeQuery ...")
-        #     accuracy = Kube_Accuracy(start_timestamp=start_utc_time,end_timestamp=end_utc_time,prom_con_obj=prom_con_obj,variables=variables)
-        #     kubequery_accuracies = accuracy.accuracy_kubernetes()
+        if variables["load_name"] == "KubeQuery_SingleCustomer":
+            print("Calculating accuracies for KubeQuery ...")
+            accuracy = Kube_Accuracy(start_timestamp=start_utc_time,end_timestamp=end_utc_time,prom_con_obj=prom_con_obj,variables=variables)
+            kubequery_accuracies = accuracy.accuracy_kubernetes()
+            #print(kubequery_accuracies)
 
         #-------------------------SelfManaged Accuracies----------------------------
         selfmanaged_accuracies=None

@@ -94,7 +94,7 @@ class Kube_Accuracy:
         self.cvddata = {key_mapping[key]: value for key, value in self.cvddata.items()}
         #print(self.cvddata)
         self.expected_data = {**self.kube_data, **self.cvddata}
-        print(self.expected_data)
+        #print(self.expected_data)
 
     def accuracy_kubernetes(self):
         self.expected_records()
@@ -107,6 +107,8 @@ class Kube_Accuracy:
             }
         #print(self.accuracy)
         return self.accuracy
+
+
 
 
 

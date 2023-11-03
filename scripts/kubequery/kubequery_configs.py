@@ -90,7 +90,9 @@ final_data = {
 }
 
 asset_count = 300
-sim_nodes = ['s13sim1','s13sim2','s13sim3','s13sim4']
+#sim_nodes = ['s13sim1','s13sim2','s13sim3','s13sim4']
+sim_nodes = ['s13sim2','s13sim3','s13sim4']
+
 kube_data = {0:0,1:0,2:0,3:0,5:0,6:0,7:0,8:0,9:0,10:0}
 kube_index_map = {0:'kubernetes_nodes',
                   1:'kubernetes_pods',
