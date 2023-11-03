@@ -42,8 +42,9 @@ def extract_node_detail(data,node_type,prom_con_obj):
                     out = stdout.read().decode('utf-8').strip()
                     if out and out!='':
                         return_dict[hostname]['storage'][label] = out
+                        print(f"Fetched '{label}' value for {hostname} : {out}")
                     else:
-                        print(f"Unable to determine {label} value for {hostname}")
+                        print(f"Unable to determine '{label}' value for {hostname}")
 
             except Exception as e:
                 print(f'ERROR : Unable connect to {hostname}' , e)
