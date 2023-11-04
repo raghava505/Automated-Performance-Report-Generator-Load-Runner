@@ -7,6 +7,7 @@ import os
 from matplotlib.dates import date2num, DateFormatter, MinuteLocator
 from matplotlib.ticker import FuncFormatter
 import numpy as np
+# import pandas as pd
 
 def convert_to_ist_time(timestamp):
     ist_timezone = pytz.timezone('Asia/Kolkata')
@@ -22,6 +23,19 @@ def format_y_ticks(value,pos):
         return f'{value/1e3:.2f} K'
     else:
         return str(int(value))
+
+def eliminate_long_breaks(old_x,old_y):
+    x=[]
+    y=[]
+    prev_point=None
+    for point in zip(old_x,old_y):
+        if prev_point and (point[0]-prev_point)> 0.00069445 :
+            x.append(None)
+            y.append(None)
+        x.append(point[0])
+        y.append(point[1])
+        prev_point=point[0]
+    return x,y
 
 outer_background_color="#191b1f"
 # text_color="#ccccdc"
@@ -67,6 +81,8 @@ def create_images_and_save(path,doc_id,collection,fs):
                     offset_ist_minutes = 330  # 5 hours and 30 minutes offset in minutes
                     x_values_ist = x_values_utc + (offset_ist_minutes / (60 * 24))  # Convert minutes to days
                     y = [float(point[1]) for point in large_array]
+                    # y = pd.Series(y).rolling(window=5).mean()
+                    x_values_ist,y=eliminate_long_breaks(x_values_ist,y)
                     plt.plot_date(x_values_ist, y, linestyle='solid',label=line["legend"],markersize=0.1,linewidth=fig_width/21)
                     list_of_legend_lengths.append(len(str(line["legend"])))
                     num_lines+=1
@@ -139,6 +155,6 @@ def create_images_and_save(path,doc_id,collection,fs):
 # database = client["Osquery_LoadTests"]
 # fs = GridFS(database)
 # collection = database["MultiCustomer"]
-# create_images_and_save(path,"65421cbd88da4d7a2c740c0f",collection,fs)
+# create_images_and_save(path,"65451ac6debce2c318478254",collection,fs)
 # f3_at = time.perf_counter()
 # print(f"Collecting the report data took : {round(f3_at - s_at,2)} seconds in total")
