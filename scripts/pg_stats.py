@@ -31,8 +31,8 @@ class PG_STATS:
         if response.status_code != 200:print("ERROR : Request failed")
         result = response.json()['data']['result']
 
-        with open("output_{}.json".format(db),'w') as json_out:
-            json.dump(result,json_out,indent=4)
+        # with open("output_{}.json".format(db),'w') as json_out:
+        #     json.dump(result,json_out,indent=4)
 
         return result
             
