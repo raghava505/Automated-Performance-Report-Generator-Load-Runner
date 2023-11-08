@@ -14,6 +14,7 @@ from trino_queries import TRINO
 from cloudquery.accuracy import ACCURACY
 from kubequery.kube_accuracy import Kube_Accuracy
 from kubequery.selfmanaged_accuracy import SelfManaged_Accuracy
+from pg_stats import PG_STATS
 from cloudquery.db_operations_time import DB_OPERATIONS_TIME
 from cloudquery.events_count import EVE_COUNTS
 from cloudquery.sts_records import STS_RECORDS
@@ -108,7 +109,7 @@ if __name__ == "__main__":
         if variables["load_name"] == "KubeQuery_SingleCustomer":
             print("Calculating accuracies for KubeQuery ...")
             accuracy = Kube_Accuracy(start_timestamp=start_utc_time,end_timestamp=end_utc_time,prom_con_obj=prom_con_obj,variables=variables)
-            kubequery_accuracies = accuracy.accuracy_kubernetes()
+            # kubequery_accuracies = accuracy.accuracy_kubernetes()
             #print(kubequery_accuracies)
 
         #-------------------------SelfManaged Accuracies----------------------------
@@ -142,11 +143,17 @@ if __name__ == "__main__":
             calc = DB_OPERATIONS_TIME(start_timestamp=start_utc_time,end_timestamp=end_utc_time,prom_con_obj=prom_con_obj)
             db_op=calc.db_operations()
 
-
+        #-------------------------------PG Stats Calculations -------------------------------------
+        pg_stats = None
+        print("Calculating Postgress Tables Details ...")
+        pgtable = PG_STATS(start_timestamp,end_timestamp,variables["load_duration_in_hrs"],prom_con_obj)
+        pg_stats = pgtable.process_output()
+        
         #--------------------------------cpu and mem node-wise---------------------------------------
         print("Fetching resource usages data ...")
         comp = MC_comparisions(start_timestamp=start_timestamp,end_timestamp=end_timestamp,prom_con_obj=prom_con_obj)
         mem_cpu_usages_dict,overall_usage_dict=comp.make_comparisions()
+        
         #--------------------------------Capture charts data---------------------------------------
         all_gridfs_fileids=[]
         try:
@@ -208,6 +215,8 @@ if __name__ == "__main__":
                 final_data_to_save.update({"Table Accuracies":kubequery_accuracies})
             if selfmanaged_accuracies:
                 final_data_to_save.update({"Table Accuracies":selfmanaged_accuracies})
+            if pg_stats:
+                final_data_to_save.update({"PG Stats":pg_stats})
 
             
 
