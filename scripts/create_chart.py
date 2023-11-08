@@ -14,15 +14,15 @@ def convert_to_ist_time(timestamp):
     ist_datetime = datetime.datetime.fromtimestamp(timestamp, tz = ist_timezone)
     return ist_datetime
 
-def format_y_ticks(value,pos):
+def format_y_ticks(value,pos,unit):
     if value >= 1e9:
-        return f'{value/1e9:.2f} B'
+        return f'{value/1e9:.2f} B {unit}'
     elif value >= 1e6:
-        return f'{value/1e6:.2f} M'
+        return f'{value/1e6:.2f} M {unit}'
     elif value >= 1e3:
-        return f'{value/1e3:.2f} K'
+        return f'{value/1e3:.2f} K {unit}'
     else:
-        return str(int(value))
+        return f"{str(int(value))} {unit}"
 
 def eliminate_long_breaks(old_x,old_y):
     x=[]
@@ -89,7 +89,8 @@ def create_images_and_save(path,doc_id,collection,fs):
                 plt.gca().xaxis.set_major_locator(MinuteLocator(interval=30))
                 date_formatter = DateFormatter('%H:%M')
                 plt.gca().xaxis.set_major_formatter(date_formatter)
-                plt.gca().get_yaxis().set_major_formatter(FuncFormatter(format_y_ticks))
+                unit = line['unit']
+                plt.gca().get_yaxis().set_major_formatter(FuncFormatter(lambda value,pos:format_y_ticks(value,pos,unit)))
                 plt.title("\n"+str(title),fontsize=fig_width/1.68,pad=fig_width/0.9,y=1)
                 if num_lines == 0:
                     print(f"ERROR : Unable to find data for chart {title} : 0 lines found" )
@@ -154,7 +155,7 @@ def create_images_and_save(path,doc_id,collection,fs):
 # client = pymongo.MongoClient("mongodb://localhost:27017")
 # database = client["Osquery_LoadTests"]
 # fs = GridFS(database)
-# collection = database["MultiCustomer"]
-# create_images_and_save(path,"65451ac6debce2c318478254",collection,fs)
+# collection = database["ControlPlane"]
+# create_images_and_save(path,"6549caac21c6cf40049944df",collection,fs)
 # f3_at = time.perf_counter()
 # print(f"Collecting the report data took : {round(f3_at - s_at,2)} seconds in total")

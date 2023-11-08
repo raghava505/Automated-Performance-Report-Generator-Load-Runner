@@ -36,25 +36,25 @@ class parent:
     
     @classmethod
     def get_node_level_RAM_used_percentage_queries(cls):
-        return dict([(f"{node} node RAM used percentage",(f"((uptycs_memory_used{{node_type='{node}'}}/uptycs_total_memory{{node_type='{node}'}})*100)" , ["host_name"]) ) for node in cls.hostname_types])
+        return dict([(f"{node} node RAM used percentage",(f"((uptycs_memory_used{{node_type='{node}'}}/uptycs_total_memory{{node_type='{node}'}})*100)" , ["host_name"] , '%') ) for node in cls.hostname_types])
     
     @classmethod
     def get_app_level_RAM_used_percentage_queries(cls):
-        app_level_RAM_used_percentage_queries= dict([(f"Memory Used by {app}",(f"{key}(uptycs_app_memory{{app_name=~'{app}'}}) by (host_name)" , ["host_name"]) ) for key,app_list in cls.memory_app_names.items() for app in app_list])
+        app_level_RAM_used_percentage_queries= dict([(f"Memory Used by {app}",(f"{key}(uptycs_app_memory{{app_name=~'{app}'}}) by (host_name)" , ["host_name"], '%') ) for key,app_list in cls.memory_app_names.items() for app in app_list])
         more_memory_queries={
-            "Kafka Disk Used Percentage":("uptycs_percentage_used{partition=~'/data/kafka'}" , ["host_name"]),
-            "Debezium memory usage":("uptycs_docker_mem_used{container_name='debezium'}" , ["host_name"]),
+            "Kafka Disk Used Percentage":("uptycs_percentage_used{partition=~'/data/kafka'}" , ["host_name"], '%'),
+            "Debezium memory usage":("uptycs_docker_mem_used{container_name='debezium'}" , ["host_name"],'bytes'),
         }
         app_level_RAM_used_percentage_queries.update(more_memory_queries)
         return app_level_RAM_used_percentage_queries
 
     @classmethod
     def get_node_level_CPU_busy_percentage_queries(cls):
-        return dict([(f"{node} node CPU busy percentage",(f"100-uptycs_idle_cpu{{node_type='{node}'}}",["host_name"]) ) for node in cls.hostname_types])
+        return dict([(f"{node} node CPU busy percentage",(f"100-uptycs_idle_cpu{{node_type='{node}'}}",["host_name"], '%') ) for node in cls.hostname_types])
     
     @classmethod
     def get_app_level_CPU_used_cores_queries(cls):
-        app_level_CPU_used_cores_queries=dict([(f"CPU Used by {app}", (f"{key}(uptycs_app_cpu{{app_name=~'{app}'}}) by (host_name)" , ["host_name"]) ) for key,app_list in cls.cpu_app_names.items() for app in app_list])
+        app_level_CPU_used_cores_queries=dict([(f"CPU Used by {app}", (f"{key}(uptycs_app_cpu{{app_name=~'{app}'}}) by (host_name)" , ["host_name"], '%') ) for key,app_list in cls.cpu_app_names.items() for app in app_list])
         more_cpu_queries={
             "Debezium CPU usage":("uptycs_docker_cpu_stats{container_name='debezium'}" , ["host_name"]),
         }
@@ -127,19 +127,19 @@ class parent:
                         "Top 10 redis client connections by app":("sort(topk(9,sum(uptycs_app_redis_clients{}) by (app_name)))" , ["app_name"]),
                         "Configdb folder size":("configdb_size" , ["host_name"]),
                         "Average records in pg bouncer":("uptycs_pbouncer_stats{col=~'avg.*', col!~'.*time'}" , ["col"]),
-                        "Average time spent by pg bouncer":("uptycs_pbouncer_stats{col=~'avg.*time'}" , ["col"]),
+                        "Average time spent by pg bouncer":("uptycs_pbouncer_stats{col=~'avg.*time'}" , ["col"] , 'μs'),
                         "iowait time":("uptycs_iowait{}" , ["host_name"]),
                         "iowait util%":("uptycs_iowait_util_percent{}" , ["host_name" , "device"]),
                         "Waiting Client Connections":("uptycs_pgb_cl_waiting", ["db" , "db_user"]),
-                        "Disk read wait time":("uptycs_r_await{}" , ["host_name" , "device"]),
-                        "Disk write wait time":("uptycs_w_await{}", ["host_name" , "device"]),
+                        "Disk read wait time":("uptycs_r_await{}" , ["host_name" , "device"],'ms'),
+                        "Disk write wait time":("uptycs_w_await{}", ["host_name" , "device"],'ms'),
                         "Idle server connections":("uptycs_pgb_sv_idle", ["db" , "db_user"]),
                         "Active Server Connections":("uptycs_pgb_sv_active", ["db" , "db_user"]),
                         "Disk blocks in configdb":("uptycs_configdb_stats{col =~ \"blks.*\"}",["col"]),
                         "Transaction count in configdb":("uptycs_configdb_stats{col =~ \"xact.*\"}",["col"]),
                         "Row count in configdb":("uptycs_configdb_stats{col =~ \"tup.*\"}",["col"]),
                         "Assets table stats":("uptycs_psql_table_stats",["col"]),
-                        "PG and data partition disk usage in configdb" : ("uptycs_used_disk_bytes{node_type=\"pg\",partition=\"/data\"} or uptycs_used_disk_bytes{node_type=\"pg\",partition=\"/pg\"}" , ["partition","host_name"])
+                        "PG and data partition disk usage in configdb" : ("uptycs_used_disk_bytes{node_type=\"pg\",partition=\"/data\"} or uptycs_used_disk_bytes{node_type=\"pg\",partition=\"/pg\"}" , ["partition","host_name"],'bytes')
                         }
     @classmethod
     def get_all_chart_queries(cls):

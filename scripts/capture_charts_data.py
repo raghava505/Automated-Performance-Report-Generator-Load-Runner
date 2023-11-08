@@ -128,7 +128,8 @@ class Charts:
                     'step':60
                 }
                 legend_list = queries[query][1]
-                
+                try:unit = queries[query][2]
+                except:unit=""
                 response = requests.get(self.PROMETHEUS + self.API_PATH, params=PARAMS)
                 print(f"processing {query} chart data (timestamp : {ste} to {ete}), Status code : {response.status_code}")
                 if response.status_code != 200:print("ERROR : Request failed")
@@ -149,6 +150,7 @@ class Charts:
                             except:
                                 print(f"Warning : Key '{key}' not present in {host['metric']}. please check the provided legend attribute")
                         host["legend"]=legend_text
+                        host["unit"]=unit
                     final[query] = result
             except Exception as e:
                 print(f"Error occured while processing data for '{query}' , {str(e)}")
