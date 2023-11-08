@@ -1,0 +1,2440 @@
+[
+    {
+        "metric": {
+            "__name__": "uptycs_pg_stats",
+            "cluster_id": "clst1",
+            "db": "statedb",
+            "host_name": "s13pn2",
+            "job": "pg_stats_and_connections",
+            "pg_host": "s13statedb",
+            "role": "master",
+            "stat": "cache_hit_pct",
+            "table_name": "azure_active_directory_service_principal_current"
+        },
+        "values": [
+            [
+                1699385400,
+                "97"
+            ],
+            [
+                1699392600,
+                "97"
+            ]
+        ]
+    },
+    {
+        "metric": {
+            "__name__": "uptycs_pg_stats",
+            "cluster_id": "clst1",
+            "db": "statedb",
+            "host_name": "s13pn2",
+            "job": "pg_stats_and_connections",
+            "pg_host": "s13statedb",
+            "role": "master",
+            "stat": "cache_hit_pct",
+            "table_name": "azure_active_directory_user_current"
+        },
+        "values": [
+            [
+                1699385400,
+                "97"
+            ],
+            [
+                1699392600,
+                "97"
+            ]
+        ]
+    },
+    {
+        "metric": {
+            "__name__": "uptycs_pg_stats",
+            "cluster_id": "clst1",
+            "db": "statedb",
+            "host_name": "s13pn2",
+            "job": "pg_stats_and_connections",
+            "pg_host": "s13statedb",
+            "role": "master",
+            "stat": "cache_hit_pct",
+            "table_name": "azure_appservice_site_current"
+        },
+        "values": [
+            [
+                1699385400,
+                "98"
+            ],
+            [
+                1699392600,
+                "98"
+            ]
+        ]
+    },
+    {
+        "metric": {
+            "__name__": "uptycs_pg_stats",
+            "cluster_id": "clst1",
+            "db": "statedb",
+            "host_name": "s13pn2",
+            "job": "pg_stats_and_connections",
+            "pg_host": "s13statedb",
+            "role": "master",
+            "stat": "cache_hit_pct",
+            "table_name": "azure_compute_vm_current"
+        },
+        "values": [
+            [
+                1699385400,
+                "100"
+            ],
+            [
+                1699392600,
+                "100"
+            ]
+        ]
+    },
+    {
+        "metric": {
+            "__name__": "uptycs_pg_stats",
+            "cluster_id": "clst1",
+            "db": "statedb",
+            "host_name": "s13pn2",
+            "job": "pg_stats_and_connections",
+            "pg_host": "s13statedb",
+            "role": "master",
+            "stat": "cache_hit_pct",
+            "table_name": "azure_cosmosdb_account_current"
+        },
+        "values": [
+            [
+                1699385400,
+                "96"
+            ],
+            [
+                1699392600,
+                "96"
+            ]
+        ]
+    },
+    {
+        "metric": {
+            "__name__": "uptycs_pg_stats",
+            "cluster_id": "clst1",
+            "db": "statedb",
+            "host_name": "s13pn2",
+            "job": "pg_stats_and_connections",
+            "pg_host": "s13statedb",
+            "role": "master",
+            "stat": "cache_hit_pct",
+            "table_name": "azure_keyvault_key_version_current"
+        },
+        "values": [
+            [
+                1699385400,
+                "99"
+            ],
+            [
+                1699392600,
+                "99"
+            ]
+        ]
+    },
+    {
+        "metric": {
+            "__name__": "uptycs_pg_stats",
+            "cluster_id": "clst1",
+            "db": "statedb",
+            "host_name": "s13pn2",
+            "job": "pg_stats_and_connections",
+            "pg_host": "s13statedb",
+            "role": "master",
+            "stat": "cache_hit_pct",
+            "table_name": "azure_keyvault_secret_current"
+        },
+        "values": [
+            [
+                1699385400,
+                "98"
+            ],
+            [
+                1699392600,
+                "98"
+            ]
+        ]
+    },
+    {
+        "metric": {
+            "__name__": "uptycs_pg_stats",
+            "cluster_id": "clst1",
+            "db": "statedb",
+            "host_name": "s13pn2",
+            "job": "pg_stats_and_connections",
+            "pg_host": "s13statedb",
+            "role": "master",
+            "stat": "cache_hit_pct",
+            "table_name": "azure_keyvault_vault_current"
+        },
+        "values": [
+            [
+                1699385400,
+                "98"
+            ],
+            [
+                1699392600,
+                "98"
+            ]
+        ]
+    },
+    {
+        "metric": {
+            "__name__": "uptycs_pg_stats",
+            "cluster_id": "clst1",
+            "db": "statedb",
+            "host_name": "s13pn2",
+            "job": "pg_stats_and_connections",
+            "pg_host": "s13statedb",
+            "role": "master",
+            "stat": "cache_hit_pct",
+            "table_name": "azure_mysql_server_current"
+        },
+        "values": [
+            [
+                1699385400,
+                "99"
+            ],
+            [
+                1699392600,
+                "99"
+            ]
+        ]
+    },
+    {
+        "metric": {
+            "__name__": "uptycs_pg_stats",
+            "cluster_id": "clst1",
+            "db": "statedb",
+            "host_name": "s13pn2",
+            "job": "pg_stats_and_connections",
+            "pg_host": "s13statedb",
+            "role": "master",
+            "stat": "cache_hit_pct",
+            "table_name": "azure_network_application_gateway_current"
+        },
+        "values": [
+            [
+                1699385400,
+                "99"
+            ],
+            [
+                1699392600,
+                "99"
+            ]
+        ]
+    },
+    {
+        "metric": {
+            "__name__": "uptycs_pg_stats",
+            "cluster_id": "clst1",
+            "db": "statedb",
+            "host_name": "s13pn2",
+            "job": "pg_stats_and_connections",
+            "pg_host": "s13statedb",
+            "role": "master",
+            "stat": "cache_hit_pct",
+            "table_name": "azure_network_load_balancer_current"
+        },
+        "values": [
+            [
+                1699385400,
+                "98"
+            ],
+            [
+                1699392600,
+                "98"
+            ]
+        ]
+    },
+    {
+        "metric": {
+            "__name__": "uptycs_pg_stats",
+            "cluster_id": "clst1",
+            "db": "statedb",
+            "host_name": "s13pn2",
+            "job": "pg_stats_and_connections",
+            "pg_host": "s13statedb",
+            "role": "master",
+            "stat": "cache_hit_pct",
+            "table_name": "azure_network_nic_current"
+        },
+        "values": [
+            [
+                1699385400,
+                "98"
+            ],
+            [
+                1699392600,
+                "98"
+            ]
+        ]
+    },
+    {
+        "metric": {
+            "__name__": "uptycs_pg_stats",
+            "cluster_id": "clst1",
+            "db": "statedb",
+            "host_name": "s13pn2",
+            "job": "pg_stats_and_connections",
+            "pg_host": "s13statedb",
+            "role": "master",
+            "stat": "cache_hit_pct",
+            "table_name": "azure_network_nsg_current"
+        },
+        "values": [
+            [
+                1699385400,
+                "98"
+            ],
+            [
+                1699392600,
+                "98"
+            ]
+        ]
+    },
+    {
+        "metric": {
+            "__name__": "uptycs_pg_stats",
+            "cluster_id": "clst1",
+            "db": "statedb",
+            "host_name": "s13pn2",
+            "job": "pg_stats_and_connections",
+            "pg_host": "s13statedb",
+            "role": "master",
+            "stat": "cache_hit_pct",
+            "table_name": "azure_network_public_ip_address_current"
+        },
+        "values": [
+            [
+                1699385400,
+                "98"
+            ],
+            [
+                1699392600,
+                "98"
+            ]
+        ]
+    },
+    {
+        "metric": {
+            "__name__": "uptycs_pg_stats",
+            "cluster_id": "clst1",
+            "db": "statedb",
+            "host_name": "s13pn2",
+            "job": "pg_stats_and_connections",
+            "pg_host": "s13statedb",
+            "role": "master",
+            "stat": "cache_hit_pct",
+            "table_name": "azure_network_route_table_current"
+        },
+        "values": [
+            [
+                1699385400,
+                "97"
+            ],
+            [
+                1699392600,
+                "97"
+            ]
+        ]
+    },
+    {
+        "metric": {
+            "__name__": "uptycs_pg_stats",
+            "cluster_id": "clst1",
+            "db": "statedb",
+            "host_name": "s13pn2",
+            "job": "pg_stats_and_connections",
+            "pg_host": "s13statedb",
+            "role": "master",
+            "stat": "cache_hit_pct",
+            "table_name": "azure_network_subnet_current"
+        },
+        "values": [
+            [
+                1699385400,
+                "99"
+            ],
+            [
+                1699392600,
+                "99"
+            ]
+        ]
+    },
+    {
+        "metric": {
+            "__name__": "uptycs_pg_stats",
+            "cluster_id": "clst1",
+            "db": "statedb",
+            "host_name": "s13pn2",
+            "job": "pg_stats_and_connections",
+            "pg_host": "s13statedb",
+            "role": "master",
+            "stat": "cache_hit_pct",
+            "table_name": "azure_network_vnet_current"
+        },
+        "values": [
+            [
+                1699385400,
+                "98"
+            ],
+            [
+                1699392600,
+                "98"
+            ]
+        ]
+    },
+    {
+        "metric": {
+            "__name__": "uptycs_pg_stats",
+            "cluster_id": "clst1",
+            "db": "statedb",
+            "host_name": "s13pn2",
+            "job": "pg_stats_and_connections",
+            "pg_host": "s13statedb",
+            "role": "master",
+            "stat": "cache_hit_pct",
+            "table_name": "azure_recoveryservice_backup_item_current"
+        },
+        "values": [
+            [
+                1699385400,
+                "98"
+            ],
+            [
+                1699392600,
+                "98"
+            ]
+        ]
+    },
+    {
+        "metric": {
+            "__name__": "uptycs_pg_stats",
+            "cluster_id": "clst1",
+            "db": "statedb",
+            "host_name": "s13pn2",
+            "job": "pg_stats_and_connections",
+            "pg_host": "s13statedb",
+            "role": "master",
+            "stat": "cache_hit_pct",
+            "table_name": "azure_sql_database_current"
+        },
+        "values": [
+            [
+                1699385400,
+                "96"
+            ],
+            [
+                1699392600,
+                "96"
+            ]
+        ]
+    },
+    {
+        "metric": {
+            "__name__": "uptycs_pg_stats",
+            "cluster_id": "clst1",
+            "db": "statedb",
+            "host_name": "s13pn2",
+            "job": "pg_stats_and_connections",
+            "pg_host": "s13statedb",
+            "role": "master",
+            "stat": "cache_hit_pct",
+            "table_name": "azure_storage_account_current"
+        },
+        "values": [
+            [
+                1699385400,
+                "97"
+            ],
+            [
+                1699392600,
+                "97"
+            ]
+        ]
+    },
+    {
+        "metric": {
+            "__name__": "uptycs_pg_stats",
+            "cluster_id": "clst1",
+            "db": "statedb",
+            "host_name": "s13pn2",
+            "job": "pg_stats_and_connections",
+            "pg_host": "s13statedb",
+            "role": "master",
+            "stat": "dead_tuple_pct",
+            "table_name": "azure_appservice_site_current"
+        },
+        "values": [
+            [
+                1699385400,
+                "32"
+            ],
+            [
+                1699392600,
+                "32"
+            ]
+        ]
+    },
+    {
+        "metric": {
+            "__name__": "uptycs_pg_stats",
+            "cluster_id": "clst1",
+            "db": "statedb",
+            "host_name": "s13pn2",
+            "job": "pg_stats_and_connections",
+            "pg_host": "s13statedb",
+            "role": "master",
+            "stat": "dead_tuple_pct",
+            "table_name": "azure_compute_vm_current"
+        },
+        "values": [
+            [
+                1699385400,
+                "175"
+            ],
+            [
+                1699392600,
+                "175"
+            ]
+        ]
+    },
+    {
+        "metric": {
+            "__name__": "uptycs_pg_stats",
+            "cluster_id": "clst1",
+            "db": "statedb",
+            "host_name": "s13pn2",
+            "job": "pg_stats_and_connections",
+            "pg_host": "s13statedb",
+            "role": "master",
+            "stat": "dead_tuple_pct",
+            "table_name": "azure_network_load_balancer_current"
+        },
+        "values": [
+            [
+                1699385400,
+                "118"
+            ],
+            [
+                1699392600,
+                "118"
+            ]
+        ]
+    },
+    {
+        "metric": {
+            "__name__": "uptycs_pg_stats",
+            "cluster_id": "clst1",
+            "db": "statedb",
+            "host_name": "s13pn2",
+            "job": "pg_stats_and_connections",
+            "pg_host": "s13statedb",
+            "role": "master",
+            "stat": "dead_tuple_pct",
+            "table_name": "azure_network_nsg_current"
+        },
+        "values": [
+            [
+                1699385400,
+                "223"
+            ],
+            [
+                1699392600,
+                "223"
+            ]
+        ]
+    },
+    {
+        "metric": {
+            "__name__": "uptycs_pg_stats",
+            "cluster_id": "clst1",
+            "db": "statedb",
+            "host_name": "s13pn2",
+            "job": "pg_stats_and_connections",
+            "pg_host": "s13statedb",
+            "role": "master",
+            "stat": "dead_tuple_pct",
+            "table_name": "azure_network_public_ip_address_current"
+        },
+        "values": [
+            [
+                1699385400,
+                "61"
+            ],
+            [
+                1699392600,
+                "61"
+            ]
+        ]
+    },
+    {
+        "metric": {
+            "__name__": "uptycs_pg_stats",
+            "cluster_id": "clst1",
+            "db": "statedb",
+            "host_name": "s13pn2",
+            "job": "pg_stats_and_connections",
+            "pg_host": "s13statedb",
+            "role": "master",
+            "stat": "dead_tuple_pct",
+            "table_name": "azure_network_subnet_current"
+        },
+        "values": [
+            [
+                1699385400,
+                "98"
+            ],
+            [
+                1699392600,
+                "98"
+            ]
+        ]
+    },
+    {
+        "metric": {
+            "__name__": "uptycs_pg_stats",
+            "cluster_id": "clst1",
+            "db": "statedb",
+            "host_name": "s13pn2",
+            "job": "pg_stats_and_connections",
+            "pg_host": "s13statedb",
+            "role": "master",
+            "stat": "dead_tuples",
+            "table_name": "azure_active_directory_service_principal_current"
+        },
+        "values": [
+            [
+                1699385400,
+                "4"
+            ],
+            [
+                1699392600,
+                "4"
+            ]
+        ]
+    },
+    {
+        "metric": {
+            "__name__": "uptycs_pg_stats",
+            "cluster_id": "clst1",
+            "db": "statedb",
+            "host_name": "s13pn2",
+            "job": "pg_stats_and_connections",
+            "pg_host": "s13statedb",
+            "role": "master",
+            "stat": "dead_tuples",
+            "table_name": "azure_active_directory_user_current"
+        },
+        "values": [
+            [
+                1699385400,
+                "282"
+            ],
+            [
+                1699392600,
+                "282"
+            ]
+        ]
+    },
+    {
+        "metric": {
+            "__name__": "uptycs_pg_stats",
+            "cluster_id": "clst1",
+            "db": "statedb",
+            "host_name": "s13pn2",
+            "job": "pg_stats_and_connections",
+            "pg_host": "s13statedb",
+            "role": "master",
+            "stat": "dead_tuples",
+            "table_name": "azure_appservice_site_current"
+        },
+        "values": [
+            [
+                1699385400,
+                "81"
+            ],
+            [
+                1699392600,
+                "81"
+            ]
+        ]
+    },
+    {
+        "metric": {
+            "__name__": "uptycs_pg_stats",
+            "cluster_id": "clst1",
+            "db": "statedb",
+            "host_name": "s13pn2",
+            "job": "pg_stats_and_connections",
+            "pg_host": "s13statedb",
+            "role": "master",
+            "stat": "dead_tuples",
+            "table_name": "azure_compute_vm_current"
+        },
+        "values": [
+            [
+                1699385400,
+                "128"
+            ],
+            [
+                1699392600,
+                "128"
+            ]
+        ]
+    },
+    {
+        "metric": {
+            "__name__": "uptycs_pg_stats",
+            "cluster_id": "clst1",
+            "db": "statedb",
+            "host_name": "s13pn2",
+            "job": "pg_stats_and_connections",
+            "pg_host": "s13statedb",
+            "role": "master",
+            "stat": "dead_tuples",
+            "table_name": "azure_cosmosdb_account_current"
+        },
+        "values": [
+            [
+                1699385400,
+                "94"
+            ],
+            [
+                1699392600,
+                "94"
+            ]
+        ]
+    },
+    {
+        "metric": {
+            "__name__": "uptycs_pg_stats",
+            "cluster_id": "clst1",
+            "db": "statedb",
+            "host_name": "s13pn2",
+            "job": "pg_stats_and_connections",
+            "pg_host": "s13statedb",
+            "role": "master",
+            "stat": "dead_tuples",
+            "table_name": "azure_keyvault_key_version_current"
+        },
+        "values": [
+            [
+                1699385400,
+                "12"
+            ],
+            [
+                1699392600,
+                "12"
+            ]
+        ]
+    },
+    {
+        "metric": {
+            "__name__": "uptycs_pg_stats",
+            "cluster_id": "clst1",
+            "db": "statedb",
+            "host_name": "s13pn2",
+            "job": "pg_stats_and_connections",
+            "pg_host": "s13statedb",
+            "role": "master",
+            "stat": "dead_tuples",
+            "table_name": "azure_keyvault_secret_current"
+        },
+        "values": [
+            [
+                1699385400,
+                "371"
+            ],
+            [
+                1699392600,
+                "371"
+            ]
+        ]
+    },
+    {
+        "metric": {
+            "__name__": "uptycs_pg_stats",
+            "cluster_id": "clst1",
+            "db": "statedb",
+            "host_name": "s13pn2",
+            "job": "pg_stats_and_connections",
+            "pg_host": "s13statedb",
+            "role": "master",
+            "stat": "dead_tuples",
+            "table_name": "azure_keyvault_vault_current"
+        },
+        "values": [
+            [
+                1699385400,
+                "142"
+            ],
+            [
+                1699392600,
+                "142"
+            ]
+        ]
+    },
+    {
+        "metric": {
+            "__name__": "uptycs_pg_stats",
+            "cluster_id": "clst1",
+            "db": "statedb",
+            "host_name": "s13pn2",
+            "job": "pg_stats_and_connections",
+            "pg_host": "s13statedb",
+            "role": "master",
+            "stat": "dead_tuples",
+            "table_name": "azure_mysql_server_current"
+        },
+        "values": [
+            [
+                1699385400,
+                "5"
+            ],
+            [
+                1699392600,
+                "5"
+            ]
+        ]
+    },
+    {
+        "metric": {
+            "__name__": "uptycs_pg_stats",
+            "cluster_id": "clst1",
+            "db": "statedb",
+            "host_name": "s13pn2",
+            "job": "pg_stats_and_connections",
+            "pg_host": "s13statedb",
+            "role": "master",
+            "stat": "dead_tuples",
+            "table_name": "azure_network_application_gateway_current"
+        },
+        "values": [
+            [
+                1699385400,
+                "8"
+            ],
+            [
+                1699392600,
+                "8"
+            ]
+        ]
+    },
+    {
+        "metric": {
+            "__name__": "uptycs_pg_stats",
+            "cluster_id": "clst1",
+            "db": "statedb",
+            "host_name": "s13pn2",
+            "job": "pg_stats_and_connections",
+            "pg_host": "s13statedb",
+            "role": "master",
+            "stat": "dead_tuples",
+            "table_name": "azure_network_load_balancer_current"
+        },
+        "values": [
+            [
+                1699385400,
+                "59"
+            ],
+            [
+                1699392600,
+                "59"
+            ]
+        ]
+    },
+    {
+        "metric": {
+            "__name__": "uptycs_pg_stats",
+            "cluster_id": "clst1",
+            "db": "statedb",
+            "host_name": "s13pn2",
+            "job": "pg_stats_and_connections",
+            "pg_host": "s13statedb",
+            "role": "master",
+            "stat": "dead_tuples",
+            "table_name": "azure_network_nic_current"
+        },
+        "values": [
+            [
+                1699385400,
+                "13"
+            ],
+            [
+                1699392600,
+                "13"
+            ]
+        ]
+    },
+    {
+        "metric": {
+            "__name__": "uptycs_pg_stats",
+            "cluster_id": "clst1",
+            "db": "statedb",
+            "host_name": "s13pn2",
+            "job": "pg_stats_and_connections",
+            "pg_host": "s13statedb",
+            "role": "master",
+            "stat": "dead_tuples",
+            "table_name": "azure_network_nsg_current"
+        },
+        "values": [
+            [
+                1699385400,
+                "127"
+            ],
+            [
+                1699392600,
+                "127"
+            ]
+        ]
+    },
+    {
+        "metric": {
+            "__name__": "uptycs_pg_stats",
+            "cluster_id": "clst1",
+            "db": "statedb",
+            "host_name": "s13pn2",
+            "job": "pg_stats_and_connections",
+            "pg_host": "s13statedb",
+            "role": "master",
+            "stat": "dead_tuples",
+            "table_name": "azure_network_public_ip_address_current"
+        },
+        "values": [
+            [
+                1699385400,
+                "77"
+            ],
+            [
+                1699392600,
+                "77"
+            ]
+        ]
+    },
+    {
+        "metric": {
+            "__name__": "uptycs_pg_stats",
+            "cluster_id": "clst1",
+            "db": "statedb",
+            "host_name": "s13pn2",
+            "job": "pg_stats_and_connections",
+            "pg_host": "s13statedb",
+            "role": "master",
+            "stat": "dead_tuples",
+            "table_name": "azure_network_route_table_current"
+        },
+        "values": [
+            [
+                1699385400,
+                "11"
+            ],
+            [
+                1699392600,
+                "11"
+            ]
+        ]
+    },
+    {
+        "metric": {
+            "__name__": "uptycs_pg_stats",
+            "cluster_id": "clst1",
+            "db": "statedb",
+            "host_name": "s13pn2",
+            "job": "pg_stats_and_connections",
+            "pg_host": "s13statedb",
+            "role": "master",
+            "stat": "dead_tuples",
+            "table_name": "azure_network_subnet_current"
+        },
+        "values": [
+            [
+                1699385400,
+                "182"
+            ],
+            [
+                1699392600,
+                "182"
+            ]
+        ]
+    },
+    {
+        "metric": {
+            "__name__": "uptycs_pg_stats",
+            "cluster_id": "clst1",
+            "db": "statedb",
+            "host_name": "s13pn2",
+            "job": "pg_stats_and_connections",
+            "pg_host": "s13statedb",
+            "role": "master",
+            "stat": "dead_tuples",
+            "table_name": "azure_network_vnet_current"
+        },
+        "values": [
+            [
+                1699385400,
+                "8"
+            ],
+            [
+                1699392600,
+                "8"
+            ]
+        ]
+    },
+    {
+        "metric": {
+            "__name__": "uptycs_pg_stats",
+            "cluster_id": "clst1",
+            "db": "statedb",
+            "host_name": "s13pn2",
+            "job": "pg_stats_and_connections",
+            "pg_host": "s13statedb",
+            "role": "master",
+            "stat": "dead_tuples",
+            "table_name": "azure_recoveryservice_backup_item_current"
+        },
+        "values": [
+            [
+                1699385400,
+                "9"
+            ],
+            [
+                1699392600,
+                "9"
+            ]
+        ]
+    },
+    {
+        "metric": {
+            "__name__": "uptycs_pg_stats",
+            "cluster_id": "clst1",
+            "db": "statedb",
+            "host_name": "s13pn2",
+            "job": "pg_stats_and_connections",
+            "pg_host": "s13statedb",
+            "role": "master",
+            "stat": "dead_tuples",
+            "table_name": "azure_sql_database_current"
+        },
+        "values": [
+            [
+                1699385400,
+                "489"
+            ],
+            [
+                1699392600,
+                "489"
+            ]
+        ]
+    },
+    {
+        "metric": {
+            "__name__": "uptycs_pg_stats",
+            "cluster_id": "clst1",
+            "db": "statedb",
+            "host_name": "s13pn2",
+            "job": "pg_stats_and_connections",
+            "pg_host": "s13statedb",
+            "role": "master",
+            "stat": "dead_tuples",
+            "table_name": "azure_storage_account_current"
+        },
+        "values": [
+            [
+                1699385400,
+                "200"
+            ],
+            [
+                1699392600,
+                "200"
+            ]
+        ]
+    },
+    {
+        "metric": {
+            "__name__": "uptycs_pg_stats",
+            "cluster_id": "clst1",
+            "db": "statedb",
+            "host_name": "s13pn2",
+            "job": "pg_stats_and_connections",
+            "pg_host": "s13statedb",
+            "role": "master",
+            "stat": "index_size_bytes",
+            "table_name": "azure_active_directory_service_principal_current"
+        },
+        "values": [
+            [
+                1699385400,
+                "3088384"
+            ],
+            [
+                1699392600,
+                "3088384"
+            ]
+        ]
+    },
+    {
+        "metric": {
+            "__name__": "uptycs_pg_stats",
+            "cluster_id": "clst1",
+            "db": "statedb",
+            "host_name": "s13pn2",
+            "job": "pg_stats_and_connections",
+            "pg_host": "s13statedb",
+            "role": "master",
+            "stat": "index_size_bytes",
+            "table_name": "azure_active_directory_user_current"
+        },
+        "values": [
+            [
+                1699385400,
+                "1581056"
+            ],
+            [
+                1699392600,
+                "1581056"
+            ]
+        ]
+    },
+    {
+        "metric": {
+            "__name__": "uptycs_pg_stats",
+            "cluster_id": "clst1",
+            "db": "statedb",
+            "host_name": "s13pn2",
+            "job": "pg_stats_and_connections",
+            "pg_host": "s13statedb",
+            "role": "master",
+            "stat": "index_size_bytes",
+            "table_name": "azure_appservice_site_current"
+        },
+        "values": [
+            [
+                1699385400,
+                "1826816"
+            ],
+            [
+                1699392600,
+                "1826816"
+            ]
+        ]
+    },
+    {
+        "metric": {
+            "__name__": "uptycs_pg_stats",
+            "cluster_id": "clst1",
+            "db": "statedb",
+            "host_name": "s13pn2",
+            "job": "pg_stats_and_connections",
+            "pg_host": "s13statedb",
+            "role": "master",
+            "stat": "index_size_bytes",
+            "table_name": "azure_compute_vm_current"
+        },
+        "values": [
+            [
+                1699385400,
+                "9781248"
+            ],
+            [
+                1699392600,
+                "9781248"
+            ]
+        ]
+    },
+    {
+        "metric": {
+            "__name__": "uptycs_pg_stats",
+            "cluster_id": "clst1",
+            "db": "statedb",
+            "host_name": "s13pn2",
+            "job": "pg_stats_and_connections",
+            "pg_host": "s13statedb",
+            "role": "master",
+            "stat": "index_size_bytes",
+            "table_name": "azure_cosmosdb_account_current"
+        },
+        "values": [
+            [
+                1699385400,
+                "5726208"
+            ],
+            [
+                1699392600,
+                "5726208"
+            ]
+        ]
+    },
+    {
+        "metric": {
+            "__name__": "uptycs_pg_stats",
+            "cluster_id": "clst1",
+            "db": "statedb",
+            "host_name": "s13pn2",
+            "job": "pg_stats_and_connections",
+            "pg_host": "s13statedb",
+            "role": "master",
+            "stat": "index_size_bytes",
+            "table_name": "azure_keyvault_key_version_current"
+        },
+        "values": [
+            [
+                1699385400,
+                "3907584"
+            ],
+            [
+                1699392600,
+                "3907584"
+            ]
+        ]
+    },
+    {
+        "metric": {
+            "__name__": "uptycs_pg_stats",
+            "cluster_id": "clst1",
+            "db": "statedb",
+            "host_name": "s13pn2",
+            "job": "pg_stats_and_connections",
+            "pg_host": "s13statedb",
+            "role": "master",
+            "stat": "index_size_bytes",
+            "table_name": "azure_keyvault_secret_current"
+        },
+        "values": [
+            [
+                1699385400,
+                "2506752"
+            ],
+            [
+                1699392600,
+                "2506752"
+            ]
+        ]
+    },
+    {
+        "metric": {
+            "__name__": "uptycs_pg_stats",
+            "cluster_id": "clst1",
+            "db": "statedb",
+            "host_name": "s13pn2",
+            "job": "pg_stats_and_connections",
+            "pg_host": "s13statedb",
+            "role": "master",
+            "stat": "index_size_bytes",
+            "table_name": "azure_keyvault_vault_current"
+        },
+        "values": [
+            [
+                1699385400,
+                "2678784"
+            ],
+            [
+                1699392600,
+                "2678784"
+            ]
+        ]
+    },
+    {
+        "metric": {
+            "__name__": "uptycs_pg_stats",
+            "cluster_id": "clst1",
+            "db": "statedb",
+            "host_name": "s13pn2",
+            "job": "pg_stats_and_connections",
+            "pg_host": "s13statedb",
+            "role": "master",
+            "stat": "index_size_bytes",
+            "table_name": "azure_mysql_server_current"
+        },
+        "values": [
+            [
+                1699385400,
+                "5808128"
+            ],
+            [
+                1699392600,
+                "5808128"
+            ]
+        ]
+    },
+    {
+        "metric": {
+            "__name__": "uptycs_pg_stats",
+            "cluster_id": "clst1",
+            "db": "statedb",
+            "host_name": "s13pn2",
+            "job": "pg_stats_and_connections",
+            "pg_host": "s13statedb",
+            "role": "master",
+            "stat": "index_size_bytes",
+            "table_name": "azure_network_application_gateway_current"
+        },
+        "values": [
+            [
+                1699385400,
+                "7839744"
+            ],
+            [
+                1699392600,
+                "7839744"
+            ]
+        ]
+    },
+    {
+        "metric": {
+            "__name__": "uptycs_pg_stats",
+            "cluster_id": "clst1",
+            "db": "statedb",
+            "host_name": "s13pn2",
+            "job": "pg_stats_and_connections",
+            "pg_host": "s13statedb",
+            "role": "master",
+            "stat": "index_size_bytes",
+            "table_name": "azure_network_load_balancer_current"
+        },
+        "values": [
+            [
+                1699385400,
+                "14213120"
+            ],
+            [
+                1699392600,
+                "14213120"
+            ]
+        ]
+    },
+    {
+        "metric": {
+            "__name__": "uptycs_pg_stats",
+            "cluster_id": "clst1",
+            "db": "statedb",
+            "host_name": "s13pn2",
+            "job": "pg_stats_and_connections",
+            "pg_host": "s13statedb",
+            "role": "master",
+            "stat": "index_size_bytes",
+            "table_name": "azure_network_nic_current"
+        },
+        "values": [
+            [
+                1699385400,
+                "18636800"
+            ],
+            [
+                1699392600,
+                "18636800"
+            ]
+        ]
+    },
+    {
+        "metric": {
+            "__name__": "uptycs_pg_stats",
+            "cluster_id": "clst1",
+            "db": "statedb",
+            "host_name": "s13pn2",
+            "job": "pg_stats_and_connections",
+            "pg_host": "s13statedb",
+            "role": "master",
+            "stat": "index_size_bytes",
+            "table_name": "azure_network_nsg_current"
+        },
+        "values": [
+            [
+                1699385400,
+                "17997824"
+            ],
+            [
+                1699392600,
+                "17997824"
+            ]
+        ]
+    },
+    {
+        "metric": {
+            "__name__": "uptycs_pg_stats",
+            "cluster_id": "clst1",
+            "db": "statedb",
+            "host_name": "s13pn2",
+            "job": "pg_stats_and_connections",
+            "pg_host": "s13statedb",
+            "role": "master",
+            "stat": "index_size_bytes",
+            "table_name": "azure_network_public_ip_address_current"
+        },
+        "values": [
+            [
+                1699385400,
+                "15941632"
+            ],
+            [
+                1699392600,
+                "15941632"
+            ]
+        ]
+    },
+    {
+        "metric": {
+            "__name__": "uptycs_pg_stats",
+            "cluster_id": "clst1",
+            "db": "statedb",
+            "host_name": "s13pn2",
+            "job": "pg_stats_and_connections",
+            "pg_host": "s13statedb",
+            "role": "master",
+            "stat": "index_size_bytes",
+            "table_name": "azure_network_route_table_current"
+        },
+        "values": [
+            [
+                1699385400,
+                "13721600"
+            ],
+            [
+                1699392600,
+                "13721600"
+            ]
+        ]
+    },
+    {
+        "metric": {
+            "__name__": "uptycs_pg_stats",
+            "cluster_id": "clst1",
+            "db": "statedb",
+            "host_name": "s13pn2",
+            "job": "pg_stats_and_connections",
+            "pg_host": "s13statedb",
+            "role": "master",
+            "stat": "index_size_bytes",
+            "table_name": "azure_network_subnet_current"
+        },
+        "values": [
+            [
+                1699385400,
+                "19505152"
+            ],
+            [
+                1699392600,
+                "19505152"
+            ]
+        ]
+    },
+    {
+        "metric": {
+            "__name__": "uptycs_pg_stats",
+            "cluster_id": "clst1",
+            "db": "statedb",
+            "host_name": "s13pn2",
+            "job": "pg_stats_and_connections",
+            "pg_host": "s13statedb",
+            "role": "master",
+            "stat": "index_size_bytes",
+            "table_name": "azure_network_vnet_current"
+        },
+        "values": [
+            [
+                1699385400,
+                "19562496"
+            ],
+            [
+                1699392600,
+                "19562496"
+            ]
+        ]
+    },
+    {
+        "metric": {
+            "__name__": "uptycs_pg_stats",
+            "cluster_id": "clst1",
+            "db": "statedb",
+            "host_name": "s13pn2",
+            "job": "pg_stats_and_connections",
+            "pg_host": "s13statedb",
+            "role": "master",
+            "stat": "index_size_bytes",
+            "table_name": "azure_recoveryservice_backup_item_current"
+        },
+        "values": [
+            [
+                1699385400,
+                "10240000"
+            ],
+            [
+                1699392600,
+                "10240000"
+            ]
+        ]
+    },
+    {
+        "metric": {
+            "__name__": "uptycs_pg_stats",
+            "cluster_id": "clst1",
+            "db": "statedb",
+            "host_name": "s13pn2",
+            "job": "pg_stats_and_connections",
+            "pg_host": "s13statedb",
+            "role": "master",
+            "stat": "index_size_bytes",
+            "table_name": "azure_sql_database_current"
+        },
+        "values": [
+            [
+                1699385400,
+                "950272"
+            ],
+            [
+                1699392600,
+                "950272"
+            ]
+        ]
+    },
+    {
+        "metric": {
+            "__name__": "uptycs_pg_stats",
+            "cluster_id": "clst1",
+            "db": "statedb",
+            "host_name": "s13pn2",
+            "job": "pg_stats_and_connections",
+            "pg_host": "s13statedb",
+            "role": "master",
+            "stat": "index_size_bytes",
+            "table_name": "azure_storage_account_current"
+        },
+        "values": [
+            [
+                1699385400,
+                "19931136"
+            ],
+            [
+                1699392600,
+                "19931136"
+            ]
+        ]
+    },
+    {
+        "metric": {
+            "__name__": "uptycs_pg_stats",
+            "cluster_id": "clst1",
+            "db": "statedb",
+            "host_name": "s13pn2",
+            "job": "pg_stats_and_connections",
+            "pg_host": "s13statedb",
+            "role": "master",
+            "stat": "live_tuples",
+            "table_name": "azure_active_directory_service_principal_current"
+        },
+        "values": [
+            [
+                1699385400,
+                "0"
+            ],
+            [
+                1699392600,
+                "0"
+            ]
+        ]
+    },
+    {
+        "metric": {
+            "__name__": "uptycs_pg_stats",
+            "cluster_id": "clst1",
+            "db": "statedb",
+            "host_name": "s13pn2",
+            "job": "pg_stats_and_connections",
+            "pg_host": "s13statedb",
+            "role": "master",
+            "stat": "live_tuples",
+            "table_name": "azure_active_directory_user_current"
+        },
+        "values": [
+            [
+                1699385400,
+                "0"
+            ],
+            [
+                1699392600,
+                "0"
+            ]
+        ]
+    },
+    {
+        "metric": {
+            "__name__": "uptycs_pg_stats",
+            "cluster_id": "clst1",
+            "db": "statedb",
+            "host_name": "s13pn2",
+            "job": "pg_stats_and_connections",
+            "pg_host": "s13statedb",
+            "role": "master",
+            "stat": "live_tuples",
+            "table_name": "azure_appservice_site_current"
+        },
+        "values": [
+            [
+                1699385400,
+                "253"
+            ],
+            [
+                1699392600,
+                "253"
+            ]
+        ]
+    },
+    {
+        "metric": {
+            "__name__": "uptycs_pg_stats",
+            "cluster_id": "clst1",
+            "db": "statedb",
+            "host_name": "s13pn2",
+            "job": "pg_stats_and_connections",
+            "pg_host": "s13statedb",
+            "role": "master",
+            "stat": "live_tuples",
+            "table_name": "azure_compute_vm_current"
+        },
+        "values": [
+            [
+                1699385400,
+                "73"
+            ],
+            [
+                1699392600,
+                "73"
+            ]
+        ]
+    },
+    {
+        "metric": {
+            "__name__": "uptycs_pg_stats",
+            "cluster_id": "clst1",
+            "db": "statedb",
+            "host_name": "s13pn2",
+            "job": "pg_stats_and_connections",
+            "pg_host": "s13statedb",
+            "role": "master",
+            "stat": "live_tuples",
+            "table_name": "azure_cosmosdb_account_current"
+        },
+        "values": [
+            [
+                1699385400,
+                "0"
+            ],
+            [
+                1699392600,
+                "0"
+            ]
+        ]
+    },
+    {
+        "metric": {
+            "__name__": "uptycs_pg_stats",
+            "cluster_id": "clst1",
+            "db": "statedb",
+            "host_name": "s13pn2",
+            "job": "pg_stats_and_connections",
+            "pg_host": "s13statedb",
+            "role": "master",
+            "stat": "live_tuples",
+            "table_name": "azure_keyvault_key_version_current"
+        },
+        "values": [
+            [
+                1699385400,
+                "0"
+            ],
+            [
+                1699392600,
+                "0"
+            ]
+        ]
+    },
+    {
+        "metric": {
+            "__name__": "uptycs_pg_stats",
+            "cluster_id": "clst1",
+            "db": "statedb",
+            "host_name": "s13pn2",
+            "job": "pg_stats_and_connections",
+            "pg_host": "s13statedb",
+            "role": "master",
+            "stat": "live_tuples",
+            "table_name": "azure_keyvault_secret_current"
+        },
+        "values": [
+            [
+                1699385400,
+                "0"
+            ],
+            [
+                1699392600,
+                "0"
+            ]
+        ]
+    },
+    {
+        "metric": {
+            "__name__": "uptycs_pg_stats",
+            "cluster_id": "clst1",
+            "db": "statedb",
+            "host_name": "s13pn2",
+            "job": "pg_stats_and_connections",
+            "pg_host": "s13statedb",
+            "role": "master",
+            "stat": "live_tuples",
+            "table_name": "azure_keyvault_vault_current"
+        },
+        "values": [
+            [
+                1699385400,
+                "0"
+            ],
+            [
+                1699392600,
+                "0"
+            ]
+        ]
+    },
+    {
+        "metric": {
+            "__name__": "uptycs_pg_stats",
+            "cluster_id": "clst1",
+            "db": "statedb",
+            "host_name": "s13pn2",
+            "job": "pg_stats_and_connections",
+            "pg_host": "s13statedb",
+            "role": "master",
+            "stat": "live_tuples",
+            "table_name": "azure_mysql_server_current"
+        },
+        "values": [
+            [
+                1699385400,
+                "0"
+            ],
+            [
+                1699392600,
+                "0"
+            ]
+        ]
+    },
+    {
+        "metric": {
+            "__name__": "uptycs_pg_stats",
+            "cluster_id": "clst1",
+            "db": "statedb",
+            "host_name": "s13pn2",
+            "job": "pg_stats_and_connections",
+            "pg_host": "s13statedb",
+            "role": "master",
+            "stat": "live_tuples",
+            "table_name": "azure_network_application_gateway_current"
+        },
+        "values": [
+            [
+                1699385400,
+                "0"
+            ],
+            [
+                1699392600,
+                "0"
+            ]
+        ]
+    },
+    {
+        "metric": {
+            "__name__": "uptycs_pg_stats",
+            "cluster_id": "clst1",
+            "db": "statedb",
+            "host_name": "s13pn2",
+            "job": "pg_stats_and_connections",
+            "pg_host": "s13statedb",
+            "role": "master",
+            "stat": "live_tuples",
+            "table_name": "azure_network_load_balancer_current"
+        },
+        "values": [
+            [
+                1699385400,
+                "50"
+            ],
+            [
+                1699392600,
+                "50"
+            ]
+        ]
+    },
+    {
+        "metric": {
+            "__name__": "uptycs_pg_stats",
+            "cluster_id": "clst1",
+            "db": "statedb",
+            "host_name": "s13pn2",
+            "job": "pg_stats_and_connections",
+            "pg_host": "s13statedb",
+            "role": "master",
+            "stat": "live_tuples",
+            "table_name": "azure_network_nic_current"
+        },
+        "values": [
+            [
+                1699385400,
+                "0"
+            ],
+            [
+                1699392600,
+                "0"
+            ]
+        ]
+    },
+    {
+        "metric": {
+            "__name__": "uptycs_pg_stats",
+            "cluster_id": "clst1",
+            "db": "statedb",
+            "host_name": "s13pn2",
+            "job": "pg_stats_and_connections",
+            "pg_host": "s13statedb",
+            "role": "master",
+            "stat": "live_tuples",
+            "table_name": "azure_network_nsg_current"
+        },
+        "values": [
+            [
+                1699385400,
+                "57"
+            ],
+            [
+                1699392600,
+                "57"
+            ]
+        ]
+    },
+    {
+        "metric": {
+            "__name__": "uptycs_pg_stats",
+            "cluster_id": "clst1",
+            "db": "statedb",
+            "host_name": "s13pn2",
+            "job": "pg_stats_and_connections",
+            "pg_host": "s13statedb",
+            "role": "master",
+            "stat": "live_tuples",
+            "table_name": "azure_network_public_ip_address_current"
+        },
+        "values": [
+            [
+                1699385400,
+                "126"
+            ],
+            [
+                1699392600,
+                "126"
+            ]
+        ]
+    },
+    {
+        "metric": {
+            "__name__": "uptycs_pg_stats",
+            "cluster_id": "clst1",
+            "db": "statedb",
+            "host_name": "s13pn2",
+            "job": "pg_stats_and_connections",
+            "pg_host": "s13statedb",
+            "role": "master",
+            "stat": "live_tuples",
+            "table_name": "azure_network_route_table_current"
+        },
+        "values": [
+            [
+                1699385400,
+                "0"
+            ],
+            [
+                1699392600,
+                "0"
+            ]
+        ]
+    },
+    {
+        "metric": {
+            "__name__": "uptycs_pg_stats",
+            "cluster_id": "clst1",
+            "db": "statedb",
+            "host_name": "s13pn2",
+            "job": "pg_stats_and_connections",
+            "pg_host": "s13statedb",
+            "role": "master",
+            "stat": "live_tuples",
+            "table_name": "azure_network_subnet_current"
+        },
+        "values": [
+            [
+                1699385400,
+                "185"
+            ],
+            [
+                1699392600,
+                "185"
+            ]
+        ]
+    },
+    {
+        "metric": {
+            "__name__": "uptycs_pg_stats",
+            "cluster_id": "clst1",
+            "db": "statedb",
+            "host_name": "s13pn2",
+            "job": "pg_stats_and_connections",
+            "pg_host": "s13statedb",
+            "role": "master",
+            "stat": "live_tuples",
+            "table_name": "azure_network_vnet_current"
+        },
+        "values": [
+            [
+                1699385400,
+                "0"
+            ],
+            [
+                1699392600,
+                "0"
+            ]
+        ]
+    },
+    {
+        "metric": {
+            "__name__": "uptycs_pg_stats",
+            "cluster_id": "clst1",
+            "db": "statedb",
+            "host_name": "s13pn2",
+            "job": "pg_stats_and_connections",
+            "pg_host": "s13statedb",
+            "role": "master",
+            "stat": "live_tuples",
+            "table_name": "azure_recoveryservice_backup_item_current"
+        },
+        "values": [
+            [
+                1699385400,
+                "0"
+            ],
+            [
+                1699392600,
+                "0"
+            ]
+        ]
+    },
+    {
+        "metric": {
+            "__name__": "uptycs_pg_stats",
+            "cluster_id": "clst1",
+            "db": "statedb",
+            "host_name": "s13pn2",
+            "job": "pg_stats_and_connections",
+            "pg_host": "s13statedb",
+            "role": "master",
+            "stat": "live_tuples",
+            "table_name": "azure_sql_database_current"
+        },
+        "values": [
+            [
+                1699385400,
+                "0"
+            ],
+            [
+                1699392600,
+                "0"
+            ]
+        ]
+    },
+    {
+        "metric": {
+            "__name__": "uptycs_pg_stats",
+            "cluster_id": "clst1",
+            "db": "statedb",
+            "host_name": "s13pn2",
+            "job": "pg_stats_and_connections",
+            "pg_host": "s13statedb",
+            "role": "master",
+            "stat": "live_tuples",
+            "table_name": "azure_storage_account_current"
+        },
+        "values": [
+            [
+                1699385400,
+                "0"
+            ],
+            [
+                1699392600,
+                "0"
+            ]
+        ]
+    },
+    {
+        "metric": {
+            "__name__": "uptycs_pg_stats",
+            "cluster_id": "clst1",
+            "db": "statedb",
+            "host_name": "s13pn2",
+            "job": "pg_stats_and_connections",
+            "pg_host": "s13statedb",
+            "role": "master",
+            "stat": "table_size_bytes",
+            "table_name": "azure_active_directory_service_principal_current"
+        },
+        "values": [
+            [
+                1699385400,
+                "1957888"
+            ],
+            [
+                1699392600,
+                "1957888"
+            ]
+        ]
+    },
+    {
+        "metric": {
+            "__name__": "uptycs_pg_stats",
+            "cluster_id": "clst1",
+            "db": "statedb",
+            "host_name": "s13pn2",
+            "job": "pg_stats_and_connections",
+            "pg_host": "s13statedb",
+            "role": "master",
+            "stat": "table_size_bytes",
+            "table_name": "azure_active_directory_user_current"
+        },
+        "values": [
+            [
+                1699385400,
+                "1277952"
+            ],
+            [
+                1699392600,
+                "1277952"
+            ]
+        ]
+    },
+    {
+        "metric": {
+            "__name__": "uptycs_pg_stats",
+            "cluster_id": "clst1",
+            "db": "statedb",
+            "host_name": "s13pn2",
+            "job": "pg_stats_and_connections",
+            "pg_host": "s13statedb",
+            "role": "master",
+            "stat": "table_size_bytes",
+            "table_name": "azure_appservice_site_current"
+        },
+        "values": [
+            [
+                1699385400,
+                "3776512"
+            ],
+            [
+                1699392600,
+                "3776512"
+            ]
+        ]
+    },
+    {
+        "metric": {
+            "__name__": "uptycs_pg_stats",
+            "cluster_id": "clst1",
+            "db": "statedb",
+            "host_name": "s13pn2",
+            "job": "pg_stats_and_connections",
+            "pg_host": "s13statedb",
+            "role": "master",
+            "stat": "table_size_bytes",
+            "table_name": "azure_compute_vm_current"
+        },
+        "values": [
+            [
+                1699385400,
+                "3112960"
+            ],
+            [
+                1699392600,
+                "3112960"
+            ]
+        ]
+    },
+    {
+        "metric": {
+            "__name__": "uptycs_pg_stats",
+            "cluster_id": "clst1",
+            "db": "statedb",
+            "host_name": "s13pn2",
+            "job": "pg_stats_and_connections",
+            "pg_host": "s13statedb",
+            "role": "master",
+            "stat": "table_size_bytes",
+            "table_name": "azure_cosmosdb_account_current"
+        },
+        "values": [
+            [
+                1699385400,
+                "1998848"
+            ],
+            [
+                1699392600,
+                "1998848"
+            ]
+        ]
+    },
+    {
+        "metric": {
+            "__name__": "uptycs_pg_stats",
+            "cluster_id": "clst1",
+            "db": "statedb",
+            "host_name": "s13pn2",
+            "job": "pg_stats_and_connections",
+            "pg_host": "s13statedb",
+            "role": "master",
+            "stat": "table_size_bytes",
+            "table_name": "azure_keyvault_key_version_current"
+        },
+        "values": [
+            [
+                1699385400,
+                "1376256"
+            ],
+            [
+                1699392600,
+                "1376256"
+            ]
+        ]
+    },
+    {
+        "metric": {
+            "__name__": "uptycs_pg_stats",
+            "cluster_id": "clst1",
+            "db": "statedb",
+            "host_name": "s13pn2",
+            "job": "pg_stats_and_connections",
+            "pg_host": "s13statedb",
+            "role": "master",
+            "stat": "table_size_bytes",
+            "table_name": "azure_keyvault_secret_current"
+        },
+        "values": [
+            [
+                1699385400,
+                "1335296"
+            ],
+            [
+                1699392600,
+                "1335296"
+            ]
+        ]
+    },
+    {
+        "metric": {
+            "__name__": "uptycs_pg_stats",
+            "cluster_id": "clst1",
+            "db": "statedb",
+            "host_name": "s13pn2",
+            "job": "pg_stats_and_connections",
+            "pg_host": "s13statedb",
+            "role": "master",
+            "stat": "table_size_bytes",
+            "table_name": "azure_keyvault_vault_current"
+        },
+        "values": [
+            [
+                1699385400,
+                "1974272"
+            ],
+            [
+                1699392600,
+                "1974272"
+            ]
+        ]
+    },
+    {
+        "metric": {
+            "__name__": "uptycs_pg_stats",
+            "cluster_id": "clst1",
+            "db": "statedb",
+            "host_name": "s13pn2",
+            "job": "pg_stats_and_connections",
+            "pg_host": "s13statedb",
+            "role": "master",
+            "stat": "table_size_bytes",
+            "table_name": "azure_mysql_server_current"
+        },
+        "values": [
+            [
+                1699385400,
+                "1228800"
+            ],
+            [
+                1699392600,
+                "1228800"
+            ]
+        ]
+    },
+    {
+        "metric": {
+            "__name__": "uptycs_pg_stats",
+            "cluster_id": "clst1",
+            "db": "statedb",
+            "host_name": "s13pn2",
+            "job": "pg_stats_and_connections",
+            "pg_host": "s13statedb",
+            "role": "master",
+            "stat": "table_size_bytes",
+            "table_name": "azure_network_application_gateway_current"
+        },
+        "values": [
+            [
+                1699385400,
+                "1105920"
+            ],
+            [
+                1699392600,
+                "1105920"
+            ]
+        ]
+    },
+    {
+        "metric": {
+            "__name__": "uptycs_pg_stats",
+            "cluster_id": "clst1",
+            "db": "statedb",
+            "host_name": "s13pn2",
+            "job": "pg_stats_and_connections",
+            "pg_host": "s13statedb",
+            "role": "master",
+            "stat": "table_size_bytes",
+            "table_name": "azure_network_load_balancer_current"
+        },
+        "values": [
+            [
+                1699385400,
+                "3825664"
+            ],
+            [
+                1699392600,
+                "3825664"
+            ]
+        ]
+    },
+    {
+        "metric": {
+            "__name__": "uptycs_pg_stats",
+            "cluster_id": "clst1",
+            "db": "statedb",
+            "host_name": "s13pn2",
+            "job": "pg_stats_and_connections",
+            "pg_host": "s13statedb",
+            "role": "master",
+            "stat": "table_size_bytes",
+            "table_name": "azure_network_nic_current"
+        },
+        "values": [
+            [
+                1699385400,
+                "3817472"
+            ],
+            [
+                1699392600,
+                "3817472"
+            ]
+        ]
+    },
+    {
+        "metric": {
+            "__name__": "uptycs_pg_stats",
+            "cluster_id": "clst1",
+            "db": "statedb",
+            "host_name": "s13pn2",
+            "job": "pg_stats_and_connections",
+            "pg_host": "s13statedb",
+            "role": "master",
+            "stat": "table_size_bytes",
+            "table_name": "azure_network_nsg_current"
+        },
+        "values": [
+            [
+                1699385400,
+                "3104768"
+            ],
+            [
+                1699392600,
+                "3104768"
+            ]
+        ]
+    },
+    {
+        "metric": {
+            "__name__": "uptycs_pg_stats",
+            "cluster_id": "clst1",
+            "db": "statedb",
+            "host_name": "s13pn2",
+            "job": "pg_stats_and_connections",
+            "pg_host": "s13statedb",
+            "role": "master",
+            "stat": "table_size_bytes",
+            "table_name": "azure_network_public_ip_address_current"
+        },
+        "values": [
+            [
+                1699385400,
+                "2236416"
+            ],
+            [
+                1699392600,
+                "2236416"
+            ]
+        ]
+    },
+    {
+        "metric": {
+            "__name__": "uptycs_pg_stats",
+            "cluster_id": "clst1",
+            "db": "statedb",
+            "host_name": "s13pn2",
+            "job": "pg_stats_and_connections",
+            "pg_host": "s13statedb",
+            "role": "master",
+            "stat": "table_size_bytes",
+            "table_name": "azure_network_route_table_current"
+        },
+        "values": [
+            [
+                1699385400,
+                "2572288"
+            ],
+            [
+                1699392600,
+                "2572288"
+            ]
+        ]
+    },
+    {
+        "metric": {
+            "__name__": "uptycs_pg_stats",
+            "cluster_id": "clst1",
+            "db": "statedb",
+            "host_name": "s13pn2",
+            "job": "pg_stats_and_connections",
+            "pg_host": "s13statedb",
+            "role": "master",
+            "stat": "table_size_bytes",
+            "table_name": "azure_network_subnet_current"
+        },
+        "values": [
+            [
+                1699385400,
+                "3121152"
+            ],
+            [
+                1699392600,
+                "3121152"
+            ]
+        ]
+    },
+    {
+        "metric": {
+            "__name__": "uptycs_pg_stats",
+            "cluster_id": "clst1",
+            "db": "statedb",
+            "host_name": "s13pn2",
+            "job": "pg_stats_and_connections",
+            "pg_host": "s13statedb",
+            "role": "master",
+            "stat": "table_size_bytes",
+            "table_name": "azure_network_vnet_current"
+        },
+        "values": [
+            [
+                1699385400,
+                "3817472"
+            ],
+            [
+                1699392600,
+                "3817472"
+            ]
+        ]
+    },
+    {
+        "metric": {
+            "__name__": "uptycs_pg_stats",
+            "cluster_id": "clst1",
+            "db": "statedb",
+            "host_name": "s13pn2",
+            "job": "pg_stats_and_connections",
+            "pg_host": "s13statedb",
+            "role": "master",
+            "stat": "table_size_bytes",
+            "table_name": "azure_recoveryservice_backup_item_current"
+        },
+        "values": [
+            [
+                1699385400,
+                "1441792"
+            ],
+            [
+                1699392600,
+                "1441792"
+            ]
+        ]
+    },
+    {
+        "metric": {
+            "__name__": "uptycs_pg_stats",
+            "cluster_id": "clst1",
+            "db": "statedb",
+            "host_name": "s13pn2",
+            "job": "pg_stats_and_connections",
+            "pg_host": "s13statedb",
+            "role": "master",
+            "stat": "table_size_bytes",
+            "table_name": "azure_sql_database_current"
+        },
+        "values": [
+            [
+                1699385400,
+                "3440640"
+            ],
+            [
+                1699392600,
+                "3440640"
+            ]
+        ]
+    },
+    {
+        "metric": {
+            "__name__": "uptycs_pg_stats",
+            "cluster_id": "clst1",
+            "db": "statedb",
+            "host_name": "s13pn2",
+            "job": "pg_stats_and_connections",
+            "pg_host": "s13statedb",
+            "role": "master",
+            "stat": "table_size_bytes",
+            "table_name": "azure_storage_account_current"
+        },
+        "values": [
+            [
+                1699385400,
+                "2064384"
+            ],
+            [
+                1699392600,
+                "2064384"
+            ]
+        ]
+    }
+]
