@@ -34,7 +34,7 @@ def create_input_form():
             "sprint": 111,
             "build": 111111,
             "add_extra_time_for_charts_at_end_in_min": 10,
-            "fetch_node_parameters_before_generating_report" :  False,
+            # "fetch_node_parameters_before_generating_report" :  False,
             }
 
     print("Please enter the following load details ...")
@@ -91,7 +91,7 @@ def create_input_form():
         except:
             print(f"WARNING: load class for {load_type_options[details['load_type']]} is not found , hence using the parent class : {parent}")
             load_cls = parent
-        prom_con_obj = configuration(test_env_file_name=details['test_env_file_name'] , fetch_node_parameters_before_generating_report=details['fetch_node_parameters_before_generating_report'])
+        prom_con_obj = configuration(test_env_file_name=details['test_env_file_name'] , fetch_node_parameters_before_generating_report=True)
         return details,prom_con_obj,load_cls
     elif user_input =='n':
         print("OK! Enter the modified details ...")

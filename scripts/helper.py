@@ -23,8 +23,9 @@ def extract_node_detail(data,node_type,prom_con_obj):
                     out = stdout.read().decode('utf-8').strip()
                     if out and out!='':
                         return_dict[hostname][label] = out
+                        print(f"Fetched '{label}' value for {hostname} : {out}")
                     else:
-                        print(f"Unable to determine {label} value for {hostname}")
+                        print(f"ERROR : Unable to determine {label} value for {hostname}")
                 
                 storage_commands = {'root_partition':"df -h | awk '$6 == \"/\" {print $2}'",
                                     'kafka' : "df -h | awk '$6 == \"/data/kafka\" {print $2}'",
@@ -43,15 +44,15 @@ def extract_node_detail(data,node_type,prom_con_obj):
                     if out and out!='':
                         return_dict[hostname]['storage'][label] = out
                         print(f"Fetched '{label}' value for {hostname} : {out}")
-                    else:
-                        print(f"Unable to determine '{label}' value for {hostname}")
+                    else:pass
+                        # print(f"WARNING : Unable to determine '{label}' value for {hostname}")
 
             except Exception as e:
                 print(f'ERROR : Unable connect to {hostname}' , e)
             finally:
                 client.close()
-        except socket.gaierror:
-            print(f"ERROR : Could not resolve {hostname}")
+        except socket.gaierror as e:
+            print(f"ERROR : Could not resolve {hostname} , {e}")
         if 'c2' in hostname:return_dict[hostname]['clst'] = "2"
         else:return_dict[hostname]['clst'] = "1"
     return return_dict
