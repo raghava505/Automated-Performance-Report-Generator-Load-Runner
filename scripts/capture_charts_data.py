@@ -140,9 +140,13 @@ class Charts:
                         host["values"] = file_id
                         file_ids.append(file_id)
                         try:
-                            legend_text=str(host['metric'][legend_list[0]])
+                            if len(legend_list)>0:
+                                legend_text=str(host['metric'][legend_list[0]])
+                            else:
+                                print("Empty legend list found")
+                                legend_text=""
                         except:
-                            print("error: list index out of range error while trying to access 1st element of the legend list")
+                            print(f"Warning : Key '{legend_list[0]}' not present in '{host['metric']}'. please check the provided legend attribute")
                             legend_text=""
                         for key in legend_list[1:]:
                             try:
