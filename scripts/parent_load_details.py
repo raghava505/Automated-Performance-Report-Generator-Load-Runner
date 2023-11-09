@@ -178,22 +178,27 @@ class parent:
         return cls.load_specific_details[load_name]
     
     @classmethod
+    @property
+    def list_of_observations_to_make(cls):
+        return [
+                    'Check for Ingestion lag',
+                    'Check for Rule engine Lag',
+                    'Check for db-events Lag',
+                    'Data loss check for raw tables like processes, process_env etc (accuracy)',
+                    'Data loss check for processed data like events, alerts and incidents etc (accuracy)',
+                    "Check if CPU/memory utilisation in line with previous sprints. If not, are the differences expected?",
+                    'Check for variations in the Count of queries executed on presto',
+                    'Triage bugs and check for blockers',
+                    'Check if PG master is in sync with replica',
+                    'Check for memory leaks',
+                    'Check for variation in HDFS disk usage',
+                    'Check for variation in PG disk usage',
+                    'Check for variation in Kafka disk usage',
+                    'Check for new kafka topics',
+                    'Check for steady state of live assets count'
+                ]
+    
+    @classmethod
     def get_dictionary_of_observations(cls):
-        list_of_observations_to_make =['Check for Ingestion lag',
-                                       'Check for Rule engine Lag',
-                                       'Check for db-events Lag',
-                                       'Data loss check for raw tables like processes, process_env etc (accuracy)',
-                                       'Data loss check for processed data like events, alerts and incidents etc (accuracy)',
-                                       "Check if CPU/memory utilisation in line with previous sprints. If not, are the differences expected?",
-                                       'Check for variations in the Count of queries executed on presto',
-                                       'Triage bugs and check for blockers',
-                                       'Check if PG master is in sync with replica',
-                                       'Check for memory leaks',
-                                       'Check for variation in HDFS disk usage',
-                                       'Check for variation in PG disk usage',
-                                       'Check for variation in Kafka disk usage',
-                                       'Check for new kafka topics',
-                                       'Check for steady state of live assets count'
-                                       ]
-        observations_dict=dict([(observation,{"Status":"" , "Comments":""}) for observation in list_of_observations_to_make])
+        observations_dict=dict([(observation,{"Status":"" , "Comments":""}) for observation in cls.list_of_observations_to_make])
         return observations_dict
