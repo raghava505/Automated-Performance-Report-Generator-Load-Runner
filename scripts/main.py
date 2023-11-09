@@ -98,11 +98,11 @@ if __name__ == "__main__":
             trino_queries = calc.fetch_trino_queries()
 
         #-------------------------Cloudquery Accuracies----------------------------
-        accuracies=None
+        cloudquery_accuracies=None
         if variables["load_type"] == "CloudQuery":
             print("Calculating accuracies for cloudquery ...")
             accu= ACCURACY(start_timestamp=start_utc_time,end_timestamp=end_utc_time,prom_con_obj=prom_con_obj,variables=variables)
-            accuracies = accu.calculate_accuracy()
+            cloudquery_accuracies = accu.calculate_accuracy()
 
         #-------------------------Kubequery Accuracies----------------------------
         kubequery_accuracies=None
@@ -207,14 +207,14 @@ if __name__ == "__main__":
                 final_data_to_save.update({"STS Records":sts})
             if trino_queries:
                 final_data_to_save.update({"Trino_queries":trino_queries})
-            if accuracies:
-                final_data_to_save.update({"Table Accuracies":accuracies})
+            if cloudquery_accuracies:
+                final_data_to_save.update({"Cloudquery Table Accuracies":cloudquery_accuracies})
             if db_op:
                 final_data_to_save.update({"Processing Time of Db Operations":db_op})
             if kubequery_accuracies:
-                final_data_to_save.update({"Table Accuracies":kubequery_accuracies})
+                final_data_to_save.update({"Kubequery Table Accuracies":kubequery_accuracies})
             if selfmanaged_accuracies:
-                final_data_to_save.update({"Table Accuracies":selfmanaged_accuracies})
+                final_data_to_save.update({"Slefmanaged Table Accuracies":selfmanaged_accuracies})
             if pg_stats:
                 final_data_to_save.update({"PG Stats":pg_stats})
 
