@@ -225,7 +225,7 @@ if __name__ == "__main__":
             if pg_stats:
                 final_data_to_save.update({"PG Stats":pg_stats})
             if elk_errors:
-                final_data_to_save.update({"ELK Erros":elk_errors})
+                final_data_to_save.update({"ELK Errors":elk_errors})
             
 
             final_data_to_save.update({"charts":complete_charts_data_dict})
