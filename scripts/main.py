@@ -11,6 +11,7 @@ from input import create_input_form
 from capture_charts_data import Charts
 from gridfs import GridFS
 from trino_queries import TRINO
+from elk_errors import Elk_erros
 from cloudquery.accuracy import ACCURACY
 from kubequery.kube_accuracy import Kube_Accuracy
 from kubequery.selfmanaged_accuracy import SelfManaged_Accuracy
@@ -148,6 +149,12 @@ if __name__ == "__main__":
         print("Calculating Postgress Tables Details ...")
         pgtable = PG_STATS(start_timestamp,end_timestamp,variables["load_duration_in_hrs"],prom_con_obj)
         pg_stats = pgtable.process_output()
+
+        #--------------------------------Elk Erros------------------------------------------------
+        elk_errors = None
+        print("Fetching Elk Errors ...")
+        elk = Elk_erros(start_timestamp=start_timestamp,end_timestamp=end_timestamp,prom_con_obj=prom_con_obj)
+        elk_errors = elk.fetch_errors()
         
         #--------------------------------cpu and mem node-wise---------------------------------------
         print("Fetching resource usages data ...")
@@ -214,10 +221,11 @@ if __name__ == "__main__":
             if kubequery_accuracies:
                 final_data_to_save.update({"Kubequery Table Accuracies":kubequery_accuracies})
             if selfmanaged_accuracies:
-                final_data_to_save.update({"Slefmanaged Table Accuracies":selfmanaged_accuracies})
+                final_data_to_save.update({"Selfmanaged Table Accuracies":selfmanaged_accuracies})
             if pg_stats:
                 final_data_to_save.update({"PG Stats":pg_stats})
-
+            if elk_errors:
+                final_data_to_save.update({"ELK Erros":elk_errors})
             
 
             final_data_to_save.update({"charts":complete_charts_data_dict})
