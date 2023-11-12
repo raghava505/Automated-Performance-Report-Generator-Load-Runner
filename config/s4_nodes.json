@@ -4,8 +4,9 @@
     "SU": 6,
     "domain": "mercury",
     "stack_url": "https://mercury.uptycs.net/",
-    "elk_url": "192.168.131.50",
+    "elk_url": "192.168.136.53",
     "trino_password": "4369c43b-c0c4-4d00-8514-9511f5f3d2e8",
+    "elastic": "192.168.131.50",
     "pnodes": [
         "s4c1pn1",
         "s4c1pn2",

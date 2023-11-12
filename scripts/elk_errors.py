@@ -26,7 +26,7 @@ class Elk_erros:
         self.contents = ["ruleengine","tls","ngnix","configbd","metastoredb","pgbouncer","osqueryIngestion","redis","spark","archival","compaction"]
 
 
-        self.elasticsearch_host = f"http://{self.stack_details['elk_url']}:9200"
+        self.elasticsearch_host = f"http://{self.stack_details['elastic']}:9200"
 
         self.elastic_client = Elasticsearch(hosts=[self.elasticsearch_host],timeout=1800)
 

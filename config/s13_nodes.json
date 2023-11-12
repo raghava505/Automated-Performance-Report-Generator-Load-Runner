@@ -5,6 +5,7 @@
     "domain": "alphacentauri",
     "stack_url": "https://alphacentauri.uptycs.net/",
     "elk_url": "192.168.140.73",
+    "elastic":"192.168.140.73",
     "pnodes": [
         "s13pn1",
         "s13pn2",
