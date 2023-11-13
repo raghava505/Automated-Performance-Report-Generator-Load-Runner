@@ -229,12 +229,10 @@ if __name__ == "__main__":
             
 
             final_data_to_save.update({"charts":complete_charts_data_dict})
-            # final_data_to_save.update({"images":compaction_status_image})
             final_data_to_save.update(mem_cpu_usages_dict)
             final_data_to_save.update({"observations":load_cls.get_dictionary_of_observations()})
-            # all_gridfs_referenced_ids=all_gridfs_fileids[:] + [compaction_status_image["compaction_status_chart"]]
-            all_gridfs_referenced_ids=all_gridfs_fileids[:]
-            final_data_to_save.update({"all_gridfs_referenced_ids":all_gridfs_referenced_ids})
+            # all_gridfs_referenced_ids=all_gridfs_fileids[:]
+            # final_data_to_save.update({"all_gridfs_referenced_ids":all_gridfs_referenced_ids})
             inserted_id = collection.insert_one(final_data_to_save).inserted_id
             print(f"Document pushed to mongo successfully into database:{database_name}, collection:{collection_name} with id {inserted_id}")
             #---------------CREATING GRAPHS-----------------

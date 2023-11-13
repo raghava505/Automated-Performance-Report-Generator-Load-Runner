@@ -1,5 +1,5 @@
 import pymongo
-from gridfs import GridFS
+# from gridfs import GridFS
 from settings import configuration
 from bson.objectid import ObjectId
 import shutil,os
@@ -23,12 +23,12 @@ if decision == "y":
     counter=0
     if document:
         print(f"Document found with ID : '{document_id}'")
-        all_gridfs_referenced_ids = document.get("all_gridfs_referenced_ids")
-        fs = GridFS(db)
-        for file_id in all_gridfs_referenced_ids:
-            counter+=1
-            print(f"{counter} : deleting ", file_id)
-            fs.delete(file_id=file_id)
+        # all_gridfs_referenced_ids = document.get("all_gridfs_referenced_ids")
+        # fs = GridFS(db)
+        # for file_id in all_gridfs_referenced_ids:
+        #     counter+=1
+        #     print(f"{counter} : deleting ", file_id)
+        #     fs.delete(file_id=file_id)
             
         result = collection.delete_one({'_id': ObjectId(document_id)})
         BASE_GRAPHS_PATH = os.path.join(os.path.dirname(prom_con_obj.ROOT_PATH),'graphs')

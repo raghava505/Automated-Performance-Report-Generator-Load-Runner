@@ -73,6 +73,7 @@ def create_images_and_save(path,doc_id,collection,fs):
                 for line in  charts_data[category][title]:
                     file_id = line["values"]
                     retrieved_data = fs.get(ObjectId(file_id)).read()
+                    fs.delete(file_id)
                     large_array = eval(retrieved_data.decode('utf-8'))
                     x = [convert_to_ist_time(point[0]) for point in large_array]
                     complete_time_set.add(min(x))
