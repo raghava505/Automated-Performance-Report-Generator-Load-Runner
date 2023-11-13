@@ -52,16 +52,21 @@ class PG_STATS:
             df_table = pd.DataFrame(columns=['TableName', 'StartTableSize', 'EndTableSize', 'Delta'])
             df_index = pd.DataFrame(columns=['TableName', 'StartIndexSize', 'EndIndexSize', 'Delta'])
             df_tuples = pd.DataFrame(columns=['TableName', 'StartLiveTuples', 'EndLiveTuples', 'Delta'])
+            
+            
+            # These tables are ignored
+            ignore_tables = ("agent_last_telemetry_at","java_artifacts_f")
 
             # Iterate over the data_dict
             for i in range(len(data_dict)):
                 for key in data_dict[i]:
-                    if data_dict[i]['metric']['stat'] == 'table_size_bytes':
-                        df_table.loc[len(df_table)] = [data_dict[i]['metric']['table_name'], data_dict[i]['values'][0][1], data_dict[i]['values'][1][1],int(data_dict[i]['values'][1][1])-int(data_dict[i]['values'][0][1])]
-                    elif data_dict[i]['metric']['stat'] == 'index_size_bytes':
-                        df_index.loc[len(df_index)] = [data_dict[i]['metric']['table_name'], data_dict[i]['values'][0][1], data_dict[i]['values'][1][1],int(data_dict[i]['values'][1][1])-int(data_dict[i]['values'][0][1])]
-                    elif data_dict[i]['metric']['stat'] == 'live_tuples':
-                        df_tuples.loc[len(df_tuples)] = [data_dict[i]['metric']['table_name'], data_dict[i]['values'][0][1], data_dict[i]['values'][1][1],int(data_dict[i]['values'][1][1])-int(data_dict[i]['values'][0][1])]
+                    if data_dict[i]['metric']['table_name'] not in ignore_tables:
+                        if data_dict[i]['metric']['stat'] == 'table_size_bytes':
+                            df_table.loc[len(df_table)] = [data_dict[i]['metric']['table_name'], data_dict[i]['values'][0][1], data_dict[i]['values'][1][1],int(data_dict[i]['values'][1][1])-int(data_dict[i]['values'][0][1])]
+                        elif data_dict[i]['metric']['stat'] == 'index_size_bytes':
+                            df_index.loc[len(df_index)] = [data_dict[i]['metric']['table_name'], data_dict[i]['values'][0][1], data_dict[i]['values'][1][1],int(data_dict[i]['values'][1][1])-int(data_dict[i]['values'][0][1])]
+                        elif data_dict[i]['metric']['stat'] == 'live_tuples':
+                            df_tuples.loc[len(df_tuples)] = [data_dict[i]['metric']['table_name'], data_dict[i]['values'][0][1], data_dict[i]['values'][1][1],int(data_dict[i]['values'][1][1])-int(data_dict[i]['values'][0][1])]
 
             # Print the resulting DataFrame
             df_table = df_table.astype({"StartTableSize":'int', "EndTableSize":'int',"Delta":'int'})  
