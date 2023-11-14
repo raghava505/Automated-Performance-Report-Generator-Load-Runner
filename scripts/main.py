@@ -13,6 +13,7 @@ from gridfs import GridFS
 from trino_queries import TRINO
 from elk_errors import Elk_erros
 from cloudquery.accuracy import ACCURACY
+from osquery.accuracy import osq_accuracy
 from kubequery.kube_accuracy import Kube_Accuracy
 from kubequery.selfmanaged_accuracy import SelfManaged_Accuracy
 from pg_stats import PG_STATS
@@ -97,7 +98,21 @@ if __name__ == "__main__":
             print("Performing trino queries ...")
             calc = TRINO(curr_ist_start_time=variables["start_time_str_ist"],curr_ist_end_time=end_time_str,prom_con_obj=prom_con_obj)
             trino_queries = calc.fetch_trino_queries()
-
+            
+        #-------------------------Osquery Table Accuracies----------------------------
+        Osquery_table_accuracies=None
+        Osquery_event_accuracies=None
+        if variables["load_type"] == "Osquery" and variables["load_name"] != "ControlPlane":
+            print("Calculating Table accuracies for Osquery Load...")
+            api_path = os.path.join(os.path.dirname(os.path.realpath(__file__)),"osquery/api_keys/jupiter.json")
+            input_file_path = os.path.join(os.path.dirname(os.path.realpath(__file__)),"osquery/testinputfiles/rhel7-6tab_12rec.log")
+            accuracy_obj= osq_accuracy(start_time_utc=start_utc_time,end_time_utc=end_utc_time,api_path=api_path,domain='jupiter',endline=18000,assets_per_cust=126,ext='net',trans=True,hours=variables['load_duration_in_hrs'],input_file=input_file_path)
+            Osquery_table_accuracies = accuracy_obj.table_accuracy()
+            print("Osquery_table_accuracies : ",Osquery_table_accuracies)
+            print("Calculating Events accuracies for Osquery Load ...")
+            Osquery_event_accuracies = accuracy_obj.events_accuracy()
+            print("Osquery_event_accuracies : ",Osquery_event_accuracies)
+        
         #-------------------------Cloudquery Accuracies----------------------------
         cloudquery_accuracies=None
         if variables["load_type"] == "CloudQuery":
@@ -226,6 +241,10 @@ if __name__ == "__main__":
                 final_data_to_save.update({"PG Stats":pg_stats})
             if elk_errors:
                 final_data_to_save.update({"ELK Errors":elk_errors})
+            if Osquery_table_accuracies:
+                final_data_to_save.update({"Osquery Table Accuracies":Osquery_table_accuracies})
+            if Osquery_event_accuracies:
+                final_data_to_save.update({"Osquery Event Accuracies":Osquery_event_accuracies})
             
 
             final_data_to_save.update({"charts":complete_charts_data_dict})
