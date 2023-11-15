@@ -21,4 +21,4 @@ raghava_venv/*
 project/*
 .DS_Store
 test.ipynb
-scripts/osquery/testinputfiles/rhel7-6tab_12rec.log
+scripts/osquery/testinputfiles/*
