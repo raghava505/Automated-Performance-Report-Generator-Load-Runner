@@ -68,25 +68,28 @@ class MC_comparisions:
                 maximum = max(values)
                 final[query][hostname] = {"percentage":{"average":avg , "minimum":minimum , "maximum":maximum}}
                 final[query][hostname][unit]={}
-                if tag == memory_tag:
-                    final[query][hostname][unit]={
-                        'average':avg * float(self.nodes_data[hostname]['ram']) / 100,
-                        'minimum':minimum * float(self.nodes_data[hostname]['ram']) / 100,
-                        'maximum':maximum * float(self.nodes_data[hostname]['ram']) / 100
-                    }
-                else:
-                    if query == HOST:
+                try:
+                    if tag == memory_tag:
                         final[query][hostname][unit]={
-                            'average':avg * float(self.nodes_data[hostname]['cores']) / 100,
-                            'minimum':minimum * float(self.nodes_data[hostname]['cores']) / 100,
-                            'maximum':maximum * float(self.nodes_data[hostname]['cores']) / 100
+                            'average':avg * float(self.nodes_data[hostname]['ram']) / 100,
+                            'minimum':minimum * float(self.nodes_data[hostname]['ram']) / 100,
+                            'maximum':maximum * float(self.nodes_data[hostname]['ram']) / 100
                         }
                     else:
-                        final[query][hostname][unit]={
-                            'average':avg/100,
-                            'minimum': minimum/100,
-                            'maximum': maximum/100
-                        }
+                        if query == HOST:
+                            final[query][hostname][unit]={
+                                'average':avg * float(self.nodes_data[hostname]['cores']) / 100,
+                                'minimum':minimum * float(self.nodes_data[hostname]['cores']) / 100,
+                                'maximum':maximum * float(self.nodes_data[hostname]['cores']) / 100
+                            }
+                        else:
+                            final[query][hostname][unit]={
+                                'average':avg/100,
+                                'minimum': minimum/100,
+                                'maximum': maximum/100
+                            }
+                except Exception as e:
+                    raise RuntimeError(F"KEY ERROR : Could not fetch details for host {hostname}, please make sure you have details for {hostname} correctly configured in stack's json file. {e}") from e
 
         #calculate overall pnodes,dnodes,pgnodes usage
         new_data = final[HOST]
