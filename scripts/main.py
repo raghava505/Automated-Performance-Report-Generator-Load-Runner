@@ -58,6 +58,7 @@ if __name__ == "__main__":
     with open(TEST_ENV_FILE_PATH , 'r') as file:
         test_env_json_details = json.load(file)
     skip_fetching_data=False
+    domain = test_env_json_details['domain']
     #---------------------Check for previous runs------------------------------------
     mongo_connection_string=prom_con_obj.mongo_connection_string
     client = pymongo.MongoClient(mongo_connection_string)
@@ -104,9 +105,9 @@ if __name__ == "__main__":
         Osquery_event_accuracies=None
         if variables["load_type"] == "Osquery" and variables["load_name"] != "ControlPlane":
             print("Calculating Table accuracies for Osquery Load...")
-            api_path = os.path.join(os.path.dirname(os.path.realpath(__file__)),"osquery/api_keys/jupiter.json")
+            api_path = os.path.join(os.path.dirname(os.path.realpath(__file__)),f"osquery/api_keys/{domain}.json")
             input_file_path = os.path.join(os.path.dirname(os.path.realpath(__file__)),"osquery/testinputfiles/rhel7-6tab_12rec.log")
-            accuracy_obj= osq_accuracy(start_time_utc=start_utc_time,end_time_utc=end_utc_time,api_path=api_path,domain='jupiter',endline=18000,assets_per_cust=126,ext='net',trans=True,hours=variables['load_duration_in_hrs'],input_file=input_file_path)
+            accuracy_obj= osq_accuracy(start_time_utc=start_utc_time,end_time_utc=end_utc_time,api_path=api_path,domain=domain,endline=1800*variables['load_duration_in_hrs'],assets_per_cust=126,ext='net',trans=True,hours=variables['load_duration_in_hrs'],input_file=input_file_path)
             Osquery_table_accuracies = accuracy_obj.table_accuracy()
             print("Osquery_table_accuracies : ",Osquery_table_accuracies)
             print("Calculating Events accuracies for Osquery Load ...")
