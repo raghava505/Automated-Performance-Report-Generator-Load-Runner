@@ -1,5 +1,5 @@
 from settings import configuration
-import os
+import os,json
 from parent_load_details import parent
 from osquery.osquery_child_class import osquery_child
 from cloudquery.cloudquery_child_class import cloudquery_child
@@ -81,16 +81,20 @@ def create_input_form():
     for key,val in details.items():
         print(f"{key} : {val}")
 
+    print()
+    try:
+        load_cls = load_type_options[details["load_type"]]['class']
+        print(f"Using load class : {load_cls}")
+    except:
+        print(f"WARNING: load class for {load_type_options[details['load_type']]} is not found , hence using the parent class : {parent}")
+        load_cls = parent
+    print(f"Please verify the load details for {details['load_type']}:{details['load_name']}. These details will be saved to database. : ")
+    print(json.dumps(load_cls.get_load_specific_details(details["load_name"]), indent=4))
+
     user_input = input("Are you sure you want to continue with these details? This will make permenant changes in the database (y/n): ").strip().lower()
 
     if user_input =='y':
         print("Continuing ...")
-        try:
-            load_cls = load_type_options[details["load_type"]]['class']
-            print(f"Using load class : {load_cls}")
-        except:
-            print(f"WARNING: load class for {load_type_options[details['load_type']]} is not found , hence using the parent class : {parent}")
-            load_cls = parent
         prom_con_obj = configuration(test_env_file_name=details['test_env_file_name'] , fetch_node_parameters_before_generating_report=True)
         return details,prom_con_obj,load_cls
     elif user_input =='n':
