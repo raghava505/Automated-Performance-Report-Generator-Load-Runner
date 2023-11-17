@@ -159,7 +159,7 @@ if __name__ == "__main__":
         db_op = None
         if variables["load_type"] == "CloudQuery":
             print("Processing time for Db Operations ...")
-            calc = DB_OPERATIONS_TIME(start_timestamp=start_utc_time,end_timestamp=end_utc_time,prom_con_obj=prom_con_obj)
+            calc = DB_OPERATIONS_TIME(start_timestamp=start_timestamp,end_timestamp=end_timestamp,prom_con_obj=prom_con_obj)
             db_op=calc.db_operations()
 
         #-------------------------------PG Stats Calculations -------------------------------------

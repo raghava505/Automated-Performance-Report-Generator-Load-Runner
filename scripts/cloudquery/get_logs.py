@@ -3,9 +3,9 @@ import os
 
 class LOGScriptRunner:
     def __init__(self,load_name):
-        self.simulators = ["s4simhost1b", "s4simhost1d", "s4simhost2b", "s4simhost2d", "s4simhost3b", "s4simhost3d", "s4simhost4b", "s4simhost4d", "s4simhost5b", "s4simhost5d", "s4simhost6b", "s4simhost6d"]
+        self.simulators = ["s4simhost1a", "s4simhost1d", "s4simhost2b", "s4simhost2d", "s4simhost3b", "s4simhost3d", "s4simhost4b", "s4simhost4d", "s4simhost5b", "s4simhost5d", "s4simhost6b", "s4simhost6d"]
         # self.remote_logs_path = "~/multi-customer-cqsim/aws/logs"
-        self.output_folder = "expected_logs"
+        self.output_folder = "cloudquery/expected_logs"
         self.password = "abacus"
 
         path_mappings = {
