@@ -22,7 +22,7 @@ def format_y_ticks(value,pos,unit):
     elif value >= 1e3:
         return f'{value/1e3:.2f} K {unit}'
     else:
-        return f"{str(float(value))} {unit}"
+        return f"{float(value):.2f} {unit}"
 
 def eliminate_long_breaks(old_x,old_y):
     x=[]
