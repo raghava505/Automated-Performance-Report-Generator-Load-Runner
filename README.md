@@ -5,7 +5,7 @@
 2. switch to monkey user (sumonkey)
 3. Navigate to project directory(cd tool_support/LoadTests/save-report-data-to-mongo)
 4. Pull the latest code from github (git pull origin main). Make sure you do not have any local changes made (git stash).
-5. Activate the virtual environment : run the command 'source raghava_venv/bin/activate'
+5. Activate the virtual environment : run the command 'source raghava_env/bin/activate'
 
 ## step 2
 Run "/scripts/main.py" and enter the required load details, the report data will be saved to database.
