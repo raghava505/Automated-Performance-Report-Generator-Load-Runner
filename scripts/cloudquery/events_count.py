@@ -4,7 +4,7 @@ from concurrent.futures import ThreadPoolExecutor
 
 class EVE_COUNTS:
     def __init__(self, variables):
-        self.simulators = ["s4simhost1b", "s4simhost1d", "s4simhost2b", "s4simhost2d", "s4simhost3b", "s4simhost3d",
+        self.simulators = ["s4simhost1a", "s4simhost1d", "s4simhost2b", "s4simhost2d", "s4simhost3b", "s4simhost3d",
                            "s4simhost4b", "s4simhost4d", "s4simhost5b", "s4simhost5d", "s4simhost6b", "s4simhost6d"]
         self.load_name = variables['load_name']
         self.ssh_user = "abacus"
@@ -33,9 +33,9 @@ class EVE_COUNTS:
         return int(result)
 
     def analyze_logs(self, simulator, pattern, pattern2, pattern3):
-        events_pattern = f'cd {self.remote_logs_path} && tail -10 "$(ls -trh | tail -2 | head -1)" | awk \'{pattern}\''
-        modified_events_pattern = f'cd {self.remote_logs_path} && tail -10 "$(ls -trh | tail -2 | head -1)" | awk \'{pattern2}\''
-        inventory_pattern = f'cd {self.remote_logs_path} && tail -10 "$(ls -trh | tail -2 | head -1)" | awk \'{pattern3}\''
+        events_pattern = f'cd {self.remote_logs_path} && tail -10 "$(ls -trh | tail -1)" | awk \'{pattern}\''
+        modified_events_pattern = f'cd {self.remote_logs_path} && tail -10 "$(ls -trh | tail -1)" | awk \'{pattern2}\''
+        inventory_pattern = f'cd {self.remote_logs_path} && tail -10 "$(ls -trh | tail -1)" | awk \'{pattern3}\''
 
         total_sum = self.run_remote_command(simulator, events_pattern)
         total_sum2 = self.run_remote_command(simulator, modified_events_pattern)

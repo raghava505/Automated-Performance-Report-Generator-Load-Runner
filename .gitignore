@@ -12,7 +12,7 @@ scripts/cloudquery/__pycache__/*
 config/s11_nodes.json
 config/sdev2_nodes.json
 publish_practice/*
-scripts/expected_logs/*
+scripts/cloudquery/expected_logs/*
 atlassian_api/use_publish.py
 atlassian_api/__pycache__
 scripts/kubequery/__pycache__
