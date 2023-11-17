@@ -59,8 +59,7 @@ if __name__ == "__main__":
         test_env_json_details = json.load(file)
     skip_fetching_data=False
     domain = test_env_json_details['domain']
-    assets_per_cust=int(load_cls.get_load_specific_details(variables['load_name'])['assets_per_cust'])
-    input_file = load_cls.get_load_specific_details(variables['load_name'])['input_file']
+    
     #---------------------Check for previous runs------------------------------------
     mongo_connection_string=prom_con_obj.mongo_connection_string
     client = pymongo.MongoClient(mongo_connection_string)
@@ -106,6 +105,8 @@ if __name__ == "__main__":
         Osquery_table_accuracies=None
         Osquery_event_accuracies=None
         if variables["load_type"] == "Osquery" and variables["load_name"] != "ControlPlane":
+            assets_per_cust=int(load_cls.get_load_specific_details(variables['load_name'])['assets_per_cust'])
+            input_file = load_cls.get_load_specific_details(variables['load_name'])['input_file']
             print("Calculating Table accuracies for Osquery Load...")
             api_path = os.path.join(os.path.dirname(os.path.realpath(__file__)),f"osquery/api_keys/{domain}.json")
             input_file_path = os.path.join(os.path.dirname(os.path.realpath(__file__)),f"osquery/testinputfiles/{input_file}")
