@@ -59,7 +59,7 @@ if __name__ == "__main__":
         test_env_json_details = json.load(file)
     skip_fetching_data=False
     domain = test_env_json_details['domain']
-    
+    extension = test_env_json_details['extension']
     #---------------------Check for previous runs------------------------------------
     mongo_connection_string=prom_con_obj.mongo_connection_string
     client = pymongo.MongoClient(mongo_connection_string)
@@ -110,7 +110,7 @@ if __name__ == "__main__":
             print("Calculating Table accuracies for Osquery Load...")
             api_path = os.path.join(os.path.dirname(os.path.realpath(__file__)),f"osquery/api_keys/{domain}.json")
             input_file_path = os.path.join(os.path.dirname(os.path.realpath(__file__)),f"osquery/testinputfiles/{input_file}")
-            accuracy_obj= osq_accuracy(start_time_utc=start_utc_time,end_time_utc=end_utc_time,api_path=api_path,domain=domain,endline=1800*variables['load_duration_in_hrs'],assets_per_cust=assets_per_cust,ext='net',trans=True,hours=variables['load_duration_in_hrs'],input_file=input_file_path)
+            accuracy_obj= osq_accuracy(start_time_utc=start_utc_time,end_time_utc=end_utc_time,api_path=api_path,domain=domain,endline=1800*variables['load_duration_in_hrs'],assets_per_cust=assets_per_cust,ext=extension,trans=True,hours=variables['load_duration_in_hrs'],input_file=input_file_path)
             Osquery_table_accuracies = accuracy_obj.table_accuracy()
             print("Osquery_table_accuracies : ",Osquery_table_accuracies)
             print("Calculating Events accuracies for Osquery Load ...")

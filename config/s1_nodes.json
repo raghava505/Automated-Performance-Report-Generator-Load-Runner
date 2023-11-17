@@ -3,8 +3,8 @@
     "clusters": 2,
     "SU": 6,
     "domain": "jupiter",
+    "extension":"net",
     "stack_url": "https://jupiter.uptycs.net/",
-    "elk_url": "192.168.134.50",
     "trino_password": "a68dc948-6a5e-498e-873b-501aac439efd",
     "elastic": "192.168.129.52",
     "pnodes": [

@@ -3,6 +3,7 @@
     "clusters": 2,
     "SU": 6,
     "domain": "longevity",
+    "extension":"net",
     "stack_url": "https://longevity.uptycs.net/",
     "elastic": "192.168.148.52",
     "pnodes": [
