@@ -3,8 +3,8 @@
     "clusters":1,
     "SU":3,
     "domain": "alphacentauri",
+    "extension":"net",
     "stack_url": "https://alphacentauri.uptycs.net/",
-    "elk_url": "192.168.140.73",
     "elastic":"192.168.140.73",
     "pnodes": [
         "s13pn1",
