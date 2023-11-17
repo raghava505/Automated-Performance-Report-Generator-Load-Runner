@@ -88,8 +88,20 @@ def create_input_form():
     except:
         print(f"WARNING: load class for {load_type_options[details['load_type']]} is not found , hence using the parent class : {parent}")
         load_cls = parent
-    print(f"Please verify the load details for {details['load_type']}:{details['load_name']}. These details will be saved to database. : ")
+    print(f"Please verify the below load details for {details['load_type']}:{details['load_name']} : ")
     print(json.dumps(load_cls.get_load_specific_details(details["load_name"]), indent=4))
+    edit_inp=input(f"These details will be saved to database. Enter any one of the 2 strings (edit/proceed) : ").strip().lower()
+    if edit_inp == 'edit':
+        print("(NOTE : To set default value press enter)")
+        old_dictionary = load_cls.get_load_specific_details(details["load_name"])
+        new_dictionary={}
+        for key,val in old_dictionary.items():
+            new_input = input(f"Enter '{key}' (default : {val}) : ").strip()
+            if new_input=="":new_dictionary[key] = old_dictionary[key]
+            else:new_dictionary[key] = new_input
+        load_cls.load_specific_details[details["load_name"]]=new_dictionary
+        print("Your new details are : ")
+        print(json.dumps(load_cls.get_load_specific_details(details["load_name"]), indent=4))
 
     user_input = input("Are you sure you want to continue with these details? This will make permenant changes in the database (y/n): ").strip().lower()
 
