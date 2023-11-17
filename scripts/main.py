@@ -60,7 +60,7 @@ if __name__ == "__main__":
     skip_fetching_data=False
     domain = test_env_json_details['domain']
     assets_per_cust=int(load_cls.get_load_specific_details(variables['load_name'])['assets_per_cust'])
-    input_file = int(load_cls.get_load_specific_details(variables['load_name'])['input_file'])
+    input_file = load_cls.get_load_specific_details(variables['load_name'])['input_file']
     #---------------------Check for previous runs------------------------------------
     mongo_connection_string=prom_con_obj.mongo_connection_string
     client = pymongo.MongoClient(mongo_connection_string)
