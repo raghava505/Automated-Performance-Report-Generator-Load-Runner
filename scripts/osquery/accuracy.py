@@ -130,6 +130,9 @@ class osq_accuracy:
         self.hours=hours
         self.input_file=input_file
         self.upt_day="".join(str(start_time_utc.strftime("%Y-%m-%d")).split('-'))
+        print(f"Start time string in utc : {self.start_time}")
+        print(f"End time string in utc : {self.end_time}")
+        print(f"upt day : {self.upt_day}")
     def api_keys(self):
         with open(self.api_path,'r') as c:
             api_config=json.load(c)
@@ -290,6 +293,7 @@ class osq_accuracy:
         tables=["processes","process_open_files","load_average","interface_details","dns_lookup_events","process_open_sockets","process_file_events","process_events","socket_events"]
         for table in tables:
             query="select count(*) from {} where upt_day>={} and upt_time >= timestamp '{}' and upt_time < timestamp '{}'".format(table,self.upt_day,self.start_time,self.end_time)
+            print(f"Executing query : {query}")
             t1=threading.Thread(target=self.run_table_accuracy,args=(query,table,accuracy,expected_tables,api))
             t1.start()
             thread_list.append(t1)
@@ -311,11 +315,13 @@ class osq_accuracy:
                 if expect>33*self.hours*100000:
                     expect=33*self.hours*100000
                 query="select count(*) from {} where upt_day>= {} and created_at >= timestamp '{}' and created_at < timestamp '{}' and code like '%-builder-added%'".format(table,self.upt_day,self.start_time,self.end_time)
+                print(f"Executing query : {query}")
                 actual = http_query(api, query,self.ext)
                 print(actual)
             else:
                 expect=66000
                 query="select count(*) from {} where  created_at >= timestamp '{}' and created_at < timestamp '{}' and code like '%-builder-added%'".format(table,self.start_time,self.end_time)
+                print(f"Executing query : {query}")
                 actual = http_query(api, query, self.ext)
                 print(actual)
             accuracy[table]={"actual":actual,"expected":expect,"accuracy":round((actual/expect)*100,2)}
