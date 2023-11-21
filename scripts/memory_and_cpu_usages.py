@@ -155,6 +155,7 @@ class MC_comparisions:
         return final 
     def extract_app_data(self,queries,tag,unit):
         final=dict()
+        print(f"----------processing application level {tag} usages for (timestamp : {self.curr_ist_start_time} to {self.curr_ist_end_time})")
         for query in queries:
             PARAMS = {
                 'query': queries[query],
@@ -163,13 +164,12 @@ class MC_comparisions:
                 'step':30
             }
             response = requests.get(self.PROMETHEUS + self.API_PATH, params=PARAMS)
-            print(f"----------processing application level {tag} for {query} (timestamp : {self.curr_ist_start_time} to {self.curr_ist_end_time}), Status code : {response.status_code}")
+            print(f"processing {tag} usage for {query} application (timestamp : {self.curr_ist_start_time} to {self.curr_ist_end_time}), Status code : {response.status_code}")
             if response.status_code != 200:print("ERROR : Request failed")
             result = response.json()['data']['result']
             if len(result)==0:
-                if 'gprofiler' in query:
-                    print("No data found for : ",query)
-                    continue
+                print(f"WARNING : No data found for : {query}, the query executed is : {queries[query]}")
+                continue
             values = [float(i[1]) for i in result[0]['values']]
             avg = sum(values) / len(values)
             minimum = min(values)
