@@ -12,6 +12,11 @@ app_names={
             "avg":[]
           }
 
+application_level_usage_app_names = ["tls","trino","/opt/uptycs/cloud/go/bin/ruleEngine-production-ruleengine",
+                                     "kafka","spark-master","spark-worker","osqueryIngestion",
+                                     "data-archival","orc-compaction","auditLogsIngestion","alertsIngestion",
+                                     "cloudConnectorIngestion","prestoLogsIngestion","queryPackIngestion"]
+
 memory_queries = {f"{HOST}" : 'avg((uptycs_memory_used/uptycs_total_memory) * 100)  by (host_name)',}
 memory_queries.update(dict([(app,f"{key}(uptycs_app_memory{{app_name=~'{app}'}}) by (host_name)") for key,app_list in app_names.items() for app in app_list]))
 
@@ -21,11 +26,27 @@ cpu_queries.update(dict([(app,f"{key}(uptycs_app_cpu{{app_name=~'{app}'}}) by (h
 container_memory_queries = {'container' : "sum(uptycs_docker_mem_used{}/(1000*1000*1000)) by (container_name)",}
 container_cpu_queries = {'container' : "sum(uptycs_docker_cpu_stats{}) by (container_name)",}
 
+app_level_memory_queries=dict([(app,f"sum(uptycs_app_memory{{app_name='{app}'}}) by (app_name)") for app in application_level_usage_app_names])
+app_level_cpu_queries=dict([(app,f"sum(uptycs_app_cpu{{app_name='{app}'}}) by (app_name)") for app in application_level_usage_app_names])
+app_level_memory_queries.update({"osqLogger" : "sum(sum(uptycs_app_memory{app_name=~'.*osqLogger-.*'}) by (app_name))" })
+app_level_cpu_queries.update({"osqLogger" : "sum(sum(uptycs_app_cpu{app_name=~'.*osqLogger-.*'}) by (app_name))" })
+
+app_level_memory_queries["gprofiler perf-record pns"]="sum(uptycs_app_memory{node_type='process',app_name='/app/gprofiler/resources/perf-record--F'}) by (app_name)"
+app_level_memory_queries["gprofiler perf-script pns"]="sum(uptycs_app_memory{node_type='process',app_name='/app/gprofiler/resources/perf-script--F'}) by (app_name)"
+app_level_memory_queries["gprofiler perf-record dns"]="sum(uptycs_app_memory{node_type='data',app_name='/app/gprofiler/resources/perf-record--F'}) by (app_name)"
+app_level_memory_queries["gprofiler perf-script dns"]="sum(uptycs_app_memory{node_type='data',app_name='/app/gprofiler/resources/perf-script--F'}) by (app_name)"
+app_level_cpu_queries["gprofiler perf-record pns"]="sum(uptycs_app_cpu{node_type='process',app_name='/app/gprofiler/resources/perf-record--F'}) by (app_name)"
+app_level_cpu_queries["gprofiler perf-script pns"]="sum(uptycs_app_cpu{node_type='process',app_name='/app/gprofiler/resources/perf-script--F'}) by (app_name)"
+app_level_cpu_queries["gprofiler perf-record dns"]="sum(uptycs_app_cpu{node_type='data',app_name='/app/gprofiler/resources/perf-record--F'}) by (app_name)"
+app_level_cpu_queries["gprofiler perf-script dns"]="sum(uptycs_app_cpu{node_type='data',app_name='/app/gprofiler/resources/perf-script--F'}) by (app_name)"
+
 all_queries_to_execute={
     "memory_queries":memory_queries,
     "cpu_queries":cpu_queries,
     "container_memory_queries":container_memory_queries,
-    "container_cpu_queries":container_cpu_queries
+    "container_cpu_queries":container_cpu_queries,
+    "application_level_memory_queries":app_level_memory_queries,
+    "application_level_cpu_queries":app_level_cpu_queries,
 }
 
 class MC_comparisions:
@@ -132,7 +153,34 @@ class MC_comparisions:
                     maximum = maximum/100
                 final[query][container_name] = {f"{unit}":{"average":avg , "minimum":minimum , "maximum":maximum}}
         return final 
-    
+    def extract_app_data(self,queries,tag,unit):
+        final=dict()
+        for query in queries:
+            PARAMS = {
+                'query': queries[query],
+                'start': self.curr_ist_start_time,
+                'end': self.curr_ist_end_time,
+                'step':30
+            }
+            response = requests.get(self.PROMETHEUS + self.API_PATH, params=PARAMS)
+            print(f"----------processing application level {tag} for {query} (timestamp : {self.curr_ist_start_time} to {self.curr_ist_end_time}), Status code : {response.status_code}")
+            if response.status_code != 200:print("ERROR : Request failed")
+            result = response.json()['data']['result']
+            if len(result)==0:
+                if 'gprofiler' in query:
+                    print("No data found for : ",query)
+                    continue
+            values = [float(i[1]) for i in result[0]['values']]
+            avg = sum(values) / len(values)
+            minimum = min(values)
+            maximum = max(values)
+            try:
+                print(str(query)==str(result[0]['metric']['app_name']))
+            except Exception as e:
+                print("Warning : ", e)
+            final[query] = {"percentage":{"average":avg , "minimum":minimum , "maximum":maximum}}
+        return final 
+
     def make_comparisions(self):
         print("All usage queries to be executed are : ")
         print(json.dumps(all_queries_to_execute, indent=4))
@@ -140,6 +188,8 @@ class MC_comparisions:
         cpu_data,overall_cpu_data = self.extract_data(cpu_queries,cpu_tag,cpu_unit)
         container_memory_data =  self.extract_container_data(container_memory_queries,memory_tag,memory_unit)
         container_cpu_data =  self.extract_container_data(container_cpu_queries,cpu_tag,cpu_unit)
+        app_memory_data =  self.extract_app_data(app_level_memory_queries,memory_tag,memory_unit)
+        app_cpu_data =  self.extract_app_data(app_level_cpu_queries,cpu_tag,cpu_unit)
         
         current_build_data={
             "node_level_resource_utilization": {
@@ -149,6 +199,10 @@ class MC_comparisions:
             "container_level_resource_utilization":{
                 "memory":container_memory_data,
                 "cpu" : container_cpu_data,
+            },
+            "application_level_resource_utilization":{
+                "memory":app_memory_data,
+                "cpu" : app_cpu_data,
             }
         }
         return current_build_data,{ "node_level_total_average_resource_utilization":{
