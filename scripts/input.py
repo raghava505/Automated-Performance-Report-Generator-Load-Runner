@@ -4,6 +4,7 @@ from parent_load_details import parent
 from osquery.osquery_child_class import osquery_child
 from cloudquery.cloudquery_child_class import cloudquery_child
 from kubequery.kubequery_child_class import kubequery_child
+from combined_loads_setup import all_combined_child,osquery_cloudquery_combined_child
 
 bool_options=[False,True]
 load_type_options = {   
@@ -18,7 +19,15 @@ load_type_options = {
                         'KubeQuery_and_SelfManaged':{
                                         'subtypes':['KubeQuery_SingleCustomer','SelfManaged_SingleCustomer'],
                                         'class':kubequery_child
-                                    } 
+                                    } ,
+                        'osquery_cloudquery_combined':{
+                                        'subtypes':['Osquery(multi)_CloudQuery(aws_gcp_multi)'],
+                                        'class':osquery_cloudquery_combined_child
+                                    },
+                        'all_loads_combined':{
+                                        'subtypes':['Osquery(multi)_CloudQuery(aws_gcp_multi)_KubeQuery(single)_and_SelfManaged(single)'],
+                                        'class':all_combined_child
+                                    }
                      }
 
 all_files = os.listdir(configuration().base_stack_config_path)

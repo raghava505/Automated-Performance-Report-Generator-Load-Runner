@@ -89,7 +89,7 @@ if __name__ == "__main__":
             disk_space_usage_dict=calc.make_calculations()
         #--------------------------------- add kafka topics ---------------------------------------
         kafka_topics_list=None
-        if variables["load_type"]=="Osquery":
+        if variables["load_type"] in ["Osquery","osquery_cloudquery_combined","all_loads_combined"]:
             print("Fetching kafka topics ...")
             kafka_obj = kafka_topics(prom_con_obj=prom_con_obj)
             kafka_topics_list = kafka_obj.add_topics_to_report()
@@ -104,7 +104,7 @@ if __name__ == "__main__":
         #-------------------------Osquery Table Accuracies----------------------------
         Osquery_table_accuracies=None
         Osquery_event_accuracies=None
-        if variables["load_type"] == "Osquery" and variables["load_name"] != "ControlPlane":
+        if variables["load_type"] in ["Osquery","osquery_cloudquery_combined","all_loads_combined"] and variables["load_name"] != "ControlPlane":
             assets_per_cust=int(load_cls.get_load_specific_details(variables['load_name'])['assets_per_cust'])
             input_file = load_cls.get_load_specific_details(variables['load_name'])['input_file']
             print("Calculating Table accuracies for Osquery Load...")
