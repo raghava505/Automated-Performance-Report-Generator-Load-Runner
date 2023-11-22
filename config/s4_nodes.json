@@ -47,7 +47,8 @@
         "s4stsnode2",
         "mlbank1a",
         "s2logstash1",
-        "s2logstash2"
+        "s2logstash2",
+        "s4-memgraph-gcp"
     ],
     "s4c1pn1": {
         "storage": {
