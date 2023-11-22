@@ -6,6 +6,7 @@
     "extension":"net",
     "stack_url": "https://longevity.uptycs.net/",
     "elastic": "192.168.148.52",
+    "trino_password":"306370ab-7fb5-433b-9af1-4a08ff63a55d",
     "pnodes": [
         "long-c1pn1",
         "long-c2pn1",
