@@ -9,21 +9,21 @@
  ```
  ssh abacus@192.168.146.69
  ```
-3. Switch to monkey user
+2. Switch to monkey user
  ```
  sumonkey
  ```
-5. Navigate to project directory
+3. Navigate to project directory
 ```
 cd tool_support/LoadTests/save-report-data-to-mongo
 ```
-6. Pull the latest code from github.
+4. Pull the latest code from github.
 *Make sure there are no any local uncommited changes*
 ```
 git checkout main
 git pull origin main
 ```
-8. Activate the python virtual environment
+5. Activate the python virtual environment
 ```
 source raghava_env/bin/activate
 ```
@@ -45,7 +45,7 @@ Create "<your_stack>_nodes.json" file inside "config" folder if not present
 
 *Make sure to enter the details upto "other_nodes" field*
 -  *No need to enter the later fields i.e fields containing 'ram', 'cores', storage details*
--  *Make sure all your stack host IP Addresses are mapped in ```/etc/hosts``` in autoendtoend Node*
+-  *Make sure all your stack host IP Addresses are mapped in ```/etc/hosts``` in perf-prod-dashboard Node*
 
 Example
 ```
