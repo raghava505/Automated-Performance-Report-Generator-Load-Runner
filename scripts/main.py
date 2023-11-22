@@ -125,8 +125,8 @@ if __name__ == "__main__":
         cloudquery_accuracies=None
         if variables["load_type"] == "CloudQuery":
             print("Calculating accuracies for cloudquery ...")
-            accu= ACCURACY(start_timestamp=start_utc_time,end_timestamp=end_utc_time,prom_con_obj=prom_con_obj,variables=variables)
-            cloudquery_accuracies = accu.calculate_accuracy()
+            # accu= ACCURACY(start_timestamp=start_utc_time,end_timestamp=end_utc_time,prom_con_obj=prom_con_obj,variables=variables)
+            # cloudquery_accuracies = accu.calculate_accuracy()
 
         #-------------------------Kubequery Accuracies----------------------------
         kubequery_accuracies=None
