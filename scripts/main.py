@@ -123,14 +123,14 @@ if __name__ == "__main__":
         
         #-------------------------Cloudquery Accuracies----------------------------
         cloudquery_accuracies=None
-        if variables["load_type"] == "CloudQuery":
+        if variables["load_type"] in ["CloudQuery","osquery_cloudquery_combined","all_loads_combined"]:
             print("Calculating accuracies for cloudquery ...")
             # accu= ACCURACY(start_timestamp=start_utc_time,end_timestamp=end_utc_time,prom_con_obj=prom_con_obj,variables=variables)
             # cloudquery_accuracies = accu.calculate_accuracy()
 
         #-------------------------Kubequery Accuracies----------------------------
         kubequery_accuracies=None
-        if variables["load_name"] == "KubeQuery_SingleCustomer":
+        if variables["load_name"] == "KubeQuery_SingleCustomer" or variables["load_type"] in ["all_loads_combined"]:
             print("Calculating accuracies for KubeQuery ...")
             accuracy = Kube_Accuracy(start_timestamp=start_utc_time,end_timestamp=end_utc_time,prom_con_obj=prom_con_obj,variables=variables)
             # kubequery_accuracies = accuracy.accuracy_kubernetes()
@@ -138,7 +138,7 @@ if __name__ == "__main__":
 
         #-------------------------SelfManaged Accuracies----------------------------
         selfmanaged_accuracies=None
-        if variables["load_name"] == "SelfManaged_SingleCustomer":
+        if variables["load_name"] == "SelfManaged_SingleCustomer" or variables["load_type"] in ["all_loads_combined"]:
             print("Calculating accuracies for SelfManaged ...")
             accuracy = SelfManaged_Accuracy(start_timestamp=start_utc_time,end_timestamp=end_utc_time,prom_con_obj=prom_con_obj,variables=variables)
             selfmanaged_accuracies = accuracy.accuracy_selfmanaged()
@@ -147,7 +147,7 @@ if __name__ == "__main__":
         
         #--------------------------------------Events Counts--------------------------------------
         evecount = None
-        if variables["load_type"] == "CloudQuery":
+        if variables["load_type"] in ["CloudQuery","osquery_cloudquery_combined","all_loads_combined"]:
             print("Calculating the counts of various events during the load ...")
             calc = EVE_COUNTS(variables=variables)
             evecount = calc.get_events_count()
@@ -162,7 +162,7 @@ if __name__ == "__main__":
 
         #-----------------------------Processing Time for Db Operations------------------------------
         db_op = None
-        if variables["load_type"] == "CloudQuery":
+        if variables["load_type"] in ["CloudQuery","osquery_cloudquery_combined","all_loads_combined"]:
             print("Processing time for Db Operations ...")
             calc = DB_OPERATIONS_TIME(start_timestamp=start_timestamp,end_timestamp=end_timestamp,prom_con_obj=prom_con_obj)
             db_op=calc.db_operations()
