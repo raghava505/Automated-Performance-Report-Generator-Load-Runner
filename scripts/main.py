@@ -175,9 +175,9 @@ if __name__ == "__main__":
 
         #--------------------------------Elk Erros------------------------------------------------
         elk_errors = None
-        # print("Fetching Elk Errors ...")
-        # elk = Elk_erros(start_timestamp=start_timestamp,end_timestamp=end_timestamp,prom_con_obj=prom_con_obj)
-        # elk_errors = elk.fetch_errors()
+        print("Fetching Elk Errors ...")
+        elk = Elk_erros(start_timestamp=start_timestamp,end_timestamp=end_timestamp,prom_con_obj=prom_con_obj)
+        elk_errors = elk.fetch_errors()
         
         #--------------------------------cpu and mem node-wise---------------------------------------
         print("Fetching resource usages data ...")
