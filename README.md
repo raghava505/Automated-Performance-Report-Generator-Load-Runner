@@ -30,7 +30,7 @@ source raghava_env/bin/activate
 ## Step 2
 Run the below command
 ```
-python3 /scripts/main.py
+python3 scripts/main.py
 ```
 Enter the required load details and the report data will be saved to Mongodb.
 
