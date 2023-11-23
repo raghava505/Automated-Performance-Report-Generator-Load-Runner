@@ -4,22 +4,25 @@ from concurrent.futures import ThreadPoolExecutor
 
 class EVE_COUNTS:
     def __init__(self, variables):
-        self.simulators = ["s4simhost1a", "s4simhost1d", "s4simhost2b", "s4simhost2d", "s4simhost3b", "s4simhost3d",
+        self.simulators1 = ["s4simhost1a", "s4simhost1d", "s4simhost2b", "s4simhost2d", "s4simhost3b", "s4simhost3d",
                            "s4simhost4b", "s4simhost4d", "s4simhost5b", "s4simhost5d", "s4simhost6b", "s4simhost6d"]
+        self.simulators2 = ["long-aws-sim1", "long-aws-sim2"]
+        self.simulators3 = ["long-gcp-sim1", "long-gcp-sim2"]
         self.load_name = variables['load_name']
+        self.load_type = variables['load_type']
         self.ssh_user = "abacus"
         self.ssh_password = "abacus"
         self.total_sum = 0
         self.total_sum2 = 0
         self.total_sum3 = 0
 
-        path_mappings = {
+        self.path_mappings = {
             "AWS_MultiCustomer": "~/multi-customer-cqsim/aws/logs",
             "GCP_MultiCustomer": "~/multi-customer-cqsim/gcp/logs",
             "AWS_SingleCustomer": "~/cloud_query_sim/aws/logs",
         }
 
-        self.remote_logs_path = path_mappings.get(self.load_name, "~/multi-customer-cqsim/aws/logs")
+        self.remote_logs_path = self.path_mappings.get(self.load_name, "~/multi-customer-cqsim/aws/logs")
 
     def run_remote_command(self, host, command):
         ssh_client = paramiko.SSHClient()
@@ -27,9 +30,10 @@ class EVE_COUNTS:
         ssh_client.connect(host, username=self.ssh_user, password=self.ssh_password)
 
         stdin, stdout, stderr = ssh_client.exec_command(command)
-
+        
         result = stdout.read().decode().strip()
         ssh_client.close()
+        
         return int(result)
 
     def analyze_logs(self, simulator, pattern, pattern2, pattern3):
@@ -40,7 +44,7 @@ class EVE_COUNTS:
         total_sum = self.run_remote_command(simulator, events_pattern)
         total_sum2 = self.run_remote_command(simulator, modified_events_pattern)
         total_sum3 = self.run_remote_command(simulator, inventory_pattern)
-        print(total_sum,total_sum3,total_sum2)
+        print(total_sum,total_sum3,total_sum2,simulator)
         return total_sum, total_sum2, total_sum3
 
     @staticmethod
@@ -49,35 +53,83 @@ class EVE_COUNTS:
 
     def get_events_count(self):
         save_dict = {}
+
         if self.load_name in ["AWS_MultiCustomer", "AWS_SingleCustomer"]:
             events_pattern = '/Total no\\.of events happened till now:/ {sum+=$NF} END {print sum}'
             modified_events_pattern = '/Total no\\.of modified events happened till now:/ {sum+=$NF} END {print sum}'
             inventory_pattern = '/Total no\\.of inventory events happened till now:/ {sum+=$NF} END {print sum}'
 
         elif self.load_name == "GCP_MultiCustomer":
-            events_pattern = '/Total no\.of events happened till now :/ {sum+=$NF} END {print sum}'
-            modified_events_pattern = '/Total no\.of modified events happened during load:/ {sum+=$NF} END {print sum}'
-            inventory_pattern = '/Total no\.of inventory events happened during load:/ {sum+=$NF} END {print sum}'
+            events_pattern = '/Total no\\.of events happened till now :/ {sum+=$NF} END {print sum}'
+            modified_events_pattern = '/Total no\\.of modified events happened during load:/ {sum+=$NF} END {print sum}'
+            inventory_pattern = '/Total no\\.of inventory events happened during load:/ {sum+=$NF} END {print sum}'
 
-        with ThreadPoolExecutor(max_workers=len(self.simulators)) as executor:
-            results = list(executor.map(self.analyze_logs, self.simulators, [events_pattern] * len(self.simulators), [modified_events_pattern] * len(self.simulators), [inventory_pattern] * len(self.simulators)))
+        with ThreadPoolExecutor(max_workers=len(self.simulators1)) as executor:
+            if self.load_name in ["Osquery(multi)_CloudQuery(aws_gcp_multi)", "Osquery(multi)_CloudQuery(aws_gcp_multi)_KubeQuery(single)_and_SelfManaged(single)"]:
+                
+                events_pattern_aws = '/Total no\\.of events happened till now:/ {sum+=$NF} END {print sum}'
+                modified_events_pattern_aws = '/Total no\\.of modified events happened till now:/ {sum+=$NF} END {print sum}'
+                inventory_pattern_aws = '/Total no\\.of inventory events happened till now:/ {sum+=$NF} END {print sum}'
 
-        for total_sum, total_sum2, total_sum3 in results:
-            self.total_sum += total_sum
-            self.total_sum2 += total_sum2
-            self.total_sum3 += total_sum3
+                events_pattern_gcp = '/Total no\\.of events happened till now :/ {sum+=$NF} END {print sum}'
+                modified_events_pattern_gcp = '/Total no\\.of modified events happened during load:/ {sum+=$NF} END {print sum}'
+                inventory_pattern_gcp = '/Total no\\.of inventory events happened during load:/ {sum+=$NF} END {print sum}'
 
-        save_dict["Total inventory count"] = self.format_in_millions(self.total_sum3)
-        save_dict["Total inventory count / hour"] = self.format_in_millions(self.total_sum3 / 12)
+                results_aws = list(executor.map(self.analyze_logs,  self.simulators2, [events_pattern_aws] * len(self.simulators2), [modified_events_pattern_aws] * len(self.simulators2), [inventory_pattern_aws] * len(self.simulators2)))
+                self.remote_logs_path = self.path_mappings.get("GCP_MultiCustomer", "~/multi-customer-cqsim/aws/logs")
+                results_gcp = list(executor.map(self.analyze_logs,  self.simulators3, [events_pattern_gcp] * len(self.simulators3), [modified_events_pattern_gcp] * len(self.simulators3), [inventory_pattern_gcp] * len(self.simulators3)))
+            else:
+                
+                results = list(executor.map(self.analyze_logs,  self.simulators1, [events_pattern] * len(self.simulators1), [modified_events_pattern] * len(self.simulators1), [inventory_pattern] * len(self.simulators1)))
 
-        save_dict["Total cloud trail events count"] = self.format_in_millions(self.total_sum2)
-        save_dict["Total cloud trail events count / hour"] = self.format_in_millions(self.total_sum2 / 12)
+        if self.load_name in ["Osquery(multi)_CloudQuery(aws_gcp_multi)", "Osquery(multi)_CloudQuery(aws_gcp_multi)_KubeQuery(single)_and_SelfManaged(single)"]:
+            
+            total_sum_aws = sum(result[0] for result in results_aws)
+            total_sum2_aws = sum(result[1] for result in results_aws)
+            total_sum3_aws = sum(result[2] for result in results_aws)
 
-        save_dict["Total count:"] = self.format_in_millions(self.total_sum)
-        save_dict["Total count / hour:"] = self.format_in_millions(self.total_sum / 12)
+            total_sum_gcp = sum(result[0] for result in results_gcp)
+            total_sum2_gcp = sum(result[1] for result in results_gcp)
+            total_sum3_gcp = sum(result[2] for result in results_gcp)
 
-        inventory_events_ratio = math.ceil(self.total_sum2 / self.total_sum3)
-        save_dict["Ratio (inventory:events)"] = f"1:{inventory_events_ratio}"
+            save_dict["AWS"] = {
+                "Total inventory count": self.format_in_millions(total_sum3_aws),
+                "Total inventory count / hour" : self.format_in_millions(total_sum3_aws / 12),
+                "Total cloud trail events count": self.format_in_millions(total_sum2_aws),
+                "Total cloud trail events count / hour" : self.format_in_millions(total_sum2_aws / 12),
+                "Total count": self.format_in_millions(total_sum_aws),
+                "Total count / hour:" : self.format_in_millions(total_sum_aws / 12),
+                "Ratio (inventory:events)": f"1:{math.ceil(total_sum2_aws / total_sum3_aws)}"
+            }
+
+            save_dict["GCP"] = {
+                "Total inventory count": self.format_in_millions(total_sum3_gcp),
+                "Total inventory count / hour" : self.format_in_millions(total_sum3_gcp / 12),
+                "Total cloud trail events count": self.format_in_millions(total_sum2_gcp),
+                "Total cloud trail events count / hour" : self.format_in_millions(total_sum2_gcp / 12),
+                "Total count": self.format_in_millions(total_sum_gcp),
+                "Total count / hour:" : self.format_in_millions(total_sum_gcp / 12),
+                "Ratio (inventory:events)": f"1:{math.ceil(total_sum2_gcp / total_sum3_gcp)}"
+            }
+        else:
+            
+            for total_sum, total_sum2, total_sum3 in results:
+                self.total_sum += total_sum
+                self.total_sum2 += total_sum2
+                self.total_sum3 += total_sum3
+
+            save_dict["Total inventory count"] = self.format_in_millions(self.total_sum3)
+            save_dict["Total inventory count / hour"] = self.format_in_millions(self.total_sum3 / 12)
+
+            save_dict["Total cloud trail events count"] = self.format_in_millions(self.total_sum2)
+            save_dict["Total cloud trail events count / hour"] = self.format_in_millions(self.total_sum2 / 12)
+
+            save_dict["Total count:"] = self.format_in_millions(self.total_sum)
+            save_dict["Total count / hour:"] = self.format_in_millions(self.total_sum / 12)
+
+            inventory_events_ratio = math.ceil(self.total_sum2 / self.total_sum3)
+            save_dict["Ratio (inventory:events)"] = f"1:{inventory_events_ratio}"
+
 
         print(save_dict)
         return save_dict
