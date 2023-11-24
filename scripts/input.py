@@ -82,7 +82,10 @@ def create_input_form():
             input_index = int(input(f"Enter : {' '.join(str(key).split('_')).title()} {helper_text} : ").strip())
             input_value = bool_options[input_index]
         elif Type == int:
-            input_value=int(input(f"Enter : {' '.join(str(key).split('_')).title()}  (example: {value}) : ").strip())
+            if key == "sprint":
+                input_value=int(input(f"Enter release {' '.join(str(key).split('_')).title()}  (example: {value}) : ").strip())
+            else:
+                input_value=int(input(f"Enter : {' '.join(str(key).split('_')).title()}  (example: {value}) : ").strip())
 
         details[key] = Type(input_value)
 
