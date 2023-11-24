@@ -21,6 +21,7 @@ cd tool_support/LoadTests/save-report-data-to-mongo
 *Make sure there are no any local uncommited changes*
 ```
 git checkout main
+git stash
 git pull origin main
 ```
 5. Activate the python virtual environment
