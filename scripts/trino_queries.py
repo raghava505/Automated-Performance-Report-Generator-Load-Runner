@@ -21,6 +21,39 @@ class TRINO:
             self.stack_details = json.load(file)
 
             
+    def fetch_trino_password(self):
+        
+        remote_host = self.stack_details['pgnodes'][0]
+        remote_username = 'abacus'
+        remote_password = 'abacus'
+
+
+        psql_command = "PGPASSWORD=pguptycs psql -h {} -U uptycs -p 5432 -d configdb -c \"select read_password from customer_database where database_name='upt_{}';\"".format(remote_host,self.stack_details['domain'])
+
+        ssh = paramiko.SSHClient()
+        ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+
+        try:
+            ssh.connect(remote_host, username=remote_username, password=remote_password)
+            print("SSH connection established successfully.")
+
+            stdin, stdout, stderr = ssh.exec_command(psql_command)
+            output = stdout.read().decode('utf-8')
+            error_output = stderr.read().decode('utf-8')
+            password = output.split()[2]
+            
+            if error_output:
+                print("Error output:")
+                print(error_output)
+
+        finally:
+            
+            stdin.close()
+            stdout.close()
+            stderr.close()
+            ssh.close()
+        return password
+    
     def fetch_trino_queries(self):
         save_dict = {}
         ssh_client = paramiko.SSHClient()
@@ -35,13 +68,11 @@ class TRINO:
         utc_time = ist_time.astimezone(self.utc_timezone)
         end_time_utc = utc_time.strftime('%Y-%m-%d %H:%M')
 
-        # ist_time_format = '%Y-%m-%d %H:%M'
-        # start_time_utc = (datetime.strptime(self.curr_ist_start_time, ist_time_format))
-        # end_time_utc = (datetime.strptime(self.curr_ist_end_time, ist_time_format))
-        
+        trino_password = self.fetch_trino_password()
+
         try:
             ssh_client.connect(node, 22, "abacus", "abacus")
-            command = f"sudo -u monkey TRINO_PASSWORD={self.stack_details['trino_password']} /opt/uptycs/cloud/utilities/trino-cli --insecure --server https://localhost:5665 --schema upt_system --user upt_read_{self.stack_details['domain']} --catalog uptycs --password --truststore-password sslpassphrase --truststore-path /opt/uptycs/etc/presto/presto.jks --execute \"select source,query_operation,count(*) from presto_query_logs where upt_time > timestamp '{start_time_utc}' and upt_time< timestamp '{end_time_utc}' group by source,query_operation order by source;\""
+            command = f"sudo -u monkey TRINO_PASSWORD={trino_password} /opt/uptycs/cloud/utilities/trino-cli --insecure --server https://localhost:5665 --schema upt_system --user upt_read_{self.stack_details['domain']} --catalog uptycs --password --truststore-password sslpassphrase --truststore-path /opt/uptycs/etc/presto/presto.jks --execute \"select source,query_operation,count(*) from presto_query_logs where upt_time > timestamp '{start_time_utc}' and upt_time< timestamp '{end_time_utc}' group by source,query_operation order by source;\""
             print("Trino Query Command to execute in node : "+ node + " is : ")
             print(command)
             stdin, stdout, stderr = ssh_client.exec_command(command)
@@ -70,5 +101,6 @@ class TRINO:
             print(f"Error: {str(e)}")
         finally:
             ssh_client.close()
-
+        print(" The trino queries executed are :")
+        print(save_dict)
         return save_dict

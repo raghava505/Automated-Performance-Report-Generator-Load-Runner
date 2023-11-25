@@ -5,7 +5,6 @@
     "domain": "mercury",
     "extension":"net",
     "stack_url": "https://mercury.uptycs.net/",
-    "trino_password": "4369c43b-c0c4-4d00-8514-9511f5f3d2e8",
     "elastic": "192.168.131.50",
     "pnodes": [
         "s4c1pn1",
