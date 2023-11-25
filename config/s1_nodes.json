@@ -5,7 +5,6 @@
     "domain": "jupiter",
     "extension":"net",
     "stack_url": "https://jupiter.uptycs.net/",
-    "trino_password": "a68dc948-6a5e-498e-873b-501aac439efd",
     "elastic": "192.168.129.52",
     "pnodes": [
         "s1c1pn1",
