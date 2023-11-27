@@ -1,5 +1,6 @@
 import paramiko
 import math
+import socket
 from concurrent.futures import ThreadPoolExecutor
 
 class EVE_COUNTS:
@@ -25,17 +26,20 @@ class EVE_COUNTS:
         self.remote_logs_path = self.path_mappings.get(self.load_name, "~/multi-customer-cqsim/aws/logs")
 
     def run_remote_command(self, host, command):
-        ssh_client = paramiko.SSHClient()
-        ssh_client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-        ssh_client.connect(host, username=self.ssh_user, password=self.ssh_password)
+        try:
+            ssh_client = paramiko.SSHClient()
+            ssh_client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+            ssh_client.connect(host, username=self.ssh_user, password=self.ssh_password, timeout=30) 
 
-        stdin, stdout, stderr = ssh_client.exec_command(command)
-        
-        result = stdout.read().decode().strip()
-        ssh_client.close()
-        
-        return int(result)
+            stdin, stdout, stderr = ssh_client.exec_command(command)
 
+            result = stdout.read().decode().strip()
+            ssh_client.close()
+
+            return int(result)
+        except (paramiko.SSHException, socket.timeout) as e:
+            print(f"Error connecting to {host}: {e}")
+            return 0
     def analyze_logs(self, simulator, pattern, pattern2, pattern3):
         events_pattern = f'cd {self.remote_logs_path} && tail -10 "$(ls -trh | tail -1)" | awk \'{pattern}\''
         modified_events_pattern = f'cd {self.remote_logs_path} && tail -10 "$(ls -trh | tail -1)" | awk \'{pattern2}\''
@@ -118,18 +122,20 @@ class EVE_COUNTS:
                 self.total_sum2 += total_sum2
                 self.total_sum3 += total_sum3
 
-            save_dict["Total inventory count"] = self.format_in_millions(self.total_sum3)
-            save_dict["Total inventory count / hour"] = self.format_in_millions(self.total_sum3 / 12)
+            if self.load_name in ["AWS_MultiCustomer", "AWS_SingleCustomer"]:
+                x="AWS"
+            elif self.load_name == "GCP_MultiCustomer":
+                x="GCP"
 
-            save_dict["Total cloud trail events count"] = self.format_in_millions(self.total_sum2)
-            save_dict["Total cloud trail events count / hour"] = self.format_in_millions(self.total_sum2 / 12)
-
-            save_dict["Total count:"] = self.format_in_millions(self.total_sum)
-            save_dict["Total count / hour:"] = self.format_in_millions(self.total_sum / 12)
-
-            inventory_events_ratio = math.ceil(self.total_sum2 / self.total_sum3)
-            save_dict["Ratio (inventory:events)"] = f"1:{inventory_events_ratio}"
-
+            save_dict[x] = {
+            "Total inventory count": self.format_in_millions(self.total_sum3),
+            "Total inventory count / hour": self.format_in_millions(self.total_sum3 / 12),
+            "Total cloud trail events count": self.format_in_millions(self.total_sum2),
+            "Total cloud trail events count / hour": self.format_in_millions(self.total_sum2 / 12),
+            "Total count": self.format_in_millions(self.total_sum),
+            "Total count / hour": self.format_in_millions(self.total_sum / 12),
+            "Ratio (inventory:events)": f"1:{math.ceil(self.total_sum2 / self.total_sum3)}"
+            }
 
         print(save_dict)
         return save_dict
