@@ -1,11 +1,11 @@
 {
     "stack": "S13",
-    "clusters":1,
-    "SU":3,
+    "clusters": 1,
+    "SU": 3,
     "domain": "alphacentauri",
-    "extension":"net",
+    "extension": "net",
     "stack_url": "https://alphacentauri.uptycs.net/",
-    "elastic":"192.168.140.73",
+    "elastic": "192.168.140.73",
     "pnodes": [
         "s13pn1",
         "s13pn2",
@@ -28,6 +28,18 @@
         "s13elasticsearch",
         "s13kibana",
         "s13logstash"
+    ],
+    "kubesim_nodes": [
+        "s13sim1",
+        "s13sim2",
+        "s13sim3",
+        "s13sim4"
+    ],
+    "selfsim_nodes": [
+        "s13sim1",
+        "s13sim2",
+        "s13sim3",
+        "s13sim4"
     ],
     "s13pn1": {
         "storage": {
