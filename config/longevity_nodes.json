@@ -58,6 +58,12 @@
         "long-sts1",
         "long-sts2"
     ],
+    "kubesim_nodes": [
+        "long-kube-sim1"
+    ],
+    "selfsim_nodes": [
+        "long-self-managed-container1"
+    ],
     "long-c1pn1": {
         "storage": {
             "root_partition": "1.8T",
