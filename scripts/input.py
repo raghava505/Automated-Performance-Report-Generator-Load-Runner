@@ -35,16 +35,21 @@ test_env_path_options = sorted([file for file in all_files if file.endswith('.js
 
 def create_input_form():
     details = {
-            "test_env_file_name":'s1_nodes.json',
-            "load_type":"Osquery",
-            "load_name": "SingleCustomer",
-            "start_time_str_ist":  "2023-08-12 23:08",
+            "test_env_file_name":'longevity_nodes.json',
+            "load_type":"KubeQuery_and_SelfManaged",
+            "load_name": "KubeQuery_SingleCustomer",
+            "start_time_str_ist":  "2023-12-05 22:40",
             "load_duration_in_hrs": 10,
-            "sprint": 111,
-            "build": 111111,
+            "sprint": 144,
+            "build": 144068,
             "add_extra_time_for_charts_at_end_in_min": 10,
             # "fetch_node_parameters_before_generating_report" :  False,
             }
+    
+    # These three lines are for Debugging Purposes :)
+    # load_cls = load_type_options[details["load_type"]]['class']
+    # prom_con_obj = configuration(test_env_file_name=details['test_env_file_name'] , fetch_node_parameters_before_generating_report=False)
+    # return details,prom_con_obj,load_cls
 
     print("Please enter the following load details ...")
     for key,value in details.items():

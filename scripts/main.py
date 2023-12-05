@@ -24,11 +24,52 @@ import pytz
 import os
 from create_chart import create_images_and_save
 
+import logging
+import argparse
+
+parser = argparse.ArgumentParser()
+parser.add_argument("-log","--loglevel",type=str)
+args = parser.parse_args()
+
+logger = logging.getLogger(__name__)
+
+c_handler = logging.StreamHandler()
+c_handler.setLevel(logging.NOTSET)
+
+c_format = logging.Formatter('%(levelname)s - %(message)s')
+c_handler.setFormatter(c_format)
+
+# Add handlers to the logger
+logger.addHandler(c_handler)
+
+# assuming args.loglevel is bound to the string value obtained from the
+# command line argument. Convert to upper case to allow the user to
+# specify --log=DEBUG or --log=debug
+if not isinstance(args.loglevel, str):
+    args.loglevel = "INFO"
+    
+numeric_level = getattr(logging, args.loglevel.upper(), None)
+if not isinstance(numeric_level, int):
+    raise ValueError('Invalid log level: %s' %(args.loglevel))
+
 if __name__ == "__main__":
+    
+    logger.setLevel(numeric_level)
+    logger.info("Seting Log Level to => %s" %(args.loglevel))
+    
     variables , prom_con_obj,load_cls =create_input_form()
     if not variables or not prom_con_obj : 
         print("Received NoneType objects, terminating the program ...")
         sys.exit()
+        
+    f_handler = logging.FileHandler('./logs/%s.log' %(variables["load_name"]))
+    f_handler.setLevel(logging.DEBUG)
+    
+    f_format = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
+    f_handler.setFormatter(f_format)
+    
+    logger.addHandler(f_handler)
+        
     TEST_ENV_FILE_PATH   = prom_con_obj.test_env_file_path
     print("Test environment file path is : " + TEST_ENV_FILE_PATH)
     #---------------------start time and endtime (timestamps) for prometheus queries-------------------
@@ -125,16 +166,17 @@ if __name__ == "__main__":
         cloudquery_accuracies=None
         if variables["load_type"] in ["CloudQuery","osquery_cloudquery_combined","all_loads_combined"]:
             print("Calculating accuracies for cloudquery ...")
-            # accu= ACCURACY(start_timestamp=start_utc_time,end_timestamp=end_utc_time,prom_con_obj=prom_con_obj,variables=variables)
-            # cloudquery_accuracies = accu.calculate_accuracy()
+            accu= ACCURACY(start_timestamp=start_utc_time,end_timestamp=end_utc_time,prom_con_obj=prom_con_obj,variables=variables)
+            cloudquery_accuracies = accu.calculate_accuracy()
 
         #-------------------------Kubequery Accuracies----------------------------
         kubequery_accuracies=None
         if variables["load_name"] == "KubeQuery_SingleCustomer" or variables["load_type"] in ["all_loads_combined"]:
             print("Calculating accuracies for KubeQuery ...")
             accuracy = Kube_Accuracy(start_timestamp=start_utc_time,end_timestamp=end_utc_time,prom_con_obj=prom_con_obj,variables=variables)
-            # kubequery_accuracies = accuracy.accuracy_kubernetes()
-            #print(kubequery_accuracies)
+            kubequery_accuracies = accuracy.accuracy_kubernetes()
+            # print(json.dumps(kubequery_accuracies, indent=4))
+            # sys.exit()
 
         #-------------------------SelfManaged Accuracies----------------------------
         selfmanaged_accuracies=None
@@ -142,7 +184,8 @@ if __name__ == "__main__":
             print("Calculating accuracies for SelfManaged ...")
             accuracy = SelfManaged_Accuracy(start_timestamp=start_utc_time,end_timestamp=end_utc_time,prom_con_obj=prom_con_obj,variables=variables)
             selfmanaged_accuracies = accuracy.accuracy_selfmanaged()
-            #print(selfmanaged_accuracies)
+            # print(json.dumps(selfmanaged_accuracies, indent=4))
+            # sys.exit()
 
         
         #--------------------------------------Events Counts--------------------------------------
