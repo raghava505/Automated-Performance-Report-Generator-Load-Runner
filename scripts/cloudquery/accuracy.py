@@ -1,5 +1,5 @@
 import sys
-sys.path.append('cloudquery/') 
+#sys.path.append('cloudquery/') 
 from .api_func import *
 from .configs import *
 from . import configs
@@ -30,11 +30,12 @@ class ACCURACY:
         self.password  = prom_con_obj.abacus_password
 
         self.load_name = variables['load_name']
+        self.load_type = variables['load_type']
         with open(self.test_env_file_path, 'r') as file:
             self.stack_details = json.load(file)
 
         self.api_path=None
-        self.total_counts = getattr(configs, f'total_counts_{self.load_name.split("_")[0]}', None)
+        self.total_counts = 'total_counts_'
 
     def global_query(self,data,table):
         # test_result = TestResult()
@@ -47,18 +48,19 @@ class ACCURACY:
         output2 = post_api(data,mglobal_query_api,payload)
         job_id= output2['id']
         n_result_api =result_api.format(data['domain'], data['domainSuffix'], data['customerId'],job_id)
-        payload["query"]="select upt_added,count(*) from {} where upt_day >= 2022-07-13 and upt_time >= timestamp '{}' and upt_time < timestamp '{}' group by upt_added;"
+        payload["query"]="select upt_added,count(*) from {} where upt_day >= 2023-11-30 and upt_time >= timestamp '{}' and upt_time < timestamp '{}' group by upt_added;"
 
         if output2['status']=="FINISHED":
             response=get_api(data,n_result_api)
             print(response['items'][0]['rowData']['_col0'])
         else:
             while output2['status'] not in ['FINISHED', 'ERROR']:
-                time.sleep(10)
+                time.sleep(5)
                 n_api=mglobal_query_api+'/'+job_id
                 output2=get_api(data,n_api)
             if output2['status'] == 'ERROR':
                 print('global query failed' )
+                #print(output2)
             else :
                 response=get_api(data,n_result_api)
                 return response
@@ -68,6 +70,7 @@ class ACCURACY:
         
         for filename in os.listdir(json_directory):
             if filename.endswith(".json"):
+                print(os.path.join(json_directory, filename))
                 with open(os.path.join(json_directory, filename), "r") as file1:
                     data = json.load(file1)
                 
@@ -82,19 +85,20 @@ class ACCURACY:
         
         resp = self.global_query(customer,table)
         
-        if "aws_cloudtrail_events" in query_api:
-            with event_count.get_lock():
-                event_count.value += resp["items"][0]["rowData"]["_col0"]
-        else:
-            for item in resp["items"]:
-                upt_added = item["rowData"]["upt_added"]
-                count = item["rowData"]["_col1"]
-                if upt_added:
-                    with upt_added_true.get_lock():
-                        upt_added_true.value += count
-                else:
-                    with upt_added_false.get_lock():
-                        upt_added_false.value += count
+        if resp!=None:
+            if "aws_cloudtrail_events" in query_api:
+                with event_count.get_lock():
+                    event_count.value += resp["items"][0]["rowData"]["_col0"]
+            else:
+                for item in resp["items"]:
+                    upt_added = item["rowData"]["upt_added"]
+                    count = item["rowData"]["_col1"]
+                    if upt_added:
+                        with upt_added_true.get_lock():
+                            upt_added_true.value += count
+                    else:
+                        with upt_added_false.get_lock():
+                            upt_added_false.value += count
 
 
 
@@ -137,22 +141,40 @@ class ACCURACY:
         
 
     def calculate_accuracy(self):
-
+        save_dict={}
         obj = LOGScriptRunner(self.load_name)
-        obj.get_log()
-        if(self.load_name=="AWS_MultiCustomer" or "GCP_MultiCustomer"):
-            self.api_path=api_path_multi
-            
+        print(self.load_name)
+        if(self.load_name=="AWS_MultiCustomer" or self.load_name == "GCP_MultiCustomer"):
+            print(1)
+            obj.get_log(obj.simulators1)
+            self.api_path=api_path_multi_mercury
+            self.total_counts = getattr(configs, f'total_counts_{self.load_name.split("_")[0]}', None)
             fs = open(self.api_path)
             file = fs.read()
-            save_dict=self.multi_tables_accuracy(file)
+            save_dict[self.load_name.split("_")[0]]=self.multi_tables_accuracy(file)
 
         elif(self.load_name == "AWS_SingleCustomer"):
-            self.api_path=api_path_single
-            
+            print(2)
+            obj.get_log(obj.simulators1)
+            self.api_path=api_path_single_mercury
+            self.total_counts = getattr(configs, f'total_counts_AWS', None)
             fs = open(self.api_path)
             file = fs.read()
-            save_dict=self.multi_tables_accuracy(file)
+            save_dict["AWS"]=self.multi_tables_accuracy(file)
+
+        elif(self.load_type == 'osquery_cloudquery_combined' or 'all_loads_combined'):
+            print(3)
+            obj.get_log(obj.simulators2)
+            self.api_path=api_path_multi_longevity
+            self.total_counts = getattr(configs, f'total_counts_AWS', None)
+            fs = open(self.api_path)
+            file = fs.read()
+            save_dict["AWS"]=self.multi_tables_accuracy(file)
+
+            obj.get_log(obj.simulators3)
+            self.total_counts = getattr(configs, f'total_counts_GCP', None)
+            obj.remote_logs_path =  "~/multi-customer-cqsim/gcp/logs"
+            save_dict["GCP"]=self.multi_tables_accuracy(file)
 
         return save_dict
 

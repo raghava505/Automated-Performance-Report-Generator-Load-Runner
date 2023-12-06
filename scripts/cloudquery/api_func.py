@@ -57,7 +57,7 @@ def general_api(apiconfig: str) -> dict:
     data=apiconfig
     headers = generateHeaders(data['key'], data['secret'])
     url = "https://%s.uptycs.io/public/api/version" % (data['domain'])
-    resp = requests.get(url, headers=headers, verify=False, timeout=120)
+    resp = requests.get(url, headers=headers, verify=False, timeout=300)
     return resp.json()
 
 @retry(num_times=5, sleep_between_error_seconds=10)
@@ -66,13 +66,13 @@ def get_api(apiconfig, url) -> dict:
     data=apiconfig
     headers = generateHeaders(data['key'], data['secret'])
     i=0
-    resp = requests.get(url, headers=headers, verify=False, timeout=120)
+    resp = requests.get(url, headers=headers, verify=False, timeout=300)
     if resp.status_code == 200:
         return resp.json()
     else:
         while (i < 20) and (resp.status_code != 200):
             time.sleep(0.1)
-            resp = requests.get(url, headers=headers, verify=False, timeout=120)
+            resp = requests.get(url, headers=headers, verify=False, timeout=300)
             i = i + 1
         if resp.status_code == 200:
             return resp.json()
@@ -91,13 +91,13 @@ def post_api(apiconfig: str, url: str, raw_data) -> dict:
     data=apiconfig
     headers = generateHeaders(data['key'], data['secret'])
     json_payload = json.dumps(raw_data)
-    resp = requests.post(url, data=json_payload, headers=headers, verify=False, timeout=120)
+    resp = requests.post(url, data=json_payload, headers=headers, verify=False, timeout=300)
     if resp.status_code == 200:
         return resp.json()
     else:
         while (i < 20) and (resp.status_code != 200):
             time.sleep(0.1)
-            resp = requests.post(url, data=json_payload, headers=headers, verify=False, timeout=120)
+            resp = requests.post(url, data=json_payload, headers=headers, verify=False, timeout=300)
             i = i + 1
         if resp.status_code == 200:
             return resp.json()
@@ -108,5 +108,5 @@ def general_api(apiconfig: str) -> dict:
     data = open_js_safely(apiconfig)
     headers = generateHeaders(data['key'], data['secret'])
     url = "https://{}{}/public/api/version".format(data['domain'], data['domainSuffix'])
-    resp = requests.get(url, headers=headers, verify=False, timeout=120)
+    resp = requests.get(url, headers=headers, verify=False, timeout=300)
     return resp.json()
