@@ -1,10 +1,12 @@
 import paramiko
 import os
+import shutil
 
 class LOGScriptRunner:
     def __init__(self,load_name):
-        self.simulators = ["s4simhost1a", "s4simhost1d", "s4simhost2b", "s4simhost2d", "s4simhost3b", "s4simhost3d", "s4simhost4b", "s4simhost4d", "s4simhost5b", "s4simhost5d", "s4simhost6b", "s4simhost6d"]
-        # self.remote_logs_path = "~/multi-customer-cqsim/aws/logs"
+        self.simulators1 = ["s4simhost1a", "s4simhost1d", "s4simhost2b", "s4simhost2d", "s4simhost3b", "s4simhost3d", "s4simhost4b", "s4simhost4d", "s4simhost5b", "s4simhost5d", "s4simhost6b", "s4simhost6d"]
+        self.simulators2 = ["long-aws-sim1", "long-aws-sim2"]
+        self.simulators3 = ["long-gcp-sim1", "long-gcp-sim2"]
         self.output_folder = "cloudquery/expected_logs"
         self.password = "abacus"
 
@@ -17,10 +19,13 @@ class LOGScriptRunner:
         self.remote_logs_path = path_mappings.get(load_name, "~/multi-customer-cqsim/aws/logs")
 
         
-    def get_log(self):
-        os.makedirs(self.output_folder, exist_ok=True)
+    def get_log(self,simulators):
+        if os.path.exists(self.output_folder):
+            shutil.rmtree(self.output_folder)
 
-        for simulator in self.simulators:
+        os.makedirs(self.output_folder)
+
+        for simulator in simulators:
             ssh = paramiko.SSHClient()
             ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
 
