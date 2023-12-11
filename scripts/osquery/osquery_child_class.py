@@ -7,7 +7,7 @@ class osquery_child(parent):
                 "number_of_customers_with_auto_exception_enabled": "0",
                 "test_title": "Multiple Customer Rule Engine and Control Plane Load",
                 "total_assets": "80K Control Plane + 15K Multi customer",
-                "assets_per_cust":"126",
+                "assets_per_cust":"125",
                 "records_sent_per_hour_per_customer": "8,164,800",
                 "records_sent_per_hour" : "979,776,000",
                 "input_file": "rhel7-6tab_12rec.log",

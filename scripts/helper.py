@@ -48,11 +48,17 @@ def extract_node_detail(data,node_type,prom_con_obj):
                         # print(f"WARNING : Unable to determine '{label}' value for {hostname}")
 
             except Exception as e:
-                raise RuntimeError(f"ERROR : Unable connect to {hostname} , {e}") from e
+                if node_type=="other_nodes":
+                    print(f"WARNING : Unable connect to {hostname} (other_node category), {e}")
+                else:
+                    raise RuntimeError(f"ERROR : Unable connect to {hostname} , {e}") from e
             finally:
                 client.close()
         except socket.gaierror as e:
-            raise RuntimeError(f"ERROR : Could not resolve {hostname} , {e}") from e
+            if node_type=="other_nodes":
+                print(f"WARNING : Unable connect to {hostname} (other_node category), {e}")
+            else:
+                raise RuntimeError(f"ERROR : Could not resolve {hostname} , {e}") from e
         if 'c2' in hostname:return_dict[hostname]['clst'] = "2"
         else:return_dict[hostname]['clst'] = "1"
     return return_dict
