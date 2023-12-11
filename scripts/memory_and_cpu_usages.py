@@ -110,7 +110,10 @@ class MC_comparisions:
                                 'maximum': maximum/100
                             }
                 except Exception as e:
-                    raise RuntimeError(F"KEY ERROR : Could not fetch details for host {hostname}, please make sure you have details for {hostname} correctly configured in stack's json file. {e}") from e
+                    if hostname in self.nodes_data['other_nodes']:
+                        print(f"WARNING : KEY ERROR : Could not fetch details for host {hostname}, please make sure you have details for {hostname} correctly configured in stack's json file. {e}")
+                    else:
+                        raise RuntimeError(F"KEY ERROR : Could not fetch details for host {hostname}, please make sure you have details for {hostname} correctly configured in stack's json file. {e}") from e
 
         #calculate overall pnodes,dnodes,pgnodes usage
         new_data = final[HOST]
