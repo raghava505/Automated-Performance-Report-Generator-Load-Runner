@@ -276,7 +276,7 @@ if __name__ == "__main__":
             if kafka_topics_list:
                 final_data_to_save.update({"kafka_topics":kafka_topics_list})
             if evecount:
-                final_data_to_save.update({"Events Counts":evecount})
+                final_data_to_save.update({"Cloudquery Event Counts":evecount})
             if sts:
                 final_data_to_save.update({"STS Records":sts})
             if trino_queries:
@@ -284,7 +284,7 @@ if __name__ == "__main__":
             if cloudquery_accuracies:
                 final_data_to_save.update({"Cloudquery Table Accuracies":cloudquery_accuracies})
             if db_op:
-                final_data_to_save.update({"Processing Time of Db Operations":db_op})
+                final_data_to_save.update({"Cloudquery Db Operations Processing Time":db_op})
             if kubequery_accuracies:
                 final_data_to_save.update({"Kubequery Table Accuracies":kubequery_accuracies})
             if selfmanaged_accuracies:
