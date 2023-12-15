@@ -6,10 +6,10 @@ class all_combined_child(parent):
                     "test_title": "Multiple Customer Rule Engine, Control Plane, CloudQuery, KubeQuery and SelfManaged Load",
                     "total_number_of_customers": 100,
                     "number_of_customers_with_auto_exception_enabled": 0,
-                    "total_assets": "32K Control Plane +  6K Multi customer",
-                    "records_sent_per_hour_per_customer": "38,88,000",
-                    "records_sent_per_hour" : "38,88,00,000",
-                    "assets_per_cust":60,
+                    "total_assets": "32K Control Plane +  8K Multi customer",
+                    "records_sent_per_hour_per_customer": "51,84,000",
+                    "records_sent_per_hour" : "51,84,00,000",
+                    "assets_per_cust":80,
                     "input_file": "rhel7-6tab_12rec.log",
                     "events_table_name": "dns_lookup_events, socket_events, process_events, process_file_events"
                 }

@@ -2,6 +2,8 @@ from atlassian import Confluence
 import logging
 import pandas as pd
 import os
+import io
+import plotly.io as pio
 
 # logging.basicConfig(level=logging.DEBUG)
 
@@ -186,6 +188,28 @@ class publish_to_confluence:
         base=link_string.split('//')[-1]
         key=base.split('/')[2]
         self.add_jira_issue_by_key(key)
+
+    def attach_plot_as_image(self, chart_name, fig, heading_tag):
+        try:
+            print(f"Attaching : {chart_name}")
+            img_bytes = pio.to_image(fig, format='png') # Convert Plotly figure to image bytes
+            img_stream = io.BytesIO(img_bytes) # Create an Image object from the image bytes
+            attachment = self.confluence.attach_content(content=img_stream, name=chart_name, content_type="image/png", title=self.title, space=self.space)
+            attachment_id = attachment['results'][0]['id']
+            self.body_content += f"""
+                                <h{heading_tag}>{str(chart_name)}</h{heading_tag}>
+                                    <ac:image ac:height="1400">
+                                        <ri:attachment ri:filename="{str(chart_name)}" ri:space-key="{self.space}" />
+                                    </ac:image>
+                            """
+        except Exception as err:
+            print(f"ERROR : {err}")
+    
+    def attach_plots_as_charts(self, dict_of_figures):
+        print("Attaching charts ...")
+        self.body_content += "<h2>Charts</h2>"
+        for chart_name in dict_of_figures:
+            self.attach_plot_as_image(chart_name, dict_of_figures[chart_name], 4)
 
     def update_and_publish(self):
         self.confluence.update_page(self.page_id, self.title, self.body_content, 
