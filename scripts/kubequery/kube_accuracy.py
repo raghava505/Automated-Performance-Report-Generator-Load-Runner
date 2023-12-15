@@ -4,7 +4,7 @@ import sys
 sys.path.append('kubequery/') 
 import json
 import paramiko
-from kubequery_configs import *
+from .kubequery_configs import *
 from fabric import Connection
 from datetime import datetime, timedelta
 from pathlib import Path
