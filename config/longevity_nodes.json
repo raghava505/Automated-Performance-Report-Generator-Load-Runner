@@ -21,8 +21,8 @@
         "long-c2pn6"
     ],
     "dnodes": [
-        "long-c1dn1",
         "long-c2dn1",
+        "long-c1dn1",
         "long-c1dn2",
         "long-c2dn2",
         "long-c1dn3",
