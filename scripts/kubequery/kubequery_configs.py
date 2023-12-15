@@ -93,8 +93,8 @@ asset_count = 40
 #sim_nodes = ['s13sim1','s13sim2','s13sim3','s13sim4']
 # sim_nodes = ['s13sim2','s13sim3','s13sim4']
 
-kubesim_ports = [1255,1256,1247,1248,1249]
-osquery_ports = [28001,28002,28003,28004,28005]
+kubesim_ports = [1201,1202,1203,1204,1205,1206,1207,1208,1209,1210]
+osquery_ports = [28001,28002,28003,28004,28005,28006,28007,28008,28009,28010]
 # In Minutes
 deltaTime = 60 
 
@@ -110,13 +110,13 @@ kube_index_map = {0:'kubernetes_nodes',
                   9:'kubernetes_cluster_role_binding_subjects',
                   5:'kubernetes_events'}
 
-cvd_data = {"VulnerabilitiesScannedImages_Count":0, 
-             "Vulnerabilities_Count":0, 
+cvd_data = {"VulnerabilitiesScannedImages_Count": 5000, 
+             "Vulnerabilities_Count": 30000000, 
              "Compliance_Count":0, 
-             "ProcessEvents_Count":0, 
-             "SocketEvents_Count":0, 
-             "ProcessFileEvents_Count":0, 
-             "DnsLookupEvents_Count":0, 
+             "ProcessEvents_Count": 4000000, 
+             "SocketEvents_Count": 4000000, 
+             "ProcessFileEvents_Count": 4000000, 
+             "DnsLookupEvents_Count": 4000000, 
              }
 
 key_mapping = {
