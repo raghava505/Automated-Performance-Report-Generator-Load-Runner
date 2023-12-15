@@ -157,6 +157,13 @@ class parent:
             "Statedb PG connections by application":('uptycs_pg_connections_by_app{db=~"statedb"}',["application_name"]),
         }
     
+    @staticmethod
+    def get_restart_count_charts():
+        return {
+            "Uptycs containers restart count":('sum(uptycs_container_restart_count) by (container_name)' , ["container_name"]),
+            "Uptycs applications restart count":('sum(uptycs_app_restart) by (app_name)' , ["app_name"]),
+            }
+    
     @classmethod
     def get_all_chart_queries(cls):
         return {
@@ -167,6 +174,7 @@ class parent:
             "Application-level CPU Charts":cls.get_app_level_CPU_used_cores_queries(),
             "Inject-Drain rate and Lag Charts":cls.get_inject_drain_rate_and_lag_chart_queries(),
             "Pg Charts": cls.get_pg_charts(),
+            "Restart count Charts": cls.get_restart_count_charts(),
             "Other Charts":cls.get_other_chart_queries()
         }
 
