@@ -86,7 +86,7 @@ class ACCURACY:
         resp = self.global_query(customer,table)
         
         if resp!=None:
-            if "aws_cloudtrail_events" in query_api:
+            if "aws_cloudtrail_events" in query_api or "gcp_cloud_log_events" in query_api:
                 with event_count.get_lock():
                     event_count.value += resp["items"][0]["rowData"]["_col0"]
             else:
@@ -103,11 +103,10 @@ class ACCURACY:
 
 
     def table_accuracy(self,data, table, actual_true_count,actual_false_count,expected_true_count,expected_false_count):
-        accuracy_true = round((actual_true_count / expected_true_count) * 100, 2)
-        accuracy_false= round((actual_false_count / expected_false_count) * 100, 2)
+        accuracy_true = round(((actual_true_count +1) / (expected_true_count+1)) * 100, 2)
+        accuracy_false= round(((actual_false_count+1) / (expected_false_count+1)) * 100, 2)
         data[table] = {"Actual added":actual_true_count, "Actual removed": actual_false_count, "Expected added":expected_true_count, "Expected removed": expected_false_count,  "Accuracy true": accuracy_true, "Accuracy false":accuracy_false}
-        #accuracy_entry={"table": table,  "expected added": expected_true_count, "expected deleted": expected_false_count}
-        #data.append(accuracy_entry)
+        print(data[table])
 
     def multi_accuracy(self,data,file):
         
