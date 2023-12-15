@@ -89,14 +89,14 @@ final_data = {
     }
 }
 
-asset_count = 100
+asset_count = 40
 #sim_nodes = ['s13sim1','s13sim2','s13sim3','s13sim4']
 # sim_nodes = ['s13sim2','s13sim3','s13sim4']
 
-kubesim_ports = [1255,1256]
-osquery_ports = [28010,28020]
+kubesim_ports = [1255,1256,1247,1248,1249]
+osquery_ports = [28001,28002,28003,28004,28005]
 # In Minutes
-deltaTime = 10 
+deltaTime = 60 
 
 kube_data = {0:0,1:0,2:0,3:0,5:0,6:0,7:0,8:0,9:0,10:0}
 kube_index_map = {0:'kubernetes_nodes',
