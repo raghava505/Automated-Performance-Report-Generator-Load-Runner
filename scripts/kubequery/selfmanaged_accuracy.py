@@ -10,7 +10,7 @@ from datetime import timedelta
 from pathlib import Path
 
 # Variables
-ROOT_PATH = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
+ROOT_PATH = os.path.dirname(os.path.dirname(os.path.dirname(os.path.realpath(__file__))))
 base_stack_config_path = f"{ROOT_PATH}/config"
 
 class SelfManaged_Accuracy:
