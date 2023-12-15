@@ -87,6 +87,9 @@ def create_images_and_save(path,doc_id,collection,fs):
                     plt.plot_date(x_values_ist, y, linestyle='solid',label=line["legend"],markersize=0.1,linewidth=fig_width/21)
                     list_of_legend_lengths.append(len(str(line["legend"])))
                     num_lines+=1
+                    # plt.text(x_values_ist[0],y[0],line['legend'])
+                    plt.text(x_values_ist[0],y[0],line['legend'], fontsize=10, verticalalignment='bottom', horizontalalignment='right', color='black', rotation=0, bbox=dict(facecolor='white', edgecolor='none', boxstyle='round,pad=0.1'))
+                    plt.text(x_values_ist[-1],y[-1],line['legend'], fontsize=10, verticalalignment='bottom', horizontalalignment='right', color='black', rotation=0, bbox=dict(facecolor='white', edgecolor='none', boxstyle='round,pad=0.1'))
                 plt.gca().xaxis.set_major_locator(MinuteLocator(interval=30))
                 date_formatter = DateFormatter('%H:%M')
                 plt.gca().xaxis.set_major_formatter(date_formatter)
@@ -156,7 +159,7 @@ def create_images_and_save(path,doc_id,collection,fs):
 # client = pymongo.MongoClient("mongodb://localhost:27017")
 # database = client["Osquery_LoadTests"]
 # fs = GridFS(database)
-# collection = database["ControlPlane"]
-# create_images_and_save(path,"6549caac21c6cf40049944df",collection,fs)
+# collection = database["MultiCustomer"]
+# create_images_and_save(path,"657c3430b37a5726f90e4286",collection,fs)
 # f3_at = time.perf_counter()
 # print(f"Collecting the report data took : {round(f3_at - s_at,2)} seconds in total")
