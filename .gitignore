@@ -23,3 +23,4 @@ project/*
 test.ipynb
 scripts/osquery/testinputfiles/*
 logs/*
+scripts/application_restarts.py
