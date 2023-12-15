@@ -59,7 +59,8 @@
         "long-sts2"
     ],
     "kubesim_nodes": [
-        "long-kube-sim1"
+        "long-kube-sim1",
+        "long-kube-sim2"
     ],
     "selfsim_nodes": [
         "long-self-managed-container1"
