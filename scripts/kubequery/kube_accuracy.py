@@ -4,20 +4,27 @@ import sys
 sys.path.append('kubequery/') 
 import json
 import paramiko
-from .kubequery_configs import *
+from kubequery_configs import *
 from fabric import Connection
 from datetime import datetime, timedelta
 from pathlib import Path
 
+
+# PROJECT_ROOT = Path(__file__).resolve().parent
+# CONFIG_PATH = "./config"
+
 # Variables
-PROJECT_ROOT = Path(__file__).resolve().parent
-CONFIG_PATH = "./config"
+ROOT_PATH = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
+base_stack_config_path = f"{ROOT_PATH}/config"
+print(base_stack_config_path)
 
 class Kube_Accuracy:
 
     def __init__(self,start_timestamp,end_timestamp,prom_con_obj,variables):
         
-        with open(os.path.join(CONFIG_PATH,variables["test_env_file_name"]),"r") as file:
+        test_env_file_path = "{}/{}".format(base_stack_config_path,variables["test_env_file_name"])
+        
+        with open(test_env_file_path,"r") as file:
             data = json.load(file)
             # print(data)
         
@@ -132,7 +139,7 @@ class Kube_Accuracy:
             self.accuracy[t] = {
                 "Expected Records" : self.expected_data[t],
                 "Actual Records" : self.actual_data[t],
-                "Accuracy" : (self.actual_data[t]/self.expected_data[t])*100
+                "Accuracy" : (self.actual_data[t]+1/self.expected_data[t]+1)*100
             }
         #print(self.accuracy)
         return self.accuracy
