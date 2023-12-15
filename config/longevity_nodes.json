@@ -69,8 +69,8 @@
             "root_partition": "1.8T",
             "kafka": "1.8T"
         },
-        "ram": "251",
-        "cores": "32",
+        "ram": "220",
+        "cores": "48",
         "clst": "1"
     },
     "long-c2pn1": {
@@ -79,7 +79,7 @@
             "kafka": "1.8T"
         },
         "ram": "251",
-        "cores": "32",
+        "cores": "48",
         "clst": "2"
     },
     "long-c1pn2": {
@@ -97,7 +97,7 @@
             "kafka": "1.8T"
         },
         "ram": "251",
-        "cores": "32",
+        "cores": "48",
         "clst": "2"
     },
     "long-c1pn3": {
@@ -115,7 +115,7 @@
             "kafka": "1.8T"
         },
         "ram": "251",
-        "cores": "32",
+        "cores": "48",
         "clst": "2"
     },
     "long-c1pn4": {
@@ -124,7 +124,7 @@
             "kafka": "1.8T"
         },
         "ram": "188",
-        "cores": "32",
+        "cores": "48",
         "clst": "1"
     },
     "long-c2pn4": {
@@ -142,7 +142,7 @@
             "kafka": "1.8T"
         },
         "ram": "188",
-        "cores": "32",
+        "cores": "48",
         "clst": "1"
     },
     "long-c2pn5": {

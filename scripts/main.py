@@ -162,12 +162,6 @@ if __name__ == "__main__":
             Osquery_event_accuracies = accuracy_obj.events_accuracy()
             print("Osquery_event_accuracies : ",Osquery_event_accuracies)
         
-        #-------------------------Cloudquery Accuracies----------------------------
-        cloudquery_accuracies=None
-        if variables["load_type"] in ["CloudQuery","osquery_cloudquery_combined","all_loads_combined"]:
-            print("Calculating accuracies for cloudquery ...")
-            accu= ACCURACY(start_timestamp=start_utc_time,end_timestamp=end_utc_time,prom_con_obj=prom_con_obj,variables=variables)
-            cloudquery_accuracies = accu.calculate_accuracy()
 
         #-------------------------Kubequery Accuracies----------------------------
         kubequery_accuracies=None
@@ -227,6 +221,13 @@ if __name__ == "__main__":
         print("Fetching resource usages data ...")
         comp = MC_comparisions(start_timestamp=start_timestamp,end_timestamp=end_timestamp,prom_con_obj=prom_con_obj)
         mem_cpu_usages_dict,overall_usage_dict=comp.make_comparisions()
+        
+        #-------------------------Cloudquery Accuracies----------------------------
+        cloudquery_accuracies=None
+        if variables["load_type"] in ["CloudQuery","osquery_cloudquery_combined","all_loads_combined"]:
+            print("Calculating accuracies for cloudquery ...")
+            accu= ACCURACY(start_timestamp=start_utc_time,end_timestamp=end_utc_time,prom_con_obj=prom_con_obj,variables=variables)
+            cloudquery_accuracies = accu.calculate_accuracy()
         
         #--------------------------------Capture charts data---------------------------------------
         all_gridfs_fileids=[]

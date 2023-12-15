@@ -37,18 +37,20 @@ class ACCURACY:
         self.api_path=None
         self.total_counts = 'total_counts_'
 
+        self.upt_day="".join(str(start_timestamp.strftime("%Y-%m-%d")).split('-'))
+
     def global_query(self,data,table):
         # test_result = TestResult()
         # log.info(str(PROJECT_ROOT))
         print(table)
         stack_keys = open_js_safely(self.api_path)
         mglobal_query_api = query_api.format(data['domain'],data['domainSuffix'],data['customerId'])
-        pl=payload["query"].format(table,self.load_start,self.load_end)
+        pl=payload["query"].format(table,self.upt_day,self.load_start,self.load_end)
         payload["query"]=pl
         output2 = post_api(data,mglobal_query_api,payload)
         job_id= output2['id']
         n_result_api =result_api.format(data['domain'], data['domainSuffix'], data['customerId'],job_id)
-        payload["query"]="select upt_added,count(*) from {} where upt_day >= 2023-11-30 and upt_time >= timestamp '{}' and upt_time < timestamp '{}' group by upt_added;"
+        payload["query"]="select upt_added,count(*) from {} where upt_day >= {} and upt_time >= timestamp '{}' and upt_time < timestamp '{}' group by upt_added;"
 
         if output2['status']=="FINISHED":
             response=get_api(data,n_result_api)

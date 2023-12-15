@@ -24,3 +24,4 @@ test.ipynb
 scripts/osquery/testinputfiles/*
 logs/*
 scripts/application_restarts.py
+scripts/pg_badger_report.py

@@ -15,6 +15,6 @@ api_path_multi_longevity = str(PROJECT_ROOT)  + '/api_keys/{}_multicustomer_api.
 
 
 query_api='https://{}{}/public/api/customers/{}/queryJobs'
-payload={"query":"select upt_added,count(*) from {} where upt_day >= 2023-11-30 and upt_time >= timestamp '{}' and upt_time < timestamp '{}' group by upt_added;","type":"global","filters":{},"parameters":[],"parameterValues":{},"agentType":"asset"}
+payload={"query":"select upt_added,count(*) from {} where upt_day >= {} and upt_time >= timestamp '{}' and upt_time < timestamp '{}' group by upt_added;","type":"global","filters":{},"parameters":[],"parameterValues":{},"agentType":"asset"}
 result_api='https://{}{}/public/api/customers/{}/queryJobs/{}/results?limit=10000'
 
