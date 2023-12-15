@@ -41,7 +41,7 @@ def create_input_form():
             "start_time_str_ist":  "2023-12-05 22:40",
             "load_duration_in_hrs": 10,
             "sprint": 144,
-            "build": 144068,
+            "build": "144068",
             "add_extra_time_for_charts_at_end_in_min": 10,
             # "fetch_node_parameters_before_generating_report" :  False,
             }

@@ -319,7 +319,7 @@ class osq_accuracy:
                 actual = http_query(api, query,self.ext)
                 print(actual)
             else:
-                expect=66000
+                expect=22000
                 query="select count(*) from {} where  created_at >= timestamp '{}' and created_at < timestamp '{}' and code like '%-builder-added%'".format(table,self.start_time,self.end_time)
                 print(f"Executing query : {query}")
                 actual = http_query(api, query, self.ext)
