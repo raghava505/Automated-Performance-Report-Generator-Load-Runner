@@ -82,3 +82,7 @@ class PG_STATS:
             table_dict.update(obj)
         
         return table_dict
+
+# from settings import configuration
+# cls  = PG_STATS(1702588974,1702629932,10,configuration("s1_nodes.json"))
+# print(cls.process_output())
