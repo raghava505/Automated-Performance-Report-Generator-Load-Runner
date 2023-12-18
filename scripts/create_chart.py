@@ -84,12 +84,14 @@ def create_images_and_save(path,doc_id,collection,fs,duration):
                     y = [float(point[1]) for point in large_array]
                     # y = pd.Series(y).rolling(window=5).mean()
                     x_values_ist,y=eliminate_long_breaks(x_values_ist,y)
-                    plt.plot_date(x_values_ist, y, linestyle='solid',label=line["legend"],markersize=0.1,linewidth=fig_width/21)
+                    line_plot, = plt.plot_date(x_values_ist, y, linestyle='solid', label=line["legend"], markersize=0.1, linewidth=fig_width/21)
                     list_of_legend_lengths.append(len(str(line["legend"])))
                     num_lines+=1
                     # plt.text(x_values_ist[0],y[0],line['legend'])
-                    plt.text(x_values_ist[0],y[0],line['legend'], fontsize=10, verticalalignment='bottom', horizontalalignment='right', color='black', rotation=0, bbox=dict(facecolor='white', edgecolor='none', boxstyle='round,pad=0.1'))
-                    plt.text(x_values_ist[-1],y[-1],line['legend'], fontsize=10, verticalalignment='bottom', horizontalalignment='right', color='black', rotation=0, bbox=dict(facecolor='white', edgecolor='none', boxstyle='round,pad=0.1'))
+                    # Get the line color
+                    line_color = line_plot.get_color()
+                    plt.text(x_values_ist[0],y[0],line['legend'], fontsize=10, verticalalignment='bottom', horizontalalignment='left', color='black', rotation=0, bbox=dict(facecolor=line_color, edgecolor='none', boxstyle='round,pad=0.1'))
+                    plt.text(x_values_ist[-1],y[-1],line['legend'], fontsize=10, verticalalignment='bottom', horizontalalignment='right', color='black', rotation=0, bbox=dict(facecolor=line_color, edgecolor='none', boxstyle='round,pad=0.1'))
                 
                 if duration < 18:
                     x_time_interval_in_min = 30
@@ -128,7 +130,7 @@ def create_images_and_save(path,doc_id,collection,fs,duration):
                     final_ncol = ncol + scale*font_diff*(rows-1)
                     # print(f"ncol : {ncol}, finalncol: {final_ncol}, font diff:{initial_legend_fontsize-fontsize} , rows:{rows}")
                     # final_ncol = ncol + ((ncol_increase_rate_with_rows/((average_legend_length**2.09) * (fontsize**2.21))) * (rows-1))
-                    leg=plt.legend(loc='upper center', bbox_to_anchor=(0.5, -0.030), ncol=final_ncol, fontsize=fontsize,handlelength=1,frameon=False)
+                    leg=plt.legend(loc='upper center', bbox_to_anchor=(0.5, -0.050), ncol=final_ncol, fontsize=fontsize,handlelength=1,frameon=False)
                     for legobj in leg.legendHandles:
                         legobj.set_linewidth(fig_width/6) 
                 file_name = title.replace("/", "-")
