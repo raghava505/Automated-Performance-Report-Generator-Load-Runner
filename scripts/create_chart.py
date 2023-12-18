@@ -50,7 +50,7 @@ initial_legend_fontsize=fig_width/1.90
 fontsize_decrease_rate_with_rows=fig_width/165
 ncol_increase_rate_with_rows=8000
 
-def create_images_and_save(path,doc_id,collection,fs):
+def create_images_and_save(path,doc_id,collection,fs,duration):
     sns.set_style("darkgrid")
     sns.plotting_context("talk")
     sns.set(rc={"text.color": text_color})
@@ -90,9 +90,20 @@ def create_images_and_save(path,doc_id,collection,fs):
                     # plt.text(x_values_ist[0],y[0],line['legend'])
                     plt.text(x_values_ist[0],y[0],line['legend'], fontsize=10, verticalalignment='bottom', horizontalalignment='right', color='black', rotation=0, bbox=dict(facecolor='white', edgecolor='none', boxstyle='round,pad=0.1'))
                     plt.text(x_values_ist[-1],y[-1],line['legend'], fontsize=10, verticalalignment='bottom', horizontalalignment='right', color='black', rotation=0, bbox=dict(facecolor='white', edgecolor='none', boxstyle='round,pad=0.1'))
-                plt.gca().xaxis.set_major_locator(MinuteLocator(interval=30))
-                date_formatter = DateFormatter('%H:%M')
-                plt.gca().xaxis.set_major_formatter(date_formatter)
+                
+                if duration < 18:
+                    x_time_interval_in_min = 30
+                else:
+                    x_time_interval_in_min = 60
+                
+                if duration > 24:
+                    x_date_formatter = DateFormatter('%m/%d \n%H:%M')
+                else:
+                    x_date_formatter = DateFormatter('%H:%M')
+
+                plt.gca().xaxis.set_major_locator(MinuteLocator(interval=x_time_interval_in_min))
+                # date_formatter = DateFormatter('%H:%M')
+                plt.gca().xaxis.set_major_formatter(x_date_formatter)
                 unit = line['unit']
                 plt.gca().get_yaxis().set_major_formatter(FuncFormatter(lambda value,pos:format_y_ticks(value,pos,unit)))
                 plt.title("\n"+str(title),fontsize=fig_width/1.68,pad=fig_width/0.9,y=1)
