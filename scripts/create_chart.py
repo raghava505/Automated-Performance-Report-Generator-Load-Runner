@@ -93,10 +93,9 @@ def create_images_and_save(path,doc_id,collection,fs,duration):
                     plt.text(x_values_ist[0],y[0],line['legend'], fontsize=10, verticalalignment='bottom', horizontalalignment='left', color='black', rotation=0, bbox=dict(facecolor=line_color, edgecolor='none', boxstyle='round,pad=0.1'))
                     plt.text(x_values_ist[-1],y[-1],line['legend'], fontsize=10, verticalalignment='bottom', horizontalalignment='right', color='black', rotation=0, bbox=dict(facecolor=line_color, edgecolor='none', boxstyle='round,pad=0.1'))
                 
-                if duration < 18:
-                    x_time_interval_in_min = 30
-                else:
-                    x_time_interval_in_min = 60
+                base_x_interval_min = 30
+                factor = (duration//18) + 1
+                x_time_interval_in_min = base_x_interval_min * factor
                 
                 if duration > 24:
                     x_date_formatter = DateFormatter('%m/%d \n%H:%M')
