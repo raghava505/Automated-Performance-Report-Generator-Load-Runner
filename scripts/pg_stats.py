@@ -4,7 +4,7 @@ import pandas as pd
 
 databases = ["configdb","statedb"]
 
-pg_query = 'uptycs_pg_stats{db=~"%s"}'
+
 
 class PG_STATS:
     def __init__(self,start_timestamp,end_timestamp,load_dur,prom_con_obj):
@@ -17,14 +17,15 @@ class PG_STATS:
         self.test_env_file_path=prom_con_obj.test_env_file_path
         
     def get_data(self,db):
+        query = f'uptycs_pg_stats{{db=~"{db}"}}'
         params = {
-            'query': pg_query %(db),
+            'query': query,
             'start': self.curr_ist_start_time,
             'end': self.curr_ist_end_time,
             'step': self.load_duration * 3600              
         }
         response = requests.get(self.PROMETHEUS + self.API_PATH, params=params)
-        print(f"-------processing PG STATS for {pg_query} (timestamp : {self.curr_ist_start_time} to {self.curr_ist_end_time}), Status code : {response.status_code}")
+        print(f"-------processing PG STATS for {query} (timestamp : {self.curr_ist_start_time} to {self.curr_ist_end_time}), Status code : {response.status_code}")
         if response.status_code != 200:print("ERROR : Request failed")
         result = response.json()['data']['result']
 
@@ -84,5 +85,5 @@ class PG_STATS:
         return table_dict
 
 # from settings import configuration
-# cls  = PG_STATS(1702588974,1702629932,10,configuration("s1_nodes.json"))
-# print(cls.process_output())
+# cls  = PG_STATS(1702926000,1702947600,6,configuration("longevity_nodes.json"))
+# print("FINAL O/P : " ,cls.process_output())
