@@ -63,7 +63,7 @@ class Kube_Accuracy:
             if t == "vulnerabilities_scanned_images":
                 query = """select count(*) from {} where system_id like 'c0d3%'""".format("upt_"+t)
             else:
-                query = """select count(*) from {} where upt_day>={} and upt_time>=timestamp'{}' and upt_time<=timestamp'{}' and upt_hostname like 'cluster%'""".format(t,self.upt_day,self.load_start,end_time)
+                query = """select count(*) from {} where upt_day>={} and upt_time>=timestamp'{}' and upt_hostname like 'cluster%'""".format(t,self.upt_day,self.load_start)
             
             command="""sudo TRINO_PASSWORD=prestossl /opt/uptycs/cloud/utilities/trino-cli --server https://localhost:5665 --user uptycs --catalog uptycs --schema upt_{} --password --truststore-password sslpassphrase --truststore-path /opt/uptycs/cloud/config/wildcard.jks --insecure --execute "{} ;" """.format(self.cloud_domain, query)
             conn = Connection(host=self.target_host, user=self.username, connect_kwargs={'password': self.password})
