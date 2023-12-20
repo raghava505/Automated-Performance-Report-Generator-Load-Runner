@@ -169,7 +169,7 @@ if __name__ == "__main__":
             print("Calculating accuracies for KubeQuery ...")
             accuracy = Kube_Accuracy(start_timestamp=start_utc_time,end_timestamp=end_utc_time,prom_con_obj=prom_con_obj,variables=variables)
             kubequery_accuracies = accuracy.accuracy_kubernetes()
-            # print(json.dumps(kubequery_accuracies, indent=4))
+            print(json.dumps(kubequery_accuracies, indent=4))
             # sys.exit()
 
         #-------------------------SelfManaged Accuracies----------------------------
@@ -178,7 +178,7 @@ if __name__ == "__main__":
             print("Calculating accuracies for SelfManaged ...")
             accuracy = SelfManaged_Accuracy(start_timestamp=start_utc_time,end_timestamp=end_utc_time,prom_con_obj=prom_con_obj,variables=variables)
             selfmanaged_accuracies = accuracy.accuracy_selfmanaged()
-            # print(json.dumps(selfmanaged_accuracies, indent=4))
+            print(json.dumps(selfmanaged_accuracies, indent=4))
             # sys.exit()
 
         

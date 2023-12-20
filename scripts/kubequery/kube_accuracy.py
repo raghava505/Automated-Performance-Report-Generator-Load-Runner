@@ -62,10 +62,12 @@ class Kube_Accuracy:
         for t in self.tables:
             if t == "vulnerabilities_scanned_images":
                 query = """select count(*) from {} where system_id like 'c0d3%'""".format("upt_"+t)
+            elif "kubernetes" in t:
+                query = """select count(*) from {} where upt_day>={} and upt_time>=timestamp'{}'  and upt_time<=timestamp'{}'""".format(t,self.upt_day,self.load_start,end_time)
             else:
-                query = """select count(*) from {} where upt_day>={} and upt_time>=timestamp'{}' and upt_hostname like 'cluster%'""".format(t,self.upt_day,self.load_start)
+                query = """select count(*) from {} where upt_day>={} and upt_time>=timestamp'{}'  and upt_time<=timestamp'{}' and upt_hostname like 'cluster%'""".format(t,self.upt_day,self.load_start,end_time)
             
-            command="""sudo TRINO_PASSWORD=prestossl /opt/uptycs/cloud/utilities/trino-cli --server https://localhost:5665 --user uptycs --catalog uptycs --schema upt_{} --password --truststore-password sslpassphrase --truststore-path /opt/uptycs/cloud/config/wildcard.jks --insecure --execute "{} ;" """.format(self.cloud_domain, query)
+            command="""sudo TRINO_PASSWORD=prestossl /opt/uptycs/cloud/utilities/trino-cli --server https://localhost:5665 --user uptycs --catalog uptycs --schema upt_{} --password --truststore-password sslpassphrase --truststore-path /opt/uptycs/cloud/config/wildcard.jks --insecure --execute "{};" """.format(self.cloud_domain, query)
             conn = Connection(host=self.target_host, user=self.username, connect_kwargs={'password': self.password})
             print(command)
             res = conn.sudo(command, password=self.password, hide='stderr')
@@ -102,7 +104,7 @@ class Kube_Accuracy:
                         self.kubedata[i]+=int(re.findall(r'\d+',data)[-1])
 
             self.kube_data = {kube_index_map[key]: value for key, value in self.kubedata.items()}
-            print(json.dumps(self.kube_data, indent=4)) 
+            
             # sys.exit()
             
             for port in osquery_ports:
@@ -127,6 +129,7 @@ class Kube_Accuracy:
                
         self.cvddata = {key: self.cvddata[key] * asset_count for key in self.cvddata}
         self.cvddata = {key_mapping[key]: value for key, value in self.cvddata.items()}
+        print(json.dumps(self.kube_data, indent=4)) 
         print(json.dumps(self.cvddata, indent=4))
         self.expected_data = {**self.kube_data, **self.cvddata}
         #print(self.expected_data)
