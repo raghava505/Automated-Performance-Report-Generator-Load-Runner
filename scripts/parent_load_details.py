@@ -148,13 +148,13 @@ class parent:
             "Configb PG table size per table":('uptycs_pg_stats{db=~"configdb",stat="table_size_bytes"}',["table_name"]),
             "Configb PG index size per table":('uptycs_pg_stats{db=~"configdb",stat="index_size_bytes"}',["table_name"]),
             "Configb PG live tuples per table":('uptycs_pg_stats{db=~"configdb",stat="live_tuples"}',["table_name"]),
-            "Configb PG connections by state":('uptycs_pg_connections_by_state{db=~"configdb"}',["state"]),
-            "Configb PG connections by application":('uptycs_pg_connections_by_app{db=~"configdb"}',["application_name"]),
+            "Configb PG connections by state":('sum(uptycs_pg_connections_by_state{db=~"configdb"}) by (state)',["state"]),
+            "Configb PG connections by application":('sum(uptycs_pg_connections_by_app{db=~"configdb"}) by (application_name)',["application_name"]),
             "Statedb PG table size per table":('uptycs_pg_stats{db=~"statedb",stat="table_size_bytes"}',["table_name"]),
             "Statedb PG index size per table":('uptycs_pg_stats{db=~"statedb",stat="index_size_bytes"}',["table_name"]),
             "Statedb PG live tuples per table":('uptycs_pg_stats{db=~"statedb",stat="live_tuples"}',["table_name"]),
-            "Statedb PG connections by state":('uptycs_pg_connections_by_state{db=~"statedb"}',["state"]),
-            "Statedb PG connections by application":('uptycs_pg_connections_by_app{db=~"statedb"}',["application_name"]),
+            "Statedb PG connections by state":('sum(uptycs_pg_connections_by_state{db=~"statedb"}) by (state)',["state"]),
+            "Statedb PG connections by application":('sum(uptycs_pg_connections_by_app{db=~"statedb"}) by (application_name)',["application_name"]),
         }
     
     @staticmethod
@@ -173,7 +173,7 @@ class parent:
             "Application-level Memory Charts":cls.get_app_level_RAM_used_percentage_queries(),
             "Application-level CPU Charts":cls.get_app_level_CPU_used_cores_queries(),
             "Inject-Drain rate and Lag Charts":cls.get_inject_drain_rate_and_lag_chart_queries(),
-            "Pg Charts": cls.get_pg_charts(),
+            "Pg Stats Charts": cls.get_pg_charts(),
             "Restart count Charts": cls.get_restart_count_charts(),
             "Other Charts":cls.get_other_chart_queries()
         }
