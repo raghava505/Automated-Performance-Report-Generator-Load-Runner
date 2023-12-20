@@ -43,6 +43,7 @@ def create_input_form():
             "sprint": 144,
             "build": "144068",
             "add_extra_time_for_charts_at_end_in_min": 10,
+            "api_load_csv_file_path":"/path/to/file.csv"
             # "fetch_node_parameters_before_generating_report" :  False,
             }
     
@@ -76,6 +77,8 @@ def create_input_form():
                 helper_text += "\n select one option " 
                 input_index = int(input(f"Enter : {' '.join(str(key).split('_')).title()} {helper_text} : ").strip())
                 input_value = test_env_path_options[input_index]
+            elif key == "api_load_csv_file_path":
+                input_value=str(input(f"Enter : {' '.join(str(key).split('_')).title()}  (example: {value}) .Press ENTER to skip this variable : ").strip())
             else:
                 input_value=str(input(f"Enter : {' '.join(str(key).split('_')).title()}  (example: {value}) : ").strip())
         
