@@ -141,7 +141,11 @@ if __name__ == "__main__":
             print("Performing trino queries ...")
             calc = TRINO(curr_ist_start_time=variables["start_time_str_ist"],curr_ist_end_time=end_time_str,prom_con_obj=prom_con_obj)
             trino_queries = calc.fetch_trino_queries()
-            
+        #-------------------------API LOAD--------------------------
+        csv_path = variables['api_load_csv_file_path']
+        result_dict_api_load=None
+        # result_dict_api_load = your_func(csv_path)
+
         #-------------------------Osquery Table Accuracies----------------------------
         Osquery_table_accuracies=None
         Osquery_event_accuracies=None
@@ -298,6 +302,8 @@ if __name__ == "__main__":
                 final_data_to_save.update({"Osquery Table Accuracies":Osquery_table_accuracies})
             if Osquery_event_accuracies:
                 final_data_to_save.update({"Osquery Event Accuracies":Osquery_event_accuracies})
+            if result_dict_api_load:
+                final_data_to_save.update({"API Load details":result_dict_api_load})
             
 
             final_data_to_save.update({"charts":complete_charts_data_dict})
