@@ -17,12 +17,12 @@ vsi_data = {"VulnerabilitiesScannedImages_Count": 0,
              "DockerImages_Count": 0,
              "CrioImages_Count": 0}
 
-asset_count = 100
+asset_count = 200
 # sim_nodes = ['s13sim1','s13sim2','s13sim3','s13sim4']
 
 ports = [28001 ,28002]
 # In Minutes
-deltaTime = 70 
+deltaTime = 60 
 
 key_mapping = {
     'VulnerabilitiesScannedImages_Count': 'vulnerabilities_scanned_images',
