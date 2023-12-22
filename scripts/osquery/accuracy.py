@@ -326,7 +326,7 @@ class osq_accuracy:
                 print(actual)
             else:
                 utc_days=self.get_utc_days_involved()
-                expect=alerts_triggered*1000*(utc_days)
+                expect=alerts_triggered*1000*(utc_days+1)
                 query="select count(*) from {} where  created_at >= timestamp '{}' and created_at < timestamp '{}' and code like '%-builder-added%'".format(table,self.start_time,self.end_time)
                 print(f"Executing query : {query}")
                 actual = http_query(api, query, self.ext)
