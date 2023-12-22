@@ -174,10 +174,9 @@ if __name__ == "__main__":
         kubequery_accuracies=None
         if variables["load_name"] == "KubeQuery_SingleCustomer" or variables["load_type"] in ["all_loads_combined"]:
             print("Calculating accuracies for KubeQuery ...")
-            # accuracy = Kube_Accuracy(start_timestamp=start_utc_time,end_timestamp=end_utc_time,prom_con_obj=prom_con_obj,variables=variables)
-            # kubequery_accuracies = accuracy.accuracy_kubernetes()
-            # print(json.dumps(kubequery_accuracies, indent=4))
-            # sys.exit()
+            accuracy = Kube_Accuracy(start_timestamp=start_utc_time,end_timestamp=end_utc_time,prom_con_obj=prom_con_obj,variables=variables)
+            kubequery_accuracies = accuracy.accuracy_kubernetes()
+            print(json.dumps(kubequery_accuracies, indent=4))
 
         #-------------------------SelfManaged Accuracies----------------------------
         selfmanaged_accuracies=None
@@ -221,8 +220,8 @@ if __name__ == "__main__":
         elk_errors = None
         if test_env_json_details["stack"]!="S1":
             print("Fetching Elk Errors ...")
-            # elk = Elk_erros(start_timestamp=start_timestamp,end_timestamp=end_timestamp,prom_con_obj=prom_con_obj)
-            # elk_errors = elk.fetch_errors()
+            elk = Elk_erros(start_timestamp=start_timestamp,end_timestamp=end_timestamp,prom_con_obj=prom_con_obj)
+            elk_errors = elk.fetch_errors()
         
         #--------------------------------cpu and mem node-wise---------------------------------------
         print("Fetching resource usages data ...")
@@ -233,8 +232,8 @@ if __name__ == "__main__":
         cloudquery_accuracies=None
         if variables["load_type"] in ["CloudQuery","osquery_cloudquery_combined","all_loads_combined"]:
             print("Calculating accuracies for cloudquery ...")
-        #     accu= ACCURACY(start_timestamp=start_utc_time,end_timestamp=end_utc_time,prom_con_obj=prom_con_obj,variables=variables)
-        #     cloudquery_accuracies = accu.calculate_accuracy()
+            accu= ACCURACY(start_timestamp=start_utc_time,end_timestamp=end_utc_time,prom_con_obj=prom_con_obj,variables=variables)
+            cloudquery_accuracies = accu.calculate_accuracy()
         
         #--------------------------------Capture charts data---------------------------------------
         all_gridfs_fileids=[]
