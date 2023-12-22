@@ -6,7 +6,7 @@
     "extension": "net",
     "stack_url": "https://alphacentauri.uptycs.net/",
     "elastic": "192.168.140.73",
-    "events_rules_per_cust":{"enabled":39,"triggered":33},
+    "event_rules_per_cust":{"enabled":39,"triggered":33},
     "alert_rules_per_cust":{"enabled":39,"triggered":33},
     "pnodes": [
         "s13pn1",

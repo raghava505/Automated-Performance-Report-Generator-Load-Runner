@@ -7,7 +7,7 @@
     "stack_url": "https://neptune.uptycs.io/",
     "trino_password": "24e3ed40-0ea8-4051-b8c5-00ea379e843a",
     "elastic": "192.168.131.50",
-    "events_rules_per_cust":{"enabled":39,"triggered":33},
+    "event_rules_per_cust":{"enabled":39,"triggered":33},
     "alert_rules_per_cust":{"enabled":39,"triggered":33},
     "pnodes": [
         "s2c1pn1",
