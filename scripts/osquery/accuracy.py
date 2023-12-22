@@ -141,11 +141,11 @@ class osq_accuracy:
     def get_utc_days_involved(self):
         time_format='%Y-%m-%d %H:%M'
         print(time_format)
-        start_time_utc = datetime.strptime(self.start_time, time_format)
-        print(start_time_utc)
-        end_time_utc = datetime.strptime(self.end_time, time_format)
-        print(end_time_utc)
-        days_involved=((start_time_utc-end_time_utc).days)+1
+        start_utc = datetime.strptime(self.start_time, time_format)
+        print(start_utc)
+        end_utc = datetime.strptime(self.end_time, time_format)
+        print(end_utc)
+        days_involved=((start_utc-end_utc).days)+2
         return days_involved
     def expected_events(self):
         input_lines =self.endline
@@ -339,4 +339,3 @@ class osq_accuracy:
             accuracy[table]={"actual":actual,"expected":expect,"accuracy":round((actual/expect)*100,2)}
         return accuracy
         
-
