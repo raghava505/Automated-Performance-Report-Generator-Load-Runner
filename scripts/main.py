@@ -152,6 +152,7 @@ if __name__ == "__main__":
         if variables["load_type"] in ["Osquery","osquery_cloudquery_combined","all_loads_combined"] and variables["load_name"] != "ControlPlane":
             assets_per_cust=int(load_cls.get_load_specific_details(variables['load_name'])['assets_per_cust'])
             input_file = load_cls.get_load_specific_details(variables['load_name'])['input_file']
+            alert_rules_triggered_per_cust=load_cls.get_load_specific_details(variables['load_name'])['alert_rules_triggered_per_cust']
             print("Calculating Table accuracies for Osquery Load...")
             api_path = os.path.join(os.path.dirname(os.path.realpath(__file__)),f"osquery/api_keys/{domain}.json")
             input_file_path = os.path.join(os.path.dirname(os.path.realpath(__file__)),f"osquery/testinputfiles/{input_file}")
@@ -163,7 +164,7 @@ if __name__ == "__main__":
             Osquery_table_accuracies = accuracy_obj.table_accuracy()
             print("Osquery_table_accuracies : ",Osquery_table_accuracies)
             print("Calculating Events accuracies for Osquery Load ...")
-            Osquery_event_accuracies = accuracy_obj.events_accuracy()
+            Osquery_event_accuracies = accuracy_obj.events_accuracy(alert_rules_triggered_per_cust)
             print("Osquery_event_accuracies : ",Osquery_event_accuracies)
         
 
