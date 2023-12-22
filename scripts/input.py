@@ -93,7 +93,6 @@ def create_input_form():
                 input_value=int(input(f"Enter : {' '.join(str(key).split('_')).title()}  (example: {value}) : ").strip())
 
         details[key] = Type(input_value)
-    details["api_load_csv_file_path"] = configuration().api_loads_folder_path + str(details["start_time_str_ist"]) + ".csv"
 
     print("The details you entered are : ")
     for key,val in details.items():

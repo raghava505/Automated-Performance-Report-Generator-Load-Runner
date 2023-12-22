@@ -143,7 +143,9 @@ if __name__ == "__main__":
             calc = TRINO(curr_ist_start_time=variables["start_time_str_ist"],curr_ist_end_time=end_time_str,prom_con_obj=prom_con_obj)
             trino_queries = calc.fetch_trino_queries()
         #-------------------------API LOAD--------------------------
-        csv_path = variables['api_load_csv_file_path']
+        
+        csv_path = prom_con_obj.api_loads_folder_path + str(test_env_json_details['stack']).lower() + "-" + str(variables["start_time_str_ist"]) + ".csv"
+        print("CSV file path for API load : " , csv_path)
         result_dict_api_load=None
         result_dict_api_load = API_LOAD().fetch_api_load_dict(csv_path)
 
