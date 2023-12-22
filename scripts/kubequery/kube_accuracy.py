@@ -69,7 +69,7 @@ class Kube_Accuracy:
             
             command="""sudo TRINO_PASSWORD=prestossl /opt/uptycs/cloud/utilities/trino-cli --server https://localhost:5665 --user uptycs --catalog uptycs --schema upt_{} --password --truststore-password sslpassphrase --truststore-path /opt/uptycs/cloud/config/wildcard.jks --insecure --execute "{};" """.format(self.cloud_domain, query)
             conn = Connection(host=self.target_host, user=self.username, connect_kwargs={'password': self.password})
-            print(command)
+            # print(command)
             res = conn.sudo(command, password=self.password, hide='stderr')
             result_list = res.stdout.split("\n")
             self.actual_data[t] = int(result_list[0].split("\"")[1])
