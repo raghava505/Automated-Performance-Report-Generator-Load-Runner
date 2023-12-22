@@ -140,6 +140,7 @@ class osq_accuracy:
         return api_config
     def get_utc_days_involved(self):
         time_format='%Y-%m-%d %H:%M'
+        print(time_format)
         start_time_utc = datetime.strptime(self.start_time, time_format)
         print(start_time_utc)
         end_time_utc = datetime.strptime(self.end_time, time_format)
