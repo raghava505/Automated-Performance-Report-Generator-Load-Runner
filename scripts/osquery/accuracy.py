@@ -1,7 +1,7 @@
 import json
 import requests
 import time
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 import threading
 import re
 import jwt
@@ -138,6 +138,12 @@ class osq_accuracy:
             api_config=json.load(c)
             c.close()
         return api_config
+    def get_utc_days_involved(self):
+        time_format='%Y-%m-%d %H:%M'
+        start_time = datetime.strptime(self.start_time, time_format)
+        end_time = datetime.strptime(self.end_time, time_format)
+        days_involved=(start_time-end_time).days+1
+        return days_involved
     def expected_events(self):
         input_lines =self.endline
         dns_lookup_events = {'dns_lookup_events-builder-added':0, 'dns_lookup_events_1-builder-added':0, 'dns_lookup_events_2-builder-added':0, 'dns_lookup_events_3-builder-added':0, 'dns_lookup_events_4-builder-added':0,'dns_lookup_events_5-builder-added':0,'dns_lookup_events_6-builder-added':0}
@@ -300,7 +306,7 @@ class osq_accuracy:
         for thread1 in thread_list:
             thread1.join()
         return accuracy
-    def events_accuracy(self,cust=0):
+    def events_accuracy(self,alerts_triggered,cust=0):
         api_config=self.api_keys()
         if cust==0:
             api=api_config[self.domain]
@@ -319,7 +325,7 @@ class osq_accuracy:
                 actual = http_query(api, query,self.ext)
                 print(actual)
             else:
-                expect=22000
+                expect=alerts_triggered*1000*(self.get_utc_days_involved())
                 query="select count(*) from {} where  created_at >= timestamp '{}' and created_at < timestamp '{}' and code like '%-builder-added%'".format(table,self.start_time,self.end_time)
                 print(f"Executing query : {query}")
                 actual = http_query(api, query, self.ext)

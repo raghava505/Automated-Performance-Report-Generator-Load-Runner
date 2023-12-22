@@ -3,7 +3,7 @@
     "clusters": 2,
     "SU": 6,
     "domain": "longevity",
-    "extension":"net",
+    "extension": "net",
     "stack_url": "https://longevity.uptycs.net/",
     "elastic": "192.168.148.52",
     "pnodes": [
@@ -134,7 +134,7 @@
             "kafka": "1.8T"
         },
         "ram": "188",
-        "cores": "32",
+        "cores": "48",
         "clst": "2"
     },
     "long-c1pn5": {
@@ -152,7 +152,7 @@
             "kafka": "1.8T"
         },
         "ram": "188",
-        "cores": "32",
+        "cores": "48",
         "clst": "2"
     },
     "long-c1pn6": {
@@ -161,7 +161,7 @@
             "kafka": "1.8T"
         },
         "ram": "188",
-        "cores": "32",
+        "cores": "48",
         "clst": "1"
     },
     "long-c2pn6": {
@@ -170,7 +170,7 @@
             "kafka": "1.8T"
         },
         "ram": "188",
-        "cores": "32",
+        "cores": "48",
         "clst": "2"
     },
     "long-c1dn1": {
@@ -182,7 +182,7 @@
             "dn3": "1.8T"
         },
         "ram": "251",
-        "cores": "32",
+        "cores": "48",
         "clst": "1"
     },
     "long-c2dn1": {
@@ -194,7 +194,7 @@
             "dn3": "1.8T"
         },
         "ram": "251",
-        "cores": "32",
+        "cores": "48",
         "clst": "2"
     },
     "long-c1dn2": {
@@ -206,7 +206,7 @@
             "dn3": "1.8T"
         },
         "ram": "251",
-        "cores": "32",
+        "cores": "48",
         "clst": "1"
     },
     "long-c2dn2": {
@@ -218,7 +218,7 @@
             "dn3": "1.8T"
         },
         "ram": "251",
-        "cores": "32",
+        "cores": "48",
         "clst": "2"
     },
     "long-c1dn3": {
@@ -230,7 +230,7 @@
             "dn3": "1.8T"
         },
         "ram": "251",
-        "cores": "32",
+        "cores": "48",
         "clst": "1"
     },
     "long-c2dn3": {
@@ -242,7 +242,7 @@
             "dn3": "1.8T"
         },
         "ram": "251",
-        "cores": "32",
+        "cores": "48",
         "clst": "2"
     },
     "long-c1dn4": {
@@ -254,7 +254,7 @@
             "dn3": "1.8T"
         },
         "ram": "188",
-        "cores": "32",
+        "cores": "48",
         "clst": "1"
     },
     "long-c2dn4": {
@@ -266,7 +266,7 @@
             "dn3": "1.8T"
         },
         "ram": "188",
-        "cores": "32",
+        "cores": "48",
         "clst": "2"
     },
     "long-c1dn5": {
@@ -278,7 +278,7 @@
             "dn3": "1.8T"
         },
         "ram": "188",
-        "cores": "32",
+        "cores": "48",
         "clst": "1"
     },
     "long-c2dn5": {
@@ -290,7 +290,7 @@
             "dn3": "1.8T"
         },
         "ram": "188",
-        "cores": "32",
+        "cores": "48",
         "clst": "2"
     },
     "long-c1dn6": {
@@ -302,7 +302,7 @@
             "dn3": "1.8T"
         },
         "ram": "188",
-        "cores": "32",
+        "cores": "48",
         "clst": "1"
     },
     "long-c2dn6": {
@@ -314,7 +314,7 @@
             "dn3": "1.8T"
         },
         "ram": "188",
-        "cores": "32",
+        "cores": "48",
         "clst": "2"
     },
     "long-pg1": {
