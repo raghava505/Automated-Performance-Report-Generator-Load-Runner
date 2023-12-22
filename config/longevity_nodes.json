@@ -6,7 +6,7 @@
     "extension": "net",
     "stack_url": "https://longevity.uptycs.net/",
     "elastic": "192.168.148.52",
-    "events_rules_per_cust":{"enabled":39,"triggered":33},
+    "event_rules_per_cust":{"enabled":39,"triggered":33},
     "alert_rules_per_cust":{"enabled":12,"triggered":12},
     "pnodes": [
         "long-c1pn1",

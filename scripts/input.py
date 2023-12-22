@@ -127,7 +127,7 @@ def create_input_form():
 
     if user_input =='y':
         print("Continuing ...")
-        prom_con_obj = configuration(test_env_file_name=details['test_env_file_name'] , fetch_node_parameters_before_generating_report=True)
+        prom_con_obj = configuration(test_env_file_name=details['test_env_file_name'] , fetch_node_parameters_before_generating_report=False)
         return details,prom_con_obj,load_cls
     elif user_input =='n':
         print("OK! Enter the modified details ...")
