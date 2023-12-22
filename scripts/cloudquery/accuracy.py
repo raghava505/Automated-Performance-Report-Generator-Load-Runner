@@ -107,7 +107,7 @@ class ACCURACY:
     def table_accuracy(self,data, table, actual_true_count,actual_false_count,expected_true_count,expected_false_count):
         accuracy_true = round(((actual_true_count +1) / (expected_true_count+1)) * 100, 2)
         accuracy_false= round(((actual_false_count+1) / (expected_false_count+1)) * 100, 2)
-        data[table] = {"Actual added":actual_true_count, "Actual removed": actual_false_count, "Expected added":expected_true_count, "Expected removed": expected_false_count,  "Accuracy true": accuracy_true, "Accuracy false":accuracy_false}
+        data[table] = {"Actual inserted records":actual_true_count, "Actual deleted records": actual_false_count, "Expected inserted records":expected_true_count, "Expected deleted records": expected_false_count,  "Accuracy for inserted records": accuracy_true, "Accuracy for deleted records":accuracy_false}
         print(data[table])
 
     def multi_accuracy(self,data,file):
@@ -143,11 +143,11 @@ class ACCURACY:
 
     def calculate_accuracy(self):
         save_dict={}
-        obj = LOGScriptRunner(self.load_name)
+        obj = LOGScriptRunner()
         print(self.load_name)
         if(self.load_name=="AWS_MultiCustomer" or self.load_name == "GCP_MultiCustomer"):
             print(1)
-            obj.get_log(obj.simulators1)
+            obj.get_log(obj.simulators1,self.load_name)
             self.api_path=api_path_multi_mercury
             self.total_counts = getattr(configs, f'total_counts_{self.load_name.split("_")[0]}', None)
             fs = open(self.api_path)
@@ -156,7 +156,7 @@ class ACCURACY:
 
         elif(self.load_name == "AWS_SingleCustomer"):
             print(2)
-            obj.get_log(obj.simulators1)
+            obj.get_log(obj.simulators1,self.load_name)
             self.api_path=api_path_single_mercury
             self.total_counts = getattr(configs, f'total_counts_AWS', None)
             fs = open(self.api_path)
@@ -165,16 +165,15 @@ class ACCURACY:
 
         elif(self.load_type == 'osquery_cloudquery_combined' or 'all_loads_combined'):
             print(3)
-            obj.get_log(obj.simulators2)
+            obj.get_log(obj.simulators2,"AWS_MultiCustomer")
             self.api_path=api_path_multi_longevity
             self.total_counts = getattr(configs, f'total_counts_AWS', None)
             fs = open(self.api_path)
             file = fs.read()
             save_dict["AWS"]=self.multi_tables_accuracy(file)
 
-            obj.get_log(obj.simulators3)
+            obj.get_log(obj.simulators3,"GCP_MultiCustomer")
             self.total_counts = getattr(configs, f'total_counts_GCP', None)
-            obj.remote_logs_path =  "~/multi-customer-cqsim/gcp/logs"
             save_dict["GCP"]=self.multi_tables_accuracy(file)
 
         return save_dict
