@@ -42,8 +42,7 @@ def create_input_form():
             "load_duration_in_hrs": 10,
             "sprint": 144,
             "build": "144068",
-            "add_extra_time_for_charts_at_end_in_min": 10,
-            "api_load_csv_file_path":"/path/to/file.csv"
+            "add_extra_time_for_charts_at_end_in_min": 10
             # "fetch_node_parameters_before_generating_report" :  False,
             }
     
@@ -77,8 +76,6 @@ def create_input_form():
                 helper_text += "\n select one option " 
                 input_index = int(input(f"Enter : {' '.join(str(key).split('_')).title()} {helper_text} : ").strip())
                 input_value = test_env_path_options[input_index]
-            elif key == "api_load_csv_file_path":
-                input_value=str(input(f"Enter : {' '.join(str(key).split('_')).title()}  (example: {value}) .Press ENTER to skip this variable : ").strip())
             else:
                 input_value=str(input(f"Enter : {' '.join(str(key).split('_')).title()}  (example: {value}) : ").strip())
         
@@ -96,6 +93,7 @@ def create_input_form():
                 input_value=int(input(f"Enter : {' '.join(str(key).split('_')).title()}  (example: {value}) : ").strip())
 
         details[key] = Type(input_value)
+    details["api_load_csv_file_path"] = configuration().api_loads_folder_path + str(details["start_time_str_ist"]) + ".csv"
 
     print("The details you entered are : ")
     for key,val in details.items():

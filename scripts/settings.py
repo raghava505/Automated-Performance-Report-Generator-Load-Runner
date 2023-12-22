@@ -19,6 +19,8 @@ class configuration:
         self.ROOT_PATH = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
         self.base_stack_config_path = f"{self.ROOT_PATH}/config"
         self.mongo_connection_string = "mongodb://localhost:27017"
+        self.api_loads_folder_path = "/home/abacus/apache-jmeter-5.6.2/bin/reports/"
+        self.api_loads_vm_ip = "192.168.145.94"
 
         if test_env_file_name:
             self.test_env_file_path = f"{self.base_stack_config_path}/{test_env_file_name}"
@@ -30,6 +32,4 @@ class configuration:
                 
             self.monitoring_ip=  stack_details["monitoring_node"][0]
             self.prometheus_path = f"http://{self.monitoring_ip}:{self.prometheus_port}"
-            self.execute_kafka_topics_script_in = stack_details['pnodes'][0]
-
-        
+            self.execute_kafka_topics_script_in = stack_details['pnodes'][0]       
