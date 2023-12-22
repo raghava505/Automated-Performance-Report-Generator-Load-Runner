@@ -306,7 +306,7 @@ class osq_accuracy:
         for thread1 in thread_list:
             thread1.join()
         return accuracy
-    def events_accuracy(self,alerts_triggered,cust=0):
+    def events_accuracy(self,alerts_triggered,events_triggered,cust=0):
         api_config=self.api_keys()
         if cust==0:
             api=api_config[self.domain]
@@ -318,14 +318,17 @@ class osq_accuracy:
         for table in events_tables:
             if table=="upt_events":
                 expect=sum(expected.values())
-                if expect>33*self.hours*100000:
-                    expect=33*self.hours*100000
+                if expect>events_triggered*self.hours*100000:
+                    expect=events_triggered*self.hours*100000
                 query="select count(*) from {} where upt_day>= {} and created_at >= timestamp '{}' and created_at < timestamp '{}' and code like '%-builder-added%'".format(table,self.upt_day,self.start_time,self.end_time)
                 print(f"Executing query : {query}")
                 actual = http_query(api, query,self.ext)
                 print(actual)
             else:
-                expect=alerts_triggered*1000*(self.get_utc_days_involved())
+                utc_days=self.get_utc_days_involved()
+                print("utc days involved ",utc_days)
+                expect=alerts_triggered*1000*(utc_days)
+                print(" trigerered rules " ,alerts_triggered,events_triggered)
                 query="select count(*) from {} where  created_at >= timestamp '{}' and created_at < timestamp '{}' and code like '%-builder-added%'".format(table,self.start_time,self.end_time)
                 print(f"Executing query : {query}")
                 actual = http_query(api, query, self.ext)
