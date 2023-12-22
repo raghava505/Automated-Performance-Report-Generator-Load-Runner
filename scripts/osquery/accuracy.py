@@ -140,9 +140,11 @@ class osq_accuracy:
         return api_config
     def get_utc_days_involved(self):
         time_format='%Y-%m-%d %H:%M'
-        start_time = datetime.strptime(self.start_time, time_format)
-        end_time = datetime.strptime(self.end_time, time_format)
-        days_involved=(start_time-end_time).days+1
+        start_time_utc = datetime.strptime(self.start_time, time_format)
+        print(start_time_utc)
+        end_time_utc = datetime.strptime(self.end_time, time_format)
+        print(end_time_utc)
+        days_involved=((start_time_utc-end_time_utc).days)+1
         return days_involved
     def expected_events(self):
         input_lines =self.endline
