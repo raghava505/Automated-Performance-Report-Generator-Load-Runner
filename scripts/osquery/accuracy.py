@@ -140,12 +140,9 @@ class osq_accuracy:
         return api_config
     def get_utc_days_involved(self):
         time_format='%Y-%m-%d %H:%M'
-        print(time_format)
         start_utc = datetime.strptime(self.start_time, time_format)
-        print(start_utc)
         end_utc = datetime.strptime(self.end_time, time_format)
-        print(end_utc)
-        days_involved=((start_utc-end_utc).days)+2
+        days_involved=((end_utc-start_utc).days)+1
         return days_involved
     def expected_events(self):
         input_lines =self.endline
@@ -329,9 +326,7 @@ class osq_accuracy:
                 print(actual)
             else:
                 utc_days=self.get_utc_days_involved()
-                print("utc days involved ",utc_days)
                 expect=alerts_triggered*1000*(utc_days)
-                print(" trigerered rules " ,alerts_triggered,events_triggered)
                 query="select count(*) from {} where  created_at >= timestamp '{}' and created_at < timestamp '{}' and code like '%-builder-added%'".format(table,self.start_time,self.end_time)
                 print(f"Executing query : {query}")
                 actual = http_query(api, query, self.ext)
