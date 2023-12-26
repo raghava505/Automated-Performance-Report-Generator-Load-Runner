@@ -228,7 +228,7 @@ if __name__ == "__main__":
         #--------------------------------cpu and mem node-wise---------------------------------------
         print("Fetching resource usages data ...")
         comp = MC_comparisions(start_timestamp=start_timestamp,end_timestamp=end_timestamp,prom_con_obj=prom_con_obj)
-        mem_cpu_usages_dict,overall_usage_dict=comp.make_comparisions()
+        mem_cpu_usages_dict,overall_usage_dict=comp.make_comparisions(load_cls.application_level_usage_app_names_for_table , load_cls.common_app_names)
         
         #-------------------------Cloudquery Accuracies----------------------------
         cloudquery_accuracies=None

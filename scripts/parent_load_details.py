@@ -13,8 +13,47 @@ class parent:
     
     @classmethod
     @property
+    def application_level_usage_app_names_for_table(cls):
+        return ["tls","trino","/opt/uptycs/cloud/go/bin/ruleEngine-production-ruleengine",
+                "kafka","spark-master","spark-worker","osqueryIngestion",
+                "data-archival","orc-compaction","auditLogsIngestion","alertsIngestion",
+                "cloudConnectorIngestion","prestoLogsIngestion","queryPackIngestion"]
+
+    @classmethod
+    @property
     def hostname_types(cls):
         return ["process","data","pg"]
+    
+    @classmethod
+    @property
+    def mon_spark_topic_names(cls):
+        return ['agentosquery','event']
+    
+    @classmethod
+    @property
+    def kafka_group_names(cls):
+        return ['db-alerts','ruleengine','debeziumconsumer']
+    
+    @classmethod
+    @property
+    def list_of_observations_to_make(cls):
+        return [
+                    'Check for Ingestion lag',
+                    'Check for Rule engine Lag',
+                    'Check for db-events Lag',
+                    'Data loss check for raw tables like processes, process_env etc (accuracy)',
+                    'Data loss check for processed data like events, alerts and incidents etc (accuracy)',
+                    "Check if CPU/memory utilisation in line with previous sprints. If not, are the differences expected?",
+                    'Check for variations in the Count of queries executed on presto',
+                    'Triage bugs and check for blockers',
+                    'Check if PG master is in sync with replica',
+                    'Check for memory leaks',
+                    'Check for variation in HDFS disk usage',
+                    'Check for variation in PG disk usage',
+                    'Check for variation in Kafka disk usage',
+                    'Check for new kafka topics',
+                    'Check for steady state of live assets count'
+                ]
     
     @classmethod
     @property
@@ -62,15 +101,6 @@ class parent:
         app_level_CPU_used_cores_queries.update(more_cpu_queries)
         return app_level_CPU_used_cores_queries
     
-    @classmethod
-    @property
-    def mon_spark_topic_names(cls):
-        return ['agentosquery','event']
-    
-    @classmethod
-    @property
-    def kafka_group_names(cls):
-        return ['db-alerts','ruleengine','debeziumconsumer']
 
     @staticmethod
     def get_inject_drain_and_lag_uptycs_mon_spark(topic):
@@ -96,27 +126,7 @@ class parent:
         for group in cls.kafka_group_names:
             queries.update(cls.get_inject_drain_and_lag_uptycs_kafka_group(group))
         return copy.deepcopy(queries)
-        # return {
-        #     "Spark Inject Rate for agent Osquery":("uptycs_mon_spark_inject_rate{topic='agentosquery'}",["__name__","cluster_id","topic"]),
-        #     "Spark Drain Rate for agent Osquery":("uptycs_mon_spark_drain_rate{topic='agentosquery'}" , ["__name__","cluster_id","topic"]),
-        #     "Spark Lag for Agent Osquery":("uptycs_mon_spark_lag{topic='agentosquery'}",["__name__","cluster_id","topic"]),
 
-        #     "Spark Inject Rate for Events":("uptycs_mon_spark_inject_rate{topic='event'}",["__name__","cluster_id","topic"]),
-        #     "Spark Drain Rate for Events":("uptycs_mon_spark_drain_rate{topic='event'}",["__name__","cluster_id","topic"]),
-        #     "Spark lag for events":("uptycs_mon_spark_lag{topic='event'}",["__name__","cluster_id","topic"]),
-
-        #     "Inject Rate for Db-Alerts group":("uptycs_kafka_group_inject_rate{group='db-alerts'}",["__name__","cluster_id","group"]),
-        #     "Drain Rate for Db-Alerts group":("uptycs_kafka_group_drain_rate{group='db-alerts'}",["__name__","cluster_id","group"]),
-        #     "kafka lag for Db-alerts group":("uptycs_kafka_group_lag{group='db-alerts'}",["__name__","cluster_id","group"]),
-
-        #     "Inject rate for ruleengine group":("uptycs_kafka_group_inject_rate{group='ruleengine'}",["__name__","cluster_id","group"]),
-        #     "Drain rate for ruleengine group":("uptycs_kafka_group_drain_rate{group='ruleengine'}",["__name__","cluster_id","group"]),
-        #     "Kafka lag for ruleengine group":("uptycs_kafka_group_lag{group='ruleengine'}",["__name__","cluster_id","group"]),
-
-        #     "Kafka Inject rate for debezium group":("uptycs_kafka_group_inject_rate{group='debeziumconsumer'}" , ["__name__","cluster_id","group"]),
-        #     "Kafka Drain rate for debezium group":("uptycs_kafka_group_drain_rate{group='debeziumconsumer'}",["__name__","cluster_id","group"]),
-        #     "Debezium Aggregate Lag":("uptycs_kafka_group_lag{group='debeziumconsumer'}",["__name__","cluster_id","group"]),
-        # }
     
     @staticmethod
     def get_other_chart_queries():
@@ -185,26 +195,6 @@ class parent:
     def get_load_specific_details(cls,load_name):
         return cls.load_specific_details[load_name]
     
-    @classmethod
-    @property
-    def list_of_observations_to_make(cls):
-        return [
-                    'Check for Ingestion lag',
-                    'Check for Rule engine Lag',
-                    'Check for db-events Lag',
-                    'Data loss check for raw tables like processes, process_env etc (accuracy)',
-                    'Data loss check for processed data like events, alerts and incidents etc (accuracy)',
-                    "Check if CPU/memory utilisation in line with previous sprints. If not, are the differences expected?",
-                    'Check for variations in the Count of queries executed on presto',
-                    'Triage bugs and check for blockers',
-                    'Check if PG master is in sync with replica',
-                    'Check for memory leaks',
-                    'Check for variation in HDFS disk usage',
-                    'Check for variation in PG disk usage',
-                    'Check for variation in Kafka disk usage',
-                    'Check for new kafka topics',
-                    'Check for steady state of live assets count'
-                ]
     
     @classmethod
     def get_dictionary_of_observations(cls):
