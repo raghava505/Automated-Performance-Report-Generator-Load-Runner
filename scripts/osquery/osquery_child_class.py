@@ -1,4 +1,5 @@
 from parent_load_details import parent
+import copy
 
 class osquery_child(parent):
     load_specific_details={
@@ -30,4 +31,11 @@ class osquery_child(parent):
                 "redis_switchover_case_time_ist":""
             },
     }
+
+    @classmethod
+    @property
+    def mon_spark_topic_names(cls):
+        temp = copy.deepcopy(parent.mon_spark_topic_names)
+        temp.extend(["agentosquery"])
+        return temp
     

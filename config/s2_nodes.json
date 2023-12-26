@@ -32,6 +32,9 @@
     "monitoring_node": [
         "s2monitor"
     ],
+    "stsnodes": [
+        
+    ],
     "other_nodes": [
         "s2objectstore",
         "s2elasticsearch",

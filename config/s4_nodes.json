@@ -43,9 +43,11 @@
     "monitoring_node": [
         "s4mon"
     ],
-    "other_nodes": [
+    "stsnodes": [
         "s4stsnode1",
-        "s4stsnode2",
+        "s4stsnode2"
+    ],
+    "other_nodes": [
         "mlbank1a",
         "s2logstash1",
         "s2logstash2",

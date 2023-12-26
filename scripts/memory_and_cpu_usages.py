@@ -80,7 +80,7 @@ class MC_comparisions:
 
         #calculate overall pnodes,dnodes,pgnodes usage
         new_data = final[HOST]
-        for node_type in ["pnodes" , "dnodes" , "pgnodes"]:
+        for node_type in ["pnodes" , "dnodes" , "pgnodes","stsnodes"]:
             print(f"Calculating overall {tag} usages for node-type : {node_type}")
             new_sum=0
             for node in self.nodes_data[node_type]:
