@@ -7,47 +7,16 @@ cpu_tag = "CPU"
 memory_unit = "GB"
 cpu_unit = "cores"
 
-app_names={
-            "sum":[ ".*osqLogger.*", "kafka",".*ruleEngine.*","tls", "trino" , "osqueryIngestion"],
-            "avg":[]
-          }
+# node_level_usage_app_names={
+#             "sum":[ ".*osqLogger.*", "kafka",".*ruleEngine.*","tls", "trino" , "osqueryIngestion"],
+#             "avg":[]
+#           }
 
-application_level_usage_app_names = ["tls","trino","/opt/uptycs/cloud/go/bin/ruleEngine-production-ruleengine",
-                                     "kafka","spark-master","spark-worker","osqueryIngestion",
-                                     "data-archival","orc-compaction","auditLogsIngestion","alertsIngestion",
-                                     "cloudConnectorIngestion","prestoLogsIngestion","queryPackIngestion"]
+# application_level_usage_app_names = ["tls","trino","/opt/uptycs/cloud/go/bin/ruleEngine-production-ruleengine",
+#                                      "kafka","spark-master","spark-worker","osqueryIngestion",
+#                                      "data-archival","orc-compaction","auditLogsIngestion","alertsIngestion",
+#                                      "cloudConnectorIngestion","prestoLogsIngestion","queryPackIngestion"]
 
-memory_queries = {f"{HOST}" : 'avg((uptycs_memory_used/uptycs_total_memory) * 100)  by (host_name)',}
-memory_queries.update(dict([(app,f"{key}(uptycs_app_memory{{app_name=~'{app}'}}) by (host_name)") for key,app_list in app_names.items() for app in app_list]))
-
-cpu_queries = {f"{HOST}" : 'avg(100-uptycs_idle_cpu) by (host_name)',}
-cpu_queries.update(dict([(app,f"{key}(uptycs_app_cpu{{app_name=~'{app}'}}) by (host_name)") for key,app_list in app_names.items() for app in app_list]))
-
-container_memory_queries = {'container' : "sum(uptycs_docker_mem_used{}/(1000*1000*1000)) by (container_name)",}
-container_cpu_queries = {'container' : "sum(uptycs_docker_cpu_stats{}) by (container_name)",}
-
-app_level_memory_queries=dict([(app,f"sum(uptycs_app_memory{{app_name='{app}'}}) by (app_name)") for app in application_level_usage_app_names])
-app_level_cpu_queries=dict([(app,f"sum(uptycs_app_cpu{{app_name='{app}'}}) by (app_name)") for app in application_level_usage_app_names])
-app_level_memory_queries.update({"osqLogger" : "sum(sum(uptycs_app_memory{app_name=~'.*osqLogger-.*'}) by (app_name))" })
-app_level_cpu_queries.update({"osqLogger" : "sum(sum(uptycs_app_cpu{app_name=~'.*osqLogger-.*'}) by (app_name))" })
-
-app_level_memory_queries["gprofiler perf-record pns"]="sum(uptycs_app_memory{node_type='process',app_name='/app/gprofiler/resources/perf-record--F'}) by (app_name)"
-app_level_memory_queries["gprofiler perf-script pns"]="sum(uptycs_app_memory{node_type='process',app_name='/app/gprofiler/resources/perf-script--F'}) by (app_name)"
-app_level_memory_queries["gprofiler perf-record dns"]="sum(uptycs_app_memory{node_type='data',app_name='/app/gprofiler/resources/perf-record--F'}) by (app_name)"
-app_level_memory_queries["gprofiler perf-script dns"]="sum(uptycs_app_memory{node_type='data',app_name='/app/gprofiler/resources/perf-script--F'}) by (app_name)"
-app_level_cpu_queries["gprofiler perf-record pns"]="sum(uptycs_app_cpu{node_type='process',app_name='/app/gprofiler/resources/perf-record--F'}) by (app_name)"
-app_level_cpu_queries["gprofiler perf-script pns"]="sum(uptycs_app_cpu{node_type='process',app_name='/app/gprofiler/resources/perf-script--F'}) by (app_name)"
-app_level_cpu_queries["gprofiler perf-record dns"]="sum(uptycs_app_cpu{node_type='data',app_name='/app/gprofiler/resources/perf-record--F'}) by (app_name)"
-app_level_cpu_queries["gprofiler perf-script dns"]="sum(uptycs_app_cpu{node_type='data',app_name='/app/gprofiler/resources/perf-script--F'}) by (app_name)"
-
-all_queries_to_execute={
-    "memory_queries":memory_queries,
-    "cpu_queries":cpu_queries,
-    "container_memory_queries":container_memory_queries,
-    "container_cpu_queries":container_cpu_queries,
-    "application_level_memory_queries":app_level_memory_queries,
-    "application_level_cpu_queries":app_level_cpu_queries,
-}
 
 class MC_comparisions:
     def __init__(self,prom_con_obj,start_timestamp,end_timestamp):
@@ -184,9 +153,43 @@ class MC_comparisions:
             final[query] = {"percentage":{"average":avg , "minimum":minimum , "maximum":maximum}}
         return final 
 
-    def make_comparisions(self):
+    def make_comparisions(self,application_level_usage_app_names,node_level_usage_app_names):
         print("All usage queries to be executed are : ")
+
+        memory_queries = {f"{HOST}" : 'avg((uptycs_memory_used/uptycs_total_memory) * 100)  by (host_name)',}
+        memory_queries.update(dict([(app,f"{key}(uptycs_app_memory{{app_name=~'{app}'}}) by (host_name)") for key,app_list in node_level_usage_app_names.items() for app in app_list]))
+
+        cpu_queries = {f"{HOST}" : 'avg(100-uptycs_idle_cpu) by (host_name)',}
+        cpu_queries.update(dict([(app,f"{key}(uptycs_app_cpu{{app_name=~'{app}'}}) by (host_name)") for key,app_list in node_level_usage_app_names.items() for app in app_list]))
+
+        container_memory_queries = {'container' : "sum(uptycs_docker_mem_used{}/(1000*1000*1000)) by (container_name)",}
+        container_cpu_queries = {'container' : "sum(uptycs_docker_cpu_stats{}) by (container_name)",}
+
+        app_level_memory_queries=dict([(app,f"sum(uptycs_app_memory{{app_name='{app}'}}) by (app_name)") for app in application_level_usage_app_names])
+        app_level_cpu_queries=dict([(app,f"sum(uptycs_app_cpu{{app_name='{app}'}}) by (app_name)") for app in application_level_usage_app_names])
+        app_level_memory_queries.update({"osqLogger" : "sum(sum(uptycs_app_memory{app_name=~'.*osqLogger-.*'}) by (app_name))" })
+        app_level_cpu_queries.update({"osqLogger" : "sum(sum(uptycs_app_cpu{app_name=~'.*osqLogger-.*'}) by (app_name))" })
+
+        app_level_memory_queries["gprofiler perf-record pns"]="sum(uptycs_app_memory{node_type='process',app_name='/app/gprofiler/resources/perf-record--F'}) by (app_name)"
+        app_level_memory_queries["gprofiler perf-script pns"]="sum(uptycs_app_memory{node_type='process',app_name='/app/gprofiler/resources/perf-script--F'}) by (app_name)"
+        app_level_memory_queries["gprofiler perf-record dns"]="sum(uptycs_app_memory{node_type='data',app_name='/app/gprofiler/resources/perf-record--F'}) by (app_name)"
+        app_level_memory_queries["gprofiler perf-script dns"]="sum(uptycs_app_memory{node_type='data',app_name='/app/gprofiler/resources/perf-script--F'}) by (app_name)"
+        app_level_cpu_queries["gprofiler perf-record pns"]="sum(uptycs_app_cpu{node_type='process',app_name='/app/gprofiler/resources/perf-record--F'}) by (app_name)"
+        app_level_cpu_queries["gprofiler perf-script pns"]="sum(uptycs_app_cpu{node_type='process',app_name='/app/gprofiler/resources/perf-script--F'}) by (app_name)"
+        app_level_cpu_queries["gprofiler perf-record dns"]="sum(uptycs_app_cpu{node_type='data',app_name='/app/gprofiler/resources/perf-record--F'}) by (app_name)"
+        app_level_cpu_queries["gprofiler perf-script dns"]="sum(uptycs_app_cpu{node_type='data',app_name='/app/gprofiler/resources/perf-script--F'}) by (app_name)"
+
+        all_queries_to_execute={
+            "memory_queries":memory_queries,
+            "cpu_queries":cpu_queries,
+            "container_memory_queries":container_memory_queries,
+            "container_cpu_queries":container_cpu_queries,
+            "application_level_memory_queries":app_level_memory_queries,
+            "application_level_cpu_queries":app_level_cpu_queries,
+        }
+
         print(json.dumps(all_queries_to_execute, indent=4))
+
         memory_data,overall_memory_data = self.extract_data(memory_queries,memory_tag,memory_unit)
         cpu_data,overall_cpu_data = self.extract_data(cpu_queries,cpu_tag,cpu_unit)
         container_memory_data =  self.extract_container_data(container_memory_queries,memory_tag,memory_unit)
