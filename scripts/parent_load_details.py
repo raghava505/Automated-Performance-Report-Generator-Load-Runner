@@ -7,7 +7,7 @@ class parent:
     def common_app_names(cls):
         return  {"sum":["orc-compaction" ,"uptycs-configdb",  ".*osqLogger.*", "kafka","spark-worker",".*ruleEngine.*",
                         "data-archival",".*redis-server.*","/opt/uptycs/cloud/go/bin/complianceSummaryConsumer","tls",".*airflow.*",
-                        "trino" , "osqueryIngestion"],
+                        "trino" , "osqueryIngestion","pgbouncer","spark-master","/usr/local/bin/pushgateway"],
                 "avg":[]
                 }
     
@@ -55,17 +55,17 @@ class parent:
                     'Check for steady state of live assets count'
                 ]
     
-    @classmethod
-    @property
-    def memory_app_names(cls):
-        return copy.deepcopy(cls.common_app_names)
+    # @classmethod
+    # @property
+    # def memory_app_names(cls):
+    #     return copy.deepcopy(cls.common_app_names)
     
-    @classmethod
-    @property
-    def cpu_app_names(cls):
-        app_names =copy.deepcopy(cls.common_app_names)
-        app_names['sum'].extend(["pgbouncer","spark-master","/usr/local/bin/pushgateway"])
-        return app_names
+    # @classmethod
+    # @property
+    # def cpu_app_names(cls):
+    #     app_names =copy.deepcopy(cls.common_app_names)
+    #     app_names['sum'].extend(["pgbouncer","spark-master","/usr/local/bin/pushgateway"])
+    #     return app_names
 
     @staticmethod
     def get_basic_chart_queries():
@@ -79,7 +79,7 @@ class parent:
     
     @classmethod
     def get_app_level_RAM_used_percentage_queries(cls):
-        app_level_RAM_used_percentage_queries= dict([(f"Memory Used by {app}",(f"{key}(uptycs_app_memory{{app_name=~'{app}'}}) by (host_name)" , ["host_name"], '%') ) for key,app_list in cls.memory_app_names.items() for app in app_list])
+        app_level_RAM_used_percentage_queries= dict([(f"Memory Used by {app}",(f"{key}(uptycs_app_memory{{app_name=~'{app}'}}) by (host_name)" , ["host_name"], '%') ) for key,app_list in cls.common_app_names.items() for app in app_list])
         more_memory_queries={
             "Kafka Disk Used Percentage":("uptycs_percentage_used{partition=~'/data/kafka'}" , ["host_name"], '%'),
             "Debezium memory usage":("uptycs_docker_mem_used{container_name='debezium'}" , ["host_name"],'bytes'),
@@ -93,7 +93,7 @@ class parent:
     
     @classmethod
     def get_app_level_CPU_used_cores_queries(cls):
-        app_level_CPU_used_cores_queries=dict([(f"CPU Used by {app}", (f"{key}(uptycs_app_cpu{{app_name=~'{app}'}}) by (host_name)" , ["host_name"], '%') ) for key,app_list in cls.cpu_app_names.items() for app in app_list])
+        app_level_CPU_used_cores_queries=dict([(f"CPU Used by {app}", (f"{key}(uptycs_app_cpu{{app_name=~'{app}'}}) by (host_name)" , ["host_name"], '%') ) for key,app_list in cls.common_app_names.items() for app in app_list])
         more_cpu_queries={
             "Debezium CPU usage":("uptycs_docker_cpu_stats{container_name='debezium'}" , ["host_name"]),
         }

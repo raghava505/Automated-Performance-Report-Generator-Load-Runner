@@ -12,12 +12,6 @@ cpu_unit = "cores"
 #             "avg":[]
 #           }
 
-# application_level_usage_app_names = ["tls","trino","/opt/uptycs/cloud/go/bin/ruleEngine-production-ruleengine",
-#                                      "kafka","spark-master","spark-worker","osqueryIngestion",
-#                                      "data-archival","orc-compaction","auditLogsIngestion","alertsIngestion",
-#                                      "cloudConnectorIngestion","prestoLogsIngestion","queryPackIngestion"]
-
-
 class MC_comparisions:
     def __init__(self,prom_con_obj,start_timestamp,end_timestamp):
         self.curr_ist_start_time=start_timestamp
