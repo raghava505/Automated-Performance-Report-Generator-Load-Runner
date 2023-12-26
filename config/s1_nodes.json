@@ -3,11 +3,17 @@
     "clusters": 2,
     "SU": 6,
     "domain": "jupiter",
-    "extension":"net",
+    "extension": "net",
     "stack_url": "https://jupiter.uptycs.net/",
     "elastic": "192.168.129.52",
-    "event_rules_per_cust":{"enabled":39,"triggered":33},
-    "alert_rules_per_cust":{"enabled":39,"triggered":33},
+    "event_rules_per_cust": {
+        "enabled": 39,
+        "triggered": 33
+    },
+    "alert_rules_per_cust": {
+        "enabled": 39,
+        "triggered": 33
+    },
     "pnodes": [
         "s1c1pn1",
         "s1c1pn2",
