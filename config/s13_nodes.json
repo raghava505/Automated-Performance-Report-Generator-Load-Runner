@@ -26,6 +26,9 @@
     "monitoring_node": [
         "s13monitor"
     ],
+    "stsnodes": [
+        
+    ],
     "other_nodes": [
         "s13elasticsearch",
         "s13kibana",

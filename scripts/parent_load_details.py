@@ -27,12 +27,12 @@ class parent:
     @classmethod
     @property
     def mon_spark_topic_names(cls):
-        return ['agentosquery','event']
+        return ['event','audit','prestoquerylogs']
     
     @classmethod
     @property
     def kafka_group_names(cls):
-        return ['db-alerts','ruleengine','debeziumconsumer']
+        return ['db-alerts','ruleengine','debeziumconsumer','db-incidents']
     
     @classmethod
     @property
@@ -55,17 +55,6 @@ class parent:
                     'Check for steady state of live assets count'
                 ]
     
-    # @classmethod
-    # @property
-    # def memory_app_names(cls):
-    #     return copy.deepcopy(cls.common_app_names)
-    
-    # @classmethod
-    # @property
-    # def cpu_app_names(cls):
-    #     app_names =copy.deepcopy(cls.common_app_names)
-    #     app_names['sum'].extend(["pgbouncer","spark-master","/usr/local/bin/pushgateway"])
-    #     return app_names
 
     @staticmethod
     def get_basic_chart_queries():
@@ -121,6 +110,7 @@ class parent:
     @classmethod
     def get_inject_drain_rate_and_lag_chart_queries(cls):
         queries={}
+        queries['Debezium Replication Lag']=('sum(uptycs_pg_logical_replication_lag{slot_name=~".*debezium.*"}) by (database,lag_type,slot_name,slot_type)' , ['slot_name','lag_type'] , 'bytes' )
         for topic in cls.mon_spark_topic_names:
             queries.update(cls.get_inject_drain_and_lag_uptycs_mon_spark(topic))
         for group in cls.kafka_group_names:
@@ -131,6 +121,8 @@ class parent:
     @staticmethod
     def get_other_chart_queries():
         return {"Active Client Connections":("uptycs_pgb_cl_active" , ["host_name","db","db_user"]),
+                "Uptycs redis Connections":("sum(uptycs_redis_connection)" , []),
+                "Uptycs pg Connections by app":("sum(uptycs_pg_connections_by_app)" , []),
                         "Redis client connections for tls":("sum(uptycs_app_redis_clients{app_name='/opt/uptycs/cloud/tls/tls.js'}) by (host_name)" , ["host_name"]),
                         "Configdb Pg wal folder size":("configdb_wal_folder",["host_name"]),
                         "Configdb number of wal files":("configdb_wal_file{}" , ["host_name"]),

@@ -6,8 +6,14 @@
     "extension": "net",
     "stack_url": "https://longevity.uptycs.net/",
     "elastic": "192.168.148.52",
-    "event_rules_per_cust":{"enabled":39,"triggered":33},
-    "alert_rules_per_cust":{"enabled":12,"triggered":12},
+    "event_rules_per_cust": {
+        "enabled": 39,
+        "triggered": 33
+    },
+    "alert_rules_per_cust": {
+        "enabled": 12,
+        "triggered": 12
+    },
     "pnodes": [
         "long-c1pn1",
         "long-c2pn1",
@@ -43,6 +49,10 @@
     "monitoring_node": [
         "long-monitor"
     ],
+    "stsnodes": [
+        "long-sts1",
+        "long-sts2"
+    ],
     "other_nodes": [
         "long-elastic",
         "long-kibana",
@@ -56,9 +66,7 @@
         "long-air-fl2",
         "long-memgraph-aws",
         "long-memgraph-gcp",
-        "long-memgraph-azure",
-        "long-sts1",
-        "long-sts2"
+        "long-memgraph-azure"
     ],
     "kubesim_nodes": [
         "long-kube-sim1",

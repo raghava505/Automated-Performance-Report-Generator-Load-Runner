@@ -18,26 +18,40 @@ class cloudquery_child(parent):
                 "Tables Validated in the Load" : "gcp_iam_role , gcp_compute_disk , gcp_container_cluster , gcp_storage_bucket , gcp_file_backup , gcp_logging_metric , gcp_monitoring_alert_policy , gcp_dns_policy , gcp_pubsub_topic , gcp_sql_database , gcp_bigquery_table , gcp_memorystore_redis_instance , gcp_cloud_function , gcp_cloud_run_service , gcp_kms_key , gcp_secret_manager_secret_version, gcp_pubsub_subscription , gcp_file_instance,gcp_compute_image,gcp_dns_managed_zone,gcp_sql_instance,gcp_bigquery_dataset,gcp_memorystore_memcached_instance,gcp_cloud_run_revision,gcp_iam_service_account,gcp_compute_instance,gcp_logging_sink,gcp_secret_manager_secret"
             }
     }
-    
+    @classmethod
+    @property
+    def hostname_types(cls):
+        return ["process","data","pg","ep"]
+
     @classmethod
     @property
     def common_app_names(cls):
-        return  {"sum":[".*effectivePermissions.*","sts.*","/usr/lib/memgraph/memgraph","/opt/uptycs/cloud/go/bin/cloudqueryConsumer",
-                        "cloudDetectionConsumer",".*statedb.*","cloudConnectorIngestion","orc-compaction" ,".*configdb.*", "kafka",".*ruleEngine.*",
-                        "data-archival",".*redis-server.*","/opt/uptycs/cloud/go/bin/complianceSummaryConsumer","tls",".*airflow.*",
-                        "trino" , "osqueryIngestion",".*osqLogger.*","spark-worker","spark-worker"],
-                "avg":[]
-                }
+        temp = copy.deepcopy(parent.common_app_names)
+        temp['sum'].extend([".*effectivePermissions.*","sts.*","/usr/lib/memgraph/memgraph","/opt/uptycs/cloud/go/bin/cloudqueryConsumer","cloudDetectionConsumer",".*statedb.*","cloudConnectorIngestion"])
+        return temp
     
+
+    @classmethod
+    @property
+    def application_level_usage_app_names_for_table(cls):
+        temp = copy.deepcopy(parent.application_level_usage_app_names_for_table)
+        temp.extend([".*effectivePermissions.*","sts.*","/usr/lib/memgraph/memgraph","/opt/uptycs/cloud/go/bin/cloudqueryConsumer","cloudDetectionConsumer",".*statedb.*","cloudConnectorIngestion"])
+        return temp
+
+
     @classmethod
     @property
     def mon_spark_topic_names(cls):
-        return ["cloudconnectorsink","event"]
+        temp = copy.deepcopy(parent.mon_spark_topic_names)
+        temp.extend(["cloudconnectorsink"])
+        return temp
     
     @classmethod
     @property
     def kafka_group_names(cls):
-        return ["cloudqueryinventorygroup","cloudcompliancemanager",'ruleenginecc','ruleenginecc','debeziumconsumer']
+        temp = copy.deepcopy(parent.kafka_group_names)
+        temp.extend(["cloudqueryinventorygroup" , "cloudcompliancemanager" , "ruleenginecc"])
+        return temp
     
     @classmethod
     @property
@@ -52,4 +66,10 @@ class cloudquery_child(parent):
                     'Check for cloudcompliance manager lag',
                     'Check for Db events lag',
                     'Check for cloudconnector Ingestion lag',
+                    'Triage bugs and check for blockers',
+                    'Check if PG master is in sync with replica',
+                    'Check for memory leaks',
+                    'Check for variation in HDFS disk usage',
+                    'Check for variation in PG disk usage',
+                    'Check for variation in Kafka disk usage',
                 ]

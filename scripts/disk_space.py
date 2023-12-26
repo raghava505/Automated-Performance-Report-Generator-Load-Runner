@@ -104,8 +104,14 @@ class DISK:
             total_data_partition_disk_used = (data_used_after_load_in_bytes[node]-data_used_before_load_in_bytes[node])/bytes_in_a_gb
             print(f"for node {node}, pg_used_after_load_in_bytes : {pg_used_after_load_in_bytes[node]} , pg_used_before_load_in_bytes : {pg_used_before_load_in_bytes[node]}")
             print(f"for node {node}, data_used_after_load_in_bytes : {data_used_after_load_in_bytes[node]} , data_used_before_load_in_bytes : {data_used_before_load_in_bytes[node]}")
-            save_dict[node] = {"/pg (used in GB)" : total_pg_partition_disk_used,
-                               "/data (used in GB)" : total_data_partition_disk_used}
+            save_dict[node] = {
+                "/pg (used before load in GB)":pg_used_before_load_in_bytes[node]/bytes_in_a_gb,
+                "/pg (used after load in GB)":pg_used_after_load_in_bytes[node]/bytes_in_a_gb,
+                "/pg (used in GB) (After -  Before)" : total_pg_partition_disk_used,
+
+                "/data (used before load in GB)":data_used_before_load_in_bytes[node]/bytes_in_a_gb,
+                "/data (used after load in GB)":data_used_after_load_in_bytes[node]/bytes_in_a_gb,
+                "/data (used in GB) (After -  Before)" : total_data_partition_disk_used}
         print("Final dictionary to save : " , )
         print(json.dumps(save_dict, indent=4))
         return TYPE,save_dict
