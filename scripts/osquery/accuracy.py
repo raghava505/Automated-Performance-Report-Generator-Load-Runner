@@ -276,12 +276,14 @@ class osq_accuracy:
                 #print(line)
                 if line_no % 2 == 0 and line_no <= endline: 
                     lines = json.loads(line)
+                    count=count+1
                     for table_details in lines["data"]:
                         if table_details['name'] in  output_log:
                             output_log[table_details['name']]=output_log[table_details['name']]+1
                         else:
                             output_log[table_details['name']]=1
                 line_no=line_no+1
+            print(f"calculated expected for tables from {count} messages in  {line_no} lines ")
         return output_log
     def run_table_accuracy(self,query,table,accuracy,expected,api):
         actual=http_query(api, query,self.ext)
