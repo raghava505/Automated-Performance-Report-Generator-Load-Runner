@@ -143,12 +143,11 @@ if __name__ == "__main__":
             calc = TRINO(curr_ist_start_time=variables["start_time_str_ist"],curr_ist_end_time=end_time_str,prom_con_obj=prom_con_obj)
             trino_queries = calc.fetch_trino_queries()
         #-------------------------API LOAD--------------------------
-        
+        result_dict_api_load=None
         if 'api_load_reports_node_ip' in test_env_json_details:
             print(f"Looking for api load csv file in {test_env_json_details['api_load_reports_node_ip']}")
             csv_path = prom_con_obj.api_loads_folder_path + str(test_env_json_details['stack']).lower() + "-" + str(variables["start_time_str_ist"]) + ".csv"
             print("CSV file path for API load : " , csv_path)
-            result_dict_api_load=None
             result_dict_api_load = API_LOAD().fetch_api_load_dict(csv_path,test_env_json_details['api_load_reports_node_ip'],prom_con_obj)
         else:
             print(f"Skipping API load details because 'api_load_reports_node_ip' is not present in stack json file")
