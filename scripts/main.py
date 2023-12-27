@@ -144,10 +144,14 @@ if __name__ == "__main__":
             trino_queries = calc.fetch_trino_queries()
         #-------------------------API LOAD--------------------------
         
-        csv_path = prom_con_obj.api_loads_folder_path + str(test_env_json_details['stack']).lower() + "-" + str(variables["start_time_str_ist"]) + ".csv"
-        print("CSV file path for API load : " , csv_path)
-        result_dict_api_load=None
-        result_dict_api_load = API_LOAD().fetch_api_load_dict(csv_path)
+        if 'api_load_reports_node_ip' in test_env_json_details:
+            print(f"Looking for api load csv file in {test_env_json_details['api_load_reports_node_ip']}")
+            csv_path = prom_con_obj.api_loads_folder_path + str(test_env_json_details['stack']).lower() + "-" + str(variables["start_time_str_ist"]) + ".csv"
+            print("CSV file path for API load : " , csv_path)
+            result_dict_api_load=None
+            result_dict_api_load = API_LOAD().fetch_api_load_dict(csv_path,test_env_json_details['api_load_reports_node_ip'],prom_con_obj)
+        else:
+            print(f"Skipping API load details because 'api_load_reports_node_ip' is not present in stack json file")
 
         #-------------------------Osquery Table Accuracies----------------------------
         Osquery_table_accuracies=None
