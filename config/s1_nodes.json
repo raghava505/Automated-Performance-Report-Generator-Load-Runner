@@ -8,11 +8,11 @@
     "elastic": "192.168.129.52",
     "event_rules_per_cust": {
         "enabled": 39,
-        "triggered": 33
+        "triggered": 34
     },
     "alert_rules_per_cust": {
-        "enabled": 39,
-        "triggered": 33
+        "enabled": 21,
+        "triggered": 16
     },
     "pnodes": [
         "s1c1pn1",
