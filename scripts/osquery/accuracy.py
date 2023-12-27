@@ -142,7 +142,11 @@ class osq_accuracy:
         time_format='%Y-%m-%d %H:%M'
         start_utc = datetime.strptime(self.start_time, time_format)
         end_utc = datetime.strptime(self.end_time, time_format)
-        days_involved=((end_utc-start_utc).days)+1
+        days_involved = 0
+        current_date = start_utc.date()
+        while current_date < end_utc.date():
+            days_involved += 1
+            current_date += timedelta(days=1)
         return days_involved
     def expected_events(self):
         input_lines =self.endline
