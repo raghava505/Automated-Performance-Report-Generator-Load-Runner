@@ -1,11 +1,10 @@
 import paramiko
 import pandas as pd
-from settings import configuration
 import os
 
 
 class API_LOAD:
-    def fetch_api_load_dict(self, api_load_csv_file_path):
+    def fetch_api_load_dict(self, api_load_csv_file_path,api_load_reports_node_ip,prom_com_obj):
         if api_load_csv_file_path == None or api_load_csv_file_path == "":
             return None
         
@@ -18,8 +17,8 @@ class API_LOAD:
         
         try:
             # Use SCP to copy the file from the remote host to the local machine
-            with paramiko.Transport((configuration().api_loads_vm_ip, 22)) as transport:
-                transport.connect(username=configuration().abacus_username, password=configuration().abacus_password)
+            with paramiko.Transport((api_load_reports_node_ip, 22)) as transport:
+                transport.connect(username=prom_com_obj.abacus_username, password=prom_com_obj.abacus_password)
                 sftp = paramiko.SFTPClient.from_transport(transport)
                 sftp.get(remote_csv_path, local_csv_path)
                 sftp.close()

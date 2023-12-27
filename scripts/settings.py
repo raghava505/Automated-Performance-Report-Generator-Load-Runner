@@ -20,7 +20,6 @@ class configuration:
         self.base_stack_config_path = f"{self.ROOT_PATH}/config"
         self.mongo_connection_string = "mongodb://localhost:27017"
         self.api_loads_folder_path = "/home/abacus/apache-jmeter-5.6.2/bin/reports/"
-        self.api_loads_vm_ip = "192.168.145.94"
 
         if test_env_file_name:
             self.test_env_file_path = f"{self.base_stack_config_path}/{test_env_file_name}"
