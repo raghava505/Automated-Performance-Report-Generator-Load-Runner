@@ -272,8 +272,8 @@ class osq_accuracy:
             line_no = 1
             count=0
             output_log={}
-            lines_1 = fin.readlines()
-            print(f"no of inputfile lines {len(lines_1)}")
+            #lines_1 = fin.readlines()
+            #print(f"no of inputfile lines {len(lines_1)}")
             for line in fin:
                 #print(line)
                 if line_no % 2 == 0 and line_no <= endline: 
