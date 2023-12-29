@@ -141,7 +141,8 @@ class parent:
                         "Transaction count in configdb":("uptycs_configdb_stats{col =~ \"xact.*\"}",["col"]),
                         "Row count in configdb":("uptycs_configdb_stats{col =~ \"tup.*\"}",["col"]),
                         "Assets table stats":("uptycs_psql_table_stats",["col"]),
-                        "PG and data partition disk usage in configdb" : ("uptycs_used_disk_bytes{node_type=\"pg\",partition=\"/data\"} or uptycs_used_disk_bytes{node_type=\"pg\",partition=\"/pg\"}" , ["partition","host_name"],'bytes')
+                        "PG and data partition disk usage in configdb" : ("uptycs_used_disk_bytes{node_type=\"pg\",partition=\"/data\"} or uptycs_used_disk_bytes{node_type=\"pg\",partition=\"/pg\"}" , ["partition","host_name"],'bytes'),
+                        "StateDB errors":("sum(curr_state_db_errors) by (error,table_name)" , ["error" , "table_name"])
                         }
     
     @staticmethod
