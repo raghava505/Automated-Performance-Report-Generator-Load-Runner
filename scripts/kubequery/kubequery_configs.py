@@ -93,8 +93,8 @@ asset_count = 40
 #sim_nodes = ['s13sim1','s13sim2','s13sim3','s13sim4']
 # sim_nodes = ['s13sim2','s13sim3','s13sim4']
 
-kubesim_ports = [1201,1202,1203,1204,1205,1206]
-osquery_ports = [28001,28002,28003,28004,28005,28006]
+kubesim_ports = [1201,1202,1203,1204,1205,1206,1207,1208,1209,1210]
+osquery_ports = [28001,28002,28003,28004,28005,28006,28007,28008,28009,28010]
 # In Minutes
 deltaTime = 60 
 
