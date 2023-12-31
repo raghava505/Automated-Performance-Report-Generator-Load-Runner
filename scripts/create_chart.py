@@ -37,6 +37,8 @@ def eliminate_long_breaks(old_x,old_y):
         prev_point=point[0]
     return x,y
 
+offset_ist_minutes = 330  # 5 hours and 30 minutes offset in minutes
+
 outer_background_color="#191b1f"
 # text_color="#ccccdc"
 text_color="#EAEAEA"
@@ -70,6 +72,7 @@ def create_images_and_save(path,doc_id,collection,fs,duration):
             try:
                 num_lines=0
                 list_of_legend_lengths=[]
+                unit=""
                 for line in  charts_data[category][title]:
                     file_id = line["values"]
                     retrieved_data = fs.get(ObjectId(file_id)).read()
@@ -79,7 +82,6 @@ def create_images_and_save(path,doc_id,collection,fs,duration):
                     complete_time_set.add(min(x))
                     complete_time_set.add(max(x))
                     x_values_utc = date2num(x)
-                    offset_ist_minutes = 330  # 5 hours and 30 minutes offset in minutes
                     x_values_ist = x_values_utc + (offset_ist_minutes / (60 * 24))  # Convert minutes to days
                     y = [float(point[1]) for point in large_array]
                     # y = pd.Series(y).rolling(window=5).mean()
@@ -92,20 +94,20 @@ def create_images_and_save(path,doc_id,collection,fs,duration):
                     line_color = line_plot.get_color()
                     plt.text(x_values_ist[0],y[0],line['legend'], fontsize=10, verticalalignment='bottom', horizontalalignment='left', color='black', rotation=0, bbox=dict(facecolor=line_color, edgecolor='none', boxstyle='round,pad=0.1'))
                     plt.text(x_values_ist[-1],y[-1],line['legend'], fontsize=10, verticalalignment='bottom', horizontalalignment='right', color='black', rotation=0, bbox=dict(facecolor=line_color, edgecolor='none', boxstyle='round,pad=0.1'))
-                
+                    unit = line['unit']
+
                 base_x_interval_min = 30
                 factor = (duration//18) + 1
                 x_time_interval_in_min = base_x_interval_min * factor
                 
-                if duration > 24:
-                    x_date_formatter = DateFormatter('%m/%d \n%H:%M')
-                else:
-                    x_date_formatter = DateFormatter('%H:%M')
+                # if duration > 24:
+                x_date_formatter = DateFormatter('%m/%d \n%H:%M')
+                # else:
+                    # x_date_formatter = DateFormatter('%H:%M')
 
                 plt.gca().xaxis.set_major_locator(MinuteLocator(interval=x_time_interval_in_min))
                 # date_formatter = DateFormatter('%H:%M')
                 plt.gca().xaxis.set_major_formatter(x_date_formatter)
-                unit = line['unit']
                 plt.gca().get_yaxis().set_major_formatter(FuncFormatter(lambda value,pos:format_y_ticks(value,pos,unit)))
                 plt.title("\n"+str(title),fontsize=fig_width/1.68,pad=fig_width/0.9,y=1)
                 if num_lines == 0:
