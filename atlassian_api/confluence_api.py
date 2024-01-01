@@ -137,10 +137,14 @@ class publish_to_confluence:
 
     def attach_single_image(self,image_file_path,heading_tag):
         if os.path.exists(image_file_path):
+            if image_file_path.endswith(".mp4"):
+                content_type = "video/mp4"
+            else:
+                content_type="image/png"
             base_filename = os.path.basename(image_file_path)
             print(f"Attaching : {base_filename}")
             base_filename_without_extension = str(os.path.splitext(base_filename)[0])
-            attachment=self.confluence.attach_file(image_file_path,name=str(base_filename),content_type="image/png",title=self.title, space=self.space)
+            attachment=self.confluence.attach_file(image_file_path,name=str(base_filename),content_type=content_type,title=self.title, space=self.space)
             attachment_id = attachment['results'][0]['id']
             self.body_content+=f"""
                                 <h{heading_tag}>{str(base_filename_without_extension)}</h{heading_tag}>
