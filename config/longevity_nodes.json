@@ -76,6 +76,9 @@
     "selfsim_nodes": [
         "long-self-managed-container1"
     ],
+    "azuresim_nodes": [
+        "long-azure-sim1"
+    ],
     "long-c1pn1": {
         "storage": {
             "root_partition": "1.8T",

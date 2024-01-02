@@ -9,6 +9,7 @@ class EVE_COUNTS:
                            "s4simhost4b", "s4simhost4d", "s4simhost5b", "s4simhost5d", "s4simhost6b", "s4simhost6d"]
         self.simulators2 = ["long-aws-sim1", "long-aws-sim2"]
         self.simulators3 = ["long-gcp-sim1", "long-gcp-sim2"]
+        self.azure_simulators = ["long-azure-sim1"]
         self.load_name = variables['load_name']
         self.load_type = variables['load_type']
         self.ssh_user = "abacus"
@@ -18,6 +19,7 @@ class EVE_COUNTS:
         self.total_sum3 = 0
 
         self.path_mappings = {
+            "Azure_MultiCustomer": "~/cloud_query_sim/azure_multi/logs",
             "AWS_MultiCustomer": "~/multi-customer-cqsim/aws/logs",
             "GCP_MultiCustomer": "~/multi-customer-cqsim/gcp/logs",
             "AWS_SingleCustomer": "~/cloud_query_sim/aws/logs",
@@ -40,6 +42,7 @@ class EVE_COUNTS:
         except (paramiko.SSHException, socket.timeout) as e:
             print(f"Error connecting to {host}: {e}")
             return 0
+        
     def analyze_logs(self, simulator, pattern, pattern2, pattern3):
         events_pattern = f'cd {self.remote_logs_path} && tail -10 "$(ls -trh | tail -1)" | awk \'{pattern}\''
         modified_events_pattern = f'cd {self.remote_logs_path} && tail -10 "$(ls -trh | tail -1)" | awk \'{pattern2}\''
@@ -63,17 +66,26 @@ class EVE_COUNTS:
             modified_events_pattern = '/Total no\\.of modified events happened till now:/ {sum+=$NF} END {print sum}'
             inventory_pattern = '/Total no\\.of inventory events happened till now:/ {sum+=$NF} END {print sum}'
 
+        elif self.load_name == "Azure_MultiCustomer":
+            events_pattern = '/Total no\\.of events happened till now :/ {sum+=$NF} END {print sum}'
+            modified_events_pattern = '/Total no\\.of modified events happened during load:/ {sum+=$NF} END {print sum}'
+            inventory_pattern = '/Total no\\.of inventory events happened during load:/ {sum+=$NF} END {print sum}'
+
         elif self.load_name == "GCP_MultiCustomer":
             events_pattern = '/Total no\\.of events happened till now :/ {sum+=$NF} END {print sum}'
             modified_events_pattern = '/Total no\\.of modified events happened during load:/ {sum+=$NF} END {print sum}'
             inventory_pattern = '/Total no\\.of inventory events happened during load:/ {sum+=$NF} END {print sum}'
 
         with ThreadPoolExecutor(max_workers=len(self.simulators1)) as executor:
-            if self.load_name in ["Osquery(multi)_CloudQuery(aws_gcp_multi)", "Osquery(multi)_CloudQuery(aws_gcp_multi)_KubeQuery(single)_and_SelfManaged(single)"]:
+            if self.load_name in ["Osquery(multi)_CloudQuery(aws_gcp_multi)", "Osquery(multi)_CloudQuery(aws_gcp_azure_multi)_KubeQuery(single)_and_SelfManaged(single)"]:
                 
                 events_pattern_aws = '/Total no\\.of events happened till now:/ {sum+=$NF} END {print sum}'
                 modified_events_pattern_aws = '/Total no\\.of modified events happened till now:/ {sum+=$NF} END {print sum}'
                 inventory_pattern_aws = '/Total no\\.of inventory events happened till now:/ {sum+=$NF} END {print sum}'
+                
+                events_pattern_azure = '/Total no\\.of events happened till now :/ {sum+=$NF} END {print sum}'
+                modified_events_pattern_azure = '/Total no\\.of modified events happened during load:/ {sum+=$NF} END {print sum}'
+                inventory_pattern_azure = '/Total no\\.of inventory events happened during load:/ {sum+=$NF} END {print sum}'
 
                 events_pattern_gcp = '/Total no\\.of events happened till now :/ {sum+=$NF} END {print sum}'
                 modified_events_pattern_gcp = '/Total no\\.of modified events happened during load:/ {sum+=$NF} END {print sum}'
@@ -82,15 +94,23 @@ class EVE_COUNTS:
                 results_aws = list(executor.map(self.analyze_logs,  self.simulators2, [events_pattern_aws] * len(self.simulators2), [modified_events_pattern_aws] * len(self.simulators2), [inventory_pattern_aws] * len(self.simulators2)))
                 self.remote_logs_path = self.path_mappings.get("GCP_MultiCustomer", "~/multi-customer-cqsim/aws/logs")
                 results_gcp = list(executor.map(self.analyze_logs,  self.simulators3, [events_pattern_gcp] * len(self.simulators3), [modified_events_pattern_gcp] * len(self.simulators3), [inventory_pattern_gcp] * len(self.simulators3)))
-            else:
+                self.remote_logs_path = self.path_mappings.get("Azure_MultiCustomer", "~/cloud_query_sim/azure_multi/logs")
+                results_azure = list(executor.map(self.analyze_logs,  self.azure_simulators, [events_pattern_azure] * len(self.azure_simulators), [modified_events_pattern_azure] * len(self.azure_simulators), [inventory_pattern_azure] * len(self.azure_simulators)))
                 
+            elif self.load_name in ["Azure_MultiCustomer"]:
+                results = list(executor.map(self.analyze_logs,  self.azure_simulators, [events_pattern] * len(self.azure_simulators), [modified_events_pattern] * len(self.azure_simulators), [inventory_pattern] * len(self.azure_simulators)))
+            else:
                 results = list(executor.map(self.analyze_logs,  self.simulators1, [events_pattern] * len(self.simulators1), [modified_events_pattern] * len(self.simulators1), [inventory_pattern] * len(self.simulators1)))
 
-        if self.load_name in ["Osquery(multi)_CloudQuery(aws_gcp_multi)", "Osquery(multi)_CloudQuery(aws_gcp_multi)_KubeQuery(single)_and_SelfManaged(single)"]:
+        if self.load_name in ["Osquery(multi)_CloudQuery(aws_gcp_multi)", "Osquery(multi)_CloudQuery(aws_gcp_azure_multi)_KubeQuery(single)_and_SelfManaged(single)"]:
             
             total_sum_aws = sum(result[0] for result in results_aws)
             total_sum2_aws = sum(result[1] for result in results_aws)
             total_sum3_aws = sum(result[2] for result in results_aws)
+            
+            total_sum_azure = sum(result[0] for result in results_azure)
+            total_sum2_azure = sum(result[1] for result in results_azure)
+            total_sum3_azure = sum(result[2] for result in results_azure)
 
             total_sum_gcp = sum(result[0] for result in results_gcp)
             total_sum2_gcp = sum(result[1] for result in results_gcp)
@@ -105,6 +125,16 @@ class EVE_COUNTS:
                 "Total count / hour:" : self.format_in_millions(total_sum_aws / 12),
                 "Ratio (inventory:events)": f"1:{math.ceil(total_sum2_aws / total_sum3_aws)}"
             }
+            
+            save_dict["Azure"] = {
+                "Total inventory count": self.format_in_millions(total_sum3_azure),
+                "Total inventory count / hour" : self.format_in_millions(total_sum3_azure / 12),
+                "Total cloud trail events count": self.format_in_millions(total_sum2_azure),
+                "Total cloud trail events count / hour" : self.format_in_millions(total_sum2_azure / 12),
+                "Total count": self.format_in_millions(total_sum_azure),
+                "Total count / hour:" : self.format_in_millions(total_sum_azure / 12),
+                "Ratio (inventory:events)": f"1:{math.ceil(total_sum2_azure / total_sum3_azure)}"
+            }            
 
             save_dict["GCP"] = {
                 "Total inventory count": self.format_in_millions(total_sum3_gcp),
@@ -124,6 +154,8 @@ class EVE_COUNTS:
 
             if self.load_name in ["AWS_MultiCustomer", "AWS_SingleCustomer"]:
                 x="AWS"
+            elif self.load_name in ["Azure_Mulyicustomer"]:
+                x="Azure"
             elif self.load_name == "GCP_MultiCustomer":
                 x="GCP"
 

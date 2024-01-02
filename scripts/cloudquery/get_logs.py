@@ -7,10 +7,12 @@ class LOGScriptRunner:
         self.simulators1 = ["s4simhost1a", "s4simhost1d", "s4simhost2b", "s4simhost2d", "s4simhost3b", "s4simhost3d", "s4simhost4b", "s4simhost4d", "s4simhost5b", "s4simhost5d", "s4simhost6b", "s4simhost6d"]
         self.simulators2 = ["long-aws-sim1", "long-aws-sim2"]
         self.simulators3 = ["long-gcp-sim1", "long-gcp-sim2"]
+        self.azure_simulators = ["long-azure-sim1"]
         self.output_folder = "cloudquery/expected_logs"
         self.password = "abacus"
 
         self.path_mappings = {
+            "Azure_MultiCustomer": "~/cloud_query_sim/azure_multi/logs",
             "AWS_MultiCustomer": "~/multi-customer-cqsim/aws/logs",
             "GCP_MultiCustomer": "~/multi-customer-cqsim/gcp/logs",
             "AWS_SingleCustomer": "~/cloud_query_sim/aws/logs",
