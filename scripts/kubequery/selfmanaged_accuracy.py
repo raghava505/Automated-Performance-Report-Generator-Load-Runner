@@ -132,7 +132,7 @@ class SelfManaged_Accuracy:
             self.accuracy[t] = {
                 "Expected Records" : self.expected_data[t],
                 "Actual Records" : self.actual_data[t],
-                "Accuracy" : ((self.actual_data[t]+1)/(self.expected_data[t]+1))*100
+                "Accuracy" : round(((self.actual_data[t]+1)/(self.expected_data[t]+1))*100 , 2)
             }
         #print(self.accuracy)
         return self.accuracy
