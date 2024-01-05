@@ -20,7 +20,7 @@ from pg_stats import PG_STATS
 from cloudquery.db_operations_time import DB_OPERATIONS_TIME
 from cloudquery.events_count import EVE_COUNTS
 from cloudquery.sts_records import STS_RECORDS
-from api_load import API_LOAD
+from api_presto_load import fetch_and_extract_csv,fetch_and_save_pdf
 import pytz
 import os
 from create_chart import create_images_and_save
@@ -143,14 +143,21 @@ if __name__ == "__main__":
             calc = TRINO(curr_ist_start_time=variables["start_time_str_ist"],curr_ist_end_time=end_time_str,prom_con_obj=prom_con_obj)
             trino_queries = calc.fetch_trino_queries()
         #-------------------------API LOAD--------------------------
-        result_dict_api_load=None
-        if 'api_load_reports_node_ip' in test_env_json_details:
-            print(f"Looking for api load csv file in {test_env_json_details['api_load_reports_node_ip']}")
-            csv_path = prom_con_obj.api_loads_folder_path + str(test_env_json_details['stack']).lower() + "-" + str(variables["start_time_str_ist"]) + ".csv"
-            print("CSV file path for API load : " , csv_path)
-            result_dict_api_load = API_LOAD().fetch_api_load_dict(csv_path,test_env_json_details['api_load_reports_node_ip'],prom_con_obj)
+        api_load_result_dict=None
+        presto_load_result_dict=None
+        if 'api_presto_load_reports_node_ip' in test_env_json_details:
+            print(f"Looking for api load  and presto load csv files in {test_env_json_details['api_presto_load_reports_node_ip']}")
+            stack_starttime_string=str(test_env_json_details['stack']).lower() + "-" + str(variables["start_time_str_ist"])
+            api_load_csv_path = os.path.join(prom_con_obj.api_loads_folder_path , stack_starttime_string+".csv")
+            benchto_load_csv_path=os.path.join(prom_con_obj.presto_loads_folder_path, stack_starttime_string, "benchto.csv")
+            benchto_load_pdf_path=os.path.join(prom_con_obj.presto_loads_folder_path , stack_starttime_string, "Benchto.pdf")
+            print("CSV file path for API/Jmeter load : " , api_load_csv_path)
+            api_load_result_dict = fetch_and_extract_csv(api_load_csv_path,test_env_json_details['api_presto_load_reports_node_ip'],prom_con_obj)
+            print("CSV file path for Presto/benchto load : " , benchto_load_csv_path)
+            presto_load_result_dict = fetch_and_extract_csv(benchto_load_csv_path,test_env_json_details['api_presto_load_reports_node_ip'],prom_con_obj)
+
         else:
-            print(f"Skipping API load details because 'api_load_reports_node_ip' is not present in stack json file")
+            print(f"Skipping API load details because 'api_presto_load_reports_node_ip' is not present in stack json file")
 
         #-------------------------Osquery Table Accuracies----------------------------
         Osquery_table_accuracies=None
@@ -190,7 +197,6 @@ if __name__ == "__main__":
             accuracy = SelfManaged_Accuracy(start_timestamp=start_utc_time,end_timestamp=end_utc_time,prom_con_obj=prom_con_obj,variables=variables)
             selfmanaged_accuracies = accuracy.accuracy_selfmanaged()
             print(json.dumps(selfmanaged_accuracies, indent=4))
-            # sys.exit()
 
         
         #--------------------------------------Events Counts--------------------------------------
@@ -308,9 +314,10 @@ if __name__ == "__main__":
                 final_data_to_save.update({"Osquery Table Accuracies":Osquery_table_accuracies})
             if Osquery_event_accuracies:
                 final_data_to_save.update({"Osquery Event Accuracies":Osquery_event_accuracies})
-            if result_dict_api_load:
-                final_data_to_save.update({"API Load details":result_dict_api_load})
-            
+            if api_load_result_dict:
+                final_data_to_save.update({"API Load details":api_load_result_dict})
+            if presto_load_result_dict:
+                final_data_to_save.update({"Presto Load details":presto_load_result_dict})
 
             final_data_to_save.update({"charts":complete_charts_data_dict})
             final_data_to_save.update(mem_cpu_usages_dict)
@@ -329,6 +336,18 @@ if __name__ == "__main__":
                 print("Done!")
             except Exception as e:
                 print(f"Error while generating graphs into {path} : {str(e)}")
+            try:
+                #---------------FETCHING PDFS-----------------
+                if presto_load_result_dict:
+                    print(f"Fetching presto load charts pdf from {test_env_json_details['api_presto_load_reports_node_ip']}:{benchto_load_csv_path}")
+                    BASE_PDFS_PATH = os.path.join(os.path.dirname(prom_con_obj.ROOT_PATH),'pdfs')
+                    presto_load_local_pdf_path=f"{BASE_PDFS_PATH}/{database_name}/{collection_name}/{inserted_id}/{inserted_id}.pdf"
+                    print(f'Saving the presto load pdf to {presto_load_local_pdf_path}')
+                    os.makedirs(os.path.dirname(presto_load_local_pdf_path),exist_ok=True)
+                    fetch_and_save_pdf(benchto_load_pdf_path,test_env_json_details['api_presto_load_reports_node_ip'],prom_con_obj,presto_load_local_pdf_path)
+            except Exception as e:
+                print(f"Error while fetching pdfs : {str(e)}")
+
         except Exception as e:
             print(f"ERROR : Failed to insert document into database {database_name}, collection:{collection_name} , {str(e)}")
             print("Deleting stored chart data ...")
