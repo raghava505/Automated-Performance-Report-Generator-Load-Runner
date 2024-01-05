@@ -67,7 +67,8 @@
         "long-air-fl2",
         "long-memgraph-aws",
         "long-memgraph-gcp",
-        "long-memgraph-azure"
+        "long-memgraph-azure",
+        "long-gh-deployer"
     ],
     "kubesim_nodes": [
         "long-kube-sim1",
