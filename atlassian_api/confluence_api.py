@@ -140,7 +140,7 @@ class publish_to_confluence:
             if image_file_path.endswith(".mp4"):
                 content_type = "video/mp4"
             else:
-                content_type="image/png"
+                content_type="image/gif"
             base_filename = os.path.basename(image_file_path)
             print(f"Attaching : {base_filename}")
             base_filename_without_extension = str(os.path.splitext(base_filename)[0])
