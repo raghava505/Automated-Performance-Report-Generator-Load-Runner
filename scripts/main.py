@@ -332,7 +332,6 @@ if __name__ == "__main__":
                 BASE_GRAPHS_PATH = os.path.join(os.path.dirname(prom_con_obj.ROOT_PATH),'graphs')
                 path=f"{BASE_GRAPHS_PATH}/{database_name}/{collection_name}/{inserted_id}"
                 os.makedirs(path,exist_ok=True)
-                create_images_and_save(path,inserted_id,collection,fs,variables["load_duration_in_hrs"])
                 try:
                     test_title = "Test title : "+str(load_cls.get_load_specific_details(variables['load_name'])['test_title'])
                 except:
