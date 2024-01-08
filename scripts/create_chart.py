@@ -52,7 +52,7 @@ initial_legend_fontsize=fig_width/1.90
 fontsize_decrease_rate_with_rows=fig_width/165
 ncol_increase_rate_with_rows=8000
 
-def create_images_and_save(path,doc_id,collection,fs,duration):
+def create_images_and_save(path,doc_id,collection,fs,duration,variables,end_time_str,run,stack,test_title):
     sns.set_style("darkgrid")
     sns.plotting_context("talk")
     sns.set(rc={"text.color": text_color})
@@ -109,7 +109,10 @@ def create_images_and_save(path,doc_id,collection,fs,duration):
                 # date_formatter = DateFormatter('%H:%M')
                 plt.gca().xaxis.set_major_formatter(x_date_formatter)
                 plt.gca().get_yaxis().set_major_formatter(FuncFormatter(lambda value,pos:format_y_ticks(value,pos,unit)))
-                plt.title("\n"+str(title),fontsize=fig_width/1.68,pad=fig_width/0.9,y=1)
+                other_details=f"Load time : {variables['start_time_str_ist']} - {end_time_str} IST ({variables['load_duration_in_hrs']}hrs) \n{test_title}"
+                plt.title(other_details,fontsize=fig_width/2.18,y=1,loc="left")
+                plt.title(f"Build and run : {variables['build']} , run{run}\nStack : {stack}",fontsize=fig_width/2.18,y=1,loc="right")
+                plt.title("\n"+str(title),fontsize=fig_width/1.48,pad=fig_width/0.9,y=1)
                 if num_lines == 0:
                     print(f"ERROR : Unable to find data for chart {title} : 0 lines found" )
                     continue
