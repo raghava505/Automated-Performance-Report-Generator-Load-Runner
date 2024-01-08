@@ -333,6 +333,11 @@ if __name__ == "__main__":
                 path=f"{BASE_GRAPHS_PATH}/{database_name}/{collection_name}/{inserted_id}"
                 os.makedirs(path,exist_ok=True)
                 create_images_and_save(path,inserted_id,collection,fs,variables["load_duration_in_hrs"])
+                try:
+                    test_title = "Test title : "+str(load_cls.get_load_specific_details(variables['load_name'])['test_title'])
+                except:
+                    test_title=""
+                create_images_and_save(path,inserted_id,collection,fs,variables["load_duration_in_hrs"],variables=variables,end_time_str=end_time_str,run=run,stack=test_env_json_details["stack"],test_title=test_title)
                 print("Done!")
             except Exception as e:
                 print(f"Error while generating graphs into {path} : {str(e)}")
