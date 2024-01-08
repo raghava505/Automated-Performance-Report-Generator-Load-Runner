@@ -135,20 +135,20 @@ class publish_to_confluence:
     def add_text(self,html_text):
         self.body_content+=html_text
 
-    def attach_single_image(self,image_file_path,heading_tag):
+    def attach_single_file(self,image_file_path,heading_tag):
         if os.path.exists(image_file_path):
-            if image_file_path.endswith(".mp4"):
-                content_type = "video/mp4"
-            else:
-                content_type="image/gif"
+            # if image_file_path.endswith(".mp4"):
+            #     content_type = "video/mp4"
+            # else:
+            #     content_type="image/gif"
             base_filename = os.path.basename(image_file_path)
             print(f"Attaching : {base_filename}")
             base_filename_without_extension = str(os.path.splitext(base_filename)[0])
-            attachment=self.confluence.attach_file(image_file_path,name=str(base_filename),content_type=content_type,title=self.title, space=self.space)
+            attachment=self.confluence.attach_file(image_file_path,name=str(base_filename),title=self.title, space=self.space)
             attachment_id = attachment['results'][0]['id']
             self.body_content+=f"""
                                 <h{heading_tag}>{str(base_filename_without_extension)}</h{heading_tag}>
-                                    <ac:image ac:height="1400">
+                                    <ac:image ac:height="1400" ac:width="2100">
                                         <ri:attachment ri:filename="{str(base_filename)}" ri:space-key="{self.space}" />
                                     </ac:image>
                             """
@@ -169,7 +169,7 @@ class publish_to_confluence:
             """
 
             for filepath in dict_of_list_of_filepaths[directory_name]:
-                self.attach_single_image(filepath,4)
+                self.attach_single_file(filepath,4)
 
             self.body_content += """
                     </ac:rich-text-body>

@@ -341,7 +341,7 @@ if __name__ == "__main__":
                 if presto_load_result_dict:
                     print(f"Fetching presto load charts pdf from {test_env_json_details['api_presto_load_reports_node_ip']}:{benchto_load_csv_path}")
                     BASE_PDFS_PATH = os.path.join(os.path.dirname(prom_con_obj.ROOT_PATH),'pdfs')
-                    presto_load_local_pdf_path=f"{BASE_PDFS_PATH}/{database_name}/{collection_name}/{inserted_id}/{inserted_id}.pdf"
+                    presto_load_local_pdf_path=f"{BASE_PDFS_PATH}/{database_name}/{collection_name}/{inserted_id}/Presto Load Charts pdf.pdf"
                     print(f'Saving the presto load pdf to {presto_load_local_pdf_path}')
                     os.makedirs(os.path.dirname(presto_load_local_pdf_path),exist_ok=True)
                     fetch_and_save_pdf(benchto_load_pdf_path,test_env_json_details['api_presto_load_reports_node_ip'],prom_con_obj,presto_load_local_pdf_path)
