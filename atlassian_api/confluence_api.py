@@ -220,5 +220,5 @@ class publish_to_confluence:
                                     parent_id=self.parent_page_id, type='page', 
                                     representation='storage', minor_edit=False, 
                                     full_width=True)
-        
+        print("Page published successfully!")
         self.close()
