@@ -109,7 +109,7 @@ def create_images_and_save(path,doc_id,collection,fs,duration,variables,end_time
                 # date_formatter = DateFormatter('%H:%M')
                 plt.gca().xaxis.set_major_formatter(x_date_formatter)
                 plt.gca().get_yaxis().set_major_formatter(FuncFormatter(lambda value,pos:format_y_ticks(value,pos,unit)))
-                other_details=f"Load time : {variables['start_time_str_ist']} - {end_time_str} IST ({variables['load_duration_in_hrs']}hrs) \n{test_title}"
+                other_details=f"{test_title}\nLoad time : {variables['start_time_str_ist']} - {end_time_str} IST ({variables['load_duration_in_hrs']}hrs)"
                 plt.title(other_details,fontsize=fig_width/2.18,y=1,loc="left")
                 plt.title(f"Build and run : {variables['build']} , run{run}\nStack : {stack}",fontsize=fig_width/2.18,y=1,loc="right")
                 plt.title("\n"+str(title),fontsize=fig_width/1.48,pad=fig_width/0.9,y=1)
