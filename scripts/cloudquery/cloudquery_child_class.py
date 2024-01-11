@@ -16,6 +16,13 @@ class cloudquery_child(parent):
                 "test_title": "GCP Multicustomer load with 25 customers",
                 "GCP Services used to conduct the Load" : "Identity and Access Management(IAM) , Compute ,Google Kubernetes Engine (GKE) , Cloud Storage , Filestore , Cloud Logging , Cloud Monitoring , Cloud DNS , Pubsub , Cloud SQL , BigQuery , Memorystore , Cloud Functions , Cloud Run , Cloud Key Management, Secret Manager",
                 "Tables Validated in the Load" : "gcp_iam_role , gcp_compute_disk , gcp_container_cluster , gcp_storage_bucket , gcp_file_backup , gcp_logging_metric , gcp_monitoring_alert_policy , gcp_dns_policy , gcp_pubsub_topic , gcp_sql_database , gcp_bigquery_table , gcp_memorystore_redis_instance , gcp_cloud_function , gcp_cloud_run_service , gcp_kms_key , gcp_secret_manager_secret_version, gcp_pubsub_subscription , gcp_file_instance,gcp_compute_image,gcp_dns_managed_zone,gcp_sql_instance,gcp_bigquery_dataset,gcp_memorystore_memcached_instance,gcp_cloud_run_revision,gcp_iam_service_account,gcp_compute_instance,gcp_logging_sink,gcp_secret_manager_secret"
+            },
+            "Azure_MultiCustomer": {
+                "total_number_of_customers": "20",
+                "test_title": "Azure_MultiCustomer load with 20 customers",
+                "Azure Services used to conduct the Load" : "Management, Compute, Network, Storage, Databases, Identity, RBAC",
+                "Tables Validated in the Load" : "azure_network_vnet, azure_network_subnet, azure_compute_vm, azure_compute_disk, azure_network_nic, azure_network_nsg, azure_network_load_balancer, azure_network_public_ip_address, azure_network_route_table, azure_resource_group, azure_network_application_gateway, azure_appservice_site, azure_appservice_appsetting, azure_storage_blob_container, azure_storage_account, azure_sql_database, azure_sql_server, azure_storage_file_share, azure_active_directory_service_principal,azure_active_directory_application, azure_active_directory_role_assignment, azure_active_directory_role_definition, azure_rbac_role_definition, azure_rbac_role_assignment, azure_active_directory_group, azure_active_directory_user",
+                "Total number of Accounts": "67"
             }
     }
     @classmethod

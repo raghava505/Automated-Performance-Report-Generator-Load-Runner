@@ -13,7 +13,7 @@ load_type_options = {
                                         'class':osquery_child
                                   },
                         'CloudQuery':{
-                                        'subtypes':['AWS_MultiCustomer','GCP_MultiCustomer','AWS_SingleCustomer'],
+                                        'subtypes':['AWS_MultiCustomer','GCP_MultiCustomer','AWS_SingleCustomer','Azure_MultiCustomer'],
                                         'class':cloudquery_child
                                      },
                         'KubeQuery_and_SelfManaged':{
@@ -25,7 +25,7 @@ load_type_options = {
                                         'class':osquery_cloudquery_combined_child
                                     },
                         'all_loads_combined':{
-                                        'subtypes':['Osquery(multi)_CloudQuery(aws_gcp_multi)_KubeQuery(single)_and_SelfManaged(single)'],
+                                        'subtypes':['Osquery(multi)_CloudQuery(aws_gcp_azure_multi)_KubeQuery(single)_and_SelfManaged(single)'],
                                         'class':all_combined_child
                                     }
                      }
