@@ -3,7 +3,7 @@ import copy
 
 class all_combined_child(parent):
     load_specific_details={
-                "Osquery(multi)_CloudQuery(aws_gcp_azure_multi)_KubeQuery(single)_and_SelfManaged(single)":{
+                "GoldenTest":{
                     "test_title": "Multiple Customer Rule Engine, Control Plane, CloudQuery, KubeQuery and SelfManaged Load",
                     "total_number_of_customers_osquery": 100,
                     "number_of_customers_with_auto_exception_enabled": 0,
