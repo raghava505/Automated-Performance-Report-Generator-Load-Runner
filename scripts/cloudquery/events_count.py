@@ -69,7 +69,7 @@ class EVE_COUNTS:
             inventory_pattern = '/Total no\\.of inventory events happened during load:/ {sum+=$NF} END {print sum}'
 
         with ThreadPoolExecutor(max_workers=len(self.simulators1)) as executor:
-            if self.load_name in ["Osquery(multi)_CloudQuery(aws_gcp_multi)", "Osquery(multi)_CloudQuery(aws_gcp_azure_multi)_KubeQuery(single)_and_SelfManaged(single)"]:
+            if self.load_name in ["Osquery(multi)_CloudQuery(aws_gcp_multi)", "GoldenTest"]:
                 
                 events_pattern_aws = '/Total no\\.of events happened till now:/ {sum+=$NF} END {print sum}'
                 modified_events_pattern_aws = '/Total no\\.of modified events happened till now:/ {sum+=$NF} END {print sum}'
@@ -86,7 +86,7 @@ class EVE_COUNTS:
                 
                 results = list(executor.map(self.analyze_logs,  self.simulators1, [events_pattern] * len(self.simulators1), [modified_events_pattern] * len(self.simulators1), [inventory_pattern] * len(self.simulators1)))
 
-        if self.load_name in ["Osquery(multi)_CloudQuery(aws_gcp_multi)", "Osquery(multi)_CloudQuery(aws_gcp_azure_multi)_KubeQuery(single)_and_SelfManaged(single)"]:
+        if self.load_name in ["Osquery(multi)_CloudQuery(aws_gcp_multi)", "GoldenTest"]:
             
             total_sum_aws = sum(result[0] for result in results_aws)
             total_sum2_aws = sum(result[1] for result in results_aws)
