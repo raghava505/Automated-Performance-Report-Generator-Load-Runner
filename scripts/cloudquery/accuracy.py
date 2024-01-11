@@ -45,7 +45,7 @@ class ACCURACY:
     def global_query(self,data,table):
         # test_result = TestResult()
         # log.info(str(PROJECT_ROOT))
-        print(table)
+        print("fetching records for table: {} for customer: {}".format(table,data['domain']))
         stack_keys = open_js_safely(self.api_path)
         mglobal_query_api = query_api.format(data['domain'],data['domainSuffix'],data['customerId'])
         pl=payload["query"].format(table,self.upt_day,self.load_start,self.load_end)
@@ -132,7 +132,7 @@ class ACCURACY:
             for p in processes:
                 p.join(timeout=20)
 
-            expected_true_count = self.total_counts[table].get("added", 1)  
+            expected_true_count = self.total_counts[table].get("added", self.total_counts[table].get("created", 1))
             expected_false_count = self.total_counts[table].get("removed", 1)
             self.table_accuracy(data, table, upt_added_true.value,upt_added_false.value, expected_true_count,expected_false_count)
         
@@ -157,14 +157,14 @@ class ACCURACY:
             file = fs.read()
             save_dict[self.load_name.split("_")[0]]=self.multi_tables_accuracy(file)
 
-        elif(self.load_name == "Azure_MultiCustomer"):
+        elif(self.load_name == "AWS_MultiCustomer"):
             print("Azure_MultiCustomer")
             obj.get_log(obj.azure_simulators,self.load_name)
             self.api_path=api_path_multi_longevity
-            self.total_counts = getattr(configs, f'total_counts_Azure', None)
+            self.total_counts = getattr(configs, f'total_counts_AWS', None)
             fs = open(self.api_path)
             file = fs.read()
-            save_dict["Azure"]=self.multi_tables_accuracy(file)
+            save_dict["AWS"]=self.multi_tables_accuracy(file)
 
         elif(self.load_name == "AWS_SingleCustomer"):
             print(2)
@@ -196,15 +196,17 @@ class ACCURACY:
             fs = open(self.api_path)
             file = fs.read()
             save_dict["AWS"]=self.multi_tables_accuracy(file)
+            print(save_dict["AWS"])
             
-            obj.get_log(obj.azure_simulators,"Azure_MultiCustomer")
-            self.total_counts = getattr(configs, f'total_counts_Azure', None)
-            save_dict["Azure"]=self.multi_tables_accuracy(file)
+            obj.get_log(obj.simulators2,"AWS_MultiCustomer")
+            self.total_counts = getattr(configs, f'total_counts_AWS', None)
+            save_dict["AWS"]=self.multi_tables_accuracy(file)
 
             obj.get_log(obj.simulators3,"GCP_MultiCustomer")
             self.total_counts = getattr(configs, f'total_counts_GCP', None)
             save_dict["GCP"]=self.multi_tables_accuracy(file)
 
+        
         return save_dict
 
 
