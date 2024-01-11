@@ -198,6 +198,10 @@ if __name__ == "__main__":
             selfmanaged_accuracies = accuracy.accuracy_selfmanaged()
             print(json.dumps(selfmanaged_accuracies, indent=4))
 
+        #-------------------------Azure Load Accuracies----------------------------
+        azure_accuracies=None
+        if variables["load_name"] == "Azure_MultiCustomer" or variables["load_type"] in ["all_loads_combined"]:
+            print("Calculating accuracies for Azure Load ...")
         
         #--------------------------------------Events Counts--------------------------------------
         evecount = None
