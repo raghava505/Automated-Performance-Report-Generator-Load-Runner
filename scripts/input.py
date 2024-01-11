@@ -20,12 +20,12 @@ load_type_options = {
                                         'subtypes':['KubeQuery_SingleCustomer','SelfManaged_SingleCustomer'],
                                         'class':kubequery_child
                                     } ,
-                        'osquery_cloudquery_combined':{
-                                        'subtypes':['Osquery(multi)_CloudQuery(aws_gcp_multi)'],
-                                        'class':osquery_cloudquery_combined_child
-                                    },
+                        # 'osquery_cloudquery_combined':{
+                        #                 'subtypes':['Osquery(multi)_CloudQuery(aws_gcp_multi)'],
+                        #                 'class':osquery_cloudquery_combined_child
+                        #             },
                         'all_loads_combined':{
-                                        'subtypes':['Osquery(multi)_CloudQuery(aws_gcp_azure_multi)_KubeQuery(single)_and_SelfManaged(single)'],
+                                        'subtypes':['GoldenTest'],
                                         'class':all_combined_child
                                     }
                      }
