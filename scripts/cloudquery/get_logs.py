@@ -13,7 +13,7 @@ class LOGScriptRunner:
 
         self.path_mappings = {
             "Azure_MultiCustomer": "~/cloud_query_sim/azure_multi/logs",
-            "AWS_MultiCustomer": "~/multi-customer-cqsim/aws/logs",
+            "AWS_MultiCustomer": "~/multi_customer_attackpath/aws/logs",
             "GCP_MultiCustomer": "~/multi-customer-cqsim/gcp/logs",
             "AWS_SingleCustomer": "~/cloud_query_sim/aws/logs",
         }
@@ -26,7 +26,7 @@ class LOGScriptRunner:
             shutil.rmtree(self.output_folder)
 
         os.makedirs(self.output_folder)
-        self.remote_logs_path = self.path_mappings.get(load_name, "~/multi-customer-cqsim/aws/logs")
+        self.remote_logs_path = self.path_mappings.get(load_name, "~/multi_customer_attackpath/aws/logs")
         for simulator in simulators:
             ssh = paramiko.SSHClient()
             ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
