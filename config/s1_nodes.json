@@ -51,14 +51,14 @@
     ],
     "stsnodes": [
         "s1stsnode1",
-        "s1stsnode2"
+        "s1stsnode2",
+        "s1stsnode3"
     ],
     "other_nodes": [
         "s1elasticsearch",
         "s1kibana",
         "s1logstash1",
         "s1logstash2",
-        "s1stsnode3",
         "s1cloudquery",
         "s1mlnode1",
         "s1mlnode2",
