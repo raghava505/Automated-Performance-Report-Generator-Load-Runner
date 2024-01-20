@@ -88,6 +88,8 @@ class MC_comparisions:
                     new_sum+=new_data[node][unit]["average"]
                 except KeyError as e:
                     print(f"ERROR : key {node} not found in : {new_data}")
+                    raise RuntimeError(f"ERROR : key {node} is present in {node_type} but not found in host groups from prometheus: {new_data}")
+                
             return_overall[node_type] = {f"{unit}":new_sum}
             print(f"{node_type} : {new_sum} {unit}")
         return final,return_overall
