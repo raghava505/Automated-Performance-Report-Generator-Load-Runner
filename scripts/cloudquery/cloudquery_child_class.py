@@ -34,17 +34,10 @@ class cloudquery_child(parent):
     @property
     def common_app_names(cls):
         temp = copy.deepcopy(parent.common_app_names)
-        temp['sum'].extend([".*effectivePermissions.*","sts.*","/usr/lib/memgraph/memgraph","/opt/uptycs/cloud/go/bin/cloudqueryConsumer","cloudDetectionConsumer",".*statedb.*","cloudConnectorIngestion"])
+        temp['sum'].extend([".*effectivePermissions.*","sts.*","/usr/lib/memgraph/memgraph","/opt/uptycs/cloud/go/bin/cloudqueryConsumer","cloudDetectionConsumer",".*statedb.*","cloudConnectorIngestion","/opt/uptycs/cloud/go/bin/ruleEngine-production-ruleenginecc"])
         return temp
     
-
-    @classmethod
-    @property
-    def application_level_usage_app_names_for_table(cls):
-        temp = copy.deepcopy(parent.application_level_usage_app_names_for_table)
-        temp.extend([".*effectivePermissions.*","sts.*","/usr/lib/memgraph/memgraph","/opt/uptycs/cloud/go/bin/cloudqueryConsumer","cloudDetectionConsumer",".*statedb.*","cloudConnectorIngestion"])
-        return temp
-
+        
 
     @classmethod
     @property
