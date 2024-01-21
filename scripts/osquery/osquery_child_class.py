@@ -39,3 +39,9 @@ class osquery_child(parent):
         temp.extend(["agentosquery"])
         return temp
     
+    @classmethod
+    @property
+    def common_app_names(cls):
+        temp = copy.deepcopy(parent.common_app_names)
+        temp['sum'].extend(["osqueryIngestion" , "/opt/uptycs/cloud/go/bin/ruleEngine-production-ruleengine"])
+        return temp
