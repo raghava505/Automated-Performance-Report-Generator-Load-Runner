@@ -62,7 +62,10 @@
         "s1cloudquery",
         "s1mlnode1",
         "s1mlnode2",
-        "s1superset"
+        "s1superset",
+        "s1kubemaster1",
+        "s1kubemaster2",
+        "s1kubemaster3"
     ],
     "s1monitor": {
         "storage": {

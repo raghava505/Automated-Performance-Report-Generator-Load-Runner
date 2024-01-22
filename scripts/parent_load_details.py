@@ -7,17 +7,11 @@ class parent:
     def common_app_names(cls):
         return  {"sum":["orc-compaction" ,"uptycs-configdb",  ".*osqLogger.*", "kafka","spark-worker",".*ruleEngine.*",
                         "data-archival",".*redis-server.*","/opt/uptycs/cloud/go/bin/complianceSummaryConsumer","tls",".*airflow.*",
-                        "trino" , "osqueryIngestion","pgbouncer","spark-master","/usr/local/bin/pushgateway"],
+                        "trino","pgbouncer","spark-master","/usr/local/bin/pushgateway" , "auditLogsIngestion","alertsIngestion",
+                        "prestoLogsIngestion","queryPackIngestion"],
                 "avg":[]
                 }
     
-    @classmethod
-    @property
-    def application_level_usage_app_names_for_table(cls):
-        return ["tls","trino","/opt/uptycs/cloud/go/bin/ruleEngine-production-ruleengine",
-                "kafka","spark-master","spark-worker","osqueryIngestion",
-                "data-archival","orc-compaction","auditLogsIngestion","alertsIngestion",
-                "cloudConnectorIngestion","prestoLogsIngestion","queryPackIngestion"]
 
     @classmethod
     @property

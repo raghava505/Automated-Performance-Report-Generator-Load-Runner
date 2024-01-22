@@ -7,10 +7,10 @@ class osquery_child(parent):
                 "total_number_of_customers": "120",
                 "number_of_customers_with_auto_exception_enabled": "0",
                 "test_title": "Multiple Customer Rule Engine and Control Plane Load",
-                "total_assets": "80K Control Plane + 20K Multi customer",
-                "assets_per_cust":"167",
-                "records_sent_per_hour_per_customer": "10.80 million",
-                "records_sent_per_hour" : "1.298 billion",
+                "total_assets": "80K Control Plane + 15K Multi customer",
+                "assets_per_cust":"125",
+                "records_sent_per_hour_per_customer": "8.10 million", 
+                "records_sent_per_hour" : "972 million", 
                 "input_file": "rhel7-6tab_12rec.log",
                 "events_table_name": "dns_lookup_events, socket_events, process_events, process_file_events"
             },
@@ -39,3 +39,9 @@ class osquery_child(parent):
         temp.extend(["agentosquery"])
         return temp
     
+    @classmethod
+    @property
+    def common_app_names(cls):
+        temp = copy.deepcopy(parent.common_app_names)
+        temp['sum'].extend(["osqueryIngestion" , "/opt/uptycs/cloud/go/bin/ruleEngine-production-ruleengine"])
+        return temp
