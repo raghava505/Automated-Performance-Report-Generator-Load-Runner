@@ -1,11 +1,7 @@
 # Steps to save your performance load report data into the database.
 
-## Step 1 
-  Add the below line to ``` /etc/hosts ```
  ```
- 192.168.146.69 perf-prod-dashboard
- ```
-1. Login to **perf-prod-dashboard** node as abacus user.
+1. Login to **perf-prod-dashboard** node .
  ```
  ssh abacus@192.168.146.69
  ```
@@ -13,31 +9,16 @@
  ```
  sumonkey
  ```
-3. Navigate to project directory
+3. Run generate_report.py script
 ```
-cd tool_support/LoadTests/save-report-data-to-mongo
-```
-4. Pull the latest code from github.
-*Make sure there are no any local uncommited changes*
-```
-git checkout main
-git stash
-git pull origin main
-```
-5. Activate the python virtual environment
-```
-source raghava_env/bin/activate
-```
-## Step 2
-Run the below command
-```
-python3 scripts/main.py
+./generate_report.sh
 ```
 Enter the required load details and the report data will be saved to Mongodb.
 
-### Accessing the Mongodb
+
+# Accessing the Mongodb
 ```
-docker exec -it mongo bash 
+sudo docker exec -it mongo bash 
 ```
 
 # Configure a New Lab Stack
@@ -54,9 +35,11 @@ vi /config/S12_nodes.json
 ```
 
 
-
 # Configure a New Load Type
 
 -  In ```scripts/input.py```  Add a new key-value pair inside load_type_options. The key is the ```load_type``` and the value is another dictionary storing list of ```subtypes```.
    
 -  Optionally you can also pass another key ```class``` by creating a child class from the ```<parent_load_details.parent> class```. This helps to customize your load specific details such as chart queries etc.
+
+
+python environment version: 3.11.4
