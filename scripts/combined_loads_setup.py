@@ -37,7 +37,7 @@ class all_combined_child(parent):
     @property
     def common_app_names(cls):
         temp = copy.deepcopy(parent.common_app_names)
-        temp['sum'].extend([".*effectivePermissions.*","sts.*","/usr/lib/memgraph/memgraph","/opt/uptycs/cloud/go/bin/cloudqueryConsumer","cloudDetectionConsumer",".*statedb.*","cloudConnectorIngestion"])
+        temp['sum'].extend(["/opt/uptycs/cloud/go/bin/ruleEngine-production-ruleengine",".*effectivePermissions.*","sts.*","/usr/lib/memgraph/memgraph","/opt/uptycs/cloud/go/bin/cloudqueryConsumer","cloudDetectionConsumer",".*statedb.*","cloudConnectorIngestion","/opt/uptycs/cloud/go/bin/ruleEngine-production-ruleenginecc"])
         return temp
     
     @classmethod
