@@ -8,7 +8,7 @@ class parent:
         return  {"sum":["orc-compaction" ,"uptycs-configdb",  ".*osqLogger.*", "kafka","spark-worker",".*ruleEngine.*",
                         "data-archival",".*redis-server.*","/opt/uptycs/cloud/go/bin/complianceSummaryConsumer","tls",".*airflow.*",
                         "trino","pgbouncer","spark-master","/usr/local/bin/pushgateway" , "auditLogsIngestion","alertsIngestion",
-                        "prestoLogsIngestion","queryPackIngestion"],
+                        "prestoLogsIngestion","queryPackIngestion","osqueryIngestion"],
                 "avg":[]
                 }
     
