@@ -1,6 +1,5 @@
 # Steps to save your performance load report data into the database.
 
- ```
 1. Login to **perf-prod-dashboard** node .
  ```
  ssh abacus@192.168.146.69
