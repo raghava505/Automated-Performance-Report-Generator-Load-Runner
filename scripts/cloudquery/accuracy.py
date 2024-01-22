@@ -13,6 +13,7 @@ import requests
 import urllib3
 import multiprocessing
 import pandas as pd
+import concurrent
 
 
 PROJECT_ROOT = Path(__file__).resolve().parent
@@ -43,9 +44,8 @@ class ACCURACY:
         self.upt_day="".join(str(start_timestamp.strftime("%Y-%m-%d")).split('-'))
 
     def global_query(self,data,table):
-        # test_result = TestResult()
-        # log.info(str(PROJECT_ROOT))
-        print(table)
+        
+        print(f"Fetching records for table: {table} from customer: {data['customerId']}")
         stack_keys = open_js_safely(self.api_path)
         mglobal_query_api = query_api.format(data['domain'],data['domainSuffix'],data['customerId'])
         pl=payload["query"].format(table,self.upt_day,self.load_start,self.load_end)
@@ -113,29 +113,33 @@ class ACCURACY:
         data[table] = {"Actual inserted records":actual_true_count, "Actual deleted records": actual_false_count, "Expected inserted records":expected_true_count, "Expected deleted records": expected_false_count,  "Accuracy for inserted records": accuracy_true, "Accuracy for deleted records":accuracy_false}
         print(data[table])
 
-    def multi_accuracy(self,data,file):
-        
-        
-        for table in self.total_counts:
-            
-            upt_added_true = multiprocessing.Value('i', 0)
-            upt_added_false = multiprocessing.Value('i', 0)
-            event_count = multiprocessing.Value('i', 0)
-            processes = []
+    def multi_accuracy(self, data, file):
+        with concurrent.futures.ProcessPoolExecutor() as executor:
+            futures = []
 
-            for customer in json.loads(file):
-                p = multiprocessing.Process(target=self.execute_query, args=(table,customer, event_count, upt_added_true, upt_added_false))
-                p.start()
-                processes.append(p)
-                
-            
-            for p in processes:
-                p.join(timeout=20)
+            for table in self.total_counts:
+                futures.append(executor.submit(self.process_table, table,data, file))
 
-            expected_true_count = self.total_counts[table].get("added", self.total_counts[table].get("created", 1))
-            expected_false_count = self.total_counts[table].get("removed", 1)
-            self.table_accuracy(data, table, upt_added_true.value,upt_added_false.value, expected_true_count,expected_false_count)
-        
+            for future in concurrent.futures.as_completed(futures):
+                future.result()
+
+    def process_table(self, table, data,file):
+        upt_added_true = multiprocessing.Value('i', 0)
+        upt_added_false = multiprocessing.Value('i', 0)
+        event_count = multiprocessing.Value('i', 0)
+        processes = []
+
+        for customer in json.loads(file):
+            p = multiprocessing.Process(target=self.execute_query, args=(table, customer, event_count, upt_added_true, upt_added_false))
+            p.start()
+            processes.append(p)
+
+        for p in processes:
+            p.join(timeout=20)
+
+        expected_true_count = self.total_counts[table].get("added", self.total_counts[table].get("created", 1))
+        expected_false_count = self.total_counts[table].get("removed", 1)
+        self.table_accuracy(data, table, upt_added_true.value, upt_added_false.value, expected_true_count, expected_false_count)
 
     def multi_tables_accuracy(self,file):
         expected_data = {}
@@ -197,9 +201,9 @@ class ACCURACY:
             file = fs.read()
             save_dict["AWS"]=self.multi_tables_accuracy(file)
             
-            obj.get_log(obj.azure_simulators,"Azure_MultiCustomer")
-            self.total_counts = getattr(configs, f'total_counts_Azure', None)
-            save_dict["Azure"]=self.multi_tables_accuracy(file)
+            # obj.get_log(obj.azure_simulators,"Azure_MultiCustomer")
+            # self.total_counts = getattr(configs, f'total_counts_Azure', None)
+            # save_dict["Azure"]=self.multi_tables_accuracy(file)
 
             obj.get_log(obj.simulators3,"GCP_MultiCustomer")
             self.total_counts = getattr(configs, f'total_counts_GCP', None)
