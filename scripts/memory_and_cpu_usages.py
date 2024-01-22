@@ -88,6 +88,8 @@ class MC_comparisions:
                     new_sum+=new_data[node][unit]["average"]
                 except KeyError as e:
                     print(f"ERROR : key {node} not found in : {new_data}")
+                    raise RuntimeError(f"ERROR : key {node} is present in {node_type} but not found in host groups from prometheus: {new_data}")
+                
             return_overall[node_type] = {f"{unit}":new_sum}
             print(f"{node_type} : {new_sum} {unit}")
         return final,return_overall
@@ -147,22 +149,20 @@ class MC_comparisions:
             final[query] = {"percentage":{"average":avg , "minimum":minimum , "maximum":maximum}}
         return final 
 
-    def make_comparisions(self,application_level_usage_app_names,node_level_usage_app_names):
+    def make_comparisions(self,app_names):
         print("All usage queries to be executed are : ")
 
         memory_queries = {f"{HOST}" : 'avg((uptycs_memory_used/uptycs_total_memory) * 100)  by (host_name)',}
-        memory_queries.update(dict([(app,f"{key}(uptycs_app_memory{{app_name=~'{app}'}}) by (host_name)") for key,app_list in node_level_usage_app_names.items() for app in app_list]))
+        memory_queries.update(dict([(app,f"{key}(uptycs_app_memory{{app_name=~'{app}'}}) by (host_name)") for key,app_list in app_names.items() for app in app_list]))
 
         cpu_queries = {f"{HOST}" : 'avg(100-uptycs_idle_cpu) by (host_name)',}
-        cpu_queries.update(dict([(app,f"{key}(uptycs_app_cpu{{app_name=~'{app}'}}) by (host_name)") for key,app_list in node_level_usage_app_names.items() for app in app_list]))
+        cpu_queries.update(dict([(app,f"{key}(uptycs_app_cpu{{app_name=~'{app}'}}) by (host_name)") for key,app_list in app_names.items() for app in app_list]))
 
         container_memory_queries = {'container' : "sum(uptycs_docker_mem_used{}/(1000*1000*1000)) by (container_name)",}
         container_cpu_queries = {'container' : "sum(uptycs_docker_cpu_stats{}) by (container_name)",}
 
-        app_level_memory_queries=dict([(app,f"sum(uptycs_app_memory{{app_name='{app}'}}) by (app_name)") for app in application_level_usage_app_names])
-        app_level_cpu_queries=dict([(app,f"sum(uptycs_app_cpu{{app_name='{app}'}}) by (app_name)") for app in application_level_usage_app_names])
-        app_level_memory_queries.update({"osqLogger" : "sum(sum(uptycs_app_memory{app_name=~'.*osqLogger-.*'}) by (app_name))" })
-        app_level_cpu_queries.update({"osqLogger" : "sum(sum(uptycs_app_cpu{app_name=~'.*osqLogger-.*'}) by (app_name))" })
+        app_level_memory_queries = dict([(app,f"sum({key}(uptycs_app_memory{{app_name=~'{app}'}}) by (app_name))") for key,app_list in app_names.items() for app in app_list])
+        app_level_cpu_queries = dict([(app,f"sum({key}(uptycs_app_cpu{{app_name=~'{app}'}}) by (app_name))") for key,app_list in app_names.items() for app in app_list])
 
         app_level_memory_queries["gprofiler perf-record pns"]="sum(uptycs_app_memory{node_type='process',app_name='/app/gprofiler/resources/perf-record--F'}) by (app_name)"
         app_level_memory_queries["gprofiler perf-script pns"]="sum(uptycs_app_memory{node_type='process',app_name='/app/gprofiler/resources/perf-script--F'}) by (app_name)"
