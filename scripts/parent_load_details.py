@@ -160,7 +160,6 @@ class parent:
     def get_restart_count_charts():
         return {
             "Uptycs containers restart count":('sum(uptycs_container_restart_count) by (container_name)' , ["container_name"]),
-            "Uptycs applications restart count":('sum(uptycs_app_restart) by (app_name)' , ["app_name"]),
             }
     
     @classmethod
