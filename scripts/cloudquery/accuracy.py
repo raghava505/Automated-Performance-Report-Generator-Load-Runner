@@ -65,7 +65,7 @@ class ACCURACY:
                 output2=get_api(data,n_api)
             if output2['status'] == 'ERROR':
                 print('global query failed' )
-                #print(output2)
+                print(output2)
             else :
                 response=get_api(data,n_result_api)
                 return response
@@ -114,16 +114,24 @@ class ACCURACY:
         print(data[table])
 
     def multi_accuracy(self, data, file):
+        manager = multiprocessing.Manager()
+        result_dict = manager.dict()
+
         with concurrent.futures.ProcessPoolExecutor() as executor:
             futures = []
 
             for table in self.total_counts:
-                futures.append(executor.submit(self.process_table, table,data, file))
+                futures.append(executor.submit(self.process_table, table, data, file, result_dict))
 
             for future in concurrent.futures.as_completed(futures):
                 future.result()
 
-    def process_table(self, table, data,file):
+        return dict(result_dict)
+
+    def process_table(self, table, data, file, result_dict):
+        manager = multiprocessing.Manager()
+        table_result_dict = manager.dict()
+
         upt_added_true = multiprocessing.Value('i', 0)
         upt_added_false = multiprocessing.Value('i', 0)
         event_count = multiprocessing.Value('i', 0)
@@ -139,12 +147,23 @@ class ACCURACY:
 
         expected_true_count = self.total_counts[table].get("added", self.total_counts[table].get("created", 1))
         expected_false_count = self.total_counts[table].get("removed", 1)
-        self.table_accuracy(data, table, upt_added_true.value, upt_added_false.value, expected_true_count, expected_false_count)
 
-    def multi_tables_accuracy(self,file):
+        table_result_dict[table] = {
+            "Actual inserted records": upt_added_true.value,
+            "Actual deleted records": upt_added_false.value,
+            "Expected inserted records": expected_true_count,
+            "Expected deleted records": expected_false_count,
+            "Accuracy for inserted records": round(((upt_added_true.value + 1) / (expected_true_count + 1)) * 100, 2),
+            "Accuracy for deleted records": round(((upt_added_false.value + 1) / (expected_false_count + 1)) * 100, 2)
+        }
+
+        result_dict.update(table_result_dict)
+        print(table_result_dict)
+
+    def multi_tables_accuracy(self, file):
         expected_data = {}
         self.expected()
-        self.multi_accuracy(expected_data,file)
+        expected_data = self.multi_accuracy(expected_data, file)
         return expected_data
         
 
