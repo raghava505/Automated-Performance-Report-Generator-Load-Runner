@@ -27,3 +27,4 @@ scripts/application_restarts.py
 scripts/pg_badger_report.py
 scripts/logs/*
 scripts/api_load.csv
+scripts/use_osquery_accuracy.py
