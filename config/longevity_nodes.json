@@ -6,7 +6,7 @@
     "extension": "net",
     "stack_url": "https://longevity.uptycs.net/",
     "elastic": "192.168.148.52",
-    "api_presto_load_reports_node_ip":"192.168.145.94",
+    "api_presto_load_reports_node_ip": "192.168.145.94",
     "event_rules_per_cust": {
         "enabled": 39,
         "triggered": 33
@@ -480,6 +480,14 @@
         },
         "ram": "62",
         "cores": "16",
+        "clst": "1"
+    },
+    "long-gh-deployer": {
+        "storage": {
+            "root_partition": "196G"
+        },
+        "ram": "47",
+        "cores": "8",
         "clst": "1"
     }
 }
