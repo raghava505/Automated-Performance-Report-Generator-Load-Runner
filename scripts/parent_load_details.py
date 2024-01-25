@@ -111,35 +111,41 @@ class parent:
             queries.update(cls.get_inject_drain_and_lag_uptycs_kafka_group(group))
         return copy.deepcopy(queries)
 
-    
+    @staticmethod
+    def get_connections_chart_queries():
+        return {
+            "No.of active connections group by application for configdb":("uptycs_pg_idle_active_connections_by_app{state=\"active\",db=\"configdb\"}" , ["application_name"]),
+            "Active Client Connections":("uptycs_pgb_cl_active" , ["host_name","db","db_user"]),
+            "Waiting Client Connections":("uptycs_pgb_cl_waiting", ["db" , "db_user"]),
+            "Uptycs pg Connections by app":("sum(uptycs_pg_connections_by_app)" , []),
+            "Uptycs redis Connections":("sum(uptycs_redis_connection)" , []),
+            "Redis client connections for tls":("sum(uptycs_app_redis_clients{app_name='/opt/uptycs/cloud/tls/tls.js'}) by (host_name)" , ["host_name"]),
+            "Top 10 redis client connections by app":("sort(topk(9,sum(uptycs_app_redis_clients{}) by (app_name)))" , ["app_name"]),
+            "Active Server Connections":("uptycs_pgb_sv_active", ["db" , "db_user"]),
+            "Idle server connections":("uptycs_pgb_sv_idle", ["db" , "db_user"]),
+        }
+
     @staticmethod
     def get_other_chart_queries():
-        return {"Active Client Connections":("uptycs_pgb_cl_active" , ["host_name","db","db_user"]),
-                "Uptycs redis Connections":("sum(uptycs_redis_connection)" , []),
-                "Uptycs pg Connections by app":("sum(uptycs_pg_connections_by_app)" , []),
-                        "Redis client connections for tls":("sum(uptycs_app_redis_clients{app_name='/opt/uptycs/cloud/tls/tls.js'}) by (host_name)" , ["host_name"]),
-                        "Configdb Pg wal folder size":("configdb_wal_folder",["host_name"]),
-                        "Configdb number of wal files":("configdb_wal_file{}" , ["host_name"]),
-                        "Top 10 redis client connections by app":("sort(topk(9,sum(uptycs_app_redis_clients{}) by (app_name)))" , ["app_name"]),
-                        "Configdb folder size":("configdb_size" , ["host_name"]),
-                        "Average records in pg bouncer":("uptycs_pbouncer_stats{col=~'avg.*', col!~'.*time'}" , ["col"]),
-                        "Average time spent by pg bouncer":("uptycs_pbouncer_stats{col=~'avg.*time'}" , ["col"] , 'μs'),
-                        "iowait time":("uptycs_iowait{}" , ["host_name"]),
-                        "iowait util%":("uptycs_iowait_util_percent{}" , ["host_name" , "device"]),
-                        "Waiting Client Connections":("uptycs_pgb_cl_waiting", ["db" , "db_user"]),
-                        "Disk read wait time":("uptycs_r_await{}" , ["host_name" , "device"],'ms'),
-                        "Disk write wait time":("uptycs_w_await{}", ["host_name" , "device"],'ms'),
-                        "Idle server connections":("uptycs_pgb_sv_idle", ["db" , "db_user"]),
-                        "Active Server Connections":("uptycs_pgb_sv_active", ["db" , "db_user"]),
-                        "Disk blocks in configdb":("uptycs_configdb_stats{col =~ \"blks.*\"}",["col"]),
-                        "Transaction count in configdb":("uptycs_configdb_stats{col =~ \"xact.*\"}",["col"]),
-                        "Row count in configdb":("uptycs_configdb_stats{col =~ \"tup.*\"}",["col"]),
-                        "Assets table stats":("uptycs_psql_table_stats",["col"]),
-                        "pg and data partition disk usage" : ("uptycs_used_disk_bytes{node_type=\"pg\",partition=\"/data\"} or uptycs_used_disk_bytes{node_type=\"pg\",partition=\"/pg\"}" , ["partition","host_name"],'bytes'),
-                        "configdb partition disk usage" : ("uptycs_used_disk_bytes{node_type=\"pg\",partition=\"/data/pgdata/configdb\"}" , ["partition","host_name"],'bytes'),
-                        "statedb partition disk usage" :  ("uptycs_used_disk_bytes{node_type=\"pg\",partition=\"/data/pgdata/statedb\"}" , ["partition","host_name"],'bytes'),
-                        "StateDB errors":("sum(curr_state_db_errors) by (error,table_name)" , ["error" , "table_name"])
-                        }
+        return {
+            "Configdb Pg wal folder size":("configdb_wal_folder",["host_name"]),
+            "Configdb number of wal files":("configdb_wal_file{}" , ["host_name"]),
+            "Configdb folder size":("configdb_size" , ["host_name"]),
+            "Average records in pg bouncer":("uptycs_pbouncer_stats{col=~'avg.*', col!~'.*time'}" , ["col"]),
+            "Average time spent by pg bouncer":("uptycs_pbouncer_stats{col=~'avg.*time'}" , ["col"] , 'μs'),
+            "iowait time":("uptycs_iowait{}" , ["host_name"]),
+            "iowait util%":("uptycs_iowait_util_percent{}" , ["host_name" , "device"]),
+            "Disk read wait time":("uptycs_r_await{}" , ["host_name" , "device"],'ms'),
+            "Disk write wait time":("uptycs_w_await{}", ["host_name" , "device"],'ms'),
+            "Disk blocks in configdb":("uptycs_configdb_stats{col =~ \"blks.*\"}",["col"]),
+            "Transaction count in configdb":("uptycs_configdb_stats{col =~ \"xact.*\"}",["col"]),
+            "Row count in configdb":("uptycs_configdb_stats{col =~ \"tup.*\"}",["col"]),
+            "Assets table stats":("uptycs_psql_table_stats",["col"]),
+            "pg and data partition disk usage" : ("uptycs_used_disk_bytes{node_type=\"pg\",partition=\"/data\"} or uptycs_used_disk_bytes{node_type=\"pg\",partition=\"/pg\"}" , ["partition","host_name"],'bytes'),
+            "configdb partition disk usage" : ("uptycs_used_disk_bytes{node_type=\"pg\",partition=\"/data/pgdata/configdb\"}" , ["partition","host_name"],'bytes'),
+            "statedb partition disk usage" :  ("uptycs_used_disk_bytes{node_type=\"pg\",partition=\"/data/pgdata/statedb\"}" , ["partition","host_name"],'bytes'),
+            "StateDB errors":("sum(curr_state_db_errors) by (error,table_name)" , ["error" , "table_name"])
+        }
     
     @staticmethod
     def get_pg_charts():
@@ -173,6 +179,7 @@ class parent:
             "Inject-Drain rate and Lag Charts":cls.get_inject_drain_rate_and_lag_chart_queries(),
             "Pg Stats Charts": cls.get_pg_charts(),
             "Restart count Charts": cls.get_restart_count_charts(),
+            "Connection Charts": cls.get_connections_chart_queries(),
             "Other Charts":cls.get_other_chart_queries()
         }
 
@@ -188,3 +195,13 @@ class parent:
     def get_dictionary_of_observations(cls):
         observations_dict=dict([(observation,{"Status":"" , "Comments":""}) for observation in cls.list_of_observations_to_make])
         return observations_dict
+    
+    @classmethod
+    @property
+    def trino_details_commands(cls):
+        return {
+            "Count of trino queries executed grouped by source and query operation" : 
+            "select source,query_operation,count(*) from presto_query_logs where upt_time > timestamp '<START_UTC_STR>' and upt_time< timestamp '<END_UTC_STR>' group by source,query_operation order by source;",
+            "Type of failures for all failed queries gp by source and query operation": 
+            "select source,query_operation,failure_message,count(*) as failed_count from presto_query_logs where upt_time > timestamp '<START_UTC_STR>' and upt_time< timestamp '<END_UTC_STR>' and failure_message!='NULL' group by 1,2,3 order by 1 desc;"
+        }
