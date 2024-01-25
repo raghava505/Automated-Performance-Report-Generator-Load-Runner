@@ -114,7 +114,7 @@ class parent:
     @staticmethod
     def get_connections_chart_queries():
         return {
-            "No.of active connections group by application for configdb":("uptycs_pg_idle_active_connections_by_app{state=\"active\",db=\"configdb\",role=\"master\"}" , ["application_name"]),
+            "No.of active connections group by application for configdb on master":("uptycs_pg_idle_active_connections_by_app{state=\"active\",db=\"configdb\",role=\"master\"}" , ["application_name"]),
             "Active Client Connections":("uptycs_pgb_cl_active" , ["host_name","db","db_user"]),
             "Waiting Client Connections":("uptycs_pgb_cl_waiting", ["db" , "db_user"]),
             "Uptycs pg Connections by app":("sum(uptycs_pg_connections_by_app)" , []),
