@@ -200,8 +200,43 @@ class parent:
     @property
     def trino_details_commands(cls):
         return {
-            "Count of trino queries executed grouped by source and query operation" : 
-            "select source,query_operation,count(*) from presto_query_logs where upt_time > timestamp '<START_UTC_STR>' and upt_time< timestamp '<END_UTC_STR>' group by source,query_operation order by source;",
-            "Type of failures for all failed queries gp by source and query operation": 
-            "select source,query_operation,failure_message,count(*) as failed_count from presto_query_logs where upt_time > timestamp '<START_UTC_STR>' and upt_time< timestamp '<END_UTC_STR>' and failure_message!='NULL' group by 1,2,3 order by 1 desc;"
-        }
+            "Total number of trino queries executed" : {
+                "query" :  "SELECT\
+                                source,\
+                                COUNT(CASE WHEN query_status = 'SUCCESS' THEN 1 END) as success_count,\
+                                COUNT(CASE WHEN query_status = 'FAILURE' THEN 1 END) as failure_count,\
+                                COUNT(*) as total_count\
+                            FROM presto_query_logs\
+                            where upt_time > timestamp '<start_utc_str>' and upt_time < timestamp '<end_utc_str>'\
+                            GROUP BY 1\
+                            ORDER BY 1;",
+                "columns":['source','success_count','failure_count','total_count']
+            },
+            "Total number of trino queries executed grouped by query_operation" : {
+                "query" :  "SELECT\
+                                source,\
+                                query_operation,\
+                                COUNT(CASE WHEN query_status = 'SUCCESS' THEN 1 END) as success_count,\
+                                COUNT(CASE WHEN query_status = 'FAILURE' THEN 1 END) as failure_count,\
+                                COUNT(*) as total_count\
+                            FROM presto_query_logs\
+                            where upt_time > timestamp '<start_utc_str>' and upt_time < timestamp '<end_utc_str>'\
+                            GROUP BY 1,2\
+                            ORDER BY 1,2;",
+                "columns":['source','query_operation','success_count','failure_count','total_count']
+            },
+            "Failed queries and reason for failure" : {
+                "query" :  "select \
+                                source,\
+                                query_operation,\
+                                failure_message,\
+                                failure_type,\
+                                count(*) as failure_count \
+                            from presto_query_logs \
+                            where upt_time > timestamp '<start_utc_str>' and upt_time < timestamp '<end_utc_str>'\
+                            and query_status='FAILURE' \
+                            group by 1,2,3,4 \
+                            order by 1,2;",
+                "columns":['source','query_operation','failure_message','failure_type','failure_count']
+            }
+          }

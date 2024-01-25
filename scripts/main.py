@@ -24,6 +24,8 @@ from api_presto_load import fetch_and_extract_csv,fetch_and_save_pdf
 import pytz
 import os
 from create_chart import create_images_and_save
+from trino_queries_analysis import TRINO_ANALYSE
+from active_conn_by_apps import Active_conn
 
 import logging
 import argparse
@@ -88,13 +90,17 @@ if __name__ == "__main__":
     start_ist_time = ist_timezone.localize(datetime.strptime(start_time_str, '%Y-%m-%d %H:%M'))
     start_timestamp = int(start_ist_time.timestamp())
     start_utc_time = start_ist_time.astimezone(utc_timezone)
+    start_utc_str = start_utc_time.strftime(format_data)
 
     end_ist_time = ist_timezone.localize(datetime.strptime(end_time_str, '%Y-%m-%d %H:%M'))
     end_timestamp = int(end_ist_time.timestamp())
     end_utc_time = end_ist_time.astimezone(utc_timezone)
+    end_utc_str = end_utc_time.strftime(format_data)
 
     print("------ starttime and endtime strings in IST are : ", start_time_str , end_time_str)
-    print("------ starttime and endtime strings in UTC are : ", start_utc_time , end_utc_time)
+    print("------ starttime and endtime datetime objects in IST are : ", start_ist_time , end_ist_time)
+    print("------ starttime and endtime strings in UTC are : ", start_utc_str , end_utc_str)
+    print("------ starttime and endtime datetime objects in UTC are : ", start_utc_time , end_utc_time)
     print("------ starttime and endtime unix time stamps based on ist time are : ", start_timestamp , end_timestamp)
     #-------------------------------------------------------------------------------------------------
     with open(TEST_ENV_FILE_PATH , 'r') as file:
@@ -135,13 +141,22 @@ if __name__ == "__main__":
             print("Fetching kafka topics ...")
             kafka_obj = kafka_topics(prom_con_obj=prom_con_obj)
             kafka_topics_list = kafka_obj.add_topics_to_report()
-
+        #---------------No.of Active connections by application---------------
+        active_conn_results=None
+        active_conn_obj = Active_conn(prom_con_obj,start_timestamp,end_timestamp)
+        active_conn_results = active_conn_obj.get_avg_active_conn()
         #-------------------------Trino Queries--------------------------
         trino_queries=None
+        trino_queries_analyse_results=None
         if variables["load_type"] != "KubeQuery":
             print("Performing trino queries ...")
             calc = TRINO(curr_ist_start_time=variables["start_time_str_ist"],curr_ist_end_time=end_time_str,prom_con_obj=prom_con_obj)
             trino_queries = calc.fetch_trino_queries()
+
+            print("Fetching Trino queries details ...")
+            trino_obj = TRINO_ANALYSE(start_utc_str,end_utc_str,prom_con_obj=prom_con_obj)
+            trino_queries_analyse_results = trino_obj.fetch_trino_results(load_cls.trino_details_commands)
+            print(f"Returned trino queries results are : {trino_queries_analyse_results}")
         #-------------------------API LOAD--------------------------
         api_load_result_dict=None
         presto_load_result_dict=None
@@ -302,6 +317,10 @@ if __name__ == "__main__":
                 final_data_to_save.update({"STS Records":sts})
             if trino_queries:
                 final_data_to_save.update({"Trino_queries":trino_queries})
+            if trino_queries_analyse_results:
+                final_data_to_save.update({"Trino Queries Analysis":trino_queries_analyse_results})
+            if active_conn_results:
+                final_data_to_save.update({"Number of active connections group by application for configdb on master":active_conn_results})
             if cloudquery_accuracies:
                 final_data_to_save.update({"Cloudquery Table Accuracies":cloudquery_accuracies})
             if db_op:
