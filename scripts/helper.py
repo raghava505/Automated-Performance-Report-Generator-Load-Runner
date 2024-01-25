@@ -56,7 +56,7 @@ def extract_node_detail(data,node_type,prom_con_obj):
                 client.close()
         except socket.gaierror as e:
             if node_type=="other_nodes":
-                print(f"WARNING : Unable connect to {hostname} (other_node category), {e}")
+                print(f"WARNING : Could not resolve {hostname} , {e}")
             else:
                 raise RuntimeError(f"ERROR : Could not resolve {hostname} , {e}") from e
         if 'c2' in hostname:return_dict[hostname]['clst'] = "2"
