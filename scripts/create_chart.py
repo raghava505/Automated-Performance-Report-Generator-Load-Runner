@@ -9,6 +9,8 @@ from matplotlib.ticker import FuncFormatter
 import numpy as np
 # import pandas as pd
 
+area_fill_titles=["No.of active connections group by application for configdb"]
+
 def convert_to_ist_time(timestamp):
     ist_timezone = pytz.timezone('Asia/Kolkata')
     ist_datetime = datetime.datetime.fromtimestamp(timestamp, tz = ist_timezone)
@@ -32,6 +34,21 @@ def eliminate_long_breaks(old_x,old_y):
         if prev_point and (point[0]-prev_point)> 0.00069445 :
             x.append(None)
             y.append(None)
+        x.append(point[0])
+        y.append(point[1])
+        prev_point=point[0]
+    return x,y
+
+def eliminate_long_breaks_for_area_plot(old_x,old_y):
+    x=[]
+    y=[]
+    prev_point=None
+    for point in zip(old_x,old_y):
+        if prev_point and (point[0]-prev_point)> 0.00069445 :
+            x.append(prev_point+0.00000001)
+            y.append(0)
+            x.append(point[0]-0.00000001)
+            y.append(0)
         x.append(point[0])
         y.append(point[1])
         prev_point=point[0]
@@ -85,13 +102,18 @@ def create_images_and_save(path,doc_id,collection,fs,duration,variables,end_time
                     x_values_ist = x_values_utc + (offset_ist_minutes / (60 * 24))  # Convert minutes to days
                     y = [float(point[1]) for point in large_array]
                     # y = pd.Series(y).rolling(window=5).mean()
-                    x_values_ist,y=eliminate_long_breaks(x_values_ist,y)
+                    if title in area_fill_titles:
+                        x_values_ist,y=eliminate_long_breaks_for_area_plot(x_values_ist,y)
+                    else:
+                        x_values_ist,y=eliminate_long_breaks(x_values_ist,y)
                     line_plot, = plt.plot_date(x_values_ist, y, linestyle='solid', label=line["legend"], markersize=0.1, linewidth=fig_width/21)
                     list_of_legend_lengths.append(len(str(line["legend"])))
                     num_lines+=1
                     # plt.text(x_values_ist[0],y[0],line['legend'])
                     # Get the line color
                     line_color = line_plot.get_color()
+                    if title in area_fill_titles:
+                        plt.fill_between(x_values_ist, y, color=line_color, alpha=0.4)
                     plt.text(x_values_ist[0],y[0],line['legend'], fontsize=10, verticalalignment='bottom', horizontalalignment='left', color='black', rotation=0, bbox=dict(facecolor=line_color, edgecolor='none', boxstyle='round,pad=0.1'))
                     plt.text(x_values_ist[-1],y[-1],line['legend'], fontsize=10, verticalalignment='bottom', horizontalalignment='right', color='black', rotation=0, bbox=dict(facecolor=line_color, edgecolor='none', boxstyle='round,pad=0.1'))
                     unit = line['unit']
@@ -169,14 +191,17 @@ def create_images_and_save(path,doc_id,collection,fs,duration,variables,end_time
 
     print("Total number of charts generated : " , total_charts)
 
-# import time,pymongo
-# from gridfs import GridFS
-# s_at = time.perf_counter()
-# path = "/Users/masabathulararao/Documents/Loadtest/save-report-data-to-mongo/other/images"
-# client = pymongo.MongoClient("mongodb://localhost:27017")
-# database = client["Osquery_LoadTests"]
-# fs = GridFS(database)
-# collection = database["MultiCustomer"]
-# create_images_and_save(path,"657c3430b37a5726f90e4286",collection,fs)
-# f3_at = time.perf_counter()
-# print(f"Collecting the report data took : {round(f3_at - s_at,2)} seconds in total")
+# if __name__=="__main__":
+#     print("Testing charts creation ...")
+#     import time,pymongo
+#     from collections import defaultdict
+#     from gridfs import GridFS
+#     s_at = time.perf_counter()
+#     path = "/Users/masabathulararao/Documents/Loadtest/save-report-data-to-mongo/other/images"
+#     client = pymongo.MongoClient("mongodb://localhost:27017")
+#     database = client["Osquery_LoadTests"]
+#     fs = GridFS(database)
+#     collection = database["ControlPlane"]
+#     create_images_and_save(path,"65b155f0dc20450c92d80bec",collection,fs,0,defaultdict(lambda:0),0,0,0,0)
+#     f3_at = time.perf_counter()
+#     print(f"Collecting the report data took : {round(f3_at - s_at,2)} seconds in total")
