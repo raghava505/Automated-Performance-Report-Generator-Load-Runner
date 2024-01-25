@@ -70,6 +70,7 @@ fontsize_decrease_rate_with_rows=fig_width/165
 ncol_increase_rate_with_rows=8000
 
 def create_images_and_save(path,doc_id,collection,fs,duration,variables,end_time_str,run,stack,test_title):
+    print(f"Delete saved images data set to : {delete_image_data}")
     sns.set_style("darkgrid")
     sns.plotting_context("talk")
     sns.set(rc={"text.color": text_color})
@@ -93,7 +94,8 @@ def create_images_and_save(path,doc_id,collection,fs,duration,variables,end_time
                 for line in  charts_data[category][title]:
                     file_id = line["values"]
                     retrieved_data = fs.get(ObjectId(file_id)).read()
-                    fs.delete(file_id)
+                    if delete_image_data:
+                        fs.delete(file_id)
                     large_array = eval(retrieved_data.decode('utf-8'))
                     x = [convert_to_ist_time(point[0]) for point in large_array]
                     complete_time_set.add(min(x))
@@ -102,7 +104,7 @@ def create_images_and_save(path,doc_id,collection,fs,duration,variables,end_time
                     x_values_ist = x_values_utc + (offset_ist_minutes / (60 * 24))  # Convert minutes to days
                     y = [float(point[1]) for point in large_array]
                     # y = pd.Series(y).rolling(window=5).mean()
-                    if title in area_fill_titles:
+                    if title in area_fill_titles or 'Lag' in category or 'Lag' in title:
                         x_values_ist,y=eliminate_long_breaks_for_area_plot(x_values_ist,y)
                     else:
                         x_values_ist,y=eliminate_long_breaks(x_values_ist,y)
@@ -112,8 +114,8 @@ def create_images_and_save(path,doc_id,collection,fs,duration,variables,end_time
                     # plt.text(x_values_ist[0],y[0],line['legend'])
                     # Get the line color
                     line_color = line_plot.get_color()
-                    if title in area_fill_titles:
-                        plt.fill_between(x_values_ist, y, color=line_color, alpha=0.4)
+                    if title in area_fill_titles or 'Lag' in category or 'Lag' in title:
+                        plt.fill_between(x_values_ist, y, color=line_color, alpha=0.1)
                     plt.text(x_values_ist[0],y[0],line['legend'], fontsize=10, verticalalignment='bottom', horizontalalignment='left', color='black', rotation=0, bbox=dict(facecolor=line_color, edgecolor='none', boxstyle='round,pad=0.1'))
                     plt.text(x_values_ist[-1],y[-1],line['legend'], fontsize=10, verticalalignment='bottom', horizontalalignment='right', color='black', rotation=0, bbox=dict(facecolor=line_color, edgecolor='none', boxstyle='round,pad=0.1'))
                     unit = line['unit']
@@ -191,17 +193,21 @@ def create_images_and_save(path,doc_id,collection,fs,duration,variables,end_time
 
     print("Total number of charts generated : " , total_charts)
 
-# if __name__=="__main__":
-#     print("Testing charts creation ...")
-#     import time,pymongo
-#     from collections import defaultdict
-#     from gridfs import GridFS
-#     s_at = time.perf_counter()
-#     path = "/Users/masabathulararao/Documents/Loadtest/save-report-data-to-mongo/other/images"
-#     client = pymongo.MongoClient("mongodb://localhost:27017")
-#     database = client["Osquery_LoadTests"]
-#     fs = GridFS(database)
-#     collection = database["ControlPlane"]
-#     create_images_and_save(path,"65b155f0dc20450c92d80bec",collection,fs,0,defaultdict(lambda:0),0,0,0,0)
-#     f3_at = time.perf_counter()
-#     print(f"Collecting the report data took : {round(f3_at - s_at,2)} seconds in total")
+if __name__=="__main__":
+    print("Testing charts creation ...")
+    global delete_image_data
+    delete_image_data=False
+    import time,pymongo
+    from collections import defaultdict
+    from gridfs import GridFS
+    s_at = time.perf_counter()
+    path = "/Users/masabathulararao/Documents/Loadtest/save-report-data-to-mongo/other/images"
+    client = pymongo.MongoClient("mongodb://localhost:27017")
+    database = client["Osquery_LoadTests"]
+    fs = GridFS(database)
+    collection = database["ControlPlane"]
+    create_images_and_save(path,"65b20ae28991656708431345",collection,fs,0,defaultdict(lambda:0),0,0,0,0)
+    f3_at = time.perf_counter()
+    print(f"Collecting the report data took : {round(f3_at - s_at,2)} seconds in total")
+else:
+    delete_image_data=True
