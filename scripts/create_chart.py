@@ -9,7 +9,7 @@ from matplotlib.ticker import FuncFormatter
 import numpy as np
 # import pandas as pd
 
-area_fill_titles=["No.of active connections group by application for configdb"]
+area_fill_titles=["No.of active connections group by application for configdb on master"]
 
 def convert_to_ist_time(timestamp):
     ist_timezone = pytz.timezone('Asia/Kolkata')
