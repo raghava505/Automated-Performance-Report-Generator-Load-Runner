@@ -446,5 +446,29 @@
         "ram": "62",
         "cores": "16",
         "clst": "1"
+    },
+    "s1kubemaster1": {
+        "storage": {
+            "root_partition": "196G"
+        },
+        "ram": "31",
+        "cores": "4",
+        "clst": "1"
+    },
+    "s1kubemaster2": {
+        "storage": {
+            "root_partition": "196G"
+        },
+        "ram": "31",
+        "cores": "4",
+        "clst": "1"
+    },
+    "s1kubemaster3": {
+        "storage": {
+            "root_partition": "196G"
+        },
+        "ram": "31",
+        "cores": "4",
+        "clst": "1"
     }
 }
