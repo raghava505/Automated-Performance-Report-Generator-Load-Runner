@@ -200,7 +200,7 @@ class parent:
     @property
     def trino_details_commands(cls):
         return {
-            "Total number of trino queries executed" : {
+            "Total number of trino queries executed from each source" : {
                 "query" :  "SELECT\
                                 source,\
                                 COUNT(CASE WHEN query_status = 'SUCCESS' THEN 1 END) as success_count,\
@@ -212,7 +212,7 @@ class parent:
                             ORDER BY 1;",
                 "columns":['source','success_count','failure_count','total_count']
             },
-            "Total number of trino queries executed grouped by query_operation" : {
+            "Total number of trino queries executed from each source grouped by query_operation" : {
                 "query" :  "SELECT\
                                 source,\
                                 query_operation,\
@@ -225,7 +225,7 @@ class parent:
                             ORDER BY 1,2;",
                 "columns":['source','query_operation','success_count','failure_count','total_count']
             },
-            "Failed queries and reason for failure" : {
+            "Total number of failed queries grouped by failure message" : {
                 "query" :  "select \
                                 source,\
                                 query_operation,\
