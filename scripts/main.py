@@ -320,7 +320,7 @@ if __name__ == "__main__":
             if trino_queries_analyse_results:
                 final_data_to_save.update({"Trino Queries Analysis":trino_queries_analyse_results})
             if active_conn_results:
-                final_data_to_save.update({"Number of active connections group by application for configdb on master":active_conn_results})
+                final_data_to_save.update({"Number of active connections group by application on master":active_conn_results})
             if cloudquery_accuracies:
                 final_data_to_save.update({"Cloudquery Table Accuracies":cloudquery_accuracies})
             if db_op:

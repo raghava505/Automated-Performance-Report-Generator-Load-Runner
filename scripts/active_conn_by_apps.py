@@ -10,31 +10,39 @@ class Active_conn:
         self.API_PATH = self.prom_con_obj.prom_api_path
     
     def get_avg_active_conn(self):
-        query="uptycs_pg_idle_active_connections_by_app{state=\"active\",db=\"configdb\",role=\"master\"}"
-        final=[]
-        PARAMS = {
-            'query': query,
-            'start': self.curr_ist_start_time,
-            'end': self.curr_ist_end_time,
-            'step':60
-        }
-        response = requests.get(self.PROMETHEUS + self.API_PATH, params=PARAMS)
-        if response.status_code != 200:print("ERROR : Request failed")
-        result = response.json()['data']['result']
-        if len(result)==0:
-            print(f"WARNING : No data found for : {query}, the query executed is : {query}")
-            return None
-        for app in result:
-            application_name = app["metric"]["application_name"]
-            values = [float(i[1]) for i in app['values']]
-            avg = sum(values) / len(values)
-            minimum = min(values)
-            maximum = max(values)
-            final.append({"application":application_name,"minimum":minimum , "maximum":maximum,"average":avg})
-        df = pd.DataFrame(final)
-        print("Printing details for active connections by app on master : ")
-        print(df)
-        return df.to_dict(orient="records")
+        base_query="uptycs_pg_idle_active_connections_by_app{{state=\"active\",db=\"{}\",role=\"master\"}}"
+        dbs = ["configdb","insightsdb","rangerdb","metastoredb","statedb"]
+        result_dict={}
+        for db in dbs:
+            query = base_query.format(db)
+            print(f"Prometheus query : {query}")
+            final=[]
+            PARAMS = {
+                'query': query,
+                'start': self.curr_ist_start_time,
+                'end': self.curr_ist_end_time,
+                'step':60
+            }
+            response = requests.get(self.PROMETHEUS + self.API_PATH, params=PARAMS)
+            if response.status_code != 200:print("ERROR : Request failed")
+            result = response.json()['data']['result']
+            if len(result)==0:
+                print(f"WARNING : No data found for : {db}, the query executed is : {query}")
+                continue
+            for app in result:
+                application_name = app["metric"]["application_name"]
+                values = [float(i[1]) for i in app['values']]
+                avg = sum(values) / len(values)
+                minimum = min(values)
+                maximum = max(values)
+                final.append({"application":application_name,"minimum":minimum , "maximum":maximum,"average":avg})
+            df = pd.DataFrame(final)
+            new_row={"application":"TOTAL","minimum":df["minimum"].sum() , "maximum":df["maximum"].sum(),"average":df["average"].sum()}
+            df = df._append(new_row, ignore_index=True)
+            print(f"Printing details for active connections by app for {db} on master : ")
+            print(df)
+            result_dict[db]= df.to_dict(orient="records")
+        return result_dict
     
 
 # if __name__=='__main__':
@@ -44,8 +52,8 @@ class Active_conn:
 #     import pytz
 #     format_data = "%Y-%m-%d %H:%M"
     
-#     start_time_str = "2024-01-24 23:37"
-#     hours=16
+#     start_time_str = "2024-01-24 03:58"
+#     hours=12
 
 #     start_time = datetime.strptime(start_time_str, format_data)
 #     end_time = start_time + timedelta(hours=hours)
