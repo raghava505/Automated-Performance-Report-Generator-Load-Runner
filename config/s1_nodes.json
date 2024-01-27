@@ -20,13 +20,7 @@
         "s1c1pn3",
         "s1c1pn4",
         "s1c1pn5",
-        "s1c1pn6",
-        "s1c2pn1",
-        "s1c2pn2",
-        "s1c2pn3",
-        "s1c2pn4",
-        "s1c2pn5",
-        "s1c2pn6"
+        "s1c1pn6"
     ],
     "dnodes": [
         "s1c1dn1",
@@ -34,13 +28,7 @@
         "s1c1dn3",
         "s1c1dn4",
         "s1c1dn5",
-        "s1c1dn6",
-        "s1c2dn1",
-        "s1c2dn2",
-        "s1c2dn3",
-        "s1c2dn4",
-        "s1c2dn5",
-        "s1c2dn6"
+        "s1c1dn6"
     ],
     "pgnodes": [
         "s1configdb1",
@@ -55,47 +43,18 @@
         "s1stsnode3"
     ],
     "other_nodes": [
+        "s1cloudquery",
         "s1elasticsearch",
         "s1kibana",
-        "s1logstash1",
-        "s1logstash2",
-        "s1cloudquery",
-        "s1mlnode1",
-        "s1mlnode2",
-        "s1superset",
         "s1kubemaster1",
         "s1kubemaster2",
-        "s1kubemaster3"
+        "s1kubemaster3",
+        "s1logstash1",
+        "s1logstash2",
+        "s1mlnode1",
+        "s1mlnode2",
+        "s1superset"
     ],
-    "s1monitor": {
-        "storage": {
-            "root_partition": "98G",
-            "data_prometheus": "3.6T"
-        },
-        "ram": "62",
-        "cores": "16",
-        "clst": "1"
-    },
-    "s1configdb1": {
-        "storage": {
-            "root_partition": "365G",
-            "pg": "5.5T",
-            "data": "5.5T"
-        },
-        "ram": "125",
-        "cores": "48",
-        "clst": "1"
-    },
-    "s1configdb2": {
-        "storage": {
-            "root_partition": "365G",
-            "pg": "5.5T",
-            "data": "5.5T"
-        },
-        "ram": "188",
-        "cores": "32",
-        "clst": "1"
-    },
     "s1c1pn1": {
         "storage": {
             "root_partition": "365G",
@@ -149,60 +108,6 @@
         "ram": "188",
         "cores": "32",
         "clst": "1"
-    },
-    "s1c2pn1": {
-        "storage": {
-            "root_partition": "365G",
-            "kafka": "3.6T"
-        },
-        "ram": "188",
-        "cores": "32",
-        "clst": "2"
-    },
-    "s1c2pn2": {
-        "storage": {
-            "root_partition": "365G",
-            "kafka": "3.6T"
-        },
-        "ram": "188",
-        "cores": "32",
-        "clst": "2"
-    },
-    "s1c2pn3": {
-        "storage": {
-            "root_partition": "365G",
-            "kafka": "3.6T"
-        },
-        "ram": "188",
-        "cores": "32",
-        "clst": "2"
-    },
-    "s1c2pn4": {
-        "storage": {
-            "root_partition": "365G",
-            "kafka": "3.6T"
-        },
-        "ram": "188",
-        "cores": "32",
-        "clst": "2"
-    },
-    "s1c2pn5": {
-        "storage": {
-            "root_partition": "365G",
-            "kafka": "3.6T"
-        },
-        "ram": "188",
-        "cores": "32",
-        "clst": "2"
-    },
-    "s1c2pn6": {
-        "storage": {
-            "root_partition": "365G",
-            "kafka": "3.6T"
-        },
-        "ram": "188",
-        "cores": "32",
-        "clst": "2"
     },
     "s1c1dn1": {
         "storage": {
@@ -276,110 +181,33 @@
         "cores": "32",
         "clst": "1"
     },
-    "s1c2dn1": {
+    "s1configdb1": {
         "storage": {
             "root_partition": "365G",
-            "spark": "3.6T",
-            "dn1": "3.6T",
-            "dn2": "3.6T",
-            "dn3": "3.6T"
+            "pg": "5.5T",
+            "data": "5.5T"
         },
-        "ram": "251",
-        "cores": "32",
-        "clst": "2"
+        "ram": "125",
+        "cores": "48",
+        "clst": "1"
     },
-    "s1c2dn2": {
+    "s1configdb2": {
         "storage": {
             "root_partition": "365G",
-            "spark": "3.6T",
-            "dn1": "3.6T",
-            "dn2": "3.6T",
-            "dn3": "3.6T"
-        },
-        "ram": "251",
-        "cores": "32",
-        "clst": "2"
-    },
-    "s1c2dn3": {
-        "storage": {
-            "root_partition": "365G",
-            "spark": "3.6T",
-            "dn1": "3.6T",
-            "dn2": "3.6T",
-            "dn3": "3.6T"
-        },
-        "ram": "251",
-        "cores": "32",
-        "clst": "2"
-    },
-    "s1c2dn4": {
-        "storage": {
-            "root_partition": "365G",
-            "spark": "3.6T",
-            "dn1": "3.6T",
-            "dn2": "3.6T",
-            "dn3": "3.6T"
+            "pg": "5.5T",
+            "data": "5.5T"
         },
         "ram": "188",
         "cores": "32",
-        "clst": "2"
+        "clst": "1"
     },
-    "s1c2dn5": {
+    "s1monitor": {
         "storage": {
-            "root_partition": "365G",
-            "spark": "3.6T",
-            "dn1": "3.6T",
-            "dn2": "3.6T",
-            "dn3": "3.6T"
+            "root_partition": "98G",
+            "data_prometheus": "3.6T"
         },
-        "ram": "188",
-        "cores": "32",
-        "clst": "2"
-    },
-    "s1c2dn6": {
-        "storage": {
-            "root_partition": "365G",
-            "spark": "3.6T",
-            "dn1": "3.6T",
-            "dn2": "3.6T",
-            "dn3": "3.6T"
-        },
-        "ram": "188",
-        "cores": "32",
-        "clst": "2"
-    },
-    "s1elastic": {
-        "storage": {
-            "root_partition": "196G",
-            "data": "3.6T"
-        },
-        "lan_ip": "192.168.129.52",
         "ram": "62",
         "cores": "16",
-        "clst": "1"
-    },
-    "s1kibana": {
-        "storage": {
-            "root_partition": "147G"
-        },
-        "ram": "31",
-        "cores": "4",
-        "clst": "1"
-    },
-    "s1logstash1": {
-        "storage": {
-            "root_partition": "196G"
-        },
-        "ram": "62",
-        "cores": "8",
-        "clst": "1"
-    },
-    "s1logstash2": {
-        "storage": {
-            "root_partition": "196G"
-        },
-        "ram": "62",
-        "cores": "8",
         "clst": "1"
     },
     "s1stsnode1": {
@@ -414,30 +242,6 @@
         "cores": "4",
         "clst": "1"
     },
-    "s1mlnode1": {
-        "storage": {
-            "root_partition": "442G"
-        },
-        "ram": "62",
-        "cores": "16",
-        "clst": "1"
-    },
-    "s1mlnode2": {
-        "storage": {
-            "root_partition": "442G"
-        },
-        "ram": "62",
-        "cores": "16",
-        "clst": "1"
-    },
-    "s1superset": {
-        "storage": {
-            "root_partition": "196G"
-        },
-        "ram": "47",
-        "cores": "8",
-        "clst": "1"
-    },
     "s1elasticsearch": {
         "storage": {
             "root_partition": "196G",
@@ -445,6 +249,14 @@
         },
         "ram": "62",
         "cores": "16",
+        "clst": "1"
+    },
+    "s1kibana": {
+        "storage": {
+            "root_partition": "147G"
+        },
+        "ram": "31",
+        "cores": "4",
         "clst": "1"
     },
     "s1kubemaster1": {
@@ -469,6 +281,46 @@
         },
         "ram": "31",
         "cores": "4",
+        "clst": "1"
+    },
+    "s1logstash1": {
+        "storage": {
+            "root_partition": "196G"
+        },
+        "ram": "62",
+        "cores": "8",
+        "clst": "1"
+    },
+    "s1logstash2": {
+        "storage": {
+            "root_partition": "196G"
+        },
+        "ram": "62",
+        "cores": "8",
+        "clst": "1"
+    },
+    "s1mlnode1": {
+        "storage": {
+            "root_partition": "442G"
+        },
+        "ram": "62",
+        "cores": "16",
+        "clst": "1"
+    },
+    "s1mlnode2": {
+        "storage": {
+            "root_partition": "442G"
+        },
+        "ram": "62",
+        "cores": "16",
+        "clst": "1"
+    },
+    "s1superset": {
+        "storage": {
+            "root_partition": "196G"
+        },
+        "ram": "47",
+        "cores": "8",
         "clst": "1"
     }
 }

@@ -27,7 +27,7 @@ class osquery_child(parent):
             "ControlPlane":{
                 "total_number_of_customers": "1",
                 "test_title": "Single Customer Control Plane Load",
-                "total_assets": "200K",
+                "total_assets": "120K",
                 "redis_switchover_case_time_ist":""
             },
     }
