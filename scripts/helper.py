@@ -2,6 +2,50 @@ import json
 import socket,paramiko
 import concurrent.futures
 import re
+import requests
+from collections import defaultdict
+
+def execute_prometheus_query(prom_con_obj,start_timestamp,end_timestamp,query,hours):
+    PROMETHEUS = prom_con_obj.prometheus_path
+    API_PATH = prom_con_obj.prom_api_path
+    step=60
+    points_per_min = 60/step
+    points_per_hour = points_per_min*60
+    PARAMS = {
+        'query': query,
+        'start': start_timestamp,
+        'end': end_timestamp,
+        'step':step
+    }
+    print(f"Executing {query} at {prom_con_obj.monitoring_ip} ...")
+
+    try:
+        response = requests.get(PROMETHEUS + API_PATH, params=PARAMS)
+        if response.status_code != 200:
+            print(f"API request failed with status code {response.status_code}")
+            return None
+        result = response.json()['data']['result']
+        if len(result)==0:
+            print(f"WARNING : No data found for : {query}")
+            return None
+        for line in result:
+            temp = line["metric"]
+            line["metric"] = defaultdict(lambda: None)
+            line["metric"].update(temp)
+            values = [float(i[1]) for i in line['values']]
+            average = sum(values) / (points_per_hour*hours)
+            minimum = min(values)
+            maximum = max(values)
+            
+            line['values']={"average":average,"minimum":minimum,"maximum":maximum}
+        return result
+
+    except requests.RequestException as e:
+        print(f"API request failed with an exception: {e}")
+
+    except Exception as e:
+        print(f"An unexpected error occurred: {e}")
+    return None
 
 def extract_node_detail(data,node_type,prom_con_obj):
     port=prom_con_obj.ssh_port
