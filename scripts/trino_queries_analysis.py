@@ -9,14 +9,11 @@ from helper import execute_trino_query
 class TRINO_ANALYSE:
     def __init__(self,start_utc_str,end_utc_str,prom_con_obj):
         self.prom_con_obj = prom_con_obj
-        self.test_env_file_path=prom_con_obj.test_env_file_path
-        with open(self.test_env_file_path, 'r') as file:
-            self.stack_details = json.load(file)
         self.start_utc_str=start_utc_str
         self.end_utc_str=end_utc_str
         self.remote_username = prom_con_obj.abacus_username
         self.remote_password  = prom_con_obj.abacus_password
-        self.dnode = self.stack_details['dnodes'][0]
+        self.dnode = prom_con_obj.execute_trino_queries_in
 
     def fetch_trino_results(self,commands):
         save_dict={}       
