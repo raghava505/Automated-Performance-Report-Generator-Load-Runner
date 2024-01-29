@@ -5,6 +5,59 @@ import re
 import requests
 from collections import defaultdict
 
+def execute_command_in_node(node,command,prom_con_obj):
+    try:
+        client = paramiko.SSHClient()
+        client.load_system_host_keys() 
+        client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+        try:
+            client.connect(node, prom_con_obj.ssh_port, prom_con_obj.abacus_username, prom_con_obj.abacus_password)
+            stdin, stdout, stderr = client.exec_command(command)
+            out = stdout.read().decode('utf-8').strip()
+            errors = stderr.read().decode('utf-8')
+            if errors:
+                print("Errors:")
+                print(errors)
+            if out and out!='':
+                print(f"Fetched '{command}' output for {node} : {out}")
+                return out
+            else:
+                raise RuntimeError(f"ERROR : Unable to run command : '{command}'  in {node} , {e}")
+                
+        except Exception as e:
+            raise RuntimeError(f"ERROR : Unable to connect to {node} , {e}") from e
+        finally:
+            client.close()
+    except socket.gaierror as e:
+        raise RuntimeError(f"ERROR : Unable to connect to {node} , {e}") from e
+
+def execute_trino_query(node,query,prom_con_obj):
+    trino_command = f"sudo -u monkey TRINO_PASSWORD=prestossl /opt/uptycs/cloud/utilities/trino-cli --insecure --server https://localhost:5665 --schema upt_system --user uptycs --catalog uptycs --password --truststore-password sslpassphrase --truststore-path /opt/uptycs/etc/presto/presto.jks --execute \"{query}\""
+    return execute_command_in_node(node,trino_command,prom_con_obj)
+
+def execute_configdb_query(node,query,prom_con_obj):
+    configdb_command = f'sudo docker exec postgres-configdb bash -c "PGPASSWORD=pguptycs psql -U postgres configdb -c \"{query}\""'
+    return execute_command_in_node(node,configdb_command,prom_con_obj)
+
+def execute_point_prometheus_query(prom_con_obj,timestamp,query):    
+    PARAMS = {
+        'query': query,
+        'time' : timestamp
+    }
+    print(f"Executing {query} at {prom_con_obj.monitoring_ip} at a single timestamp {timestamp}...")
+    try:
+        response = requests.get(prom_con_obj.prometheus_path + prom_con_obj.prom_point_api_path, params=PARAMS)
+        if response.status_code != 200:
+            raise RuntimeError(f"API request failed with status code {response.status_code}")
+        result = response.json()['data']['result']
+        if len(result)==0:
+            print(f"WARNING : No data found for : {query}")
+            return None
+        return result
+
+    except requests.RequestException as e:
+        raise RuntimeError(f"API request failed with an exception {e}")
+
 def execute_prometheus_query(prom_con_obj,start_timestamp,end_timestamp,query,hours):
     PROMETHEUS = prom_con_obj.prometheus_path
     API_PATH = prom_con_obj.prom_api_path
