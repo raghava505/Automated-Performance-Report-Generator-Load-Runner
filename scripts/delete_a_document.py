@@ -32,18 +32,27 @@ if decision == "y":
             
         result = collection.delete_one({'_id': ObjectId(document_id)})
         BASE_GRAPHS_PATH = os.path.join(os.path.dirname(prom_con_obj.ROOT_PATH),'graphs')
-        path=f"{BASE_GRAPHS_PATH}/{database_name}/{collection_name}/{document_id}"
+        graphs_path=f"{BASE_GRAPHS_PATH}/{database_name}/{collection_name}/{document_id}"
+        BASE_PDFS_PATH = os.path.join(os.path.dirname(prom_con_obj.ROOT_PATH),'pdfs')
+        pdfs_path=f"{BASE_PDFS_PATH}/{database_name}/{collection_name}/{document_id}"
         try:
-            shutil.rmtree(path)
-            print(f"Folder deleted: {path}")
+            shutil.rmtree(graphs_path)
+            print(f"Folder deleted: {graphs_path}")
+            try:
+                shutil.rmtree(pdfs_path)
+                print(f"Folder deleted: {pdfs_path}")
+            except FileNotFoundError:
+                print(f"Folder not found: {pdfs_path}")
+            except Exception as e:
+                print(f"An error occurred while deleting the folders: {e}")
         except FileNotFoundError:
-            print(f"Folder not found: {path}")
+            print(f"Folder not found: {graphs_path}")
         except Exception as e:
-            print(f"An error occurred while deleting the folder: {e}")
+            print(f"An error occurred while deleting the folders: {e}")
         if result.deleted_count == 1:
             print(f"Document with ID '{document_id}' deleted successfully.")
         else:
-            print(f"ERROR : No document found with ID '{document_id}'.")
+            print(f"ERROR : delete count not equal to 1 '{document_id}'.")
     else:
         print(f"No document found with ID '{document_id}'.")
 else:
