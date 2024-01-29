@@ -1,13 +1,6 @@
 scripts/__pycache__/*
 scripts/osquery/__pycache__/*
-other/test.py
-other/test2.py
-other/get_current_pg_disk_s1.py
 config/test.json
-other/images/*
-other/create_chart.py
-other/oops.py
-other/.DS_Store
 scripts/cloudquery/__pycache__/*
 config/s11_nodes.json
 config/sdev2_nodes.json
@@ -18,13 +11,9 @@ atlassian_api/__pycache__
 scripts/kubequery/__pycache__
 raghava_env/*
 raghava_venv/*
-project/*
 .DS_Store
-test.ipynb
 scripts/osquery/testinputfiles/*
 logs/*
-scripts/application_restarts.py
-scripts/pg_badger_report.py
 scripts/logs/*
 scripts/api_load.csv
 scripts/use_osquery_accuracy.py
