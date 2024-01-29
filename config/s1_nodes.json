@@ -1,6 +1,6 @@
 {
     "stack": "S1",
-    "clusters": 2,
+    "clusters": 1,
     "SU": 6,
     "domain": "jupiter",
     "extension": "net",

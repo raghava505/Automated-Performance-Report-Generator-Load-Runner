@@ -14,8 +14,6 @@ class configuration:
         self.ssh_port = 22  # SSH port (default is 22)
         self.abacus_username = 'abacus'  
         self.abacus_password = 'abacus' 
-        self.panel_loading_time_threshold_sec=120
-        self.thread_len=10
         self.ROOT_PATH = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
         self.base_stack_config_path = f"{self.ROOT_PATH}/config"
         self.mongo_connection_string = "mongodb://localhost:27017"
@@ -33,3 +31,4 @@ class configuration:
             self.monitoring_ip=  stack_details["monitoring_node"][0]
             self.prometheus_path = f"http://{self.monitoring_ip}:{self.prometheus_port}"
             self.execute_kafka_topics_script_in = stack_details['pnodes'][0]       
+            self.execute_trino_queries_in = stack_details['dnodes'][0]
