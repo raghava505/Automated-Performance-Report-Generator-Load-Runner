@@ -3,7 +3,7 @@ import json
 
 class kafka_topics:
     def __init__(self,prom_con_obj):
-        self.local_script_path = f'{prom_con_obj.ROOT_PATH}/other/kafka_topics.py'
+        self.local_script_path = f'{prom_con_obj.ROOT_PATH}/scripts/kafka_topics.py'
         self.host = prom_con_obj.execute_kafka_topics_script_in
         self.port=prom_con_obj.ssh_port
         self.username = prom_con_obj.abacus_username
