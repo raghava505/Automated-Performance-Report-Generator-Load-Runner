@@ -143,7 +143,7 @@ if __name__ == "__main__":
             kafka_topics_list = kafka_obj.add_topics_to_report()
         #---------------No.of Active connections by application---------------
         active_conn_results=None
-        active_conn_obj = Active_conn(prom_con_obj,start_timestamp,end_timestamp)
+        active_conn_obj = Active_conn(prom_con_obj,start_timestamp,end_timestamp,hours=variables["load_duration_in_hrs"])
         active_conn_results = active_conn_obj.get_avg_active_conn()
         #-------------------------Trino Queries--------------------------
         trino_queries=None
