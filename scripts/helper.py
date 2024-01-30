@@ -1,7 +1,6 @@
 import json
 import socket,paramiko
 import concurrent.futures
-import re
 import requests
 from collections import defaultdict
 
@@ -64,6 +63,7 @@ def execute_prometheus_query(prom_con_obj,start_timestamp,end_timestamp,query,ho
     step=60
     points_per_min = 60/step
     points_per_hour = points_per_min*60
+    estimated_points=(points_per_hour*hours) + 1
     PARAMS = {
         'query': query,
         'start': start_timestamp,
@@ -86,8 +86,8 @@ def execute_prometheus_query(prom_con_obj,start_timestamp,end_timestamp,query,ho
             line["metric"] = defaultdict(lambda: None)
             line["metric"].update(temp)
             values = [float(i[1]) for i in line['values']]
-            average = sum(values) / (points_per_hour*hours)
-            minimum = min(values)
+            average = sum(values) / (estimated_points)
+            minimum = 0 if len(values) < estimated_points else min(values)
             maximum = max(values)
             
             line['values']={"average":average,"minimum":minimum,"maximum":maximum}
