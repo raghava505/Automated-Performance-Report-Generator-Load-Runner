@@ -20,9 +20,9 @@ class Active_conn:
             final=[]
             for app in result:
                 application_name = app["metric"]["application_name"]
-                avg = app["values"]["average"]
-                minimum = app["values"]["minimum"]
-                maximum = app["values"]["maximum"]
+                avg = round(app["values"]["average"],2)
+                minimum = round(app["values"]["minimum"],2)
+                maximum = round(app["values"]["maximum"],2)
                 final.append({"application":application_name,"minimum":minimum , "maximum":maximum,"average":avg})
             df = pd.DataFrame(final)
             new_row={"application":"TOTAL","minimum":df["minimum"].sum() , "maximum":df["maximum"].sum(),"average":df["average"].sum()}
