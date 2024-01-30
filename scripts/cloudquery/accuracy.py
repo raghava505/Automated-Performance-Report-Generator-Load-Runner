@@ -220,9 +220,9 @@ class ACCURACY:
             file = fs.read()
             save_dict["AWS"]=self.multi_tables_accuracy(file)
             
-            # obj.get_log(obj.azure_simulators,"Azure_MultiCustomer")
-            # self.total_counts = getattr(configs, f'total_counts_Azure', None)
-            # save_dict["Azure"]=self.multi_tables_accuracy(file)
+            obj.get_log(obj.azure_simulators,"Azure_MultiCustomer")
+            self.total_counts = getattr(configs, f'total_counts_Azure', None)
+            save_dict["Azure"]=self.multi_tables_accuracy(file)
 
             obj.get_log(obj.simulators3,"GCP_MultiCustomer")
             self.total_counts = getattr(configs, f'total_counts_GCP', None)
