@@ -86,9 +86,9 @@ def execute_prometheus_query(prom_con_obj,start_timestamp,end_timestamp,query,ho
             line["metric"] = defaultdict(lambda: None)
             line["metric"].update(temp)
             values = [float(i[1]) for i in line['values']]
-            average = round(sum(values) / (estimated_points),2)
-            minimum = round(0 if len(values) < estimated_points else min(values),2)
-            maximum = round(max(values),2)
+            average = sum(values) / (estimated_points)
+            minimum = 0 if len(values) < estimated_points else min(values)
+            maximum = max(values)
             
             line['values']={"average":average,"minimum":minimum,"maximum":maximum}
         return result
