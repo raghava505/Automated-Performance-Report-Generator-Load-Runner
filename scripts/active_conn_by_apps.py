@@ -25,8 +25,8 @@ class Active_conn:
                 maximum = round(app["values"]["maximum"],2)
                 final.append({"application":application_name,"minimum":minimum , "maximum":maximum,"average":avg})
             df = pd.DataFrame(final)
-            new_row={"application":"TOTAL","minimum":df["minimum"].sum() , "maximum":df["maximum"].sum(),"average":df["average"].sum()}
-            df = df._append(new_row, ignore_index=True)
+            # new_row={"application":"TOTAL","minimum":df["minimum"].sum() , "maximum":df["maximum"].sum(),"average":df["average"].sum()}
+            # df = df._append(new_row, ignore_index=True)
             print(f"Printing details for active connections by app for {db} on master : ")
             print(df)
             result_dict[db]= df.to_dict(orient="records")
