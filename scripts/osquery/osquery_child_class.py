@@ -1,5 +1,6 @@
 from parent_load_details import parent
 import copy
+from collections import defaultdict
 
 class osquery_child(parent):
     load_specific_details={
@@ -31,6 +32,7 @@ class osquery_child(parent):
                 "redis_switchover_case_time_ist":""
             },
     }
+    load_specific_details = defaultdict(lambda: None, load_specific_details)
 
     @classmethod
     @property

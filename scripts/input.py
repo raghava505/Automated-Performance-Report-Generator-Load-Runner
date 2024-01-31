@@ -9,7 +9,7 @@ from combined_loads_setup import all_combined_child
 bool_options=[False,True]
 load_type_options = {   
                         'Osquery':{
-                                        'subtypes':['ControlPlane', 'SingleCustomer', 'MultiCustomer'],
+                                        'subtypes':['ControlPlane', 'SingleCustomer', 'MultiCustomer','Testing'],
                                         'class':osquery_child
                                   },
                         'CloudQuery':{

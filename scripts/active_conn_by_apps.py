@@ -23,13 +23,19 @@ class Active_conn:
                 avg = round(app["values"]["average"],2)
                 minimum = round(app["values"]["minimum"],2)
                 maximum = round(app["values"]["maximum"],2)
-                final.append({"application":application_name,"minimum":minimum , "maximum":maximum,"average":avg})
+                final.append({"application":application_name,"min":minimum , "max":maximum,"avg":avg})
             df = pd.DataFrame(final)
             # new_row={"application":"TOTAL","minimum":df["minimum"].sum() , "maximum":df["maximum"].sum(),"average":df["average"].sum()}
             # df = df._append(new_row, ignore_index=True)
             print(f"Printing details for active connections by app for {db} on master : ")
             print(df)
-            result_dict[db]= df.to_dict(orient="records")
+            result_dict[db] = {
+                "schema":{
+                    "merge_on_cols" : ["application"],
+                    "compare_cols":["avg"]
+                },
+                "table":df.to_dict(orient="records")
+            }
         return result_dict
     
 
