@@ -6,6 +6,7 @@ from collections import defaultdict
 
 def execute_command_in_node(node,command,prom_con_obj):
     try:
+        print(f"Executing the command in node : {node}")
         client = paramiko.SSHClient()
         client.load_system_host_keys() 
         client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
@@ -17,7 +18,6 @@ def execute_command_in_node(node,command,prom_con_obj):
             if errors:
                 print("Errors:")
                 print(errors)
-            print(f"Fetched '{command}' output for {node} : {out}")
             return out
                 
         except Exception as e:
