@@ -270,7 +270,7 @@ if __name__ == "__main__":
             fs = GridFS(db)
             print("Fetching charts data ...")
             charts_obj = Charts(start_timestamp=start_timestamp,end_timestamp=end_timestamp,prom_con_obj=prom_con_obj,
-                    add_extra_time_for_charts_at_end_in_min=variables["add_extra_time_for_charts_at_end_in_min"],fs=fs)
+                    add_extra_time_for_charts_at_end_in_min=variables["add_extra_time_for_charts_at_end_in_min"],fs=fs,hours=variables['load_duration_in_hrs'])
             complete_charts_data_dict,all_gridfs_fileids=charts_obj.capture_charts_and_save(load_cls.get_all_chart_queries())
             print("Saved charts data successfully !")
             #--------------------------------take screenshots---------------------------------------

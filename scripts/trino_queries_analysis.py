@@ -1,5 +1,3 @@
-import json
-import paramiko
 import pandas as pd
 from io import StringIO
 from helper import execute_trino_query
