@@ -21,6 +21,8 @@ class TRINO_ANALYSE:
             query = raw_command.replace("<start_utc_str>",self.start_utc_str).replace( "<end_utc_str>", self.end_utc_str)
             print(f"Command :\n {query}")
             output= execute_trino_query(self.dnode,query,self.prom_con_obj)
+            if not output or output.strip()=="":
+                raise RuntimeError(f"ERROR : command output is empty. Check if trino @ {self.dnode} is in good state. Terminating program ...")
             stringio = StringIO(output)
             df = pd.read_csv(stringio, header=None, names=columns)
             integer_columns = df.select_dtypes(include='int').columns
@@ -60,5 +62,5 @@ if __name__=='__main__':
     end_timestamp = int(end_ist_time.timestamp())
     end_utc_time = end_ist_time.astimezone(utc_timezone)
     end_utc_str = end_utc_time.strftime(format_data)
-    calc = TRINO_ANALYSE(start_utc_str,end_utc_str,prom_con_obj=configuration('longevity_nodes.json'))
+    calc = TRINO_ANALYSE(start_utc_str,end_utc_str,prom_con_obj=configuration('s1_nodes.json'))
     trino_queries = calc.fetch_trino_results(parent.trino_details_commands)
