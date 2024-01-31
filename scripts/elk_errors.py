@@ -1,12 +1,7 @@
-import requests
 from elasticsearch import Elasticsearch
 import datetime
-import os
-import sys
 from datetime import datetime
 import json
-import paramiko
-import pytz
 import concurrent.futures
 
 class Elk_erros:

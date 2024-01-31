@@ -17,11 +17,8 @@ def execute_command_in_node(node,command,prom_con_obj):
             if errors:
                 print("Errors:")
                 print(errors)
-            if out and out!='':
-                print(f"Fetched '{command}' output for {node} : {out}")
-                return out
-            else:
-                raise RuntimeError(f"ERROR : Unable to run command : '{command}'  in {node} , {e}")
+            print(f"Fetched '{command}' output for {node} : {out}")
+            return out
                 
         except Exception as e:
             raise RuntimeError(f"ERROR : Unable to connect to {node} , {e}") from e
@@ -51,13 +48,14 @@ def execute_point_prometheus_query(prom_con_obj,timestamp,query):
         result = response.json()['data']['result']
         if len(result)==0:
             print(f"WARNING : No data found for : {query}")
-            return None
         return result
 
     except requests.RequestException as e:
         raise RuntimeError(f"API request failed with an exception {e}")
+    except Exception as e:
+        raise RuntimeError(f"An unexpected error occurred: {e}")
 
-def execute_prometheus_query(prom_con_obj,start_timestamp,end_timestamp,query,hours):
+def execute_prometheus_query(prom_con_obj,start_timestamp,end_timestamp,query,hours,preprocess=True):
     PROMETHEUS = prom_con_obj.prometheus_path
     API_PATH = prom_con_obj.prom_api_path
     step=60
@@ -75,30 +73,29 @@ def execute_prometheus_query(prom_con_obj,start_timestamp,end_timestamp,query,ho
     try:
         response = requests.get(PROMETHEUS + API_PATH, params=PARAMS)
         if response.status_code != 200:
-            print(f"API request failed with status code {response.status_code}")
-            return None
+            raise RuntimeError(f"API request failed with status code {response.status_code}")
         result = response.json()['data']['result']
         if len(result)==0:
             print(f"WARNING : No data found for : {query}")
-            return None
-        for line in result:
-            temp = line["metric"]
-            line["metric"] = defaultdict(lambda: None)
-            line["metric"].update(temp)
-            values = [float(i[1]) for i in line['values']]
-            average = sum(values) / (estimated_points)
-            minimum = 0 if len(values) < estimated_points else min(values)
-            maximum = max(values)
-            
-            line['values']={"average":average,"minimum":minimum,"maximum":maximum}
+
+        if preprocess==True:
+            for line in result:
+                temp = line["metric"]
+                line["metric"] = defaultdict(lambda: None)
+                line["metric"].update(temp)
+                values = [float(i[1]) for i in line['values']]
+                average = sum(values) / (estimated_points)
+                minimum = 0 if len(values) < estimated_points else min(values)
+                maximum = max(values)
+                
+                line['values']={"average":average,"minimum":minimum,"maximum":maximum}
         return result
 
     except requests.RequestException as e:
-        print(f"API request failed with an exception: {e}")
+        raise RuntimeError(f"API request failed with an exception {e}")
 
     except Exception as e:
-        print(f"An unexpected error occurred: {e}")
-    return None
+        raise RuntimeError(f"An unexpected error occurred: {e}")
 
 def extract_node_detail(data,node_type,prom_con_obj):
     port=prom_con_obj.ssh_port

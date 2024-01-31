@@ -4,7 +4,7 @@ from parent_load_details import parent
 from osquery.osquery_child_class import osquery_child
 from cloudquery.cloudquery_child_class import cloudquery_child
 from kubequery.kubequery_child_class import kubequery_child
-from combined_loads_setup import all_combined_child,osquery_cloudquery_combined_child
+from combined_loads_setup import all_combined_child
 
 bool_options=[False,True]
 load_type_options = {   
