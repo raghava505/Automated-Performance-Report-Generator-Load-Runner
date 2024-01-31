@@ -210,7 +210,11 @@ class parent:
                             where upt_time > timestamp '<start_utc_str>' and upt_time < timestamp '<end_utc_str>'\
                             GROUP BY 1\
                             ORDER BY 1;",
-                "columns":['source','success_count','failure_count','total_count']
+                "columns":['source','success_count','failure_count','total_count'],
+                "schema":{
+                    "merge_on_cols" : ["source"],
+                    "compare_cols":["total_count"]
+                }
             },
             "Total number of trino queries executed from each source grouped by query_operation" : {
                 "query" :  "SELECT\
@@ -223,7 +227,11 @@ class parent:
                             where upt_time > timestamp '<start_utc_str>' and upt_time < timestamp '<end_utc_str>'\
                             GROUP BY 1,2\
                             ORDER BY 1,2;",
-                "columns":['source','query_operation','success_count','failure_count','total_count']
+                "columns":['source','query_operation','success_count','failure_count','total_count'],
+                "schema":{
+                    "merge_on_cols" : ["source,query_operation"],
+                    "compare_cols":["total_count"]
+                }
             },
             "Total number of failed queries grouped by failure message" : {
                 "query" :  "select \
@@ -237,6 +245,10 @@ class parent:
                             and query_status='FAILURE' \
                             group by 1,2,3,4 \
                             order by 1,2;",
-                "columns":['source','query_operation','failure_message','failure_type','failure_count']
+                "columns":['source','query_operation','failure_message','failure_type','failure_count'],
+                "schema":{
+                    "merge_on_cols" : ['source','query_operation','failure_message','failure_type'],
+                    "compare_cols":["failure_count"]
+                }
             }
           }

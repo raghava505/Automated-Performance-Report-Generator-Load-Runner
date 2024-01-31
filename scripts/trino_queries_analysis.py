@@ -18,6 +18,7 @@ class TRINO_ANALYSE:
         for heading,value in commands.items():
             raw_command=value['query']
             columns=value['columns']
+            schema = value["schema"]
             query = raw_command.replace("<start_utc_str>",self.start_utc_str).replace( "<end_utc_str>", self.end_utc_str)
             print(f"Command :\n {query}")
             output= execute_trino_query(self.dnode,query,self.prom_con_obj)
@@ -31,7 +32,10 @@ class TRINO_ANALYSE:
             # new_row.update(dict([(str_col,"TOTAL") for str_col in string_columns]))
             # df = df._append(new_row, ignore_index=True)
             print(df)
-            save_dict[heading] = df.to_dict(orient='records')
+            save_dict[heading] = {
+                "schema":schema,
+                "table":df.to_dict(orient="records")
+            }
 
         return save_dict
     
