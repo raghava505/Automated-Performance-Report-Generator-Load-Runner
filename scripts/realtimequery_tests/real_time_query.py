@@ -1,20 +1,20 @@
 from typing import ItemsView
-from api_func import *
-from log_config import *
-from validation import TestResult
-from configs import *
+from .api_func import *
+from .log_config import *
+from .validation import TestResult
+from .configs import *
 from pathlib import Path
 import sys
 from datetime import datetime, timedelta
-from connect_nodes import Host
+from .connect_nodes import Host
 import re 
 import pymongo
-
 
 
 PROJECT_ROOT = Path(__file__).resolve().parent
 
 LOG_PATH = str(PROJECT_ROOT) + "/logs"
+test_result = TestResult()
 
 
 def add_time(curr_time, hours=0, minutes=0, seconds=0):
@@ -43,6 +43,7 @@ def kill_existing_processes(hostname,rtsim_user,user,process_name,password):
             pass
 
     log.info('processes got deleted')
+    print('processes got deleted')
 
 def query_configd(hostname,user,password,operation):
     h = Host(hostname,user, '', password)
@@ -69,6 +70,8 @@ def run_instance(hostname,rtsim_user,user,process_name,password):
     while check_time <= rt_timeout :
         output = h.execute_command(count)
         log.info('curent process count {}'.format(output.strip()))
+        print('curent process count {}'.format(output.strip()))
+
         if int(output.strip()) == rtinstance_count+3:
             time.sleep(10)
             break
@@ -92,6 +95,8 @@ def query(rq_payload,l) :
     output = post_api(api_path,mrealtime_query_api,rq_payload)
     query_job_id1 = output['id']
     log.info('Query{} job id :{}'.format(l,query_job_id1))
+    print('Query{} job id :{}'.format(l,query_job_id1))
+
     actual_assets=0
     if output['status'] != 'FINISHED':
         while output['status'] not in ['FINISHED', 'ERROR']:        
@@ -118,6 +123,8 @@ def query(rq_payload,l) :
 
             break
         log.info('Query{} status :{}'.format(l,output['status'] ))
+        print('Query{} status :{}'.format(l,output['status'] ))
+
         time.sleep(10)
     
 
@@ -134,7 +141,8 @@ def query(rq_payload,l) :
             test_result.update_warning(' live assets are  and not responding to RT query{} : {}'.format(l,output['queryJobAssetCounts']))
 
     log.info('the assets that are responding out of {} are {} for query{}'.format(assets, actual_assets,l))
-    
+    print('the assets that are responding out of {} are {} for query{}'.format(assets, actual_assets,l))
+
     end_time = datetime.utcnow().time()
     # e_time = datetime.strptime(str(end_time), "%H:%M:%S.%f").strftime("%H:%M:%S")
     end_datetime_utc = datetime.utcnow()
@@ -170,8 +178,8 @@ def query(rq_payload,l) :
     time_command_hdfs = 'sudo TRINO_PASSWORD=prestossl /opt/uptycs/cloud/utilities/trino-cli --server https://localhost:5665 --user uptycs --catalog uptycs --schema upt_{} --password --truststore-password sslpassphrase --truststore-path /opt/uptycs/cloud/config/wildcard.jks --insecure --execute "{};" '.format(domain ,time_hdfs_records)
     hdfs_records_time = g.execute_command(time_command_hdfs)
     hdfs_records_time= hdfs_records_time.replace('"', '')
-    print(hdfs_records_time)
-    print(type(hdfs_records_time))
+    # print(hdfs_records_time)
+    # print(type(hdfs_records_time))
     hdfs_records_time_s = str(hdfs_records_time)
     hdfs_records_time_s = hdfs_records_time_s.strip()
     actual_records = actual_assets * records_per_asset
@@ -191,6 +199,8 @@ def query(rq_payload,l) :
     if int(pg) == config_records:
         c=c+1
         log.info('config records : {} for query{}'.format(pg,l))
+        print('config records : {} for query{}'.format(pg,l))
+
         test_result.update_success('records count stored in config - matched in query{}'.format(l))
     else :
         test_result.update_error('count did not match for query{}. The recordes in pg : {} ,Expected count :{}'.format(l,pg,config_records))
@@ -198,12 +208,16 @@ def query(rq_payload,l) :
     if int(hdfs) ==hdfs_records:
         c=c+1
         log.info('hdfs records : {} for query{}'.format(hdfs,l))
+        print('hdfs records : {} for query{}'.format(hdfs,l))
+
         test_result.update_success('records count stored in hdfs - matched query{}'.format(l))
     else :
         test_result.update_error('count did not match for query{}. The recordes in hdfs : {} ,Expected count :{}'.format(l,hdfs,hdfs_records) )
     if int(total) == actual_records :
         c=c+1
         log.info('total records : {} for query{}'.format(total,l))
+        print('total records : {} for query{}'.format(total,l))
+
         test_result.update_success('total records count - matched query{}'.format(l))
     else :
         test_result.update_error('count did not match for query{}.The recordes in total : {} ,Expected count : {}'.format(l,total,actual_records))
@@ -225,7 +239,7 @@ def query(rq_payload,l) :
         'Automation run Status ':result
     }
 
-def realtime_query(domain, test_result):
+def realtime_query():
 #     # bringup realtime assets
     for i in rt_sims:
         kill_existing_processes(i,rtsim_user,user,'endpointsim',rtuser_password)
@@ -243,7 +257,7 @@ def realtime_query(domain, test_result):
         test_result.update_error ("assets didn't get enrolled",skip_test = True)
    
         
-    Stack_URL = URL.formatformat(stack_keys['domain'],stack_keys['domainSuffix'])
+    Stack_URL = URL.format(stack_keys['domain'],stack_keys['domainSuffix'])
     final_data_to_save['Stack Name'] = domain 
     final_data_to_save['Stack URL'] = Stack_URL
     final_data_to_save['Build Number'] = build
@@ -254,16 +268,9 @@ def realtime_query(domain, test_result):
     for i in rq_payloads:
         query(i,l)
         l=l+1
-    mongo_connection_string="mongodb://localhost:27017"
-    client = pymongo.MongoClient(mongo_connection_string)
-    database_name = 'real_time'
-    collection_name = 'real_time_query'
-    db=client[database_name]
-    collection = db[collection_name]
-    collection.insert_one(final_data_to_save).inserted_id
-
-if __name__=="__main__":
-    test_result = TestResult()
-    realtime_query(domain,test_result)
-
     log.info(test_result)
+    return final_data_to_save
+
+# if __name__=="__main__":
+#     result=realtime_query()
+#     print(result)

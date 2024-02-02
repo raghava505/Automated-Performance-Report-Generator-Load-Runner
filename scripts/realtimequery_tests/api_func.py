@@ -5,7 +5,7 @@ import time
 import jwt
 import requests
 import urllib3
-from configs import *
+from .configs import *
 from subprocess import Popen, PIPE
 
 
