@@ -229,7 +229,7 @@ class parent:
                             ORDER BY 1,2;",
                 "columns":['source','query_operation','success_count','failure_count','total_count'],
                 "schema":{
-                    "merge_on_cols" : ["source,query_operation"],
+                    "merge_on_cols" : ["source","query_operation"],
                     "compare_cols":["total_count"]
                 }
             },
