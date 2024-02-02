@@ -1,5 +1,5 @@
 import logging
-from api_func import *
+from .api_func import *
 from datetime import datetime
 import os
 import sys
@@ -16,7 +16,7 @@ modified_api= build_api.format(stack_keys['domain'], stack_keys['domainSuffix'])
 
 output= get_api(api_path,modified_api)
 build = output['number']
-print()
+# print()
 log = logging.getLogger()
 default_level = logging.INFO
 log.setLevel(default_level)

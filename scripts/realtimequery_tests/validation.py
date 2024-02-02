@@ -3,7 +3,6 @@ import json
 import time
 from collections import OrderedDict
 import traceback
-from log_config import log
 
 def pretty_time() -> str:
     return str(datetime.datetime.now())[:19]

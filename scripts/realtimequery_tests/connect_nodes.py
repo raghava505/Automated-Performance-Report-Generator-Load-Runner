@@ -3,7 +3,7 @@ from invoke.exceptions import UnexpectedExit
 import re
 import json
 import time
-from api_func import *
+from .api_func import *
 
 
 class Host:
@@ -33,7 +33,7 @@ class Host:
             result = self.conn.run(cmd, hide='both')
             return (result.stdout)
         except UnexpectedExit as e:
-            print(e)
+            # print(e)
             if not re.search("Exit code: 1\n", str(e)):
                 raise
         
@@ -50,7 +50,7 @@ class Host:
      
 
 
-if __name__ == "__main__":
-    h = Host('protectum-pnode11a', 'areddy', '', '')
-    print(h.execute_command('uptime -p'))
+# if __name__ == "__main__":
+#     h = Host('protectum-pnode11a', 'areddy', '', '')
+#     print(h.execute_command('uptime -p'))
 

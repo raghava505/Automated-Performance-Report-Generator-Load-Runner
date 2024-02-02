@@ -26,6 +26,7 @@ import os
 from create_chart import create_images_and_save
 from trino_queries_analysis import TRINO_ANALYSE
 from active_conn_by_apps import Active_conn
+from realtimequery_tests.real_time_query import realtime_query
 
 import logging
 import argparse
@@ -129,6 +130,11 @@ if __name__ == "__main__":
                 max_run = max(document['load_details']['run'] , max_run)
             run=max_run+1
             print(f"you have already saved the details for this load in this sprint, setting run value to {run}")
+        #-------------------------real time query test details--------------------------
+        realtime_query_results=None
+        if domain=="longevity": 
+            print(f"Performing realtime query test on stack '{test_env_json_details['stack']}' ...")
+            realtime_query_results=realtime_query()
         #-------------------------disk space--------------------------
         disk_space_usage_dict=None
         if variables["load_name"] != "ControlPlane":
@@ -341,6 +347,9 @@ if __name__ == "__main__":
                 final_data_to_save.update({"API Load details":api_load_result_dict})
             if presto_load_result_dict:
                 final_data_to_save.update({"Presto Load details":presto_load_result_dict})
+            if realtime_query_results:
+                final_data_to_save.update({"Realtime query test results":realtime_query_results})
+
 
             final_data_to_save.update({"charts":complete_charts_data_dict})
             final_data_to_save.update(mem_cpu_usages_dict)
