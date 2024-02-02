@@ -1,4 +1,4 @@
-from realtimequery_tests.config import *
+from scripts.realtimequery_tests.configs import *
 
 def return_result(stack_name):
     
