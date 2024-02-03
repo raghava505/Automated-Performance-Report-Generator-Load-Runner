@@ -9,7 +9,7 @@ pd.set_option('display.expand_frame_repr', False)
 average_column_name="avg"
 minimum_column_name="min"
 maximum_column_name="max"
-cols_to_aggregate = [average_column_name]
+cols_to_aggregate = [minimum_column_name,maximum_column_name,average_column_name]
 
 class resource_usages:
     def __init__(self,prom_con_obj,start_timestamp,end_timestamp,hours):
@@ -63,6 +63,7 @@ class resource_usages:
 
         for index, group_df in grouped_df.groupby(col1):
             group_df = group_df[group_df[average_column_name] >= 0.01]
+            if group_df.empty:continue
             group_df = group_df.reset_index(level=col1)
             group_df.drop(col1, axis=1, inplace=True)
             # all_dfs[index] = group_df
@@ -110,6 +111,8 @@ class resource_usages:
             node_level_final_memory_result.append({
                 "node_type":line["metric"]["node_type"],
                 "host_name":line["metric"]["host_name"],
+                minimum_column_name : line["values"]["minimum"],
+                maximum_column_name : line["values"]["maximum"],
                 average_column_name : line["values"]["average"]
             })
         node_level_memory = pd.DataFrame(node_level_final_memory_result)  
@@ -124,6 +127,8 @@ class resource_usages:
                 "node_type":line["metric"]["node_type"],
                 "host_name":line["metric"]["host_name"],
                 "application":line["metric"]["app_name"],
+                minimum_column_name : line["values"]["minimum"]*(self.node_ram_capacity[line["metric"]["host_name"]]/100),
+                maximum_column_name : line["values"]["maximum"]*(self.node_ram_capacity[line["metric"]["host_name"]]/100),
                 average_column_name : line["values"]["average"]*(self.node_ram_capacity[line["metric"]["host_name"]]/100)
             })
 
@@ -139,6 +144,8 @@ class resource_usages:
                 "node_type":self.host_name_type_mapping[line["metric"]["host_name"]],
                 "host_name":line["metric"]["host_name"],
                 "container":line["metric"]["container_name"],
+                minimum_column_name : line["values"]["minimum"],
+                maximum_column_name : line["values"]["maximum"],
                 average_column_name : line["values"]["average"]
             })
 
@@ -156,6 +163,8 @@ class resource_usages:
             node_level_final_cpu_result.append({
                 "node_type":line["metric"]["node_type"],
                 "host_name":line["metric"]["host_name"],
+                minimum_column_name : line["values"]["minimum"]*float(self.node_cores_capacity[line["metric"]["host_name"]])/100,
+                maximum_column_name : line["values"]["maximum"]*float(self.node_cores_capacity[line["metric"]["host_name"]])/100,
                 average_column_name : line["values"]["average"]*float(self.node_cores_capacity[line["metric"]["host_name"]])/100
             })
         node_level_cpu = pd.DataFrame(node_level_final_cpu_result)   
@@ -169,6 +178,8 @@ class resource_usages:
                 "node_type":line["metric"]["node_type"],
                 "host_name":line["metric"]["host_name"],
                 "application":line["metric"]["app_name"],
+                minimum_column_name : line["values"]["minimum"],
+                maximum_column_name : line["values"]["maximum"],
                 average_column_name : line["values"]["average"]
             })
 
@@ -184,12 +195,20 @@ class resource_usages:
                 "node_type":self.host_name_type_mapping[line["metric"]["host_name"]],
                 "host_name":line["metric"]["host_name"],
                 "container":line["metric"]["container_name"],
+                minimum_column_name : line["values"]["minimum"],
+                maximum_column_name : line["values"]["maximum"],
                 average_column_name : line["values"]["average"]
             })
 
         container_level_cpu = pd.DataFrame(container_level_final_cpu_result)
         result["container_usages_analysis"]=self.preprocess_df(container_level_cpu,'container')
         return result
+    
+    def collect_total_usages(self):
+        return {
+            "memory_usages" : self.collect_total_memory_usages(),
+            "cpu_usages" : self.collect_total_cpu_usages()
+        }
 
 if __name__=='__main__':
     print("Testing active connections by app...")
@@ -219,12 +238,10 @@ if __name__=='__main__':
     end_utc_time = end_ist_time.astimezone(utc_timezone)
     end_utc_str = end_utc_time.strftime(format_data)
     active_obj = resource_usages(configuration('longevity_nodes.json') , start_timestamp,end_timestamp,hours=hours)
-    mem_result = active_obj.collect_total_memory_usages()
-    cpu_result = active_obj.collect_total_cpu_usages()
+    total_result = active_obj.collect_total_usages()
 
     from pymongo import MongoClient
     client = MongoClient('mongodb://localhost:27017/')
     db = client['Osquery_LoadTests']  # Replace 'your_database_name' with your actual database name
     collection = db['Testing']  # Replace 'your_collection_name' with your actual collection name
-    collection.insert_one({"memory_usages":mem_result,
-                           "cpu_usages":cpu_result})
+    collection.insert_one({"resource_utilization":total_result})
