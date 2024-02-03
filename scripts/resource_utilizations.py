@@ -89,16 +89,15 @@ class resource_usages:
                 group_df.drop(col1, axis=1, inplace=True)
                 all_dfs_dict[index] = group_df.to_dict(orient="index")
             # print(f"DataFrame for index {index}:\n{self.sum_and_sort_cols(group_df)}\n")
-            print(f"DataFrame for index {index}:\n{group_df}\n")
+            # print(f"DataFrame for index {index}:\n{group_df}\n")
 
         return all_dfs_dict
 
     def groupby_a_col_and_return_dict(self,df,col,for_report):
         df=df.groupby(col)[cols_to_aggregate].sum()
         df = df[df[average_column_name] >= 0.01]
-        # print(self.sum_and_sort_cols(df))
-        print(df)
-
+        print(self.sum_and_sort_cols(df))
+        # print(df)
         if for_report:
             return {
                 "schema":{
