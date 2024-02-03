@@ -51,7 +51,7 @@ class TRINO_ANALYSE:
 #     from parent_load_details import parent
 #     format_data = "%Y-%m-%d %H:%M"
 
-#     start_time_str = "2024-02-10 00:20"
+#     start_time_str = "2024-01-31 00:20"
 #     hours=12
 
 #     start_time = datetime.strptime(start_time_str, format_data)
@@ -72,3 +72,12 @@ class TRINO_ANALYSE:
 #     end_utc_str = end_utc_time.strftime(format_data)
 #     calc = TRINO_ANALYSE(start_utc_str,end_utc_str,prom_con_obj=configuration('s1_nodes.json'))
 #     trino_queries = calc.fetch_trino_results(parent.trino_details_commands)
+#     import pandas as pd
+#     from pymongo import MongoClient
+
+#     # Create a sample DataFrame
+#     client = MongoClient('mongodb://localhost:27017/')
+#     db = client['Osquery_LoadTests']  # Replace 'your_database_name' with your actual database name
+#     collection = db['Testing']  # Replace 'your_collection_name' with your actual collection name
+
+#     collection.insert_one({"data":trino_queries})
