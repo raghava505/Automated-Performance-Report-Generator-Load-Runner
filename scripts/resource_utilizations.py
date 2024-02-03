@@ -6,6 +6,11 @@ pd.set_option('display.max_rows', None)
 pd.set_option('display.max_columns', None)
 pd.set_option('display.expand_frame_repr', False)
 
+average_column_name="avg"
+minimum_column_name="min"
+maximum_column_name="max"
+cols_to_aggregate = [average_column_name]
+
 class resource_usages:
     def __init__(self,prom_con_obj,start_timestamp,end_timestamp,hours):
         self.start_timestamp=start_timestamp
@@ -36,37 +41,67 @@ class resource_usages:
             self.node_cores_capacity[node_name] = cpu_capacity
         print(self.node_cores_capacity)
 
-    def sum_all_integer_cols(self,df):
-        numeric_columns = df.select_dtypes(include=['int', 'float']).columns
-        string_columns = df.select_dtypes(include='object').columns
-        new_row=dict([(int_col,df[int_col].sum()) for int_col in numeric_columns])
-        new_row.update(dict([(str_col,"SUM") for str_col in string_columns]))
-        df = df._append(new_row, ignore_index=True)
+    # def sum_all_integer_cols(self,df):
+    #     numeric_columns = df.select_dtypes(include=['int', 'float']).columns
+    #     string_columns = df.select_dtypes(include='object').columns
+    #     new_row=dict([(int_col,df[int_col].sum()) for int_col in numeric_columns])
+    #     new_row.update(dict([(str_col,"SUM") for str_col in string_columns]))
+    #     df = df._append(new_row, ignore_index=True)
+    #     return df
+        
+    def sum_and_sort_cols(self,df):
+        new_row=dict([(int_col,df[int_col].sum()) for int_col in cols_to_aggregate])
+        df.loc["SUM"] = new_row
+        df=df.sort_values(by=average_column_name)
         return df
 
-    def preprocess_df(self,df,container_name_or_app_name,last_column_name):
+    
+    def groupby_2_cols_and_return_dict(self,df,col1,col2):
+        grouped_df=df.groupby([col1,col2])[cols_to_aggregate].sum()
+        all_dfs = {}
+        all_dfs_dict={}
 
-        group_by_node_type=self.sum_all_integer_cols(df.groupby('node_type')[[last_column_name]].sum().reset_index())
-        group_by_host_name=self.sum_all_integer_cols(df.groupby(['node_type','host_name'])[[last_column_name]].sum().reset_index())
-        print(group_by_node_type)
-        print(group_by_host_name)
+        for index, group_df in grouped_df.groupby(col1):
+            group_df = group_df[group_df[average_column_name] >= 0.01]
+            group_df = group_df.reset_index(level=col1)
+            group_df.drop(col1, axis=1, inplace=True)
+            all_dfs[index] = group_df
+            all_dfs_dict[index] = group_df.to_dict(orient="index")
+            # print(f"DataFrame for index {index}:\n{self.sum_and_sort_cols(group_df)}\n")
+            print(f"DataFrame for index {index}:\n{group_df}\n")
 
+        return all_dfs_dict
+
+    def groupby_a_col_and_return_dict(self,df,col):
+        df=df.groupby(col)[cols_to_aggregate].sum()
+        df = df[df[average_column_name] >= 0.01]
+        # print(self.sum_and_sort_cols(df))
+        print(df)
+
+        return df.to_dict(orient="index")
+
+    def preprocess_df(self,df,container_name_or_app_name):
+        group_by_node_type=self.groupby_a_col_and_return_dict(df,'node_type')
+        group_by_host_name=self.groupby_a_col_and_return_dict(df,'host_name')
+
+        result={
+                "node_type_level_usage":group_by_node_type,
+                "host_name_level_usage":group_by_host_name
+            }
+      
         if container_name_or_app_name:
-            grouped_df=df.groupby(['node_type',container_name_or_app_name])[[last_column_name]].sum()
-            node_type_dfs = {}
+            groupby_nodetype_and_app_or_cont=self.groupby_2_cols_and_return_dict(df,'node_type',container_name_or_app_name)
+            group_by_hostname_and_app_or_cont=self.groupby_2_cols_and_return_dict(df,container_name_or_app_name,'host_name')
+            group_by_app_or_cont=self.groupby_a_col_and_return_dict(df,container_name_or_app_name)
 
-            for node_type_value, group_df in grouped_df.groupby('node_type'):
-                node_type_dfs[node_type_value] = self.sum_all_integer_cols(group_df.reset_index().sort_values(by=last_column_name, ascending=False))
-            for node_type_value, node_type_df in node_type_dfs.items():
-                print(f"DataFrame for node_type {node_type_value}:\n{node_type_df}\n")
+            result[f"{container_name_or_app_name}_level_usage"] = group_by_app_or_cont
+            result[f"{container_name_or_app_name}_and_hostname_level_usage"] = group_by_hostname_and_app_or_cont
+            result[f"nodetype_and_{container_name_or_app_name}_level_usage"] = groupby_nodetype_and_app_or_cont
+        return result
 
-            group_by_host_and_app_or_cont=self.sum_all_integer_cols(df.groupby(['host_name',container_name_or_app_name])[[last_column_name]].sum().reset_index().sort_values(by=last_column_name, ascending=False))
-            group_by_app_or_cont=self.sum_all_integer_cols(df.groupby(container_name_or_app_name)[[last_column_name]].sum().reset_index().sort_values(by=last_column_name, ascending=False))
-            print(group_by_host_and_app_or_cont)
-            print(group_by_app_or_cont)
 
     def collect_total_memory_usages(self):
-        last_column_name="Average memory used in GB"
+        result={}
         #---------------------------node level----------------------------
         node_level_memory_query = "sum(uptycs_memory_used /(1024*1024)) by (node_type,host_name)"
         node_level_final_memory_result=[]
@@ -75,10 +110,10 @@ class resource_usages:
             node_level_final_memory_result.append({
                 "node_type":line["metric"]["node_type"],
                 "host_name":line["metric"]["host_name"],
-                f"{last_column_name}" : line["values"]["average"]
+                average_column_name : line["values"]["average"]
             })
         node_level_memory = pd.DataFrame(node_level_final_memory_result)  
-        self.preprocess_df(node_level_memory,None,last_column_name)
+        result["total_ram_used"]=self.preprocess_df(node_level_memory,None)
         #---------------------------app level----------------------------
         application_level_memory_query = 'sum(uptycs_app_memory) by (node_type,host_name,app_name)'
         application_level_final_memory_result=[]
@@ -88,12 +123,12 @@ class resource_usages:
             application_level_final_memory_result.append({
                 "node_type":line["metric"]["node_type"],
                 "host_name":line["metric"]["host_name"],
-                "app_name":line["metric"]["app_name"],
-                last_column_name : line["values"]["average"]*(self.node_ram_capacity[line["metric"]["host_name"]]/100)
+                "application":line["metric"]["app_name"],
+                average_column_name : line["values"]["average"]*(self.node_ram_capacity[line["metric"]["host_name"]]/100)
             })
 
         app_level_memory = pd.DataFrame(application_level_final_memory_result)
-        self.preprocess_df(app_level_memory,'app_name',last_column_name)
+        result["app_memory_used"]=self.preprocess_df(app_level_memory,'application')
         # ---------------------------container level----------------------------
         container_level_memory_query='sum(uptycs_docker_mem_used{}/(1024*1024*1024)) by (container_name,host_name)'
         container_level_final_memory_result=[]
@@ -103,16 +138,16 @@ class resource_usages:
             container_level_final_memory_result.append({
                 "node_type":self.host_name_type_mapping[line["metric"]["host_name"]],
                 "host_name":line["metric"]["host_name"],
-                "container_name":line["metric"]["container_name"],
-                last_column_name : line["values"]["average"]
+                "container":line["metric"]["container_name"],
+                average_column_name : line["values"]["average"]
             })
 
         container_level_memory = pd.DataFrame(container_level_final_memory_result)
-        container_level_memory = container_level_memory[container_level_memory[last_column_name] >= 0.001]
-        self.preprocess_df(container_level_memory,'container_name',last_column_name)
+        result["docker_memory_result"]=self.preprocess_df(container_level_memory,'container')
+        return result
        
     def collect_total_cpu_usages(self):
-        last_column_name="Average CPU used in cores"
+        result={}
         #---------------------------node level----------------------------
         node_level_cpu_query = "sum(100-uptycs_idle_cpu) by (node_type,host_name)"
         node_level_final_cpu_result=[]
@@ -121,10 +156,10 @@ class resource_usages:
             node_level_final_cpu_result.append({
                 "node_type":line["metric"]["node_type"],
                 "host_name":line["metric"]["host_name"],
-                last_column_name : line["values"]["average"]*float(self.node_cores_capacity[line["metric"]["host_name"]])/100
+                average_column_name : line["values"]["average"]*float(self.node_cores_capacity[line["metric"]["host_name"]])/100
             })
         node_level_cpu = pd.DataFrame(node_level_final_cpu_result)   
-        self.preprocess_df(node_level_cpu,None,last_column_name)
+        result["cpu_busy_cores"]=self.preprocess_df(node_level_cpu,None)
         #---------------------------app level----------------------------
         application_level_cpu_query = 'sum(uptycs_app_cpu) by (node_type,host_name,app_name)/100'
         application_level_final_cpu_result=[]
@@ -133,12 +168,12 @@ class resource_usages:
             application_level_final_cpu_result.append({
                 "node_type":line["metric"]["node_type"],
                 "host_name":line["metric"]["host_name"],
-                "app_name":line["metric"]["app_name"],
-                last_column_name : line["values"]["average"]
+                "application":line["metric"]["app_name"],
+                average_column_name : line["values"]["average"]
             })
 
         app_level_cpu = pd.DataFrame(application_level_final_cpu_result)
-        self.preprocess_df(app_level_cpu,'app_name',last_column_name)
+        result["app_cpu_used"]=self.preprocess_df(app_level_cpu,'application')
         #----------------------------container level-----------------------------
         container_level_cpu_query='sum(uptycs_docker_cpu_stats{}) by (container_name,host_name)/100'
         container_level_final_cpu_result=[]
@@ -148,13 +183,13 @@ class resource_usages:
             container_level_final_cpu_result.append({
                 "node_type":self.host_name_type_mapping[line["metric"]["host_name"]],
                 "host_name":line["metric"]["host_name"],
-                "container_name":line["metric"]["container_name"],
-                last_column_name : line["values"]["average"]
+                "container":line["metric"]["container_name"],
+                average_column_name : line["values"]["average"]
             })
 
         container_level_cpu = pd.DataFrame(container_level_final_cpu_result)
-        container_level_cpu = container_level_cpu[container_level_cpu[last_column_name] >= 0.01]
-        self.preprocess_df(container_level_cpu,'container_name',last_column_name)
+        result["docker_cpu_result"]=self.preprocess_df(container_level_cpu,'container')
+        return result
 
 if __name__=='__main__':
     print("Testing active connections by app...")
@@ -164,8 +199,8 @@ if __name__=='__main__':
     import pytz
     format_data = "%Y-%m-%d %H:%M"
     
-    start_time_str = "2024-01-26 01:25"
-    hours=16
+    start_time_str = "2024-01-31 05:53"
+    hours=12
 
     start_time = datetime.strptime(start_time_str, format_data)
     end_time = start_time + timedelta(hours=hours)
@@ -184,5 +219,12 @@ if __name__=='__main__':
     end_utc_time = end_ist_time.astimezone(utc_timezone)
     end_utc_str = end_utc_time.strftime(format_data)
     active_obj = resource_usages(configuration('longevity_nodes.json') , start_timestamp,end_timestamp,hours=hours)
-    result = active_obj.collect_total_memory_usages()
-    # result = active_obj.collect_total_cpu_usages()
+    mem_result = active_obj.collect_total_memory_usages()
+    cpu_result = active_obj.collect_total_cpu_usages()
+
+    from pymongo import MongoClient
+    client = MongoClient('mongodb://localhost:27017/')
+    db = client['Osquery_LoadTests']  # Replace 'your_database_name' with your actual database name
+    collection = db['Testing']  # Replace 'your_collection_name' with your actual collection name
+    collection.insert_one({"mem_res":mem_result,
+                           "cpu_res":cpu_result})
