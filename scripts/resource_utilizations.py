@@ -10,6 +10,7 @@ average_column_name="avg"
 minimum_column_name="min"
 maximum_column_name="max"
 cols_to_aggregate = [minimum_column_name,maximum_column_name,average_column_name]
+cols_to_compare=[average_column_name]
 
 class resource_usages:
     def __init__(self,prom_con_obj,start_timestamp,end_timestamp,hours):
@@ -62,7 +63,7 @@ class resource_usages:
             all_dfs_dict={
                 "schema":{
                     "merge_on_cols" : [col1,col2],
-                    "compare_cols":["avg"]
+                    "compare_cols":cols_to_compare
                 },
                 "table":[]
             }
@@ -80,7 +81,7 @@ class resource_usages:
                     all_dfs_dict[index] = {
                                 "schema":{
                                     "merge_on_cols" : [col1,col2],
-                                    "compare_cols":["avg"]
+                                    "compare_cols":cols_to_compare
                                 },
                                 "table":group_df.to_dict(orient="records")
                     }
@@ -102,7 +103,7 @@ class resource_usages:
             return {
                 "schema":{
                     "merge_on_cols" : col,
-                    "compare_cols":["avg"]
+                    "compare_cols":cols_to_compare
                 },
                 "table":df.reset_index().to_dict(orient="records")
             }
@@ -110,14 +111,7 @@ class resource_usages:
             return df.to_dict(orient="index")
 
     def preprocess_df(self,df,container_name_or_app_name,for_report):
-        group_by_node_type=self.groupby_a_col_and_return_dict(df,'node_type',for_report)
-        group_by_host_name=self.groupby_a_col_and_return_dict(df,'host_name',for_report)
-
-        result={
-                "nodetype_level_usage":group_by_node_type,
-                "hostname_level_usage":group_by_host_name
-            }
-      
+        result={}
         if container_name_or_app_name:
             groupby_nodetype_and_app_or_cont=self.groupby_2_cols_and_return_dict(df,'node_type',container_name_or_app_name,for_report)
             group_by_hostname_and_app_or_cont=self.groupby_2_cols_and_return_dict(df,container_name_or_app_name,'host_name',for_report,single_level_for_report=True)
@@ -126,6 +120,12 @@ class resource_usages:
             result[f"{container_name_or_app_name}_level_usage"] = group_by_app_or_cont
             result[f"{container_name_or_app_name}_and_hostname_level_usage"] = group_by_hostname_and_app_or_cont
             result[f"nodetype_and_{container_name_or_app_name}_level_usage_for_analysis"] = groupby_nodetype_and_app_or_cont
+        else:
+            group_by_node_type=self.groupby_a_col_and_return_dict(df,'node_type',for_report)
+            group_by_host_name=self.groupby_a_col_and_return_dict(df,'host_name',for_report)
+            
+            result["nodetype_level_usage"]=group_by_node_type
+            result["hostname_level_usage"]=group_by_host_name
         return result
 
 
