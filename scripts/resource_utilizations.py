@@ -58,14 +58,14 @@ class resource_usages:
     
     def groupby_2_cols_and_return_dict(self,df,col1,col2):
         grouped_df=df.groupby([col1,col2])[cols_to_aggregate].sum()
-        all_dfs = {}
+        # all_dfs = {}
         all_dfs_dict={}
 
         for index, group_df in grouped_df.groupby(col1):
             group_df = group_df[group_df[average_column_name] >= 0.01]
             group_df = group_df.reset_index(level=col1)
             group_df.drop(col1, axis=1, inplace=True)
-            all_dfs[index] = group_df
+            # all_dfs[index] = group_df
             all_dfs_dict[index] = group_df.to_dict(orient="index")
             # print(f"DataFrame for index {index}:\n{self.sum_and_sort_cols(group_df)}\n")
             print(f"DataFrame for index {index}:\n{group_df}\n")
@@ -85,8 +85,8 @@ class resource_usages:
         group_by_host_name=self.groupby_a_col_and_return_dict(df,'host_name')
 
         result={
-                "node_type_level_usage":group_by_node_type,
-                "host_name_level_usage":group_by_host_name
+                "nodetype_level_usage":group_by_node_type,
+                "hostname_level_usage":group_by_host_name
             }
       
         if container_name_or_app_name:
@@ -113,7 +113,7 @@ class resource_usages:
                 average_column_name : line["values"]["average"]
             })
         node_level_memory = pd.DataFrame(node_level_final_memory_result)  
-        result["total_ram_used"]=self.preprocess_df(node_level_memory,None)
+        result["host_usages_analysis"]=self.preprocess_df(node_level_memory,None)
         #---------------------------app level----------------------------
         application_level_memory_query = 'sum(uptycs_app_memory) by (node_type,host_name,app_name)'
         application_level_final_memory_result=[]
@@ -128,7 +128,7 @@ class resource_usages:
             })
 
         app_level_memory = pd.DataFrame(application_level_final_memory_result)
-        result["app_memory_used"]=self.preprocess_df(app_level_memory,'application')
+        result["application_usages_analysis"]=self.preprocess_df(app_level_memory,'application')
         # ---------------------------container level----------------------------
         container_level_memory_query='sum(uptycs_docker_mem_used{}/(1024*1024*1024)) by (container_name,host_name)'
         container_level_final_memory_result=[]
@@ -143,7 +143,7 @@ class resource_usages:
             })
 
         container_level_memory = pd.DataFrame(container_level_final_memory_result)
-        result["docker_memory_result"]=self.preprocess_df(container_level_memory,'container')
+        result["container_usages_analysis"]=self.preprocess_df(container_level_memory,'container')
         return result
        
     def collect_total_cpu_usages(self):
@@ -159,7 +159,7 @@ class resource_usages:
                 average_column_name : line["values"]["average"]*float(self.node_cores_capacity[line["metric"]["host_name"]])/100
             })
         node_level_cpu = pd.DataFrame(node_level_final_cpu_result)   
-        result["cpu_busy_cores"]=self.preprocess_df(node_level_cpu,None)
+        result["host_usages_analysis"]=self.preprocess_df(node_level_cpu,None)
         #---------------------------app level----------------------------
         application_level_cpu_query = 'sum(uptycs_app_cpu) by (node_type,host_name,app_name)/100'
         application_level_final_cpu_result=[]
@@ -173,7 +173,7 @@ class resource_usages:
             })
 
         app_level_cpu = pd.DataFrame(application_level_final_cpu_result)
-        result["app_cpu_used"]=self.preprocess_df(app_level_cpu,'application')
+        result["application_usages_analysis"]=self.preprocess_df(app_level_cpu,'application')
         #----------------------------container level-----------------------------
         container_level_cpu_query='sum(uptycs_docker_cpu_stats{}) by (container_name,host_name)/100'
         container_level_final_cpu_result=[]
@@ -188,7 +188,7 @@ class resource_usages:
             })
 
         container_level_cpu = pd.DataFrame(container_level_final_cpu_result)
-        result["docker_cpu_result"]=self.preprocess_df(container_level_cpu,'container')
+        result["container_usages_analysis"]=self.preprocess_df(container_level_cpu,'container')
         return result
 
 if __name__=='__main__':
@@ -226,5 +226,5 @@ if __name__=='__main__':
     client = MongoClient('mongodb://localhost:27017/')
     db = client['Osquery_LoadTests']  # Replace 'your_database_name' with your actual database name
     collection = db['Testing']  # Replace 'your_collection_name' with your actual collection name
-    collection.insert_one({"mem_res":mem_result,
-                           "cpu_res":cpu_result})
+    collection.insert_one({"memory_usages":mem_result,
+                           "cpu_usages":cpu_result})
