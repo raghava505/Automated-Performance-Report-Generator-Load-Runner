@@ -11,6 +11,15 @@ minimum_column_name="min"
 maximum_column_name="max"
 cols_to_aggregate = [minimum_column_name,maximum_column_name,average_column_name]
 cols_to_compare=[average_column_name]
+usage_threshold = 0.03
+
+exclude_nodetypes = ["monitor","elk"]
+exclude_pattern = '|'.join(exclude_nodetypes)
+exclude_filter = '{{node_type!~"^({})$"}}'.format(exclude_pattern)
+print(exclude_filter)
+
+sample_query=f'sum(uptycs_total_memory{exclude_filter}/(1024*1024)) by (node_type,host_name)'       
+
 
 class resource_usages:
     def __init__(self,prom_con_obj,start_timestamp,end_timestamp,hours):
@@ -70,7 +79,7 @@ class resource_usages:
         else:all_dfs_dict={}
 
         for index, group_df in grouped_df.groupby(col1):
-            group_df = group_df[group_df[average_column_name] >= 0.01]
+            group_df = group_df[group_df[average_column_name] >= usage_threshold]
             if group_df.empty:continue
 
             if for_report:
@@ -86,8 +95,7 @@ class resource_usages:
                                 "table":group_df.to_dict(orient="records")
                     }
             else:
-                group_df = group_df.reset_index(level=col1)
-                group_df.drop(col1, axis=1, inplace=True)
+                group_df = group_df.reset_index(level=col1,drop=True)
                 all_dfs_dict[index] = group_df.to_dict(orient="index")
             # print(f"DataFrame for index {index}:\n{self.sum_and_sort_cols(group_df)}\n")
             # print(f"DataFrame for index {index}:\n{group_df}\n")
@@ -96,7 +104,7 @@ class resource_usages:
 
     def groupby_a_col_and_return_dict(self,df,col,for_report):
         df=df.groupby(col)[cols_to_aggregate].sum()
-        df = df[df[average_column_name] >= 0.01]
+        df = df[df[average_column_name] >= usage_threshold]
         print(self.sum_and_sort_cols(df))
         # print(df)
         if for_report:
@@ -132,7 +140,7 @@ class resource_usages:
     def collect_total_memory_usages(self,for_report):
         result={}
         #---------------------------node level----------------------------
-        node_level_memory_query = "sum(uptycs_memory_used /(1024*1024)) by (node_type,host_name)"
+        node_level_memory_query = f"sum(uptycs_memory_used{exclude_filter} /(1024*1024)) by (node_type,host_name)"
         node_level_final_memory_result=[]
         node_level_memory_query_result=execute_prometheus_query(self.prom_con_obj,self.start_timestamp,self.end_timestamp,node_level_memory_query,self.hours)
         for line in node_level_memory_query_result:
@@ -146,7 +154,7 @@ class resource_usages:
         node_level_memory = pd.DataFrame(node_level_final_memory_result)  
         result["host_usages_analysis"]=self.preprocess_df(node_level_memory,None,for_report)
         #---------------------------app level----------------------------
-        application_level_memory_query = 'sum(uptycs_app_memory) by (node_type,host_name,app_name)'
+        application_level_memory_query = f'sum(uptycs_app_memory{exclude_filter}) by (node_type,host_name,app_name)'
         application_level_final_memory_result=[]
         application_level_memory_query_result=execute_prometheus_query(self.prom_con_obj,self.start_timestamp,self.end_timestamp,application_level_memory_query,self.hours)
         for line in application_level_memory_query_result:
@@ -184,7 +192,7 @@ class resource_usages:
     def collect_total_cpu_usages(self,for_report):
         result={}
         #---------------------------node level----------------------------
-        node_level_cpu_query = "sum(100-uptycs_idle_cpu) by (node_type,host_name)"
+        node_level_cpu_query = f"sum(100-uptycs_idle_cpu{exclude_filter}) by (node_type,host_name)"
         node_level_final_cpu_result=[]
         node_level_cpu_query_result=execute_prometheus_query(self.prom_con_obj,self.start_timestamp,self.end_timestamp,node_level_cpu_query,self.hours)
         for line in node_level_cpu_query_result:
@@ -198,7 +206,7 @@ class resource_usages:
         node_level_cpu = pd.DataFrame(node_level_final_cpu_result)   
         result["host_usages_analysis"]=self.preprocess_df(node_level_cpu,None,for_report)
         #---------------------------app level----------------------------
-        application_level_cpu_query = 'sum(uptycs_app_cpu) by (node_type,host_name,app_name)/100'
+        application_level_cpu_query = f'sum(uptycs_app_cpu{exclude_filter}) by (node_type,host_name,app_name)/100'
         application_level_final_cpu_result=[]
         application_level_cpu_query_result=execute_prometheus_query(self.prom_con_obj,self.start_timestamp,self.end_timestamp,application_level_cpu_query,self.hours)
         for line in application_level_cpu_query_result:
