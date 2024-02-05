@@ -79,7 +79,7 @@ class resource_usages:
         else:all_dfs_dict={}
 
         for index, group_df in grouped_df.groupby(col1):
-            group_df = group_df[group_df[average_column_name] >= usage_threshold]
+            # group_df = group_df[group_df[average_column_name] >= usage_threshold]
             if group_df.empty:continue
 
             if for_report:
@@ -104,7 +104,7 @@ class resource_usages:
 
     def groupby_a_col_and_return_dict(self,df,col,for_report):
         df=df.groupby(col)[cols_to_aggregate].sum()
-        df = df[df[average_column_name] >= usage_threshold]
+        # df = df[df[average_column_name] >= usage_threshold]
         print(self.sum_and_sort_cols(df))
         # print(df)
         if for_report:
@@ -126,7 +126,7 @@ class resource_usages:
             group_by_app_or_cont=self.groupby_a_col_and_return_dict(df,container_name_or_app_name,for_report)
 
             result[f"{container_name_or_app_name}_level_usage"] = group_by_app_or_cont
-            result[f"{container_name_or_app_name}_and_hostname_level_usage"] = group_by_hostname_and_app_or_cont
+            result[f"hostname_{container_name_or_app_name}_and_level_usage"] = group_by_hostname_and_app_or_cont
             result[f"nodetype_and_{container_name_or_app_name}_level_usage_for_analysis"] = groupby_nodetype_and_app_or_cont
         else:
             group_by_node_type=self.groupby_a_col_and_return_dict(df,'node_type',for_report)
@@ -253,8 +253,8 @@ if __name__=='__main__':
     import pytz
     format_data = "%Y-%m-%d %H:%M"
     
-    start_time_str = "2024-01-31 05:53"
-    hours=12
+    start_time_str = "2024-02-03 20:53"
+    hours=10
 
     start_time = datetime.strptime(start_time_str, format_data)
     end_time = start_time + timedelta(hours=hours)
@@ -273,7 +273,7 @@ if __name__=='__main__':
     end_utc_time = end_ist_time.astimezone(utc_timezone)
     end_utc_str = end_utc_time.strftime(format_data)
 
-    active_obj = resource_usages(configuration('longevity_nodes.json') , start_timestamp,end_timestamp,hours=hours)
+    active_obj = resource_usages(configuration('s1_nodes.json') , start_timestamp,end_timestamp,hours=hours)
     # total_result_for_querying = active_obj.collect_total_usages(for_report=False)
     total_result_for_report = active_obj.collect_total_usages(for_report=True)
 
