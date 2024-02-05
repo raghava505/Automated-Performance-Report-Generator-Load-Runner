@@ -97,7 +97,7 @@ class resource_usages:
             else:
                 group_df = group_df.reset_index(level=col1,drop=True)
                 all_dfs_dict[index] = group_df.to_dict(orient="index")
-            # print(f"DataFrame for index {index}:\n{self.sum_and_sort_cols(group_df)}\n")
+            print(f"DataFrame for index {index}:\n{self.sum_and_sort_cols(group_df)}\n")
             # print(f"DataFrame for index {index}:\n{group_df}\n")
 
         return all_dfs_dict
@@ -122,7 +122,7 @@ class resource_usages:
         result={}
         if container_name_or_app_name:
             groupby_nodetype_and_app_or_cont=self.groupby_2_cols_and_return_dict(df,'node_type',container_name_or_app_name,for_report)
-            group_by_hostname_and_app_or_cont=self.groupby_2_cols_and_return_dict(df,container_name_or_app_name,'host_name',for_report,single_level_for_report=True)
+            group_by_hostname_and_app_or_cont=self.groupby_2_cols_and_return_dict(df,'host_name',container_name_or_app_name,for_report,single_level_for_report=True)
             group_by_app_or_cont=self.groupby_a_col_and_return_dict(df,container_name_or_app_name,for_report)
 
             result[f"{container_name_or_app_name}_level_usage"] = group_by_app_or_cont
@@ -250,7 +250,6 @@ if __name__=='__main__':
     print("Testing active connections by app...")
     from settings import configuration
     from datetime import datetime, timedelta
-    from parent_load_details import parent
     import pytz
     format_data = "%Y-%m-%d %H:%M"
     
@@ -273,13 +272,16 @@ if __name__=='__main__':
     end_timestamp = int(end_ist_time.timestamp())
     end_utc_time = end_ist_time.astimezone(utc_timezone)
     end_utc_str = end_utc_time.strftime(format_data)
+
     active_obj = resource_usages(configuration('longevity_nodes.json') , start_timestamp,end_timestamp,hours=hours)
-    total_result_for_querying = active_obj.collect_total_usages(for_report=False)
+    # total_result_for_querying = active_obj.collect_total_usages(for_report=False)
     total_result_for_report = active_obj.collect_total_usages(for_report=True)
 
     from pymongo import MongoClient
     client = MongoClient('mongodb://localhost:27017/')
     db = client['Osquery_LoadTests']  # Replace 'your_database_name' with your actual database name
     collection = db['Testing']  # Replace 'your_collection_name' with your actual collection name
-    collection.insert_one({"resource_utilization_for_report":total_result_for_report,
-                           "resource_utilization":total_result_for_querying})
+    # collection.insert_one({"resource_utilization_for_report":total_result_for_report,
+    #                        "resource_utilization":total_result_for_querying})
+
+    collection.insert_one({"resource_utilization_for_report":total_result_for_report})
