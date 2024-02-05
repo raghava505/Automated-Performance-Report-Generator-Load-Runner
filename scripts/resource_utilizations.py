@@ -9,7 +9,7 @@ pd.set_option('display.expand_frame_repr', False)
 average_column_name="avg"
 minimum_column_name="min"
 maximum_column_name="max"
-cols_to_aggregate = [minimum_column_name,maximum_column_name,average_column_name]
+cols_to_aggregate = [average_column_name]
 cols_to_compare=[average_column_name]
 usage_threshold = 0.03
 
@@ -152,7 +152,7 @@ class resource_usages:
                 average_column_name : line["values"]["average"]
             })
         node_level_memory = pd.DataFrame(node_level_final_memory_result)  
-        result["host_usages_analysis"]=self.preprocess_df(node_level_memory,None,for_report)
+        result.update(self.preprocess_df(node_level_memory,None,for_report))
         #---------------------------app level----------------------------
         application_level_memory_query = f'sum(uptycs_app_memory{exclude_filter}) by (node_type,host_name,app_name)'
         application_level_final_memory_result=[]
@@ -169,7 +169,7 @@ class resource_usages:
             })
 
         app_level_memory = pd.DataFrame(application_level_final_memory_result)
-        result["application_usages_analysis"]=self.preprocess_df(app_level_memory,'application',for_report)
+        result.update(self.preprocess_df(app_level_memory,'application',for_report))
         # ---------------------------container level----------------------------
         container_level_memory_query='sum(uptycs_docker_mem_used{}/(1024*1024*1024)) by (container_name,host_name)'
         container_level_final_memory_result=[]
@@ -186,7 +186,7 @@ class resource_usages:
             })
 
         container_level_memory = pd.DataFrame(container_level_final_memory_result)
-        result["container_usages_analysis"]=self.preprocess_df(container_level_memory,'container',for_report)
+        result.update(self.preprocess_df(container_level_memory,'container',for_report))
         return result
        
     def collect_total_cpu_usages(self,for_report):
@@ -204,7 +204,7 @@ class resource_usages:
                 average_column_name : line["values"]["average"]*float(self.node_cores_capacity[line["metric"]["host_name"]])/100
             })
         node_level_cpu = pd.DataFrame(node_level_final_cpu_result)   
-        result["host_usages_analysis"]=self.preprocess_df(node_level_cpu,None,for_report)
+        result.update(self.preprocess_df(node_level_cpu,None,for_report))
         #---------------------------app level----------------------------
         application_level_cpu_query = f'sum(uptycs_app_cpu{exclude_filter}) by (node_type,host_name,app_name)/100'
         application_level_final_cpu_result=[]
@@ -220,7 +220,7 @@ class resource_usages:
             })
 
         app_level_cpu = pd.DataFrame(application_level_final_cpu_result)
-        result["application_usages_analysis"]=self.preprocess_df(app_level_cpu,'application',for_report)
+        result.update(self.preprocess_df(app_level_cpu,'application',for_report))
         #----------------------------container level-----------------------------
         container_level_cpu_query='sum(uptycs_docker_cpu_stats{}) by (container_name,host_name)/100'
         container_level_final_cpu_result=[]
@@ -237,7 +237,7 @@ class resource_usages:
             })
 
         container_level_cpu = pd.DataFrame(container_level_final_cpu_result)
-        result["container_usages_analysis"]=self.preprocess_df(container_level_cpu,'container',for_report)
+        result.update(self.preprocess_df(container_level_cpu,'container',for_report))
         return result
     
     def collect_total_usages(self,for_report):
@@ -274,14 +274,14 @@ if __name__=='__main__':
     end_utc_str = end_utc_time.strftime(format_data)
 
     active_obj = resource_usages(configuration('s1_nodes.json') , start_timestamp,end_timestamp,hours=hours)
-    # total_result_for_querying = active_obj.collect_total_usages(for_report=False)
+    total_result_for_querying = active_obj.collect_total_usages(for_report=False)
     total_result_for_report = active_obj.collect_total_usages(for_report=True)
 
     from pymongo import MongoClient
     client = MongoClient('mongodb://localhost:27017/')
     db = client['Osquery_LoadTests']  # Replace 'your_database_name' with your actual database name
     collection = db['Testing']  # Replace 'your_collection_name' with your actual collection name
-    # collection.insert_one({"resource_utilization_for_report":total_result_for_report,
-    #                        "resource_utilization":total_result_for_querying})
+    collection.insert_one({"resource_utilization_for_report":total_result_for_report,
+                           "resource_utilization":total_result_for_querying})
 
-    collection.insert_one({"resource_utilization_for_report":total_result_for_report})
+    # collection.insert_one({"resource_utilization_for_report":total_result_for_report})
