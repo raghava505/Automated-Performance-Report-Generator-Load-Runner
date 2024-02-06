@@ -364,9 +364,13 @@ if __name__=='__main__':
 
     from pymongo import MongoClient
     client = MongoClient('mongodb://localhost:27017/')
-    db = client['Osquery_LoadTests']  # Replace 'your_database_name' with your actual database name
-    collection = db['Testing']  # Replace 'your_collection_name' with your actual collection name
-    # collection.insert_one({"resource_utilization_for_report":total_result_for_report,
-    #                        "resource_utilization":total_result_for_querying})
+    db = client['Osquery_LoadTests']
+    collection = db['Testing'] 
 
-    collection.insert_one({"resource_utilization_for_report":total_result_for_report})
+    data_to_insert={}
+    data_to_insert["start_str_ist"] = start_time_str
+    data_to_insert["hours"] = hours
+
+    data_to_insert["resource_utilization_for_report"] = total_result_for_report
+    # data_to_insert["resource_utilization"] = total_result_for_querying
+    collection.insert_one(data_to_insert)
