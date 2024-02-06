@@ -126,7 +126,7 @@ class resource_usages:
             group_by_app_or_cont=self.groupby_a_col_and_return_dict(df,container_name_or_app_name,for_report)
 
             result[f"{container_name_or_app_name}_level_usage"] = group_by_app_or_cont
-            result[f"hostname_{container_name_or_app_name}_and_level_usage"] = group_by_hostname_and_app_or_cont
+            result[f"hostname_and_{container_name_or_app_name}_level_usage"] = group_by_hostname_and_app_or_cont
             result[f"nodetype_and_{container_name_or_app_name}_level_usage_for_analysis"] = groupby_nodetype_and_app_or_cont
         else:
             group_by_node_type=self.groupby_a_col_and_return_dict(df,'node_type',for_report)
