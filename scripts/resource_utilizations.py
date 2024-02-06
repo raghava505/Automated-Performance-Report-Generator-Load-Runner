@@ -13,12 +13,20 @@ cols_to_aggregate = [average_column_name]
 cols_to_compare=[average_column_name]
 usage_threshold = 0.03
 
+def get_exclude_pattern(lst):return '|'.join(lst)
+
 exclude_nodetypes = ["monitor","elk"]
-exclude_pattern = '|'.join(exclude_nodetypes)
-exclude_filter = '{{node_type!~"^({})$"}}'.format(exclude_pattern)
-print(exclude_filter)
+exclude_applications=[".*osqLogger.*" , ".*redis-server.*" , ".*airflow.*"]
+exclude_containers=[".*tls.*"]
+
+nodetype_exclude_filter = 'node_type!~"^({})$"'.format(get_exclude_pattern(exclude_nodetypes))
+app_exclude_filter = 'app_name!~"^({})$"'.format(get_exclude_pattern(exclude_applications))
+cont_exclude_filter = 'container_name!~"^({})$"'.format(get_exclude_pattern(exclude_containers))
+
+exclude_filter="{{{},{},{}}}".format(nodetype_exclude_filter,app_exclude_filter,cont_exclude_filter)
 
 sample_query=f'sum(uptycs_total_memory{exclude_filter}/(1024*1024)) by (node_type,host_name)'       
+print(sample_query)
 
 
 class resource_usages:
@@ -79,7 +87,7 @@ class resource_usages:
         else:all_dfs_dict={}
 
         for index, group_df in grouped_df.groupby(col1):
-            # group_df = group_df[group_df[average_column_name] >= usage_threshold]
+            group_df = group_df[group_df[average_column_name] >= usage_threshold]
             if group_df.empty:continue
 
             if for_report:
@@ -104,13 +112,13 @@ class resource_usages:
 
     def groupby_a_col_and_return_dict(self,df,col,for_report):
         df=df.groupby(col)[cols_to_aggregate].sum()
-        # df = df[df[average_column_name] >= usage_threshold]
+        df = df[df[average_column_name] >= usage_threshold]
         print(self.sum_and_sort_cols(df))
         # print(df)
         if for_report:
             return {
                 "schema":{
-                    "merge_on_cols" : col,
+                    "merge_on_cols" : [col],
                     "compare_cols":cols_to_compare
                 },
                 "table":df.reset_index().to_dict(orient="records")
@@ -169,9 +177,28 @@ class resource_usages:
             })
 
         app_level_memory = pd.DataFrame(application_level_final_memory_result)
+
+        for app in exclude_applications:
+            compressed = f'sum(uptycs_app_memory{{app_name=~"{app}"}}) by (node_type,host_name)'
+            compressed_application_level_final_memory_result=[]
+            compressed_application_level_memory_query_result=execute_prometheus_query(self.prom_con_obj,self.start_timestamp,self.end_timestamp,compressed,self.hours)
+            for line in compressed_application_level_memory_query_result:
+
+                compressed_application_level_final_memory_result.append({
+                    "node_type":line["metric"]["node_type"],
+                    "host_name":line["metric"]["host_name"],
+                    "application":app,
+                    minimum_column_name : line["values"]["minimum"]*(self.node_ram_capacity[line["metric"]["host_name"]]/100),
+                    maximum_column_name : line["values"]["maximum"]*(self.node_ram_capacity[line["metric"]["host_name"]]/100),
+                    average_column_name : line["values"]["average"]*(self.node_ram_capacity[line["metric"]["host_name"]]/100)
+                })
+            compressed_app_level_memory = pd.DataFrame(compressed_application_level_final_memory_result)
+            print(compressed_app_level_memory)
+            app_level_memory = pd.concat([app_level_memory, compressed_app_level_memory])
+
         result.update(self.preprocess_df(app_level_memory,'application',for_report))
         # ---------------------------container level----------------------------
-        container_level_memory_query='sum(uptycs_docker_mem_used{}/(1024*1024*1024)) by (container_name,host_name)'
+        container_level_memory_query='sum(uptycs_docker_mem_used{}/(1024*1024*1024)) by (container_name,host_name)'.format(exclude_filter)
         container_level_final_memory_result=[]
         container_level_memory_query_result=execute_prometheus_query(self.prom_con_obj,self.start_timestamp,self.end_timestamp,container_level_memory_query,self.hours)
         for line in container_level_memory_query_result:
@@ -186,6 +213,26 @@ class resource_usages:
             })
 
         container_level_memory = pd.DataFrame(container_level_final_memory_result)
+
+        for cont in exclude_containers:
+            compressed_container_level_memory_query=f'sum(uptycs_docker_mem_used{{container_name=~"{cont}"}}/(1024*1024*1024)) by (host_name)'
+            compressed_container_level_final_memory_result=[]
+            compressed_container_level_memory_query_result=execute_prometheus_query(self.prom_con_obj,self.start_timestamp,self.end_timestamp,compressed_container_level_memory_query,self.hours)
+            for line in compressed_container_level_memory_query_result:
+
+                compressed_container_level_final_memory_result.append({
+                    "node_type":self.host_name_type_mapping[line["metric"]["host_name"]],
+                    "host_name":line["metric"]["host_name"],
+                    "container":cont,
+                    minimum_column_name : line["values"]["minimum"],
+                    maximum_column_name : line["values"]["maximum"],
+                    average_column_name : line["values"]["average"]
+                })
+
+            compressed_container_level_memory = pd.DataFrame(compressed_container_level_final_memory_result)
+            print(compressed_container_level_memory)
+            container_level_memory = pd.concat([container_level_memory, compressed_container_level_memory])
+
         result.update(self.preprocess_df(container_level_memory,'container',for_report))
         return result
        
@@ -220,9 +267,27 @@ class resource_usages:
             })
 
         app_level_cpu = pd.DataFrame(application_level_final_cpu_result)
+
+        for app in exclude_applications:
+            compressed_application_level_cpu_query = f'sum(uptycs_app_cpu{{app_name=~"{app}"}}) by (node_type,host_name)/100'
+            compressed_application_level_final_cpu_result=[]
+            compressed_application_level_cpu_query_result=execute_prometheus_query(self.prom_con_obj,self.start_timestamp,self.end_timestamp,compressed_application_level_cpu_query,self.hours)
+            for line in compressed_application_level_cpu_query_result:
+                compressed_application_level_final_cpu_result.append({
+                    "node_type":line["metric"]["node_type"],
+                    "host_name":line["metric"]["host_name"],
+                    "application":app,
+                    minimum_column_name : line["values"]["minimum"],
+                    maximum_column_name : line["values"]["maximum"],
+                    average_column_name : line["values"]["average"]
+                })
+            compressed_app_level_cpu = pd.DataFrame(compressed_application_level_final_cpu_result)
+            print(compressed_app_level_cpu)
+            app_level_cpu = pd.concat([app_level_cpu, compressed_app_level_cpu])
+
         result.update(self.preprocess_df(app_level_cpu,'application',for_report))
         #----------------------------container level-----------------------------
-        container_level_cpu_query='sum(uptycs_docker_cpu_stats{}) by (container_name,host_name)/100'
+        container_level_cpu_query='sum(uptycs_docker_cpu_stats{}) by (container_name,host_name)/100'.format(exclude_filter)
         container_level_final_cpu_result=[]
         container_level_cpu_query_result=execute_prometheus_query(self.prom_con_obj,self.start_timestamp,self.end_timestamp,container_level_cpu_query,self.hours)
         for line in container_level_cpu_query_result:
@@ -237,6 +302,26 @@ class resource_usages:
             })
 
         container_level_cpu = pd.DataFrame(container_level_final_cpu_result)
+
+        for cont in exclude_containers:
+            exclude_container_level_cpu_query=f'sum(uptycs_docker_cpu_stats{{container_name=~"{cont}"}}) by (host_name)/100'
+            exclude_container_level_final_cpu_result=[]
+            exclude_container_level_cpu_query_result=execute_prometheus_query(self.prom_con_obj,self.start_timestamp,self.end_timestamp,exclude_container_level_cpu_query,self.hours)
+            for line in exclude_container_level_cpu_query_result:
+
+                exclude_container_level_final_cpu_result.append({
+                    "node_type":self.host_name_type_mapping[line["metric"]["host_name"]],
+                    "host_name":line["metric"]["host_name"],
+                    "container":cont,
+                    minimum_column_name : line["values"]["minimum"],
+                    maximum_column_name : line["values"]["maximum"],
+                    average_column_name : line["values"]["average"]
+                })
+
+            exclude_container_level_cpu = pd.DataFrame(exclude_container_level_final_cpu_result)
+            print(exclude_container_level_cpu)
+            container_level_cpu = pd.concat([container_level_cpu, exclude_container_level_cpu])
+
         result.update(self.preprocess_df(container_level_cpu,'container',for_report))
         return result
     
@@ -253,7 +338,7 @@ if __name__=='__main__':
     import pytz
     format_data = "%Y-%m-%d %H:%M"
     
-    start_time_str = "2024-02-03 20:53"
+    start_time_str = "2024-02-05 21:22"
     hours=10
 
     start_time = datetime.strptime(start_time_str, format_data)
@@ -274,14 +359,14 @@ if __name__=='__main__':
     end_utc_str = end_utc_time.strftime(format_data)
 
     active_obj = resource_usages(configuration('s1_nodes.json') , start_timestamp,end_timestamp,hours=hours)
-    total_result_for_querying = active_obj.collect_total_usages(for_report=False)
+    # total_result_for_querying = active_obj.collect_total_usages(for_report=False)
     total_result_for_report = active_obj.collect_total_usages(for_report=True)
 
     from pymongo import MongoClient
     client = MongoClient('mongodb://localhost:27017/')
     db = client['Osquery_LoadTests']  # Replace 'your_database_name' with your actual database name
     collection = db['Testing']  # Replace 'your_collection_name' with your actual collection name
-    collection.insert_one({"resource_utilization_for_report":total_result_for_report,
-                           "resource_utilization":total_result_for_querying})
+    # collection.insert_one({"resource_utilization_for_report":total_result_for_report,
+    #                        "resource_utilization":total_result_for_querying})
 
-    # collection.insert_one({"resource_utilization_for_report":total_result_for_report})
+    collection.insert_one({"resource_utilization_for_report":total_result_for_report})
