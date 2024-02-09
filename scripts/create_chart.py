@@ -122,7 +122,7 @@ def create_images_and_save(path,doc_id,collection,fs,duration,variables,end_time
 
                 base_x_interval_min = 30
                 factor = (duration//18) + 1
-                x_time_interval_in_min = base_x_interval_min * factor
+                x_time_interval_in_min = int(base_x_interval_min * factor)
                 
                 # if duration > 24:
                 x_date_formatter = DateFormatter('%m/%d \n%H:%M')
