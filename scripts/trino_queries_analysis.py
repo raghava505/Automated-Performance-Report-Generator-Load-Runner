@@ -32,6 +32,10 @@ class TRINO_ANALYSE:
             # new_row.update(dict([(str_col,"TOTAL") for str_col in string_columns]))
             # df = df._append(new_row, ignore_index=True)
             print(df)
+            try:
+                df["query_operation"] = df["query_operation"].astype(str)
+            except:
+                pass
             save_dict[heading] = {
                 "schema":schema,
                 "table":df.to_dict(orient="records")
@@ -47,7 +51,7 @@ class TRINO_ANALYSE:
 #     from parent_load_details import parent
 #     format_data = "%Y-%m-%d %H:%M"
 
-#     start_time_str = "2024-01-30 00:20"
+#     start_time_str = "2024-02-10 00:20"
 #     hours=12
 
 #     start_time = datetime.strptime(start_time_str, format_data)
