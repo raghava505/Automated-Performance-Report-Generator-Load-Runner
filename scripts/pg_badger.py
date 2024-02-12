@@ -120,7 +120,7 @@ def take_screenshots_and_save(report_links,BASE_PGBADGER_IMAGES_PATH):
                             element = driver.find_element_by_id(id)
                         sleep(2)
                         screenshot_path = f'{BASE_PGBADGER_IMAGES_PATH}/{id}_{db}.png'
-                        return_res[id]={}
+                        return_res[f"{id}_{db}"]={}
                         # print(f"Saving '{option_text}' details to path {screenshot_path}")
                         element.screenshot(screenshot_path)
                     else:
