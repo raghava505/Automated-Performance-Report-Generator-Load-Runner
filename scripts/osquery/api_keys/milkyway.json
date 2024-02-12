@@ -1,0 +1,16 @@
+{
+    "milkyway":{
+        "id": "5ae1fd98-2095-4906-8d16-d1c5db659b6b",
+        "user_id": "785160b7-a601-4d19-a255-45039a4d8ebd",
+        "customer_id": "d6446f95-8f9e-4eb3-a5c6-b69aea6f8058",
+        "active": "t",
+        "isInternal": false,
+        "key": "SUXFTA5CYWITMIASU5UNAPZSXXOE7VFQ",
+        "secret": "7KKgpt0xnzGfI/76+oYyRdKWiDNl3GtGK51j39QbUoLCoxkNp1CkE6mwY2Rc2UBU",
+        "expiry": null,
+        "updated_at": "2024-02-12T09:53:11.973Z",
+        "created_at": "2024-02-12T09:53:11.973Z",
+        "domainSuffix": ".uptycs.net",
+        "domain": "milkyway"
+      }
+}
