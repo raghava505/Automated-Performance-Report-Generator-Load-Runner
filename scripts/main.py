@@ -27,6 +27,8 @@ from create_chart import create_images_and_save
 from trino_queries_analysis import TRINO_ANALYSE
 from active_conn_by_apps import Active_conn
 from realtimequery_tests.real_time_query import realtime_query
+from bson import ObjectId
+from pg_badger import return_pgbadger_results
 
 import logging
 import argparse
@@ -358,22 +360,35 @@ if __name__ == "__main__":
             # final_data_to_save.update({"all_gridfs_referenced_ids":all_gridfs_referenced_ids})
             inserted_id = collection.insert_one(final_data_to_save).inserted_id
             print(f"Document pushed to mongo successfully into database:{database_name}, collection:{collection_name} with id {inserted_id}")
+            
+            BASE_GRAPHS_PATH = os.path.join(os.path.dirname(prom_con_obj.ROOT_PATH),'graphs')
+            graphs_path=f"{BASE_GRAPHS_PATH}/{database_name}/{collection_name}/{inserted_id}"
+            os.makedirs(graphs_path,exist_ok=True)
             #---------------CREATING GRAPHS-----------------
             try:
                 print("Generating graphs from the saved data ...")
-                BASE_GRAPHS_PATH = os.path.join(os.path.dirname(prom_con_obj.ROOT_PATH),'graphs')
-                path=f"{BASE_GRAPHS_PATH}/{database_name}/{collection_name}/{inserted_id}"
-                os.makedirs(path,exist_ok=True)
                 try:
                     test_title = "Test title : "+str(load_cls.get_load_specific_details(variables['load_name'])['test_title'])
                 except:
                     test_title=""
-                create_images_and_save(path,inserted_id,collection,fs,variables["load_duration_in_hrs"],variables=variables,end_time_str=end_time_str,run=run,stack=test_env_json_details["stack"],test_title=test_title)
+                create_images_and_save(graphs_path,inserted_id,collection,fs,variables["load_duration_in_hrs"],variables=variables,end_time_str=end_time_str,run=run,stack=test_env_json_details["stack"],test_title=test_title)
                 print("Done!")
             except Exception as e:
-                print(f"Error while generating graphs into {path} : {str(e)}")
+                print(f"Error while generating graphs into {graphs_path} : {str(e)}")
+
+            #----------------CREATING PG BADGER GRAPHS--------------
             try:
-                #---------------FETCHING PDFS-----------------
+                print("Capturing details from PG Badger ... ")
+                pg_badger_result=None
+                category_name="PG Badger Charts"
+                pg_badger_images_path = os.path.join(graphs_path,category_name)
+                pg_badger_result = return_pgbadger_results(start_ist_time,end_ist_time,test_env_json_details['elastic'],pg_badger_images_path)
+                collection.update_one({"_id": ObjectId(inserted_id)}, {"$set": {f"charts.{category_name}": pg_badger_result}})
+            except Exception as e:
+                print(f"ERROR occured while processing pg badger details : {e}")
+
+            #---------------FETCHING PDFS-----------------
+            try:
                 if presto_load_result_dict:
                     print(f"Fetching presto load charts pdf from {test_env_json_details['api_presto_load_reports_node_ip']}:{benchto_load_csv_path}")
                     BASE_PDFS_PATH = os.path.join(os.path.dirname(prom_con_obj.ROOT_PATH),'pdfs')
