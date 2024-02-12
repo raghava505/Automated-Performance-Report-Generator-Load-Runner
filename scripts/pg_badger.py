@@ -53,9 +53,35 @@ def get_links(elastic_url,start_time_ist_str, end_time_ist_str):
 def take_screenshots_and_save(report_links,BASE_PGBADGER_IMAGES_PATH):
     return_res={}
     chrome_options = webdriver.ChromeOptions()
-    chrome_options.add_argument('--headless')
-    chrome_options.add_argument('--window-size=9999,9999')
+    # chrome_options.add_argument('--window-size=9999,9999')
+    chrome_options.add_argument("--disable-extensions")
+    chrome_options.add_argument("--headless")
+    chrome_options.add_argument("--disable-gpu")
+    chrome_options.add_argument("--no-sandbox")
+    chrome_options.add_argument("--disable-dev-shm-usage")
+    chrome_options.add_argument("--start-maximized")
+    chrome_options.add_argument("--window-size=1920x1080")
+    chrome_options.add_argument("--no-sandbox")
+    chrome_options.add_argument("--disable-dev-shm-usage")
+    chrome_options.add_argument("--enable-javascript")
+
+    chrome_options.add_experimental_option("excludeSwitches", ["enable-automation"])
+    chrome_options.add_experimental_option("useAutomationExtension", False)
+    chrome_options.add_argument("--remote-debugging-port=9222")
+    chrome_options.add_argument("--dns-prefetch-disable")
+    chrome_options.add_argument("--disable-blink-features=AutomationControlled")
+    chrome_options.add_argument("--disable-blink-features=AutomationControlled")
+    chrome_options.add_argument("--enable-features=NetworkServiceInProcess")
+    chrome_options.add_argument("--disable-features=VizDisplayCompositor")
+    chrome_options.add_argument("--disable-features=VizDisplayCompositorAnxious")
+    chrome_options.add_argument("--disable-features=VizDisplayCompositorGL")
+    chrome_options.add_argument("--disable-features=NetworkService")
+    chrome_options.add_argument("--disable-features=NetworkServiceInProcess")
+    chrome_options.add_argument("--disable-features=NetworkServiceInProcess")
+    chrome_options.add_argument("--disable-features=UseSurfaceLayerForVideo")
+
     driver = webdriver.Chrome(options=chrome_options)
+    driver.maximize_window()
     for db,report_link in report_links.items():
         driver.get(report_link)
         partial_id = "menu"
