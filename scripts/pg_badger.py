@@ -21,7 +21,7 @@ def get_links(elastic_url,start_time_ist_str, end_time_ist_str):
     url = f"http://{elastic_url}:5602/ondemand"
 
     resp = requests.get(url, verify=False)
-    return_links=[]
+    return_links={}
     if resp.status_code == 200:
         dbs={"configdb","statedb"}
         for db in dbs :
@@ -56,7 +56,7 @@ def take_screenshots_and_save(report_links,BASE_PGBADGER_IMAGES_PATH):
     chrome_options.add_argument('--headless')
     chrome_options.add_argument('--window-size=9999,9999')
     driver = webdriver.Chrome(options=chrome_options)
-    for db,report_link in report_links:
+    for db,report_link in report_links.items():
         driver.get(report_link)
         partial_id = "menu"
         elements = driver.find_elements(by=By.XPATH, value=f"//ul[@class='nav navbar-nav']//li[contains(@id, '{partial_id}')]")
@@ -72,7 +72,6 @@ def take_screenshots_and_save(report_links,BASE_PGBADGER_IMAGES_PATH):
                 option_texts = [option.text for option in dropdown_options if option.text != ""]
                 
                 for option_text in option_texts:
-                    print("Extracting details for : " , option_text)
                     option = ul_element.find_element(By.XPATH, f"./li[a[text()='{option_text}']]")
                     try:
                         option.click()
@@ -81,6 +80,7 @@ def take_screenshots_and_save(report_links,BASE_PGBADGER_IMAGES_PATH):
                     sleep(2)
 
                     if option_text in stats_dict:
+                        print("Extracting details for : " , option_text)
                         id = stats_dict[option_text]
                         try:
                             element = WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.ID, id)))
@@ -91,7 +91,7 @@ def take_screenshots_and_save(report_links,BASE_PGBADGER_IMAGES_PATH):
                         except Exception as e:
                             print(f"Error clicking element: {e}")
                             element = driver.find_element_by_id(id)
-                        sleep(20)
+                        sleep(2)
                         screenshot_path = f'{BASE_PGBADGER_IMAGES_PATH}/{id}_{db}.png'
                         return_res[id]={}
                         # print(f"Saving '{option_text}' details to path {screenshot_path}")
