@@ -101,7 +101,7 @@ def take_screenshots_and_save(report_links,BASE_PGBADGER_IMAGES_PATH):
 
             except TimeoutException:
                 print("Dropdown menu not found within the specified time.")
-        driver.quit()
+    driver.quit()
 
     return return_res
 
