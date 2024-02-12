@@ -382,6 +382,7 @@ if __name__ == "__main__":
                 pg_badger_result=None
                 category_name="PG Badger Charts"
                 pg_badger_images_path = os.path.join(graphs_path,category_name)
+                os.makedirs(pg_badger_images_path,exist_ok=True)
                 pg_badger_result = return_pgbadger_results(start_ist_time,end_ist_time,test_env_json_details['elastic'],pg_badger_images_path)
                 collection.update_one({"_id": ObjectId(inserted_id)}, {"$set": {f"charts.{category_name}": pg_badger_result}})
             except Exception as e:
