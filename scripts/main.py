@@ -10,7 +10,7 @@ from disk_space import DISK
 from input import create_input_form
 from capture_charts_data import Charts
 from gridfs import GridFS
-from trino_queries import TRINO
+# from trino_queries import TRINO
 from elk_errors import Elk_erros
 from cloudquery.accuracy import ACCURACY
 from osquery.accuracy import osq_accuracy
@@ -152,17 +152,17 @@ if __name__ == "__main__":
         active_conn_obj = Active_conn(prom_con_obj,start_timestamp,end_timestamp,hours=variables["load_duration_in_hrs"])
         active_conn_results = active_conn_obj.get_avg_active_conn()
         #-------------------------Trino Queries--------------------------
-        trino_queries=None
+        # trino_queries=None
         trino_queries_analyse_results=None
-        if variables["load_type"] != "KubeQuery":
-            print("Performing trino queries ...")
-            calc = TRINO(curr_ist_start_time=variables["start_time_str_ist"],curr_ist_end_time=end_time_str,prom_con_obj=prom_con_obj)
-            trino_queries = calc.fetch_trino_queries()
+        # if variables["load_type"] != "KubeQuery":
+            # print("Performing trino queries ...")
+            # calc = TRINO(curr_ist_start_time=variables["start_time_str_ist"],curr_ist_end_time=end_time_str,prom_con_obj=prom_con_obj)
+            # trino_queries = calc.fetch_trino_queries()
 
-            print("Fetching Trino queries details ...")
-            trino_obj = TRINO_ANALYSE(start_utc_str,end_utc_str,prom_con_obj=prom_con_obj)
-            trino_queries_analyse_results = trino_obj.fetch_trino_results(load_cls.trino_details_commands)
-            print(f"Returned trino queries results are : {trino_queries_analyse_results}")
+        print("Fetching Trino queries details ...")
+        trino_obj = TRINO_ANALYSE(start_utc_str,end_utc_str,prom_con_obj=prom_con_obj)
+        trino_queries_analyse_results = trino_obj.fetch_trino_results(load_cls.trino_details_commands)
+        print(f"Returned trino queries results are : {trino_queries_analyse_results}")
         #-------------------------API LOAD--------------------------
         api_load_result_dict=None
         presto_load_result_dict=None
@@ -321,8 +321,8 @@ if __name__ == "__main__":
                 final_data_to_save.update({"Cloudquery Event Counts":evecount})
             if sts:
                 final_data_to_save.update({"STS Records":sts})
-            if trino_queries:
-                final_data_to_save.update({"Trino_queries":trino_queries})
+            # if trino_queries:
+            #     final_data_to_save.update({"Trino_queries":trino_queries})
             if trino_queries_analyse_results:
                 final_data_to_save.update({"Trino Queries Analysis":trino_queries_analyse_results})
             if active_conn_results:
