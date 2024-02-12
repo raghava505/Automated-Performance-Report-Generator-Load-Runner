@@ -11,6 +11,7 @@ from selenium.webdriver.common.action_chains import ActionChains
 from datetime import datetime, timedelta
 import os
 import pytz
+from helper import save_html_page
 
 
 current_time = datetime.now()
@@ -144,6 +145,20 @@ def return_pgbadger_results(start_time_utc,end_time_utc,elastic_url,images_path)
     links=get_links(elastic_url , start_time, end_time)
     res=take_screenshots_and_save(links,images_path)
     return res
+
+def get_and_save_pgb_html(start_time_utc,end_time_utc,elastic_url,save_path):
+    format_data = "%Y-%m-%dT%H:%M"
+
+    start_time = start_time_utc - timedelta(minutes=10)
+    start_time = start_time.strftime(format_data)
+    end_time = end_time_utc + timedelta(minutes=10) + timedelta(hours=1)
+    end_time = end_time.strftime(format_data)
+
+    print("Converted start time UTC string is : " , start_time)
+    print("Converted end time UTC string is : " , end_time)
+    links=get_links(elastic_url , start_time, end_time)
+    for db,link in links.items():
+        save_html_page(link,save_path)
 
    
 
