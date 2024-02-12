@@ -8,7 +8,7 @@ from selenium.common.exceptions import TimeoutException
 from time import sleep
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.action_chains import ActionChains
-from datetime import datetime
+from datetime import datetime, timedelta
 import os
 import pytz
 
@@ -103,33 +103,40 @@ def take_screenshots_and_save(report_links,BASE_PGBADGER_IMAGES_PATH):
     driver.quit()
     return return_res
 
-def return_pgbadger_results(start_time_ist,end_time_ist,elastic_url,images_path):
+def return_pgbadger_results(start_time_utc,end_time_utc,elastic_url,images_path):
     format_data = "%Y-%m-%dT%H:%M"
 
-    start_time_ist_str = start_time_ist.strftime(format_data)
-    end_time_ist_str = end_time_ist.strftime(format_data)
+    start_time = start_time_utc - timedelta(minutes=10)
+    start_time = start_time.strftime(format_data)
+    end_time = end_time_utc + timedelta(hours=1) + timedelta(minutes=20)
+    end_time = end_time.strftime(format_data)
 
-    print("Converted start time string is : " , start_time_ist_str)
-    print("Converted end time string is : " , end_time_ist_str)
-    links_list=get_links(elastic_url , start_time_ist_str, end_time_ist_str)
+    print("Converted start time UTC string is : " , start_time)
+    print("Converted end time UTC string is : " , end_time)
+    links_list=get_links(elastic_url , start_time, end_time)
     res=take_screenshots_and_save(links_list,images_path)
     return res
 
    
 
 if __name__=="__main__":
-    start_time_ist_str="2024-02-10 23:30"
-    end_time_ist_str="2024-02-11 13:30"
+    start_time_ist_str="2024-02-11 14:00"
+    end_time_ist_str="2024-02-12 00:00"
     elastic_url="192.168.129.52"
 
     BASE_PGBADGER_IMAGES_PATH = os.path.join("/Users/masabathulararao/Documents/Loadtest",'pgbadger_im')
     os.makedirs(BASE_PGBADGER_IMAGES_PATH,exist_ok=True)
 
     ist_timezone = pytz.timezone('Asia/Kolkata')
+    utc_timezone = pytz.utc
+
     format_data = "%Y-%m-%d %H:%M"
     start_ist_time = ist_timezone.localize(datetime.strptime(start_time_ist_str, format_data))
     end_ist_time = ist_timezone.localize(datetime.strptime(end_time_ist_str, format_data))
 
-    res = return_pgbadger_results(start_ist_time,end_ist_time,elastic_url,BASE_PGBADGER_IMAGES_PATH)
+    start_utc_time = start_ist_time.astimezone(utc_timezone)
+    end_utc_time = end_ist_time.astimezone(utc_timezone)
+
+    res = return_pgbadger_results(start_utc_time,end_utc_time,elastic_url,BASE_PGBADGER_IMAGES_PATH)
     print(res)
    
