@@ -146,7 +146,7 @@ def return_pgbadger_results(start_time_utc,end_time_utc,elastic_url,images_path)
     res=take_screenshots_and_save(links,images_path)
     return res
 
-def get_and_save_pgb_html(start_time_utc,end_time_utc,elastic_url,save_path):
+def get_and_save_pgb_html(start_time_utc,end_time_utc,elastic_url,base_save_path):
     format_data = "%Y-%m-%dT%H:%M"
 
     start_time = start_time_utc - timedelta(minutes=10)
@@ -158,6 +158,7 @@ def get_and_save_pgb_html(start_time_utc,end_time_utc,elastic_url,save_path):
     print("Converted end time UTC string is : " , end_time)
     links=get_links(elastic_url , start_time, end_time)
     for db,link in links.items():
+        save_path = os.path.join(base_save_path,f"pgbadger_report_{db}.html")
         save_html_page(link,save_path)
 
    

@@ -28,7 +28,7 @@ from trino_queries_analysis import TRINO_ANALYSE
 from active_conn_by_apps import Active_conn
 from realtimequery_tests.real_time_query import realtime_query
 from bson import ObjectId
-from pg_badger import return_pgbadger_results
+from pg_badger import return_pgbadger_results,get_and_save_pgb_html
 
 import logging
 import argparse
@@ -376,7 +376,7 @@ if __name__ == "__main__":
             except Exception as e:
                 print(f"Error while generating graphs into {graphs_path} : {str(e)}")
 
-            #----------------CREATING PG BADGER GRAPHS--------------
+            # ----------------CREATING PG BADGER GRAPHS--------------
             try:
                 print("Capturing details from PG Badger ... ")
                 pg_badger_result=None
@@ -385,6 +385,17 @@ if __name__ == "__main__":
                 os.makedirs(pg_badger_images_path,exist_ok=True)
                 pg_badger_result = return_pgbadger_results(start_utc_time,end_utc_time,test_env_json_details['elastic'],pg_badger_images_path)
                 collection.update_one({"_id": ObjectId(inserted_id)}, {"$set": {f"charts.{category_name}": pg_badger_result}})
+            except Exception as e:
+                print(f"ERROR occured while processing pg badger details : {e}")
+
+            try:
+                print("Capturing details from PG Badger ... ")
+                BASE_HTML_PATH = os.path.join(os.path.dirname(prom_con_obj.ROOT_PATH),'htmls')
+                curr_pgbad_html_path=f"{BASE_HTML_PATH}/{database_name}/{collection_name}/{inserted_id}"
+                print(f'Saving the html page to {curr_pgbad_html_path}')
+                os.makedirs(curr_pgbad_html_path,exist_ok=True)
+                get_and_save_pgb_html(start_utc_time,end_utc_time,test_env_json_details['elastic'],curr_pgbad_html_path)
+
             except Exception as e:
                 print(f"ERROR occured while processing pg badger details : {e}")
 
