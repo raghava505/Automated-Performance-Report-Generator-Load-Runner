@@ -185,3 +185,14 @@ def extract_stack_details(nodes_file_path,prom_con_obj):
     data.update(other_nodes)
     with open(nodes_file_path,'w') as file:
         json.dump(data,file,indent=4)
+
+def save_html_page(url,file_path):
+    response = requests.get(url)
+    if response.status_code == 200:
+        page_content = response.content
+        with open(file_path, "wb") as file:
+            file.write(page_content)
+
+        print(f"Webpage {url} saved successfully to {file_path}")
+    else:
+        print("Failed to download webpage")
