@@ -119,7 +119,7 @@ class osq_accuracy:
         format_data = "%Y-%m-%d %H:%M"
         start_time = start_time_utc - timedelta(minutes=10)
         self.start_time = start_time.strftime(format_data)
-        end_time = end_time_utc + timedelta(minutes=10) + timedelta(hours=4)
+        end_time = end_time_utc + timedelta(minutes=20) #+ timedelta(hours=4)
         self.end_time = end_time.strftime(format_data)
         self.api_path=api_path
         self.domain=domain
