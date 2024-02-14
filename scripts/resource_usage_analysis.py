@@ -61,8 +61,8 @@ class resource_analysis:
 
 if __name__=='__main__':
     from settings import configuration
-    id1="65c2351cee40e652dd19ce81"
-    id2="65c235423aa53848c2cb059e"
+    id1="65cb3b41160cbf0949289ab6"
+    id2="65c2351cee40e652dd19ce81"
     obj = resource_analysis(configuration() , "Osquery_LoadTests","Testing",id1,id2)
     obj.compare_nodetype_usages("memory")
     obj.compare_nodetype_usages("cpu")
