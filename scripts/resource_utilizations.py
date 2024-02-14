@@ -338,7 +338,7 @@ if __name__=='__main__':
     import pytz
     format_data = "%Y-%m-%d %H:%M"
     
-    start_time_str = "2024-02-05 21:22"
+    start_time_str = "2024-02-13 00:00"
     hours=10
 
     start_time = datetime.strptime(start_time_str, format_data)
