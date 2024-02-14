@@ -391,7 +391,7 @@ if __name__ == "__main__":
             try:
                 print("Capturing details from PG Badger ... ")
                 BASE_HTML_PATH = os.path.join(os.path.dirname(prom_con_obj.ROOT_PATH),'htmls')
-                curr_pgbad_html_path=f"{BASE_HTML_PATH}/{database_name}/{collection_name}/{inserted_id}"
+                curr_pgbad_html_path=f"{BASE_HTML_PATH}/{database_name}/{collection_name}/{inserted_id}/pgbadger_reports"
                 print(f'Saving the html page to {curr_pgbad_html_path}')
                 os.makedirs(curr_pgbad_html_path,exist_ok=True)
                 get_and_save_pgb_html(start_utc_time,end_utc_time,test_env_json_details['elastic'],curr_pgbad_html_path)
