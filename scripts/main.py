@@ -377,16 +377,16 @@ if __name__ == "__main__":
                 print(f"Error while generating graphs into {graphs_path} : {str(e)}")
 
             # ----------------CREATING PG BADGER GRAPHS--------------
-            try:
-                print("Capturing details from PG Badger ... ")
-                pg_badger_result=None
-                category_name="PG Badger Charts"
-                pg_badger_images_path = os.path.join(graphs_path,category_name)
-                os.makedirs(pg_badger_images_path,exist_ok=True)
-                pg_badger_result = return_pgbadger_results(start_utc_time,end_utc_time,test_env_json_details['elastic'],pg_badger_images_path)
-                collection.update_one({"_id": ObjectId(inserted_id)}, {"$set": {f"charts.{category_name}": pg_badger_result}})
-            except Exception as e:
-                print(f"ERROR occured while processing pg badger details : {e}")
+            # try:
+            #     print("Capturing details from PG Badger ... ")
+            #     pg_badger_result=None
+            #     category_name="PG Badger Charts"
+            #     pg_badger_images_path = os.path.join(graphs_path,category_name)
+            #     os.makedirs(pg_badger_images_path,exist_ok=True)
+            #     pg_badger_result = return_pgbadger_results(start_utc_time,end_utc_time,test_env_json_details['elastic'],pg_badger_images_path)
+            #     collection.update_one({"_id": ObjectId(inserted_id)}, {"$set": {f"charts.{category_name}": pg_badger_result}})
+            # except Exception as e:
+            #     print(f"ERROR occured while processing pg badger details : {e}")
 
             try:
                 print("Capturing details from PG Badger ... ")
