@@ -194,5 +194,7 @@ def save_html_page(url,file_path):
             file.write(page_content)
 
         print(f"Webpage {url} saved successfully to {file_path}")
+        return True
     else:
         print("Failed to download webpage")
+        return False

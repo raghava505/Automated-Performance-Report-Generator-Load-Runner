@@ -146,9 +146,9 @@ def return_pgbadger_results(start_time_utc,end_time_utc,elastic_url,images_path)
     res=take_screenshots_and_save(links,images_path)
     return res
 
-def get_and_save_pgb_html(start_time_utc,end_time_utc,elastic_url,base_save_path):
+def get_and_save_pgb_html(start_time_utc,end_time_utc,elastic_url,base_save_path,pgbadger_tail_path):
     format_data = "%Y-%m-%dT%H:%M"
-
+    return_file_names={}
     start_time = start_time_utc - timedelta(minutes=10)
     start_time = start_time.strftime(format_data)
     end_time = end_time_utc + timedelta(minutes=10) + timedelta(hours=1)
@@ -158,14 +158,22 @@ def get_and_save_pgb_html(start_time_utc,end_time_utc,elastic_url,base_save_path
     print("Converted end time UTC string is : " , end_time)
     links=get_links(elastic_url , start_time, end_time)
     for db,link in links.items():
+        print("Processing pgbadger report for database : "  , db)
         save_path = os.path.join(base_save_path,f"pgbadger_report_{db}.html")
-        save_html_page(link,save_path)
+        status=save_html_page(link,save_path)
+        if not status:
+            print("Saving this webpage failed, hence saving the direct link of pgbadger UI !")
+            return_file_names[db] = link
+        perf_prod_dashboard = "192.168.146.69"
+        if status:return_file_names[db] = os.path.join(f"http://{perf_prod_dashboard}:8000",pgbadger_tail_path,f"pgbadger_report_{db}.html")
+    print("Returning pgbadger links dict : ", return_file_names)
+    return return_file_names
 
    
 
 if __name__=="__main__":
-    start_time_ist_str="2024-02-11 14:00"
-    end_time_ist_str="2024-02-12 00:00"
+    start_time_ist_str="2024-02-16 14:00"
+    end_time_ist_str="2024-02-17 00:00"
     elastic_url="192.168.129.52"
 
     BASE_PGBADGER_IMAGES_PATH = os.path.join("/Users/masabathulararao/Documents/Loadtest",'pgbadger_im')
@@ -181,6 +189,8 @@ if __name__=="__main__":
     start_utc_time = start_ist_time.astimezone(utc_timezone)
     end_utc_time = end_ist_time.astimezone(utc_timezone)
 
-    res = return_pgbadger_results(start_utc_time,end_utc_time,elastic_url,BASE_PGBADGER_IMAGES_PATH)
+    # res = return_pgbadger_results(start_utc_time,end_utc_time,elastic_url,BASE_PGBADGER_IMAGES_PATH)
+    res= get_and_save_pgb_html(start_utc_time,end_utc_time,elastic_url,BASE_PGBADGER_IMAGES_PATH,"custom_path/sample")
+
     print(res)
    
