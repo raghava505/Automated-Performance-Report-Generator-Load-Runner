@@ -102,7 +102,10 @@ class DISK:
 
     def save(self,_ ,current_build_data):
         TYPE ,save_dict=_
-        current_build_data[f"{TYPE}_disk_used_space"] = save_dict
+        if save_dict == {}:
+            print(f"Disk space usage for {TYPE} is empty ... Not saving this key into mongo")
+        else:
+            current_build_data[f"{TYPE}_disk_used_space"] = save_dict
         return current_build_data
     
     def make_calculations(self):
