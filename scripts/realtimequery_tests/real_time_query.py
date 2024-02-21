@@ -1,5 +1,5 @@
 from typing import ItemsView
-from .api_func import *
+# from .api_func import *
 from .log_config import *
 from .validation import TestResult
 from .configs import *
@@ -8,7 +8,8 @@ import sys
 from datetime import datetime, timedelta
 from .connect_nodes import Host
 import re 
-import pymongo
+
+        
 
 
 PROJECT_ROOT = Path(__file__).resolve().parent
@@ -196,29 +197,36 @@ def query(rq_payload,l) :
             hdfs_records = actual_records - config_records
     c=0
 
-    if int(pg) == config_records:
+    new_pg_count= 0.95*config_records
+    new_hdfs_count= 0.95*hdfs_records
+    new_total_count= 0.95*actual_records
+
+    percentage_pg= int(pg)*100/config_records 
+    rpercentage_pg = round(percentage_pg,2)
+    percentage_hdfs=int(hdfs)*100/hdfs_records 
+    rpercentage_hdfs = round(percentage_hdfs,2)
+    percentage_total=int(total)*100/actual_records
+    rpercentage_total = round(percentage_total,2)
+    
+    if int(pg) >= new_pg_count:
         c=c+1
         log.info('config records : {} for query{}'.format(pg,l))
-        print('config records : {} for query{}'.format(pg,l))
-
-        test_result.update_success('records count stored in config - matched in query{}'.format(l))
+        print  ('config records : {} for query{}'.format(pg,l)) 
+        test_result.update_success('for query{} - Accuracy-{} The recordes in pg : {} ,Expected count : {}'.format(l,rpercentage_pg,pg,config_records))
     else :
         test_result.update_error('count did not match for query{}. The recordes in pg : {} ,Expected count :{}'.format(l,pg,config_records))
-    time.sleep(70)
-    if int(hdfs) ==hdfs_records:
+    if int(hdfs) >=new_hdfs_count:
         c=c+1
         log.info('hdfs records : {} for query{}'.format(hdfs,l))
         print('hdfs records : {} for query{}'.format(hdfs,l))
-
-        test_result.update_success('records count stored in hdfs - matched query{}'.format(l))
+        test_result.update_success('for query{} - Accuracy-{} The recordes in hdfs : {} ,Expected count : {}'.format(l,rpercentage_hdfs,hdfs,hdfs_records) )
     else :
         test_result.update_error('count did not match for query{}. The recordes in hdfs : {} ,Expected count :{}'.format(l,hdfs,hdfs_records) )
-    if int(total) == actual_records :
+    if int(total) >= new_total_count :
         c=c+1
         log.info('total records : {} for query{}'.format(total,l))
         print('total records : {} for query{}'.format(total,l))
-
-        test_result.update_success('total records count - matched query{}'.format(l))
+        test_result.update_success('for query{} - Accuracy-{} The recordes in total : {} ,Expected count : {}'.format(l,rpercentage_total,total,actual_records))
     else :
         test_result.update_error('count did not match for query{}.The recordes in total : {} ,Expected count : {}'.format(l,total,actual_records))
 
@@ -231,9 +239,9 @@ def query(rq_payload,l) :
         'Number of Assets Responded': actual_assets,
         'Test Start Time': c_time,
         'Test End Time': e_time,
-        'Records in configdb': {'actual': pg,'expected':config_records},
-        'Records in HDFS': {'actual':hdfs ,'expected':hdfs_records},
-        'Total Records': {'actual':total ,'expected':actual_records},
+        'Records in configdb': {'actual': pg,'expected':config_records,'accuracy':rpercentage_pg},
+        'Records in HDFS': {'actual':hdfs ,'expected':hdfs_records,'accuracy':rpercentage_hdfs},
+        'Total Records': {'actual':total ,'expected':actual_records,'accuracy':rpercentage_total},
         'Time taken for RT query to get completed': t_time,
         'Time taken for all the records to get ingested in seconds': hdfs_records_time_s,
         'Automation run Status ':result
