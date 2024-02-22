@@ -24,7 +24,17 @@ class all_combined_child(parent):
                     "total_number_of_customers_azure": "20",
                     "Azure Services used to conduct the Load" : "Management, Compute, Network, Storage, Databases, Identity, RBAC",
                     "Tables Validated in the Load" : "azure_network_vnet, azure_network_subnet, azure_compute_vm, azure_compute_disk, azure_network_nic, azure_network_nsg, azure_network_load_balancer, azure_network_public_ip_address, azure_network_route_table, azure_resource_group, azure_network_application_gateway, azure_appservice_site, azure_appservice_appsetting, azure_storage_blob_container, azure_storage_account, azure_sql_database, azure_sql_server, azure_storage_file_share, azure_active_directory_service_principal,azure_active_directory_application, azure_active_directory_role_assignment, azure_active_directory_role_definition, azure_rbac_role_definition, azure_rbac_role_assignment, azure_active_directory_group, azure_active_directory_user",
-                    "Total number of Accounts": "67"
+                    "Total number of Accounts": "67",
+                    
+                    "total_number_of_customers_kubequery": "1",
+                    "total_clusters": "20",
+                    "total_assets": "800",
+                    "total_namespaces": "2000",
+                    "total_pods": "40000",
+                    "total_containers": "20000",
+                    
+                    "total_number_of_customers_self_managed": "1",
+                    "total_assets": "200"                    
                 }
     }
 
@@ -37,21 +47,21 @@ class all_combined_child(parent):
     @property
     def common_app_names(cls):
         temp = copy.deepcopy(parent.common_app_names)
-        temp['sum'].extend(["/opt/uptycs/cloud/go/bin/ruleEngine-production-ruleengine",".*effectivePermissions.*","sts.*","/usr/lib/memgraph/memgraph","/opt/uptycs/cloud/go/bin/cloudqueryConsumer","cloudDetectionConsumer",".*statedb.*","cloudConnectorIngestion","/opt/uptycs/cloud/go/bin/ruleEngine-production-ruleenginecc"])
+        temp['sum'].extend(["/opt/uptycs/cloud/go/bin/ruleEngine-production-ruleengine",".*effectivePermissions.*","sts.*","/usr/lib/memgraph/memgraph","/opt/uptycs/cloud/go/bin/cloudqueryConsumer","cloudDetectionConsumer",".*statedb.*","cloudConnectorIngestion","/opt/uptycs/cloud/go/bin/ruleEngine-production-ruleenginecc","genericStateManagerExecutor"])
         return temp
     
     @classmethod
     @property
     def mon_spark_topic_names(cls):
         temp = copy.deepcopy(parent.mon_spark_topic_names)
-        temp.extend(["cloudconnectorsink" , 'agentosquery'])
+        temp.extend(["cloudconnectorsink" , 'agentosquery',"state","agentkubequery"])
         return temp
     
     @classmethod
     @property
     def kafka_group_names(cls):
         temp = copy.deepcopy(parent.kafka_group_names)
-        temp.extend(["cloudqueryinventorygroup" , "cloudcompliancemanager" , "ruleenginecc"])
+        temp.extend(["cloudqueryinventorygroup" , "cloudcompliancemanager" , "ruleenginecc","kubeStateManagerGroup"])
         return temp
     
     @classmethod
