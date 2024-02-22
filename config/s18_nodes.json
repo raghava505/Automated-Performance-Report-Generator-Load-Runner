@@ -1,0 +1,36 @@
+{
+    "stack": "S18",
+    "clusters": 1,
+    "SU": 3,
+    "domain": "virgo",
+    "extension": "net",
+    "stack_url": "https://virgo.uptycs.net/",
+    "event_rules_per_cust":{"enabled":39,"triggered":33},
+    "alert_rules_per_cust":{"enabled":39,"triggered":33},
+    "pnodes": [
+        "s18c1pn1",
+        "s18c1pn2",
+        "s18c1pn3"
+    ],
+    "dnodes": [
+        "s18c1dn1",
+        "s18c1dn2",
+        "s18c1dn3"
+    ],
+    "pgnodes": [
+        "s18configdb1"
+    ],
+    "monitoring_node": [
+        "s18monitor1"
+    ],
+    "stsnodes": [
+        
+    ],
+    "kubesim_nodes": [
+        "s18sim1c",
+        "s18sim1d"
+    ],
+    "selfsim_nodes": [
+        "s18sim2a"
+    ]
+}
