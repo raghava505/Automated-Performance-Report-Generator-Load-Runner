@@ -8,6 +8,7 @@ class LOGScriptRunner:
         self.simulators2 = ["long-aws-sim1", "long-aws-sim2"]
         self.simulators3 = ["long-gcp-sim1", "long-gcp-sim2"]
         self.azure_simulators = ["long-azure-sim1"]
+        self.azure_s18sims = ["s18sim1a"]
         self.output_folder = "cloudquery/expected_logs"
         self.password = "abacus"
 

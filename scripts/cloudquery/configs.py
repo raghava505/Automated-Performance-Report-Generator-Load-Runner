@@ -11,10 +11,11 @@ total_counts_GCP={"gcp_cloud_log_events":{"added":0},"gcp_secret_manager_secret"
 
 domain='mercury'
 domain2='longevity'
+domain3='virgo'
 api_path_single_mercury = str(PROJECT_ROOT)  + '/api_keys/{}_api.json'.format(domain)
 api_path_multi_mercury = str(PROJECT_ROOT)  + '/api_keys/{}_multicustomer_api.json'.format(domain)
 api_path_multi_longevity = str(PROJECT_ROOT)  + '/api_keys/{}_multicustomer_api.json'.format(domain2)
-
+api_path_multi_virgo = str(PROJECT_ROOT)  + '/api_keys/{}_multicustomer_api.json'.format(domain3)
 
 query_api='https://{}{}/public/api/customers/{}/queryJobs'
 payload={"query":"select upt_added,count(*) from {} where upt_day >= {} and upt_time >= timestamp '{}' and upt_time < timestamp '{}' group by upt_added;","type":"global","filters":{},"parameters":[],"parameterValues":{},"agentType":"asset"}

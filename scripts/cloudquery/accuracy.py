@@ -182,8 +182,8 @@ class ACCURACY:
 
         elif(self.load_name == "Azure_MultiCustomer"):
             print("Azure_MultiCustomer")
-            obj.get_log(obj.azure_simulators,self.load_name)
-            self.api_path=api_path_multi_longevity
+            obj.get_log(obj.azure_s18sims,self.load_name)
+            self.api_path=api_path_multi_virgo
             self.total_counts = getattr(configs, f'total_counts_Azure', None)
             fs = open(self.api_path)
             file = fs.read()
