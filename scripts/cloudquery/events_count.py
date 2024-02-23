@@ -84,8 +84,10 @@ class EVE_COUNTS:
                 results_aws = list(executor.map(self.analyze_logs,  self.simulators2, [events_pattern_aws] * len(self.simulators2), [modified_events_pattern_aws] * len(self.simulators2), [inventory_pattern_aws] * len(self.simulators2)))
                 self.remote_logs_path = self.path_mappings.get("GCP_MultiCustomer", "~/multi-customer-cqsim/aws/logs")
                 results_gcp = list(executor.map(self.analyze_logs,  self.simulators3, [events_pattern_gcp] * len(self.simulators3), [modified_events_pattern_gcp] * len(self.simulators3), [inventory_pattern_gcp] * len(self.simulators3)))
+            
+            elif self.load_name == "Azure_MultiCustomer":
+                results = list(executor.map(self.analyze_logs,  self.azure_s18sims, [events_pattern] * len(self.azure_s18sims), [modified_events_pattern] * len(self.azure_s18sims), [inventory_pattern] * len(self.azure_s18sims)))
             else:
-                
                 results = list(executor.map(self.analyze_logs,  self.simulators1, [events_pattern] * len(self.simulators1), [modified_events_pattern] * len(self.simulators1), [inventory_pattern] * len(self.simulators1)))
 
         if self.load_name in ["Osquery(multi)_CloudQuery(aws_gcp_multi)", "GoldenTest"]:
