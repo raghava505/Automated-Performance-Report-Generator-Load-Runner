@@ -9,6 +9,7 @@ class EVE_COUNTS:
                            "s4simhost4b", "s4simhost4d", "s4simhost5b", "s4simhost5d", "s4simhost6b", "s4simhost6d"]
         self.simulators2 = ["long-aws-sim1", "long-aws-sim2"]
         self.simulators3 = ["long-gcp-sim1", "long-gcp-sim2"]
+        self.azure_s18sims = ["s18sim1a"]
         self.load_name = variables['load_name']
         self.load_type = variables['load_type']
         self.ssh_user = "abacus"
@@ -18,6 +19,7 @@ class EVE_COUNTS:
         self.total_sum3 = 0
 
         self.path_mappings = {
+            "Azure_MultiCustomer": "~/cloud_query_sim/azure_multi/logs",
             "AWS_MultiCustomer": "~/multi_customer_attackpath/aws/logs",
             "GCP_MultiCustomer": "~/multi-customer-cqsim/gcp/logs",
             "AWS_SingleCustomer": "~/cloud_query_sim/aws/logs",
@@ -58,7 +60,7 @@ class EVE_COUNTS:
     def get_events_count(self):
         save_dict = {}
 
-        if self.load_name in ["AWS_MultiCustomer", "AWS_SingleCustomer"]:
+        if self.load_name in ["AWS_MultiCustomer", "AWS_SingleCustomer","Azure_MultiCustomer"]:
             events_pattern = '/Total no\\.of events happened till now:/ {sum+=$NF} END {print sum}'
             modified_events_pattern = '/Total no\\.of modified events happened till now:/ {sum+=$NF} END {print sum}'
             inventory_pattern = '/Total no\\.of inventory events happened till now:/ {sum+=$NF} END {print sum}'
@@ -126,6 +128,8 @@ class EVE_COUNTS:
                 x="AWS"
             elif self.load_name == "GCP_MultiCustomer":
                 x="GCP"
+            elif self.load_name == "Azure_MultiCustomer":
+                x="Azure"
 
             save_dict[x] = {
             "Total inventory count": self.format_in_millions(self.total_sum3),
