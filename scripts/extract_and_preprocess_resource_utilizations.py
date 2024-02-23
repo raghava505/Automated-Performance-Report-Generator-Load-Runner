@@ -88,7 +88,7 @@ class resource_usages:
 
         for index, group_df in grouped_df.groupby(col1):
             group_df = group_df[group_df[average_column_name] >= usage_threshold]
-            if group_df.empty:continue
+            # if group_df.empty:continue
 
             if for_report:
                 group_df = group_df.reset_index()
@@ -334,7 +334,10 @@ class resource_usages:
         del return_dict["memory_usages"]["nodetype_and_application_level_usages"]
         nodetype_and_container_level_memory_usage=return_dict["memory_usages"]["nodetype_and_container_level_usages"]
         del return_dict["memory_usages"]["nodetype_and_container_level_usages"]
-        
+        for nodetype in exclude_nodetypes:
+            try:del nodetype_and_container_level_memory_usage[nodetype]
+            except:pass
+
         return_dict.update({"memory_usages_analysis" : {
             "nodetype_and_application_level_memory_usages":nodetype_and_application_level_memory_usage,
             "nodetype_and_container_level_memory_usages":nodetype_and_container_level_memory_usage
@@ -344,6 +347,9 @@ class resource_usages:
         del return_dict["cpu_usages"]["nodetype_and_application_level_usages"]
         nodetype_and_container_level_cpu_usage=return_dict["cpu_usages"]["nodetype_and_container_level_usages"]
         del return_dict["cpu_usages"]["nodetype_and_container_level_usages"]
+        for nodetype in exclude_nodetypes:
+            try:del nodetype_and_container_level_cpu_usage[nodetype]
+            except:pass
 
         return_dict.update({"cpu_usages_analysis" : {
             "nodetype_and_application_level_cpu_usages":nodetype_and_application_level_cpu_usage,
