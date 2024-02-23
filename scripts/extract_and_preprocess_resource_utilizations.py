@@ -133,15 +133,15 @@ class resource_usages:
             group_by_hostname_and_app_or_cont=self.groupby_2_cols_and_return_dict(df,'host_name',container_name_or_app_name,for_report,single_level_for_report=True)
             group_by_app_or_cont=self.groupby_a_col_and_return_dict(df,container_name_or_app_name,for_report)
 
-            result[f"{container_name_or_app_name}_level_usage"] = group_by_app_or_cont
-            result[f"hostname_and_{container_name_or_app_name}_level_usage"] = group_by_hostname_and_app_or_cont
-            result[f"nodetype_and_{container_name_or_app_name}_level_usage_for_analysis"] = groupby_nodetype_and_app_or_cont
+            result[f"{container_name_or_app_name}_level_usages"] = group_by_app_or_cont
+            result[f"hostname_and_{container_name_or_app_name}_level_usages"] = group_by_hostname_and_app_or_cont
+            result[f"nodetype_and_{container_name_or_app_name}_level_usages"] = groupby_nodetype_and_app_or_cont
         else:
             group_by_node_type=self.groupby_a_col_and_return_dict(df,'node_type',for_report)
             group_by_host_name=self.groupby_a_col_and_return_dict(df,'host_name',for_report)
             
-            result["nodetype_level_usage"]=group_by_node_type
-            result["hostname_level_usage"]=group_by_host_name
+            result["nodetype_level_usages"]=group_by_node_type
+            result["hostname_level_usages"]=group_by_host_name
         return result
 
 
@@ -326,10 +326,32 @@ class resource_usages:
         return result
     
     def collect_total_usages(self,for_report):
-        return {
+        return_dict = {
             "memory_usages" : self.collect_total_memory_usages(for_report),
             "cpu_usages" : self.collect_total_cpu_usages(for_report)
         }
+        nodetype_and_application_level_memory_usage=return_dict["memory_usages"]["nodetype_and_application_level_usages"]
+        del return_dict["memory_usages"]["nodetype_and_application_level_usages"]
+        nodetype_and_container_level_memory_usage=return_dict["memory_usages"]["nodetype_and_container_level_usages"]
+        del return_dict["memory_usages"]["nodetype_and_container_level_usages"]
+        
+        return_dict.update({"memory_usages_analysis" : {
+            "nodetype_and_application_level_memory_usages":nodetype_and_application_level_memory_usage,
+            "nodetype_and_container_level_memory_usages":nodetype_and_container_level_memory_usage
+        }})
+
+        nodetype_and_application_level_cpu_usage=return_dict["cpu_usages"]["nodetype_and_application_level_usages"]
+        del return_dict["cpu_usages"]["nodetype_and_application_level_usages"]
+        nodetype_and_container_level_cpu_usage=return_dict["cpu_usages"]["nodetype_and_container_level_usages"]
+        del return_dict["cpu_usages"]["nodetype_and_container_level_usages"]
+
+        return_dict.update({"cpu_usages_analysis" : {
+            "nodetype_and_application_level_cpu_usages":nodetype_and_application_level_cpu_usage,
+            "nodetype_and_container_level_cpu_usages":nodetype_and_container_level_cpu_usage
+        }})
+
+        return return_dict
+
 
 if __name__=='__main__':
     print("Testing active connections by app...")
