@@ -366,8 +366,8 @@ if __name__=='__main__':
     import pytz
     format_data = "%Y-%m-%d %H:%M"
     
-    start_time_str = "2024-02-22 02:35"
-    hours=10
+    start_time_str = "2024-02-20 03:28"
+    hours=12
 
     start_time = datetime.strptime(start_time_str, format_data)
     end_time = start_time + timedelta(hours=hours)
@@ -386,7 +386,7 @@ if __name__=='__main__':
     end_utc_time = end_ist_time.astimezone(utc_timezone)
     end_utc_str = end_utc_time.strftime(format_data)
 
-    active_obj = resource_usages(configuration('s1_nodes.json') , start_timestamp,end_timestamp,hours=hours)
+    active_obj = resource_usages(configuration('longevity_nodes.json') , start_timestamp,end_timestamp,hours=hours)
     # total_result_for_querying = active_obj.collect_total_usages(for_report=False)
     total_result_for_report = active_obj.collect_total_usages(for_report=True)
 
