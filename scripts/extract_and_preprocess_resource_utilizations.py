@@ -105,7 +105,7 @@ class resource_usages:
             else:
                 group_df = group_df.reset_index(level=col1,drop=True)
                 all_dfs_dict[index] = group_df.to_dict(orient="index")
-            print(f"DataFrame for index {index}:\n{self.sum_and_sort_cols(group_df)}\n")
+            # print(f"DataFrame for index {index}:\n{self.sum_and_sort_cols(group_df)}\n")
             # print(f"DataFrame for index {index}:\n{group_df}\n")
 
         return all_dfs_dict
@@ -113,7 +113,7 @@ class resource_usages:
     def groupby_a_col_and_return_dict(self,df,col,for_report):
         df=df.groupby(col)[cols_to_aggregate].sum()
         df = df[df[average_column_name] >= usage_threshold]
-        print(self.sum_and_sort_cols(df))
+        # print(self.sum_and_sort_cols(df))
         # print(df)
         if for_report:
             return {
@@ -338,7 +338,7 @@ if __name__=='__main__':
     import pytz
     format_data = "%Y-%m-%d %H:%M"
     
-    start_time_str = "2024-02-13 00:00"
+    start_time_str = "2024-02-22 02:35"
     hours=10
 
     start_time = datetime.strptime(start_time_str, format_data)
