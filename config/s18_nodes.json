@@ -26,6 +26,9 @@
     "stsnodes": [
         
     ],
+    "other_nodes": [
+        
+    ],
     "kubesim_nodes": [
         "s18sim1c",
         "s18sim1d"
