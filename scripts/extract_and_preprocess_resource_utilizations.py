@@ -337,6 +337,8 @@ class resource_usages:
         for nodetype in exclude_nodetypes:
             try:del nodetype_and_container_level_memory_usage[nodetype]
             except:pass
+            try:del nodetype_and_application_level_memory_usage[nodetype]
+            except:pass
 
         return_dict.update({"memory_usages_analysis" : {
             "nodetype_and_application_level_memory_usages":nodetype_and_application_level_memory_usage,
@@ -349,6 +351,8 @@ class resource_usages:
         del return_dict["cpu_usages"]["nodetype_and_container_level_usages"]
         for nodetype in exclude_nodetypes:
             try:del nodetype_and_container_level_cpu_usage[nodetype]
+            except:pass
+            try:del nodetype_and_application_level_cpu_usage[nodetype]
             except:pass
 
         return_dict.update({"cpu_usages_analysis" : {
