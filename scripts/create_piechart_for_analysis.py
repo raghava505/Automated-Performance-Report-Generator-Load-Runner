@@ -7,18 +7,14 @@ outer_background_color="#1A1A1A"
 text_color="#FDFEFE"
 sns.set(rc={"text.color": text_color})
 
-kwargs={'autopct':'%1.1f%%',
-        'startangle':180, 
+kwargs={'startangle':270, 
         'wedgeprops': {'edgecolor': 'black', 'linewidth': 1.0},  # Set edge width
-        'textprops': {'fontsize': 17},  # Increase font size of labels
-        # 'shadow': True,
-        # 'labeldistance': 2.1,  # Increase distance of labels from the center
-        # 'pctdistance': 0.5,  # Set distance of percentage labels from the center
+        'textprops': {'fontsize': 12},  # Increase font size of labels
         'colors' : ['#196F3D', '#873600', '#76448A', '#21618C', '#9C640C', '#717D7E']
         }
 
-figsize=(26, 16)
-title_fontsize=25
+figsize=(25, 13)
+title_fontsize=22
 show_top_n=10
 
 def compare_dfs(main,prev,merge_on):
@@ -32,32 +28,43 @@ def compare_dfs(main,prev,merge_on):
     merged_df=merged_df.sort_values(by='absolute', ascending=False)
     return merged_df
 
+def autopct_format(values,mem_or_cpu):
+    if mem_or_cpu=="memory":
+        unit="GB"
+    else:
+        unit="cores"
+    def my_format(pct):
+        total = sum(values)
+        val = round(float(pct*total/100),2)
+        return '{:.1f}%\n({} {})'.format(pct, val,unit)
+    return my_format
+
 def create_piechart(mem_or_cpu,app_df,cont_df,nodetype):
     increased = app_df[app_df["absolute"] > 0][["application","absolute"]].head(show_top_n)
-    decreased = app_df[app_df["absolute"] < 0][["application","absolute"]].tail(show_top_n)
+    decreased = app_df[app_df["absolute"] < 0][["application","absolute"]].tail(show_top_n).sort_values(by="absolute",ascending=True)
     decreased["absolute"] = decreased["absolute"].abs()
 
-    fig, axs = plt.subplots(2, 2, figsize=figsize)  # 1 row, 2 columns
+    fig, axs = plt.subplots(2, 2, figsize=figsize)  # 2 row, 2 columns
 
-    axs[0][0].pie(increased['absolute'], labels=increased["application"], **kwargs)
+    axs[0][0].pie(increased['absolute'], labels=increased["application"],autopct=autopct_format(increased['absolute'],mem_or_cpu), **kwargs)
     title_increased = f'applications contributing to increase in {mem_or_cpu} usage for {nodetype} nodetype'.capitalize()
     axs[0][0].set_title(title_increased, fontsize=title_fontsize)
 
-    axs[0][1].pie(decreased['absolute'], labels=decreased["application"], **kwargs)
+    axs[0][1].pie(decreased['absolute'], labels=decreased["application"],autopct=autopct_format(decreased['absolute'],mem_or_cpu), **kwargs)
     title_decreased = f'applications contributing to decrease in {mem_or_cpu} usage for {nodetype} nodetype'.capitalize()
     axs[0][1].set_title(title_decreased, fontsize=title_fontsize)
 
 #-----
     
     cont_increased = cont_df[cont_df["absolute"] > 0][["container","absolute"]].head(show_top_n)
-    cont_decreased = cont_df[cont_df["absolute"] < 0][["container","absolute"]].tail(show_top_n)
+    cont_decreased = cont_df[cont_df["absolute"] < 0][["container","absolute"]].tail(show_top_n).sort_values(by="absolute",ascending=True)
     cont_decreased["absolute"] = cont_decreased["absolute"].abs()
 
-    axs[1][0].pie(cont_increased['absolute'], labels=cont_increased["container"], **kwargs)
+    axs[1][0].pie(cont_increased['absolute'], labels=cont_increased["container"],autopct=autopct_format(cont_increased['absolute'],mem_or_cpu), **kwargs)
     cont_title_increased = f'containers contributing to increase in {mem_or_cpu} usage for {nodetype} nodetype'.capitalize()
     axs[1][0].set_title(cont_title_increased, fontsize=title_fontsize)
     
-    axs[1][1].pie(cont_decreased['absolute'], labels=cont_decreased["container"], **kwargs)
+    axs[1][1].pie(cont_decreased['absolute'], labels=cont_decreased["container"],autopct=autopct_format(cont_decreased['absolute'],mem_or_cpu), **kwargs)
     cont_title_decreased = f'containers contributing to decrease in {mem_or_cpu} usage for {nodetype} nodetype'.capitalize()
     axs[1][1].set_title(cont_title_decreased, fontsize=title_fontsize)
                
@@ -70,6 +77,10 @@ def create_piechart(mem_or_cpu,app_df,cont_df,nodetype):
     # app_df.to_csv(f"/Users/masabathulararao/Documents/Loadtest/save-report-data-to-mongo/scripts/csv/{mem_or_cpu}_application_{nodetype}.csv", index=False) 
     # cont_df.to_csv(f"/Users/masabathulararao/Documents/Loadtest/save-report-data-to-mongo/scripts/csv/{mem_or_cpu}_container_{nodetype}.csv", index=False) 
 
+def compress(val):
+    last = val.split('/')[-1]
+    last=last.capitalize()
+    return last
 
 def call_create_piechart(mem_or_cpu,main_dict,prev_dict):
     current_main_dict_application=main_dict[f'nodetype_and_application_level_{mem_or_cpu}_usages']
@@ -101,5 +112,7 @@ def call_create_piechart(mem_or_cpu,main_dict,prev_dict):
         app_df= compare_dfs(main_app_df,prev_app_df,merge_on=["node_type","application"])
         cont_df= compare_dfs(main_cont_df,prev_cont_df,merge_on=["node_type","container"])
 
+        app_df["application"] = app_df["application"].apply(compress)
+        cont_df["container"] = cont_df["container"].apply(compress)
         create_piechart(mem_or_cpu,app_df,cont_df,nodetype)
         
