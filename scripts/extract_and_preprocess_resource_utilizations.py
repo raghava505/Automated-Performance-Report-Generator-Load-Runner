@@ -16,10 +16,12 @@ usage_threshold = 0.03
 def get_exclude_pattern(lst):return '|'.join(lst)
 
 exclude_nodetypes = ["monitor","elk"]
+# include_nodetypes = ["process","data","pg","ep"]
 exclude_applications=[".*osqLogger.*" , ".*redis-server.*" , ".*airflow.*"]
 exclude_containers=[".*tls.*"]
 
 nodetype_exclude_filter = 'node_type!~"^({})$"'.format(get_exclude_pattern(exclude_nodetypes))
+# nodetype_include_filter = 'node_type~"^({})$"'.format(get_exclude_pattern(include_nodetypes))
 app_exclude_filter = 'app_name!~"^({})$"'.format(get_exclude_pattern(exclude_applications))
 cont_exclude_filter = 'container_name!~"^({})$"'.format(get_exclude_pattern(exclude_containers))
 
