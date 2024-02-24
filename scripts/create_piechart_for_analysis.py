@@ -2,11 +2,23 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 import pandas as pd
 
-sns.set_style("whitegrid")
+# sns.set_theme(palette="dark", font="arial")
+outer_background_color="#1A1A1A"
+text_color="#FDFEFE"
+sns.set(rc={"text.color": text_color})
 
-kwargs={'autopct':'%1.1f%%', 'startangle':140, 'colors':sns.color_palette('pastel'), 'wedgeprops':{'edgecolor': 'black'}}
-figsize=(24, 18)
-fontsize=16
+kwargs={'autopct':'%1.1f%%',
+        'startangle':180, 
+        'wedgeprops': {'edgecolor': 'black', 'linewidth': 1.0},  # Set edge width
+        'textprops': {'fontsize': 17},  # Increase font size of labels
+        # 'shadow': True,
+        # 'labeldistance': 2.1,  # Increase distance of labels from the center
+        # 'pctdistance': 0.5,  # Set distance of percentage labels from the center
+        'colors' : ['#196F3D', '#873600', '#76448A', '#21618C', '#9C640C', '#717D7E']
+        }
+
+figsize=(26, 16)
+title_fontsize=25
 show_top_n=10
 
 def compare_dfs(main,prev,merge_on):
@@ -29,11 +41,11 @@ def create_piechart(mem_or_cpu,app_df,cont_df,nodetype):
 
     axs[0][0].pie(increased['absolute'], labels=increased["application"], **kwargs)
     title_increased = f'applications contributing to increase in {mem_or_cpu} usage for {nodetype} nodetype'.capitalize()
-    axs[0][0].set_title(title_increased, fontsize=fontsize)
+    axs[0][0].set_title(title_increased, fontsize=title_fontsize)
 
     axs[0][1].pie(decreased['absolute'], labels=decreased["application"], **kwargs)
     title_decreased = f'applications contributing to decrease in {mem_or_cpu} usage for {nodetype} nodetype'.capitalize()
-    axs[0][1].set_title(title_decreased, fontsize=fontsize)
+    axs[0][1].set_title(title_decreased, fontsize=title_fontsize)
 
 #-----
     
@@ -43,26 +55,18 @@ def create_piechart(mem_or_cpu,app_df,cont_df,nodetype):
 
     axs[1][0].pie(cont_increased['absolute'], labels=cont_increased["container"], **kwargs)
     cont_title_increased = f'containers contributing to increase in {mem_or_cpu} usage for {nodetype} nodetype'.capitalize()
-    axs[1][0].set_title(cont_title_increased, fontsize=fontsize)
-
+    axs[1][0].set_title(cont_title_increased, fontsize=title_fontsize)
+    
     axs[1][1].pie(cont_decreased['absolute'], labels=cont_decreased["container"], **kwargs)
     cont_title_decreased = f'containers contributing to decrease in {mem_or_cpu} usage for {nodetype} nodetype'.capitalize()
-    axs[1][1].set_title(cont_title_decreased, fontsize=fontsize)
-
+    axs[1][1].set_title(cont_title_decreased, fontsize=title_fontsize)
+               
+    plt.gcf().set_facecolor(outer_background_color)
+    # plt.subplots_adjust(wspace=0.5) 
 
     plt.tight_layout()
     plt.savefig(f"/Users/masabathulararao/Documents/Loadtest/save-report-data-to-mongo/scripts/csv/{mem_or_cpu}_{nodetype}.png")
 
-    # plt.pie(increased['absolute'], labels=increased[app_or_cont],**kwargs)
-    # title_increased = f'{app_or_cont}s contributing to increase in {mem_or_cpu} usage for {nodetype} nodetype'.capitalize()
-    # plt.title(title_increased, fontsize=fontsize)
-    # plt.savefig(f"/Users/masabathulararao/Documents/Loadtest/save-report-data-to-mongo/scripts/csv/{mem_or_cpu}_{app_or_cont}_{nodetype}_increased.png")
-    
-    # plt.pie(decreased['absolute'], labels=decreased[app_or_cont],**kwargs)
-    # title_decreased=f'{app_or_cont}s contributing to decrease in {mem_or_cpu} usage for {nodetype} nodetype'.capitalize()
-    # plt.title(title_decreased, fontsize=fontsize)
-    # plt.savefig(f"/Users/masabathulararao/Documents/Loadtest/save-report-data-to-mongo/scripts/csv/{mem_or_cpu}_{app_or_cont}_{nodetype}_decreased.png")
-    
     # app_df.to_csv(f"/Users/masabathulararao/Documents/Loadtest/save-report-data-to-mongo/scripts/csv/{mem_or_cpu}_application_{nodetype}.csv", index=False) 
     # cont_df.to_csv(f"/Users/masabathulararao/Documents/Loadtest/save-report-data-to-mongo/scripts/csv/{mem_or_cpu}_container_{nodetype}.csv", index=False) 
 
