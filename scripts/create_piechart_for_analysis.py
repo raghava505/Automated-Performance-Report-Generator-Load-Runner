@@ -1,6 +1,8 @@
 import matplotlib.pyplot as plt
 import seaborn as sns
 import pandas as pd
+from PIL import Image
+import io
 
 # sns.set_theme(palette="dark", font="arial")
 outer_background_color="#1A1A1A"
@@ -94,7 +96,14 @@ def create_piechart(mem_or_cpu,app_df,cont_df,nodetype):
 
     # app_df.to_csv(f"/Users/masabathulararao/Documents/Loadtest/save-report-data-to-mongo/scripts/csv/{mem_or_cpu}_application_{nodetype}.csv", index=False) 
     # cont_df.to_csv(f"/Users/masabathulararao/Documents/Loadtest/save-report-data-to-mongo/scripts/csv/{mem_or_cpu}_container_{nodetype}.csv", index=False) 
-    plots_dict[main_title] = plt
+    buffer = io.BytesIO()
+    plt.savefig(buffer, format='png')
+    buffer.seek(0)  # Reset the buffer position
+    
+    image = Image.open(buffer)
+    plt.close()
+    
+    plots_dict[main_title] = image
     return plots_dict
 
 def compress(val):
@@ -139,5 +148,9 @@ def call_create_piechart(mem_or_cpu,main_dict,prev_dict):
         app_df["application"] = app_df["application"].apply(compress)
         cont_df["container"] = cont_df["container"].apply(compress)
         return_piecharts.update(create_piechart(mem_or_cpu,app_df,cont_df,nodetype))
+    
+    # for title,im in return_piecharts.items():
+    #     im.show(title=title)
+
     return return_piecharts
         
