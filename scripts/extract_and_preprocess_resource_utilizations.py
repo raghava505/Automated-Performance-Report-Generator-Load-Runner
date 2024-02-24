@@ -15,7 +15,7 @@ usage_threshold = 0.03
 
 def get_exclude_pattern(lst):return '|'.join(lst)
 
-exclude_nodetypes = ["monitor","elk"]
+exclude_nodetypes = ["monitor","elk","cloudquery","ghdeployer","kubemaster","memgraph","airflow"]
 # include_nodetypes = ["process","data","pg","ep"]
 exclude_applications=[".*osqLogger.*" , ".*redis-server.*" , ".*airflow.*"]
 exclude_containers=[".*tls.*"]
