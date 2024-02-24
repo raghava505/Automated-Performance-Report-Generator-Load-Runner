@@ -86,7 +86,7 @@ def create_piechart(mem_or_cpu,app_df,cont_df,nodetype):
     cont_title_decreased = f'containers contributing to {"decrease".upper()} in {mem_or_cpu} usage for "{nodetype}" nodetype ({sum_cont_decreased} {unit} ↓)'
     axs[1][1].set_title(cont_title_decreased, fontsize=title_fontsize)
 
-    main_title=f"Complete {mem_or_cpu} analysis for '{nodetype}' nodetype"
+    main_title=f"Complete {mem_or_cpu} usage analysis for '{nodetype}' nodetype"
     fig.suptitle(f"{main_title}\n\n", fontsize=title_fontsize+2)
 
     plt.gcf().set_facecolor(outer_background_color)
