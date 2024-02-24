@@ -43,6 +43,7 @@ def autopct_format(values,mem_or_cpu,sign='+'):
     return my_format
 
 def create_piechart(mem_or_cpu,app_df,cont_df,nodetype):
+    plots_dict={}
     if mem_or_cpu=="memory":
         unit="GB"
     else:
@@ -83,15 +84,18 @@ def create_piechart(mem_or_cpu,app_df,cont_df,nodetype):
     cont_title_decreased = f'containers contributing to {"decrease".upper()} in {mem_or_cpu} usage for "{nodetype}" nodetype ({sum_cont_decreased} {unit} ↓)'
     axs[1][1].set_title(cont_title_decreased, fontsize=title_fontsize)
 
-    fig.suptitle(f"Complete {mem_or_cpu} analysis for '{nodetype}' nodetype\n\n", fontsize=title_fontsize+2)
+    main_title=f"Complete {mem_or_cpu} analysis for '{nodetype}' nodetype"
+    fig.suptitle(f"{main_title}\n\n", fontsize=title_fontsize+2)
 
     plt.gcf().set_facecolor(outer_background_color)
     # plt.subplots_adjust(left=10.1, right=10.9, bottom=0.1, top=0.9, wspace=70.4, hspace=700.4)
     plt.tight_layout()
-    plt.savefig(f"/Users/masabathulararao/Documents/Loadtest/save-report-data-to-mongo/scripts/csv/{mem_or_cpu}_{nodetype}.png")
+    # plt.savefig(f"/Users/masabathulararao/Documents/Loadtest/save-report-data-to-mongo/scripts/csv/{mem_or_cpu}_{nodetype}.png")
 
     # app_df.to_csv(f"/Users/masabathulararao/Documents/Loadtest/save-report-data-to-mongo/scripts/csv/{mem_or_cpu}_application_{nodetype}.csv", index=False) 
     # cont_df.to_csv(f"/Users/masabathulararao/Documents/Loadtest/save-report-data-to-mongo/scripts/csv/{mem_or_cpu}_container_{nodetype}.csv", index=False) 
+    plots_dict[main_title] = plt
+    return plots_dict
 
 def compress(val):
     last = val.split('/')[-1]
@@ -106,7 +110,9 @@ def call_create_piechart(mem_or_cpu,main_dict,prev_dict):
 
     current_main_dict_container=main_dict[f'nodetype_and_container_level_{mem_or_cpu}_usages']
     current_prev_dict_container=prev_dict[f'nodetype_and_container_level_{mem_or_cpu}_usages']
+    return_piecharts={}
     for nodetype,schema_dict in current_main_dict_application.items():
+        if nodetype not in ["process","data","pg","ep"]:continue
         print(f"Analysing {mem_or_cpu} usages for nodetype '{nodetype}'")
         main_app_df = pd.DataFrame(schema_dict["table"])
         prev_app_df = pd.DataFrame(current_prev_dict_application[nodetype]["table"])
@@ -132,5 +138,6 @@ def call_create_piechart(mem_or_cpu,main_dict,prev_dict):
 
         app_df["application"] = app_df["application"].apply(compress)
         cont_df["container"] = cont_df["container"].apply(compress)
-        create_piechart(mem_or_cpu,app_df,cont_df,nodetype)
+        return_piecharts.update(create_piechart(mem_or_cpu,app_df,cont_df,nodetype))
+    return return_piecharts
         
