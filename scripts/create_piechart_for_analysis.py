@@ -5,20 +5,20 @@ from PIL import Image
 import io
 
 # sns.set_theme(palette="dark", font="arial")
-outer_background_color="#1A1A1A"
+outer_background_color="#191b1f"
 text_color="#FDFEFE"
 sns.set(rc={"text.color": text_color})
 
 kwargs={'startangle':270, 
         'wedgeprops': {'edgecolor': 'black', 'linewidth': 1.0},  # Set edge width
         'textprops': {'fontsize': 11},  # Increase font size of labels
-        'colors' : ['#196F3D', '#873600', '#76448A', '#21618C', '#9C640C', '#717D7E'],
+        'colors' : ['#145A32','#641E16','#154360','#7D6608','#4A235A','#424949','#784212'],
         'rotatelabels':True,
-        'labeldistance':0.8,
-        'pctdistance':0.5
+        'labeldistance':0.9,
+        'pctdistance':0.7,
         }
 
-figsize=(27, 14)
+figsize=(27, 15)
 title_fontsize=18
 show_top_n=10
 
@@ -150,7 +150,8 @@ def call_create_piechart(mem_or_cpu,main_dict,prev_dict):
         return_piecharts.update(create_piechart(mem_or_cpu,app_df,cont_df,nodetype))
     
     # for title,im in return_piecharts.items():
-    #     im.show(title=title)
+    #     # im.show(title=title)
+    #     im.save("/Users/masabathulararao/Documents/Loadtest/save-report-data-to-mongo/scripts/csv/"+title+".png")
 
     return return_piecharts
         
