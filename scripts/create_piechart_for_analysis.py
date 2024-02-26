@@ -159,9 +159,9 @@ def call_create_piechart(mem_or_cpu,main_dict,prev_dict):
         cont_df["container"] = cont_df["container"].apply(compress)
         return_piecharts.update(create_piechart(mem_or_cpu,app_df,cont_df,nodetype))
     
-    for title,im in return_piecharts.items():
-        # im.show(title=title)
-        im.save("/Users/masabathulararao/Documents/Loadtest/save-report-data-to-mongo/scripts/csv/"+title+".png")
+    # for title,im in return_piecharts.items():
+    #     # im.show(title=title)
+    #     im.save("/Users/masabathulararao/Documents/Loadtest/save-report-data-to-mongo/scripts/csv/"+title+".png")
 
     return return_piecharts
         
