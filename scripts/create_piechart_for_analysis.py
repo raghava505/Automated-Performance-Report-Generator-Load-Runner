@@ -20,7 +20,7 @@ kwargs={'startangle':270,
 
 figsize=(27, 15)
 title_fontsize=18
-show_top_n=10
+threshold_to_consider_as_less_contributors=2
 
 def compare_dfs(main,prev,merge_on):
     main.rename(columns={'avg': 'avg_main'}, inplace=True)
@@ -44,6 +44,14 @@ def autopct_format(values,mem_or_cpu,sign='+'):
         return '{:.1f}%\n({}{} {})'.format(pct,sign, val,unit)
     return my_format
 
+def compress_less_contributors(df,app_or_cont):
+    sum_absolute = df["absolute"].sum()
+    df["contributions"] = df["absolute"]*100/sum_absolute
+    less_contri = df[df["contributions"]<threshold_to_consider_as_less_contributors]
+    new_df = df[df["contributions"]>=threshold_to_consider_as_less_contributors]
+    new_df=new_df._append({app_or_cont:f"others ({len(less_contri)})","absolute":less_contri["absolute"].sum()},ignore_index=True)
+    return new_df
+
 def create_piechart(mem_or_cpu,app_df,cont_df,nodetype):
     plots_dict={}
     if mem_or_cpu=="memory":
@@ -52,10 +60,11 @@ def create_piechart(mem_or_cpu,app_df,cont_df,nodetype):
         unit="cores"
     increased = app_df[app_df["absolute"] > 0][["application","absolute"]]
     sum_app_increased = round(sum(increased["absolute"]),2)
-    increased=increased.head(show_top_n)
+    increased = compress_less_contributors(increased,"application")
     decreased = app_df[app_df["absolute"] < 0][["application","absolute"]]
     sum_app_decreased = round(sum(decreased["absolute"]),2)
-    decreased=decreased.tail(show_top_n).sort_values(by="absolute",ascending=True)
+    decreased=decreased.sort_values(by="absolute",ascending=True)
+    decreased = compress_less_contributors(decreased,"application")
     decreased["absolute"] = decreased["absolute"].abs()
 
     fig, axs = plt.subplots(2, 2, figsize=figsize)  # 2 row, 2 columns
@@ -72,10 +81,11 @@ def create_piechart(mem_or_cpu,app_df,cont_df,nodetype):
     
     cont_increased = cont_df[cont_df["absolute"] > 0][["container","absolute"]]
     sum_cont_increased = round(sum(cont_increased["absolute"]),2)
-    cont_increased=cont_increased.head(show_top_n)
+    cont_increased = compress_less_contributors(cont_increased,"container")
     cont_decreased = cont_df[cont_df["absolute"] < 0][["container","absolute"]]
     sum_cont_decreased = round(sum(cont_decreased["absolute"]),2)
-    cont_decreased=cont_decreased.tail(show_top_n).sort_values(by="absolute",ascending=True)
+    cont_decreased=cont_decreased.sort_values(by="absolute",ascending=True)
+    cont_decreased = compress_less_contributors(cont_decreased,"container")
     cont_decreased["absolute"] = cont_decreased["absolute"].abs()
 
     axs[1][0].pie(cont_increased['absolute'], labels=cont_increased["container"],autopct=autopct_format(cont_increased['absolute'],mem_or_cpu), **kwargs)
