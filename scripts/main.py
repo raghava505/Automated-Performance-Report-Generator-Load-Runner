@@ -134,9 +134,9 @@ if __name__ == "__main__":
             print(f"you have already saved the details for this load in this sprint, setting run value to {run}")
         #-------------------------real time query test details--------------------------
         realtime_query_results=None
-        if domain=="longevity": 
-            print(f"Performing realtime query test on stack '{test_env_json_details['stack']}' ...")
-            realtime_query_results=realtime_query()
+        # if domain=="longevity": 
+        #     print(f"Performing realtime query test on stack '{test_env_json_details['stack']}' ...")
+        #     realtime_query_results=realtime_query()
         #-------------------------disk space--------------------------
         disk_space_usage_dict=None
         if variables["load_name"] != "ControlPlane":
