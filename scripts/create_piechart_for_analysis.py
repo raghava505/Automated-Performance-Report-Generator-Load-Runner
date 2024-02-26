@@ -10,12 +10,12 @@ text_color="#FDFEFE"
 sns.set(rc={"text.color": text_color})
 
 kwargs={'startangle':270, 
-        'wedgeprops': {'edgecolor': 'black', 'linewidth': 1.0},  # Set edge width
+        'wedgeprops': {'edgecolor': outer_background_color, 'linewidth': 1.0},  # Set edge width
         'textprops': {'fontsize': 11},  # Increase font size of labels
         'colors' : ['#145A32','#641E16','#154360','#7D6608','#4A235A','#424949','#784212'],
-        'rotatelabels':True,
-        'labeldistance':0.9,
-        'pctdistance':0.7,
+        'rotatelabels':False,
+        'labeldistance':1.01,
+        'pctdistance':0.75,
         }
 
 figsize=(27, 15)
