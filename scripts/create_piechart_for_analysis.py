@@ -12,7 +12,7 @@ sns.set(rc={"text.color": text_color})
 kwargs={'startangle':270, 
         'wedgeprops': {'edgecolor': outer_background_color, 'linewidth': 1.0},  # Set edge width
         'textprops': {'fontsize': 11},  # Increase font size of labels
-        'colors' : ['#234300','#154360','#641E16','#7D6608',"#004009",'#4A148C','#6E2C00','#880E4F',"#330066","#7D4D00"],
+        'colors' : ['#234300','#154360','#641E16','#7D6608',"#002F01",'#4A148C','#6E2C00','#880E4F',"#330066","#7D4D00"],
         'rotatelabels':False,
         'labeldistance':1.01,
         'pctdistance':0.75,
@@ -159,9 +159,9 @@ def call_create_piechart(mem_or_cpu,main_dict,prev_dict):
         cont_df["container"] = cont_df["container"].apply(compress)
         return_piecharts.update(create_piechart(mem_or_cpu,app_df,cont_df,nodetype))
     
-    for title,im in return_piecharts.items():
-        # im.show(title=title)
-        im.save("/Users/masabathulararao/Documents/Loadtest/save-report-data-to-mongo/scripts/csv/"+title+".png")
+    # for title,im in return_piecharts.items():
+    #     # im.show(title=title)
+    #     im.save("/Users/masabathulararao/Documents/Loadtest/save-report-data-to-mongo/scripts/csv/"+title+".png")
 
     return return_piecharts
         
