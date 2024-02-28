@@ -372,8 +372,8 @@ if __name__=='__main__':
     import pytz
     format_data = "%Y-%m-%d %H:%M"
     
-    start_time_str = "2024-02-20 03:28"
-    hours=12
+    start_time_str = "2024-02-17 04:57"
+    hours=60
 
     start_time = datetime.strptime(start_time_str, format_data)
     end_time = start_time + timedelta(hours=hours)
