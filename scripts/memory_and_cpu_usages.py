@@ -43,7 +43,7 @@ class MC_comparisions:
                 print("All hosts : ", [r['metric']['host_name'] for r in result])
             for res in result:
                 hostname = res['metric']['host_name']
-                print(f"Processing node-level {tag} usage for {query} : {hostname}")
+                # print(f"Processing node-level {tag} usage for {query} : {hostname}")
                 if str(hostname).endswith('v') and len(hostname)>1:
                     hostname = str(hostname)[:-1]
                 values = [float(i[1]) for i in res['values']]   
@@ -110,7 +110,7 @@ class MC_comparisions:
             result = response.json()['data']['result']
             for res in result:
                 container_name = res['metric']['container_name']
-                print(f"Processing container-level {tag} usage for {query} : {container_name}")
+                # print(f"Processing container-level {tag} usage for {query} : {container_name}")
                 values = [float(i[1]) for i in res['values']]   
                 avg = sum(values) / len(values)
                 minimum = min(values)
@@ -182,7 +182,7 @@ class MC_comparisions:
             "application_level_cpu_queries":app_level_cpu_queries,
         }
 
-        print(json.dumps(all_queries_to_execute, indent=4))
+        # print(json.dumps(all_queries_to_execute, indent=4))
 
         memory_data,overall_memory_data = self.extract_data(memory_queries,memory_tag,memory_unit)
         cpu_data,overall_cpu_data = self.extract_data(cpu_queries,cpu_tag,cpu_unit)
