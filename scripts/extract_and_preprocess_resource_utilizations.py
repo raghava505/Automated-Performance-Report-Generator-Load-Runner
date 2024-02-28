@@ -121,7 +121,7 @@ class resource_usages:
     def groupby_a_col_and_return_dict(self,df,col,for_report):
         df=df.groupby(col)[cols_to_aggregate].sum()
         df = df[df[average_column_name] >= usage_threshold]
-        # print(self.sum_and_sort_cols(df))
+        print(self.sum_and_sort_cols(df.copy()))
         # print(df)
         if for_report:
             return {
@@ -370,6 +370,14 @@ class resource_usages:
         }})
 
         return return_dict
+    
+    def get_complete_result(self):
+        total_result_for_report=self.collect_total_usages(for_report=True)
+        total_result_for_querying=self.collect_total_usages(for_report=False)
+        return {
+            "resource_utilization_for_report":total_result_for_report,
+            "resource_utilization_for_querying":total_result_for_querying
+        }
 
 
 if __name__=='__main__':
