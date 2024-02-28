@@ -88,7 +88,8 @@ class resource_usages:
             all_dfs_dict={
                 "schema":{
                     "merge_on_cols" : [col1,col2],
-                    "compare_cols":cols_to_compare
+                    "compare_cols":cols_to_compare,
+                    "display_exact_table":False
                 },
                 "table":[]
             }
@@ -106,7 +107,8 @@ class resource_usages:
                     all_dfs_dict[index] = {
                                 "schema":{
                                     "merge_on_cols" : [col1,col2],
-                                    "compare_cols":cols_to_compare
+                                    "compare_cols":cols_to_compare,
+                                    "display_exact_table":False
                                 },
                                 "table":group_df.to_dict(orient="records")
                     }
@@ -127,7 +129,8 @@ class resource_usages:
             return {
                 "schema":{
                     "merge_on_cols" : [col],
-                    "compare_cols":cols_to_compare
+                    "compare_cols":cols_to_compare,
+                    "display_exact_table":False
                 },
                 "table":df.reset_index().to_dict(orient="records")
             }
