@@ -29,6 +29,7 @@ from active_conn_by_apps import Active_conn
 from realtimequery_tests.real_time_query import realtime_query
 from bson import ObjectId
 from pg_badger import return_pgbadger_results,get_and_save_pgb_html
+from extract_and_preprocess_resource_utilizations import resource_usages
 
 import logging
 import argparse
@@ -265,6 +266,11 @@ if __name__ == "__main__":
         comp = MC_comparisions(start_timestamp=start_timestamp,end_timestamp=end_timestamp,prom_con_obj=prom_con_obj)
         mem_cpu_usages_dict,overall_usage_dict=comp.make_comparisions(load_cls.common_app_names)
         
+        #--------------------------------complete resource extraction---------------------------------------
+        complete_resource_details={}
+        resource_obj=resource_usages(prom_con_obj,start_timestamp,end_timestamp,hours=variables["load_duration_in_hrs"],include_nodetypes=load_cls.hostname_types)
+        complete_resource_details=resource_obj.get_complete_result()
+
         #-------------------------Cloudquery Accuracies----------------------------
         cloudquery_accuracies=None
         if variables["load_type"] in ["CloudQuery","osquery_cloudquery_combined","all_loads_combined"]:
@@ -351,6 +357,8 @@ if __name__ == "__main__":
                 final_data_to_save.update({"Presto Load details":presto_load_result_dict})
             if realtime_query_results:
                 final_data_to_save.update({"Realtime query test results":realtime_query_results})
+            if complete_resource_details:
+                final_data_to_save.update(complete_resource_details)
 
 
             final_data_to_save.update({"charts":complete_charts_data_dict})
