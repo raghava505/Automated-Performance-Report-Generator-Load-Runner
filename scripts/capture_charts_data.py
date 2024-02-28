@@ -48,12 +48,10 @@ class Charts:
         return final,file_ids
             
     def capture_charts_and_save(self,all_chart_queries): 
-        print("All chart queries to be executed are:")
-
         all_gridfs_fileids = []
         final_dict={}
         for key,value in all_chart_queries.items():
-            print(f"-----------Processing {key} queries-----------")
+            print(f"----------------------Processing {key} queries----------------------")
             final_dict[key],file_ids = self.extract_charts_data(value)
             all_gridfs_fileids.extend(file_ids)
         return final_dict,all_gridfs_fileids
