@@ -41,7 +41,9 @@ class all_combined_child(parent):
     @classmethod
     @property
     def hostname_types(cls):
-        return ["process","data","pg","ep"]
+        temp = copy.deepcopy(parent.hostname_types)
+        temp.extend(["ep","memgraph","cloudquery"])
+        return temp
 
     @classmethod
     @property

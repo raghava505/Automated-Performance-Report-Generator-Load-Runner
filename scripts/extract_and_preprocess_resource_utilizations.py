@@ -30,7 +30,7 @@ def get_exclude_filter(exclude_nodetypes):
 
 
 class resource_usages:
-    def __init__(self,prom_con_obj,start_timestamp,end_timestamp,hours,include_nodetypes=["process","data","pg"]):
+    def __init__(self,prom_con_obj,start_timestamp,end_timestamp,hours,include_nodetypes=["process","data","pg","airflow"]):
         self.start_timestamp=start_timestamp
         self.end_timestamp=end_timestamp
         self.hours=hours
@@ -60,6 +60,7 @@ class resource_usages:
         self.all_node_types=list(self.all_node_types_mapping.keys())
         print("All nodetypes found are : " , self.all_node_types)
         
+        print("Include nodetypes are : ",include_nodetypes)
         self.exclude_nodetypes = set(self.all_node_types).difference(set(include_nodetypes))
         self.exclude_filter = get_exclude_filter(self.exclude_nodetypes)
 
