@@ -134,10 +134,18 @@ def call_create_piechart(mem_or_cpu,main_dict,prev_dict):
         # if nodetype not in ["process","data","pg","ep"]:continue
         print(f"Analysing {mem_or_cpu} usages for nodetype '{nodetype}'")
         main_app_df = pd.DataFrame(schema_dict["table"])
-        prev_app_df = pd.DataFrame(current_prev_dict_application[nodetype]["table"])
-
-        main_cont_df = pd.DataFrame(current_main_dict_container[nodetype]["table"])
-        prev_cont_df = pd.DataFrame(current_prev_dict_container[nodetype]["table"])
+        try:prev_app_df = pd.DataFrame(current_prev_dict_application[nodetype]["table"])
+        except:
+            print(f"prev application dataframe for {nodetype} doesn't exist, skipping analysis for {nodetype}-{mem_or_cpu}")
+            continue
+        try:main_cont_df = pd.DataFrame(current_main_dict_container[nodetype]["table"])
+        except:
+            print(f"main container dataframe for {nodetype} doesn't exist, skipping analysis for {nodetype}-{mem_or_cpu}")
+            continue
+        try:prev_cont_df = pd.DataFrame(current_prev_dict_container[nodetype]["table"])
+        except:
+            print(f"prev container dataframe for {nodetype} doesn't exist, skipping analysis for {nodetype}-{mem_or_cpu}")
+            continue
 
         if main_app_df.empty:
             print(f"Main application dataframe for {nodetype} is found empty")
