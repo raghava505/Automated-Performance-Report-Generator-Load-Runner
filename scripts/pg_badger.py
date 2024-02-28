@@ -172,9 +172,9 @@ def get_and_save_pgb_html(start_time_utc,end_time_utc,elastic_url,base_save_path
    
 
 if __name__=="__main__":
-    start_time_ist_str="2024-02-16 14:00"
-    end_time_ist_str="2024-02-17 00:00"
-    elastic_url="192.168.129.52"
+    start_time_ist_str="2024-02-26 14:00"
+    end_time_ist_str="2024-02-27 00:00"
+    elastic_url="192.168.131.50"
 
     BASE_PGBADGER_IMAGES_PATH = os.path.join("/Users/masabathulararao/Documents/Loadtest",'pgbadger_im')
     os.makedirs(BASE_PGBADGER_IMAGES_PATH,exist_ok=True)
