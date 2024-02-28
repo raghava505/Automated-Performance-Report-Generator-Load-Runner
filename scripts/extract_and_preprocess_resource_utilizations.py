@@ -185,7 +185,7 @@ class resource_usages:
             compressed_application_level_final_memory_result=[]
             compressed_application_level_memory_query_result=execute_prometheus_query(self.prom_con_obj,self.start_timestamp,self.end_timestamp,compressed,self.hours)
             for line in compressed_application_level_memory_query_result:
-
+                if line["metric"]["node_type"] in exclude_nodetypes:continue
                 compressed_application_level_final_memory_result.append({
                     "node_type":line["metric"]["node_type"],
                     "host_name":line["metric"]["host_name"],
@@ -204,7 +204,7 @@ class resource_usages:
         container_level_final_memory_result=[]
         container_level_memory_query_result=execute_prometheus_query(self.prom_con_obj,self.start_timestamp,self.end_timestamp,container_level_memory_query,self.hours)
         for line in container_level_memory_query_result:
-
+            if self.host_name_type_mapping[line["metric"]["host_name"]] in exclude_nodetypes:continue
             container_level_final_memory_result.append({
                 "node_type":self.host_name_type_mapping[line["metric"]["host_name"]],
                 "host_name":line["metric"]["host_name"],
@@ -221,7 +221,7 @@ class resource_usages:
             compressed_container_level_final_memory_result=[]
             compressed_container_level_memory_query_result=execute_prometheus_query(self.prom_con_obj,self.start_timestamp,self.end_timestamp,compressed_container_level_memory_query,self.hours)
             for line in compressed_container_level_memory_query_result:
-
+                if self.host_name_type_mapping[line["metric"]["host_name"]] in exclude_nodetypes:continue
                 compressed_container_level_final_memory_result.append({
                     "node_type":self.host_name_type_mapping[line["metric"]["host_name"]],
                     "host_name":line["metric"]["host_name"],
@@ -275,6 +275,7 @@ class resource_usages:
             compressed_application_level_final_cpu_result=[]
             compressed_application_level_cpu_query_result=execute_prometheus_query(self.prom_con_obj,self.start_timestamp,self.end_timestamp,compressed_application_level_cpu_query,self.hours)
             for line in compressed_application_level_cpu_query_result:
+                if line["metric"]["node_type"] in exclude_nodetypes:continue
                 compressed_application_level_final_cpu_result.append({
                     "node_type":line["metric"]["node_type"],
                     "host_name":line["metric"]["host_name"],
@@ -293,7 +294,7 @@ class resource_usages:
         container_level_final_cpu_result=[]
         container_level_cpu_query_result=execute_prometheus_query(self.prom_con_obj,self.start_timestamp,self.end_timestamp,container_level_cpu_query,self.hours)
         for line in container_level_cpu_query_result:
-
+            if self.host_name_type_mapping[line["metric"]["host_name"]] in exclude_nodetypes:continue
             container_level_final_cpu_result.append({
                 "node_type":self.host_name_type_mapping[line["metric"]["host_name"]],
                 "host_name":line["metric"]["host_name"],
@@ -310,7 +311,7 @@ class resource_usages:
             exclude_container_level_final_cpu_result=[]
             exclude_container_level_cpu_query_result=execute_prometheus_query(self.prom_con_obj,self.start_timestamp,self.end_timestamp,exclude_container_level_cpu_query,self.hours)
             for line in exclude_container_level_cpu_query_result:
-
+                if self.host_name_type_mapping[line["metric"]["host_name"]] in exclude_nodetypes:continue
                 exclude_container_level_final_cpu_result.append({
                     "node_type":self.host_name_type_mapping[line["metric"]["host_name"]],
                     "host_name":line["metric"]["host_name"],
@@ -336,11 +337,11 @@ class resource_usages:
         del return_dict["memory_usages"]["nodetype_and_application_level_usages"]
         nodetype_and_container_level_memory_usage=return_dict["memory_usages"]["nodetype_and_container_level_usages"]
         del return_dict["memory_usages"]["nodetype_and_container_level_usages"]
-        for nodetype in exclude_nodetypes:
-            try:del nodetype_and_container_level_memory_usage[nodetype]
-            except:pass
-            try:del nodetype_and_application_level_memory_usage[nodetype]
-            except:pass
+        # for nodetype in exclude_nodetypes:
+        #     try:del nodetype_and_container_level_memory_usage[nodetype]
+        #     except:pass
+        #     try:del nodetype_and_application_level_memory_usage[nodetype]
+        #     except:pass
 
         return_dict.update({"memory_usages_analysis" : {
             "nodetype_and_application_level_memory_usages":nodetype_and_application_level_memory_usage,
@@ -351,11 +352,11 @@ class resource_usages:
         del return_dict["cpu_usages"]["nodetype_and_application_level_usages"]
         nodetype_and_container_level_cpu_usage=return_dict["cpu_usages"]["nodetype_and_container_level_usages"]
         del return_dict["cpu_usages"]["nodetype_and_container_level_usages"]
-        for nodetype in exclude_nodetypes:
-            try:del nodetype_and_container_level_cpu_usage[nodetype]
-            except:pass
-            try:del nodetype_and_application_level_cpu_usage[nodetype]
-            except:pass
+        # for nodetype in exclude_nodetypes:
+        #     try:del nodetype_and_container_level_cpu_usage[nodetype]
+        #     except:pass
+        #     try:del nodetype_and_application_level_cpu_usage[nodetype]
+        #     except:pass
 
         return_dict.update({"cpu_usages_analysis" : {
             "nodetype_and_application_level_cpu_usages":nodetype_and_application_level_cpu_usage,
