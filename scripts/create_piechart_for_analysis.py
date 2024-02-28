@@ -131,7 +131,7 @@ def call_create_piechart(mem_or_cpu,main_dict,prev_dict):
     current_prev_dict_container=prev_dict[f'nodetype_and_container_level_{mem_or_cpu}_usages']
     return_piecharts={}
     for nodetype,schema_dict in current_main_dict_application.items():
-        if nodetype not in ["process","data","pg","ep"]:continue
+        # if nodetype not in ["process","data","pg","ep"]:continue
         print(f"Analysing {mem_or_cpu} usages for nodetype '{nodetype}'")
         main_app_df = pd.DataFrame(schema_dict["table"])
         prev_app_df = pd.DataFrame(current_prev_dict_application[nodetype]["table"])
