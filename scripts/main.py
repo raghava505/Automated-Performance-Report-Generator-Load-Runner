@@ -208,19 +208,19 @@ if __name__ == "__main__":
 
         #-------------------------Kubequery Accuracies----------------------------
         kubequery_accuracies=None
-        if variables["load_name"] == "KubeQuery_SingleCustomer" or variables["load_type"] in ["all_loads_combined"]:
+        if variables["load_name"] in ["KubeQuery_SingleCustomer","KubeQuery_and_SelfManaged_Combined"] or variables["load_type"] in ["all_loads_combined"]:
             print("Calculating accuracies for KubeQuery ...")
             accuracy = Kube_Accuracy(start_timestamp=start_utc_time,end_timestamp=end_utc_time,prom_con_obj=prom_con_obj,variables=variables)
             kubequery_accuracies = accuracy.accuracy_kubernetes()
-            print(json.dumps(kubequery_accuracies, indent=4))
+            print(json.dumps(kubequery_accuracies, indent=2))
 
         #-------------------------SelfManaged Accuracies----------------------------
         selfmanaged_accuracies=None
-        if variables["load_name"] == "SelfManaged_SingleCustomer" or variables["load_type"] in ["all_loads_combined"]:
+        if variables["load_name"] in ["SelfManaged_SingleCustomer","KubeQuery_and_SelfManaged_Combined"] or variables["load_type"] in ["all_loads_combined"]:
             print("Calculating accuracies for SelfManaged ...")
             accuracy = SelfManaged_Accuracy(start_timestamp=start_utc_time,end_timestamp=end_utc_time,prom_con_obj=prom_con_obj,variables=variables)
             selfmanaged_accuracies = accuracy.accuracy_selfmanaged()
-            print(json.dumps(selfmanaged_accuracies, indent=4))
+            print(json.dumps(selfmanaged_accuracies, indent=2))
 
         #-------------------------Azure Load Accuracies----------------------------
         azure_accuracies=None
