@@ -17,7 +17,7 @@ load_type_options = {
                                         'class':cloudquery_child
                                      },
                         'KubeQuery_and_SelfManaged':{
-                                        'subtypes':['KubeQuery_SingleCustomer','SelfManaged_SingleCustomer'],
+                                        'subtypes':['KubeQuery_SingleCustomer','SelfManaged_SingleCustomer','KubeQuery_and_SelfManaged_Combined'],
                                         'class':kubequery_child
                                     } ,
                         # 'osquery_cloudquery_combined':{
