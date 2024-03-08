@@ -17,11 +17,13 @@ class kubequery_child(parent):
             }, 
                 "KubeQuery_and_SelfManaged_Combined": {
                 "test_title": "KubeQuery_and_SelfManaged_Combined",
-                "total_number_of_customers for Kubernetes Load": 1,
+                "total_number_of_customers_for_Kubequery": 1,
                 "total_number_of_clusters": 20,
-                "total_assets": 800,
-                "total_number_of_customers for Self Managed Load": 1,
-                "total_assets": 200,
+                "total_assets_for_Kubequery": 800,
+                "total_namespaces_for_Kubequery": 2000,
+                "total_pods_for_Kubequery": 40000,
+                "total_number_of_customers_for_SelfManaged": 1,
+                "total_assets_for_SelfManaged": 200,
             }
     }
 
