@@ -94,6 +94,7 @@ class Kube_Accuracy:
                 
                 if output == "":
                     print("Please check the existence your Kubesim{}.log file in /home/abacus/kubequerysim/accuracy".format(port))
+                    continue
                 # print(output)
                 # sys.exit()
             
