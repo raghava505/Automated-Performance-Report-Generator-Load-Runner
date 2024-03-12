@@ -65,7 +65,7 @@ class ACCURACY:
                 output2=get_api(data,n_api)
             if output2['status'] == 'ERROR':
                 print('global query failed' )
-                print(f'An ERROR occured : {output2['error']['detail']['message']}')
+                print(f"An ERROR occurred: {output2['error']['detail']['message']}")
             else :
                 response=get_api(data,n_result_api)
                 return response
