@@ -302,6 +302,8 @@ if __name__ == "__main__":
                 "build": variables['build'],
                 "load_name":f"{variables['load_name']}",
                 "load_type":f"{variables['load_type']}",
+                "load_start_time_utc" : f"{start_utc_str}",
+                "load_end_time_utc" : f"{end_utc_str}",
                 "load_duration_in_hrs":variables['load_duration_in_hrs'],
                 "load_start_time_ist" : f"{variables['start_time_str_ist']}",
                 "load_end_time_ist" : f"{end_time_str}",
