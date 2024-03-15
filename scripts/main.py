@@ -187,8 +187,8 @@ if __name__ == "__main__":
         Osquery_table_accuracies=None
         Osquery_event_accuracies=None
         if variables["load_type"] in ["Osquery","osquery_cloudquery_combined","all_loads_combined"] and variables["load_name"] != "ControlPlane":
-            assets_per_cust=int(load_cls.get_load_specific_details(variables['load_name'])['assets_per_cust'])
-            input_file = load_cls.get_load_specific_details(variables['load_name'])['input_file']
+            assets_per_cust=int(load_cls.get_load_specific_details(variables['load_name'])["RuleEngine and ControlPlane Load Details"]['assets_per_cust'])
+            input_file = load_cls.get_load_specific_details(variables['load_name'])["RuleEngine and ControlPlane Load Details"]['input_file']
             alert_rules_triggered_per_cust=test_env_json_details['alert_rules_per_cust']['triggered']
             event_rules_triggered_per_cust=test_env_json_details['event_rules_per_cust']['triggered']
             print("Calculating Table accuracies for Osquery Load...")
