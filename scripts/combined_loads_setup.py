@@ -7,7 +7,7 @@ class all_combined_child(parent):
                     "test_title": "Multiple Customer Rule Engine, Control Plane, CloudQuery, KubeQuery and SelfManaged Load",
                     "total_number_of_customers_osquery": 100,
                     "number_of_customers_with_auto_exception_enabled": 0,
-                    "total_assets": "32K Control Plane +  8K Multi customer",
+                    "osquery total_assets": "32K Control Plane +  8K Multi customer",
                     "records_sent_per_hour_per_customer": "51,84,000",
                     "records_sent_per_hour" : "51,84,00,000",
                     "assets_per_cust":80,
@@ -28,13 +28,13 @@ class all_combined_child(parent):
                     
                     "total_number_of_customers_kubequery": "1",
                     "total_clusters": "20",
-                    "total_assets": "800",
+                    "kubequery total_assets": "800",
                     "total_namespaces": "2000",
                     "total_pods": "40000",
                     "total_containers": "20000",
                     
                     "total_number_of_customers_self_managed": "1",
-                    "total_assets": "200"                    
+                    "self_managed total_assets": "200"                    
                 }
     }
 
