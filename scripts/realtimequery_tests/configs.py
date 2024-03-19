@@ -41,8 +41,7 @@ build_api = 'https://{}{}/public/api/version'
 rq_payload1 = {"query":"select * from processes","type":"realtime","filters":{"live":True,"hostName":"REALTIME"},"parameters":[],"parameterValues":{},"agentType":"asset"}
 rq_payload2 = {"query":"select * from compliance","type":"realtime","filters":{"live":True,"hostName":"REALTIME"},"parameters":[],"parameterValues":{},"agentType":"asset"}
 rq_payload3 = {"query":"select * from upt_api_audit_logs","type":"realtime","filters":{"live":True,"hostName":"REALTIME"},"parameters":[],"parameterValues":{},"agentType":"asset"}
-rq_payload4 = {"query":"select count(*) as count from vulnerabilities","type":"realtime","filters":{"live":True,"hostName":"REALTIME"},"parameters":[],"parameterValues":{},"agentType":"asset"}
-rq_payloads = [rq_payload1,rq_payload2,rq_payload3,rq_payload4]
+rq_payloads = [rq_payload1,rq_payload2,rq_payload3]
 
 tables = ['dns_lookup_events' , 'process_events' ,'process_open_files','process_open_sockets','processes']
 

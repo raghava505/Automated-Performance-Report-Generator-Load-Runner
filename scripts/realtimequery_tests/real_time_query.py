@@ -11,18 +11,15 @@ import re
 
         
 
-
 PROJECT_ROOT = Path(__file__).resolve().parent
 
 LOG_PATH = str(PROJECT_ROOT) + "/logs"
 test_result = TestResult()
 
-
 def add_time(curr_time, hours=0, minutes=0, seconds=0):
     time_to_add = timedelta(hours=hours, minutes=minutes, seconds=seconds)
     new_time = datetime.combine(datetime.today(), curr_time) + time_to_add
     return new_time.time()
-
 
 def subtract_times(time1, time2):
     dt1 = datetime.combine(datetime.today(), time1)
@@ -31,9 +28,6 @@ def subtract_times(time1, time2):
     return result_time
 
 def kill_existing_processes(hostname,rtsim_user,user,process_name,password):
-    # print(hostname)
-    # print(user)
-    # print(password)
     kill_endpoints = "killall {}".format(process_name)
     # kill_endpoints = "sudo -u {} sh -c 'cd /home/{}/go_http_real_time/go_http && sudo killall {}' 2>&1 ".format(rtsim_user,rtsim_user,process_name)
     h = Host(hostname, user, '', password)
@@ -42,7 +36,6 @@ def kill_existing_processes(hostname,rtsim_user,user,process_name,password):
             h.execute_command(kill_endpoints)
         except Exception: 
             pass
-
     log.info('processes got deleted')
     print('processes got deleted')
 
@@ -60,9 +53,7 @@ def query_configd(hostname,user,password,operation):
     )
     return h.execute_command(formatted_command)
     
-
-def run_instance(hostname,rtsim_user,user,process_name,password):
-    
+def run_instance(hostname,rtsim_user,user,process_name,password):    
     script = "sudo -u {} bash -c 'cd /home/{}/go_http_real_time/go_http && ./BringUpInstancesNewformat.sh' ".format(rtsim_user,rtsim_user)
     h = Host(hostname, user, '', password)
     h.execute_command(script)
@@ -81,11 +72,15 @@ def run_instance(hostname,rtsim_user,user,process_name,password):
 
     if int(output.strip())  != rtinstance_count+3 :
         test_result.update_error ("processes are failing, current processes count : {}".format(output.strip() ), skip_test = True)
-final_data_to_save ={}
 
+final_data_to_save = {
+        'Total Asset Count': assets,
+        'Records Per Asset': records_per_asset,
+        'queries': {}
+    }
 def query(rq_payload,l) :
     current_time = datetime.utcnow().time()
-
+    query_key = rq_payload['query']
     current_datetime_utc = datetime.utcnow()
     formatted_cdatetime = current_datetime_utc.strftime('%Y-%m-%d %H:%M:%S')
     c_time = str(formatted_cdatetime)
@@ -97,7 +92,6 @@ def query(rq_payload,l) :
     query_job_id1 = output['id']
     log.info('Query{} job id :{}'.format(l,query_job_id1))
     print('Query{} job id :{}'.format(l,query_job_id1))
-
     actual_assets=0
     if output['status'] != 'FINISHED':
         while output['status'] not in ['FINISHED', 'ERROR']:        
@@ -125,11 +119,8 @@ def query(rq_payload,l) :
             break
         log.info('Query{} status :{}'.format(l,output['status'] ))
         print('Query{} status :{}'.format(l,output['status'] ))
-
         time.sleep(10)
     
-
-
     if output['status'] == 'ERROR':
         test_result.update_error('realtime query{} status is ERROR'.format(l))
     if output ['status'] == 'FINISHED':
@@ -159,15 +150,15 @@ def query(rq_payload,l) :
 
     total_records = " select  count(*) from query_job_results_view where query_job_id  = '%s';" % query_job_id1
 
-    query_command_total = 'sudo TRINO_PASSWORD=prestossl /opt/uptycs/cloud/utilities/trino-cli --server https://localhost:5665 --user uptycs --catalog uptycs --schema upt_{} --password --truststore-password sslpassphrase --truststore-path /opt/uptycs/cloud/config/wildcard.jks --insecure --execute "{};" '.format(domain ,total_records)
-    query_command_pg = 'sudo TRINO_PASSWORD=prestossl /opt/uptycs/cloud/utilities/trino-cli --server https://localhost:5665 --user uptycs --catalog uptycs --schema upt_{} --password --truststore-password sslpassphrase --truststore-path /opt/uptycs/cloud/config/wildcard.jks --insecure --execute "{};" '.format(domain ,total_records_pg)
-    query_command_hdfs = 'sudo TRINO_PASSWORD=prestossl /opt/uptycs/cloud/utilities/trino-cli --server https://localhost:5665 --user uptycs --catalog uptycs --schema upt_{} --password --truststore-password sslpassphrase --truststore-path /opt/uptycs/cloud/config/wildcard.jks --insecure --execute "{};" '.format(domain ,total_records_hdfs)
+    query_command_total = 'sudo TRINO_PASSWORD=d23f5d29-931e-4c12-b787-b9deba22a1e9 /opt/uptycs/cloud/utilities/trino-cli --server https://localhost:5665 --user upt_write_longevity --catalog uptycs --schema upt_{} --password --truststore-password sslpassphrase --truststore-path /opt/uptycs/cloud/config/wildcard.jks --insecure --execute "{};" '.format(domain ,total_records)
+    query_command_pg = 'sudo TRINO_PASSWORD=d23f5d29-931e-4c12-b787-b9deba22a1e9 /opt/uptycs/cloud/utilities/trino-cli --server https://localhost:5665 --user upt_write_longevity --catalog uptycs --schema upt_{} --password --truststore-password sslpassphrase --truststore-path /opt/uptycs/cloud/config/wildcard.jks --insecure --execute "{};" '.format(domain ,total_records_pg)
+    query_command_hdfs = 'sudo TRINO_PASSWORD=d23f5d29-931e-4c12-b787-b9deba22a1e9 /opt/uptycs/cloud/utilities/trino-cli --server https://localhost:5665 --user upt_write_longevity --catalog uptycs --schema upt_{} --password --truststore-password sslpassphrase --truststore-path /opt/uptycs/cloud/config/wildcard.jks --insecure --execute "{};" '.format(domain ,total_records_hdfs)
     
     g = Host(prestonode_ip, prestonode_user, '', presto_password)
     pg = g.execute_command(query_command_pg)
     pg=pg[1:-2]
     # pg_s =str(pg)
-
+    time.sleep(240)
     hdfs = g.execute_command(query_command_hdfs)
     hdfs=hdfs[1:-2]
     # hdfs_s=str(hdfs)
@@ -176,11 +167,9 @@ def query(rq_payload,l) :
     # total_s=str(total)
 
     time_hdfs_records ="select date_diff('second', min(upt_server_time), max(upt_server_time)) AS time_interval from realtime_query_data where query_job_id = '%s';" % query_job_id1
-    time_command_hdfs = 'sudo TRINO_PASSWORD=prestossl /opt/uptycs/cloud/utilities/trino-cli --server https://localhost:5665 --user uptycs --catalog uptycs --schema upt_{} --password --truststore-password sslpassphrase --truststore-path /opt/uptycs/cloud/config/wildcard.jks --insecure --execute "{};" '.format(domain ,time_hdfs_records)
+    time_command_hdfs = 'sudo TRINO_PASSWORD=d23f5d29-931e-4c12-b787-b9deba22a1e9 /opt/uptycs/cloud/utilities/trino-cli --server https://localhost:5665 --user upt_write_longevity --catalog uptycs --schema upt_{} --password --truststore-password sslpassphrase --truststore-path /opt/uptycs/cloud/config/wildcard.jks --insecure --execute "{};" '.format(domain ,time_hdfs_records)
     hdfs_records_time = g.execute_command(time_command_hdfs)
     hdfs_records_time= hdfs_records_time.replace('"', '')
-    # print(hdfs_records_time)
-    # print(type(hdfs_records_time))
     hdfs_records_time_s = str(hdfs_records_time)
     hdfs_records_time_s = hdfs_records_time_s.strip()
     actual_records = actual_assets * records_per_asset
@@ -206,8 +195,7 @@ def query(rq_payload,l) :
     percentage_hdfs=int(hdfs)*100/hdfs_records 
     rpercentage_hdfs = round(percentage_hdfs,2)
     percentage_total=int(total)*100/actual_records
-    rpercentage_total = round(percentage_total,2)
-    
+    rpercentage_total = round(percentage_total,2)  
     if int(pg) >= new_pg_count:
         c=c+1
         log.info('config records : {} for query{}'.format(pg,l))
@@ -234,14 +222,16 @@ def query(rq_payload,l) :
         result = 'FINISHED'
     else :
         result = 'FAILED'
-    final_data_to_save['Query{}'.format(l)] = {
-        'query' : rq_payload['query'],
+
+    final_data_to_save['queries'][query_key] = {
         'Number of Assets Responded': actual_assets,
         'Test Start Time': c_time,
         'Test End Time': e_time,
-        'Records in configdb': {'actual': pg,'expected':config_records,'accuracy':rpercentage_pg},
-        'Records in HDFS': {'actual':hdfs ,'expected':hdfs_records,'accuracy':rpercentage_hdfs},
-        'Total Records': {'actual':total ,'expected':actual_records,'accuracy':rpercentage_total},
+        'records': [
+                    { 'Table': 'Records in configdb','actual': pg,'expected':config_records,'accuracy':rpercentage_pg},
+                    {'Table':'Records in HDFS', 'actual':hdfs ,'expected':hdfs_records,'accuracy':rpercentage_hdfs},
+                    {'Table':'Total Records','actual':total ,'expected':actual_records,'accuracy':rpercentage_total}
+                ],
         'Time taken for RT query to get completed': t_time,
         'Time taken for all the records to get ingested in seconds': hdfs_records_time_s,
         'Automation run Status ':result
@@ -265,16 +255,10 @@ def realtime_query():
         test_result.update_error ("assets didn't get enrolled",skip_test = True)
    
         
-    Stack_URL = URL.format(stack_keys['domain'],stack_keys['domainSuffix'])
-    final_data_to_save['Stack Name'] = domain 
-    final_data_to_save['Stack URL'] = Stack_URL
-    final_data_to_save['Build Number'] = build
-    final_data_to_save['Total Asset Count'] = assets
-    final_data_to_save['Records Per Asset'] =  records_per_asset
     
     l=1
-    for i in rq_payloads:
-        query(i,l)
+    for rq_payload in rq_payloads:
+        query(rq_payload,l)
         l=l+1
     log.info(test_result)
     return final_data_to_save
