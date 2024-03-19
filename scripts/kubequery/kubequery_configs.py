@@ -4,7 +4,7 @@ from pathlib import Path
 PROJECT_ROOT = Path(__file__).resolve().parent
 
 
-tables = ['kubernetes_nodes','kubernetes_pods','kubernetes_namespaces','kubernetes_pod_containers','kubernetes_events','kubernetes_role_policy_rules','kubernetes_cluster_role_policy_rules','kubernetes_role_binding_subjects','kubernetes_cluster_role_binding_subjects','kubernetes_service_accounts','vulnerabilities_scanned_images', 'vulnerabilities','process_events','socket_events', 'process_file_events','dns_lookup_events']
+tables = ['kubernetes_nodes','kubernetes_pods','kubernetes_namespaces','kubernetes_pod_containers','kubernetes_events','kubernetes_role_policy_rules','kubernetes_cluster_role_policy_rules','kubernetes_role_binding_subjects','kubernetes_cluster_role_binding_subjects','kubernetes_service_accounts','vulnerabilities_scanned_images', 'vulnerabilities','process_events','socket_events', 'process_file_events']
 
 final_data = {
     "kubernetes_nodes": {
@@ -81,11 +81,6 @@ final_data = {
         "Expected Records": 0,
         "Actual Records": 0,
         "Accuracy": 0
-    },
-    "dns_lookup_events": {
-        "Expected Records": 0,
-        "Actual Records": 0,
-        "Accuracy": 0
     }
 }
 
@@ -115,8 +110,7 @@ cvd_data = {"VulnerabilitiesScannedImages_Count": 0,
              "Compliance_Count":0, 
              "ProcessEvents_Count": 0, 
              "SocketEvents_Count": 0, 
-             "ProcessFileEvents_Count": 0, 
-             "DnsLookupEvents_Count": 0, 
+             "ProcessFileEvents_Count": 0
              }
 
 key_mapping = {
@@ -125,6 +119,5 @@ key_mapping = {
     'Compliance_Count': 'compliance',
     'ProcessEvents_Count': 'process_events',
     'SocketEvents_Count': 'socket_events',
-    'ProcessFileEvents_Count': 'process_file_events',
-    'DnsLookupEvents_Count': 'dns_lookup_events',
+    'ProcessFileEvents_Count': 'process_file_events'
 }
