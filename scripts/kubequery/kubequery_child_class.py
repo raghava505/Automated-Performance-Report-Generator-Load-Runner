@@ -22,6 +22,7 @@ class kubequery_child(parent):
                 "total_assets_for_Kubequery": 800,
                 "total_namespaces_for_Kubequery": 2000,
                 "total_pods_for_Kubequery": 40000,
+                
                 "total_number_of_customers_for_SelfManaged": 1,
                 "total_assets_for_SelfManaged": 200,
             }
@@ -53,6 +54,7 @@ class kubequery_child(parent):
         temp = copy.deepcopy(parent.get_app_level_RAM_used_percentage_queries())
         more_memory_queries={
             "Kubernetes State Manager memory usage":("sum(uptycs_docker_mem_used{container_name=\"kubernetes-state-manager\"}) by (host_name)" , ["host_name"],'bytes'),
+            "Kubernetes State Manager memory usage":("sum(uptycs_docker_mem_used{container_name=\"osquery-state-manager\"}) by (host_name)" , ["host_name"],'bytes')
         }
         temp.update(more_memory_queries)
         return temp
@@ -62,6 +64,7 @@ class kubequery_child(parent):
         temp = copy.deepcopy(parent.get_app_level_CPU_used_cores_queries())
         more_cpu_queries={
             "Kubernetes State Manager CPU usage":("sum(uptycs_docker_cpu_stats{container_name=\"kubernetes-state-manager\"}) by (host_name)" , ["host_name"],'%'),
+            "Kubernetes State Manager CPU usage":("sum(uptycs_docker_cpu_stats{container_name=\"osquery-state-manager\"}) by (host_name)" , ["host_name"],'%')
         }
         temp.update(more_cpu_queries)
         return temp
