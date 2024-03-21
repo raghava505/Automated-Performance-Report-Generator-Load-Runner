@@ -360,7 +360,7 @@ if __name__ == "__main__":
             if presto_load_result_dict:
                 final_data_to_save.update({"Presto Load details":presto_load_result_dict})
             if realtime_query_results:
-                final_data_to_save.update({"Realtime query test results":realtime_query_results})
+                final_data_to_save.update({"Realtimequery test results":realtime_query_results})
             # if complete_resource_details:
             #     final_data_to_save.update(complete_resource_details)
 
