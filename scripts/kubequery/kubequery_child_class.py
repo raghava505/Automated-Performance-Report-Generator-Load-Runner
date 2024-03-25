@@ -7,8 +7,10 @@ class kubequery_child(parent):
                 "KubeQuery_SingleCustomer":{
                 "total_number_of_customers": 1,
                 "test_title": "Kubequery and K8sosquery Load",
-                "total_assets": 500,
-                "total_number_of_clusters": 10
+                "total_number_of_clusters": 20,
+                "total_assets_for_Kubequery": 800,
+                "total_namespaces_for_Kubequery": 2000,
+                "total_pods_for_Kubequery": 40000,
             },
                 "SelfManaged_SingleCustomer":{
                 "total_number_of_customers": 1,
