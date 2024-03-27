@@ -5,10 +5,10 @@ from collections import defaultdict
 class osquery_child(parent):
     load_specific_details={
             "MultiCustomer" : {
+                "test_title": "Multiple Customer Rule Engine and Control Plane Load",
                 "RuleEngine and ControlPlane Load Details" : {
                     "total_number_of_customers": "100",
                     "number_of_customers_with_auto_exception_enabled": "0",
-                    "test_title": "Multiple Customer Rule Engine and Control Plane Load",
                     "total_assets": "30K Control Plane + 10K Multi customer",
                     "assets_per_cust":"100",
                     "records_sent_per_hour_per_customer": "6.48 million", #"5.44 million", 
