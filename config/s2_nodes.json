@@ -40,7 +40,7 @@
         "s2simhost2b"
     ],
     "selfsim_nodes": [
-        "s2simhost2c"
+        "s2simhost2d"
     ],
     "other_nodes": [
         "s2objectstore",
