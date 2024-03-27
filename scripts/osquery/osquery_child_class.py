@@ -5,15 +5,17 @@ from collections import defaultdict
 class osquery_child(parent):
     load_specific_details={
             "MultiCustomer" : {
-                "total_number_of_customers": "120",
-                "number_of_customers_with_auto_exception_enabled": "0",
-                "test_title": "Multiple Customer Rule Engine and Control Plane Load",
-                "total_assets": "30K Control Plane + 10K Multi customer",
-                "assets_per_cust":"84",
-                "records_sent_per_hour_per_customer": "5.44 million", 
-                "records_sent_per_hour" : "653 million", 
-                "input_file": "rhel7-6tab_12rec.log",
-                "events_table_name": "dns_lookup_events, socket_events, process_events, process_file_events"
+                "RuleEngine and ControlPlane Load Details" : {
+                    "total_number_of_customers": "100",
+                    "number_of_customers_with_auto_exception_enabled": "0",
+                    "test_title": "Multiple Customer Rule Engine and Control Plane Load",
+                    "total_assets": "30K Control Plane + 10K Multi customer",
+                    "assets_per_cust":"100",
+                    "records_sent_per_hour_per_customer": "6.48 million", #"5.44 million", 
+                    "records_sent_per_hour" : "648 million", # "653 million", 
+                    "input_file": "rhel7-6tab_12rec.log",
+                    "events_table_name": "dns_lookup_events, socket_events, process_events, process_file_events"
+                }
             },
             "SingleCustomer":{
                 "total_number_of_customers": 1,
