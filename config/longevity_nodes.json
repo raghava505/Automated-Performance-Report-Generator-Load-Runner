@@ -70,7 +70,12 @@
         "long-memgraph-azure",
         "long-gh-deployer",
         "long-obj2",
-        "long-obj3"
+        "long-obj3",
+        "long-redis1",
+        "long-redis2",
+        "long-redis3",
+        "long-redis4",
+        "long-redis5"
     ],
     "kubesim_nodes": [
         "long-kube-sim1",
