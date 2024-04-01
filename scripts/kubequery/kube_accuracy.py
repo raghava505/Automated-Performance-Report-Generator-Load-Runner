@@ -22,8 +22,8 @@ class Kube_Accuracy:
 
     def __init__(self,start_timestamp,end_timestamp,prom_con_obj,variables):
         
-        test_env_file_path = "{}/{}".format(base_stack_config_path,variables["test_env_file_name"])
-        
+        # test_env_file_path = "{}/{}".format(base_stack_config_path,variables["test_env_file_name"])
+        test_env_file_path=prom_con_obj.test_env_file_path
         with open(test_env_file_path,"r") as file:
             data = json.load(file)
             # print(data)
@@ -40,7 +40,7 @@ class Kube_Accuracy:
         self.port = 22
         self.username = "abacus"
         self.password  = "abacus"
-        self.target_host = data["dnodes"][0]
+        self.target_host = prom_con_obj.execute_trino_queries_in
         self.cloud_domain = data["domain"]
         if self.cloud_domain ==  "longevity":
             self.cloud_domain = "longevity1"
