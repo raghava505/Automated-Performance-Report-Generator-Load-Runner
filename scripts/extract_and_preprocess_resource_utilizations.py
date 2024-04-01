@@ -37,11 +37,11 @@ class resource_usages:
         self.prom_con_obj=prom_con_obj
 
         total_memory_capacity_query = "sum(uptycs_total_memory/(1024*1024)) by (node_type,host_name)"
-        result = execute_point_prometheus_query(self.prom_con_obj,self.start_timestamp,total_memory_capacity_query)
+        memory_result = execute_point_prometheus_query(self.prom_con_obj,self.start_timestamp,total_memory_capacity_query)
         self.node_ram_capacity = {}
         self.host_name_type_mapping={}
         self.all_node_types_mapping=defaultdict(lambda:[])
-        for line in result:
+        for line in memory_result:
             node_name = line["metric"]["host_name"]
             capacity = float(line["value"][1])
             self.node_ram_capacity[node_name] = capacity
@@ -140,13 +140,13 @@ class resource_usages:
     def preprocess_df(self,df,container_name_or_app_name,for_report):
         result={}
         if container_name_or_app_name:
-            groupby_nodetype_and_app_or_cont=self.groupby_2_cols_and_return_dict(df,'node_type',container_name_or_app_name,for_report)
+            group_by_nodetype_and_app_or_cont=self.groupby_2_cols_and_return_dict(df,'node_type',container_name_or_app_name,for_report)
             group_by_hostname_and_app_or_cont=self.groupby_2_cols_and_return_dict(df,'host_name',container_name_or_app_name,for_report,single_level_for_report=True)
             group_by_app_or_cont=self.groupby_a_col_and_return_dict(df,container_name_or_app_name,for_report)
 
             result[f"{container_name_or_app_name}_level_usages"] = group_by_app_or_cont
             result[f"hostname_and_{container_name_or_app_name}_level_usages"] = group_by_hostname_and_app_or_cont
-            result[f"nodetype_and_{container_name_or_app_name}_level_usages"] = groupby_nodetype_and_app_or_cont
+            result[f"nodetype_and_{container_name_or_app_name}_level_usages"] = group_by_nodetype_and_app_or_cont
         else:
             group_by_node_type=self.groupby_a_col_and_return_dict(df,'node_type',for_report)
             group_by_host_name=self.groupby_a_col_and_return_dict(df,'host_name',for_report)
@@ -172,12 +172,11 @@ class resource_usages:
             })
         node_level_memory = pd.DataFrame(node_level_final_memory_result)  
         result.update(self.preprocess_df(node_level_memory,None,for_report))
+
         #---------------------------app level----------------------------
         application_level_memory_query = f'sum(uptycs_app_memory{self.exclude_filter}) by (node_type,host_name,app_name)'
         application_level_final_memory_result=[]
-        application_level_memory_query_result=execute_prometheus_query(self.prom_con_obj,self.start_timestamp,self.end_timestamp,application_level_memory_query,self.hours)
-        for line in application_level_memory_query_result:
-
+        for line in execute_prometheus_query(self.prom_con_obj,self.start_timestamp,self.end_timestamp,application_level_memory_query,self.hours):
             application_level_final_memory_result.append({
                 "node_type":line["metric"]["node_type"],
                 "host_name":line["metric"]["host_name"],
@@ -187,15 +186,10 @@ class resource_usages:
                 average_column_name : line["values"]["average"]*(self.node_ram_capacity[line["metric"]["host_name"]]/100)
             })
 
-        app_level_memory = pd.DataFrame(application_level_final_memory_result)
-
         for app in exclude_applications:
-            compressed = f'sum(uptycs_app_memory{{app_name=~"{app}"}}) by (node_type,host_name)'
-            compressed_application_level_final_memory_result=[]
-            compressed_application_level_memory_query_result=execute_prometheus_query(self.prom_con_obj,self.start_timestamp,self.end_timestamp,compressed,self.hours)
-            for line in compressed_application_level_memory_query_result:
+            for line in execute_prometheus_query(self.prom_con_obj,self.start_timestamp,self.end_timestamp,f'sum(uptycs_app_memory{{app_name=~"{app}"}}) by (node_type,host_name)',self.hours):
                 if line["metric"]["node_type"] in self.exclude_nodetypes:continue
-                compressed_application_level_final_memory_result.append({
+                application_level_final_memory_result.append({
                     "node_type":line["metric"]["node_type"],
                     "host_name":line["metric"]["host_name"],
                     "application":app,
@@ -203,16 +197,13 @@ class resource_usages:
                     maximum_column_name : line["values"]["maximum"]*(self.node_ram_capacity[line["metric"]["host_name"]]/100),
                     average_column_name : line["values"]["average"]*(self.node_ram_capacity[line["metric"]["host_name"]]/100)
                 })
-            compressed_app_level_memory = pd.DataFrame(compressed_application_level_final_memory_result)
-            print(compressed_app_level_memory)
-            app_level_memory = pd.concat([app_level_memory, compressed_app_level_memory])
-
+        app_level_memory = pd.DataFrame(application_level_final_memory_result)
         result.update(self.preprocess_df(app_level_memory,'application',for_report))
+
         # ---------------------------container level----------------------------
         container_level_memory_query='sum(uptycs_docker_mem_used{}/(1024*1024*1024)) by (container_name,host_name)'.format(self.exclude_filter)
         container_level_final_memory_result=[]
-        container_level_memory_query_result=execute_prometheus_query(self.prom_con_obj,self.start_timestamp,self.end_timestamp,container_level_memory_query,self.hours)
-        for line in container_level_memory_query_result:
+        for line in execute_prometheus_query(self.prom_con_obj,self.start_timestamp,self.end_timestamp,container_level_memory_query,self.hours):
             if self.host_name_type_mapping[line["metric"]["host_name"]] in self.exclude_nodetypes:continue
             container_level_final_memory_result.append({
                 "node_type":self.host_name_type_mapping[line["metric"]["host_name"]],
@@ -223,15 +214,10 @@ class resource_usages:
                 average_column_name : line["values"]["average"]
             })
 
-        container_level_memory = pd.DataFrame(container_level_final_memory_result)
-
         for cont in exclude_containers:
-            compressed_container_level_memory_query=f'sum(uptycs_docker_mem_used{{container_name=~"{cont}"}}/(1024*1024*1024)) by (host_name)'
-            compressed_container_level_final_memory_result=[]
-            compressed_container_level_memory_query_result=execute_prometheus_query(self.prom_con_obj,self.start_timestamp,self.end_timestamp,compressed_container_level_memory_query,self.hours)
-            for line in compressed_container_level_memory_query_result:
+            for line in execute_prometheus_query(self.prom_con_obj,self.start_timestamp,self.end_timestamp,f'sum(uptycs_docker_mem_used{{container_name=~"{cont}"}}/(1024*1024*1024)) by (host_name)',self.hours):
                 if self.host_name_type_mapping[line["metric"]["host_name"]] in self.exclude_nodetypes:continue
-                compressed_container_level_final_memory_result.append({
+                container_level_final_memory_result.append({
                     "node_type":self.host_name_type_mapping[line["metric"]["host_name"]],
                     "host_name":line["metric"]["host_name"],
                     "container":cont,
@@ -240,10 +226,7 @@ class resource_usages:
                     average_column_name : line["values"]["average"]
                 })
 
-            compressed_container_level_memory = pd.DataFrame(compressed_container_level_final_memory_result)
-            print(compressed_container_level_memory)
-            container_level_memory = pd.concat([container_level_memory, compressed_container_level_memory])
-
+        container_level_memory = pd.DataFrame(container_level_final_memory_result)
         result.update(self.preprocess_df(container_level_memory,'container',for_report))
         return result
        
@@ -263,11 +246,11 @@ class resource_usages:
             })
         node_level_cpu = pd.DataFrame(node_level_final_cpu_result)   
         result.update(self.preprocess_df(node_level_cpu,None,for_report))
+
         #---------------------------app level----------------------------
         application_level_cpu_query = f'sum(uptycs_app_cpu{self.exclude_filter}) by (node_type,host_name,app_name)/100'
         application_level_final_cpu_result=[]
-        application_level_cpu_query_result=execute_prometheus_query(self.prom_con_obj,self.start_timestamp,self.end_timestamp,application_level_cpu_query,self.hours)
-        for line in application_level_cpu_query_result:
+        for line in execute_prometheus_query(self.prom_con_obj,self.start_timestamp,self.end_timestamp,application_level_cpu_query,self.hours):
             application_level_final_cpu_result.append({
                 "node_type":line["metric"]["node_type"],
                 "host_name":line["metric"]["host_name"],
@@ -277,15 +260,10 @@ class resource_usages:
                 average_column_name : line["values"]["average"]
             })
 
-        app_level_cpu = pd.DataFrame(application_level_final_cpu_result)
-
         for app in exclude_applications:
-            compressed_application_level_cpu_query = f'sum(uptycs_app_cpu{{app_name=~"{app}"}}) by (node_type,host_name)/100'
-            compressed_application_level_final_cpu_result=[]
-            compressed_application_level_cpu_query_result=execute_prometheus_query(self.prom_con_obj,self.start_timestamp,self.end_timestamp,compressed_application_level_cpu_query,self.hours)
-            for line in compressed_application_level_cpu_query_result:
+            for line in execute_prometheus_query(self.prom_con_obj,self.start_timestamp,self.end_timestamp,f'sum(uptycs_app_cpu{{app_name=~"{app}"}}) by (node_type,host_name)/100',self.hours):
                 if line["metric"]["node_type"] in self.exclude_nodetypes:continue
-                compressed_application_level_final_cpu_result.append({
+                application_level_final_cpu_result.append({
                     "node_type":line["metric"]["node_type"],
                     "host_name":line["metric"]["host_name"],
                     "application":app,
@@ -293,16 +271,14 @@ class resource_usages:
                     maximum_column_name : line["values"]["maximum"],
                     average_column_name : line["values"]["average"]
                 })
-            compressed_app_level_cpu = pd.DataFrame(compressed_application_level_final_cpu_result)
-            print(compressed_app_level_cpu)
-            app_level_cpu = pd.concat([app_level_cpu, compressed_app_level_cpu])
 
+        app_level_cpu = pd.DataFrame(application_level_final_cpu_result)
         result.update(self.preprocess_df(app_level_cpu,'application',for_report))
+
         #----------------------------container level-----------------------------
         container_level_cpu_query='sum(uptycs_docker_cpu_stats{}) by (container_name,host_name)/100'.format(self.exclude_filter)
         container_level_final_cpu_result=[]
-        container_level_cpu_query_result=execute_prometheus_query(self.prom_con_obj,self.start_timestamp,self.end_timestamp,container_level_cpu_query,self.hours)
-        for line in container_level_cpu_query_result:
+        for line in execute_prometheus_query(self.prom_con_obj,self.start_timestamp,self.end_timestamp,container_level_cpu_query,self.hours):
             if self.host_name_type_mapping[line["metric"]["host_name"]] in self.exclude_nodetypes:continue
             container_level_final_cpu_result.append({
                 "node_type":self.host_name_type_mapping[line["metric"]["host_name"]],
@@ -313,15 +289,10 @@ class resource_usages:
                 average_column_name : line["values"]["average"]
             })
 
-        container_level_cpu = pd.DataFrame(container_level_final_cpu_result)
-
         for cont in exclude_containers:
-            exclude_container_level_cpu_query=f'sum(uptycs_docker_cpu_stats{{container_name=~"{cont}"}}) by (host_name)/100'
-            exclude_container_level_final_cpu_result=[]
-            exclude_container_level_cpu_query_result=execute_prometheus_query(self.prom_con_obj,self.start_timestamp,self.end_timestamp,exclude_container_level_cpu_query,self.hours)
-            for line in exclude_container_level_cpu_query_result:
+            for line in execute_prometheus_query(self.prom_con_obj,self.start_timestamp,self.end_timestamp,f'sum(uptycs_docker_cpu_stats{{container_name=~"{cont}"}}) by (host_name)/100',self.hours):
                 if self.host_name_type_mapping[line["metric"]["host_name"]] in self.exclude_nodetypes:continue
-                exclude_container_level_final_cpu_result.append({
+                container_level_final_cpu_result.append({
                     "node_type":self.host_name_type_mapping[line["metric"]["host_name"]],
                     "host_name":line["metric"]["host_name"],
                     "container":cont,
@@ -329,11 +300,8 @@ class resource_usages:
                     maximum_column_name : line["values"]["maximum"],
                     average_column_name : line["values"]["average"]
                 })
-
-            exclude_container_level_cpu = pd.DataFrame(exclude_container_level_final_cpu_result)
-            print(exclude_container_level_cpu)
-            container_level_cpu = pd.concat([container_level_cpu, exclude_container_level_cpu])
-
+            
+        container_level_cpu = pd.DataFrame(container_level_final_cpu_result)
         result.update(self.preprocess_df(container_level_cpu,'container',for_report))
         return result
     
@@ -390,7 +358,7 @@ if __name__=='__main__':
     import pytz
     format_data = "%Y-%m-%d %H:%M"
     
-    start_time_str = "2024-02-17 04:57"
+    start_time_str = "2024-04-01 00:00"
     hours=60
 
     start_time = datetime.strptime(start_time_str, format_data)
