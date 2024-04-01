@@ -83,13 +83,19 @@ class resource_usages:
 
     
     def groupby_2_cols_and_return_dict(self,df,col1,col2,for_report,single_level_for_report=False):
+        if col1=="host_name":
+            cols_to_aggregate=[minimum_column_name,maximum_column_name,average_column_name]
+            display_exact_table=True
+        else:
+            cols_to_aggregate = [average_column_name]
+            display_exact_table=False
         grouped_df=df.groupby([col1,col2])[cols_to_aggregate].sum()       
         if for_report and single_level_for_report:
             all_dfs_dict={
                 "schema":{
                     "merge_on_cols" : [col1,col2],
                     "compare_cols":cols_to_compare,
-                    "display_exact_table":False
+                    "display_exact_table":display_exact_table
                 },
                 "table":[]
             }
