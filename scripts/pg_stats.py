@@ -13,7 +13,6 @@ class PG_STATS:
         self.load_duration=load_dur
         self.PROMETHEUS = self.prom_con_obj.prometheus_path
         self.API_PATH = self.prom_con_obj.prom_api_path
-        self.test_env_file_path=prom_con_obj.test_env_file_path
         
     def get_data(self,db):
         query = f'uptycs_pg_stats{{db=~"{db}"}}'
