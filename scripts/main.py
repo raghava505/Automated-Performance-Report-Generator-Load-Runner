@@ -31,51 +31,11 @@ from bson import ObjectId
 from pg_badger import return_pgbadger_results,get_and_save_pgb_html
 from extract_and_preprocess_resource_utilizations import resource_usages
 
-import logging
-import argparse
-
-parser = argparse.ArgumentParser()
-parser.add_argument("-log","--loglevel",type=str)
-args = parser.parse_args()
-
-logger = logging.getLogger(__name__)
-
-c_handler = logging.StreamHandler()
-c_handler.setLevel(logging.NOTSET)
-
-c_format = logging.Formatter('%(levelname)s - %(message)s')
-c_handler.setFormatter(c_format)
-
-# Add handlers to the logger
-logger.addHandler(c_handler)
-
-# assuming args.loglevel is bound to the string value obtained from the
-# command line argument. Convert to upper case to allow the user to
-# specify --log=DEBUG or --log=debug
-if not isinstance(args.loglevel, str):
-    args.loglevel = "INFO"
-    
-numeric_level = getattr(logging, args.loglevel.upper(), None)
-if not isinstance(numeric_level, int):
-    raise ValueError('Invalid log level: %s' %(args.loglevel))
-
 if __name__ == "__main__":
-    
-    logger.setLevel(numeric_level)
-    logger.info("Seting Log Level to => %s" %(args.loglevel))
-    
     variables , prom_con_obj,load_cls =create_input_form()
     if not variables or not prom_con_obj : 
         print("Received NoneType objects, terminating the program ...")
         sys.exit()
-        
-    f_handler = logging.FileHandler('./logs/%s.log' %(variables["load_name"]))
-    f_handler.setLevel(logging.DEBUG)
-    
-    f_format = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
-    f_handler.setFormatter(f_format)
-    
-    logger.addHandler(f_handler)
         
     TEST_ENV_FILE_PATH   = prom_con_obj.test_env_file_path
     print("Test environment file path is : " + TEST_ENV_FILE_PATH)
