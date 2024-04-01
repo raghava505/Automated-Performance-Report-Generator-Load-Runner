@@ -19,7 +19,6 @@ class STS_RECORDS:
     def __init__(self,start_timestamp,end_timestamp,prom_con_obj,variables):
         self.load_start=start_timestamp
         self.load_end=end_timestamp
-        self.test_env_file_path=prom_con_obj.test_env_file_path
         self.PROMETHEUS = prom_con_obj.prometheus_path
         self.API_PATH = prom_con_obj.prom_point_api_path
         self.port=prom_con_obj.ssh_port
@@ -27,8 +26,6 @@ class STS_RECORDS:
         self.password  = prom_con_obj.abacus_password
         self.api_path=None
         self.load_name = variables['load_name']
-        with open(self.test_env_file_path, 'r') as file:
-            self.stack_details = json.load(file)
 
     def global_query(self,data,query):
         # test_result = TestResult()

@@ -10,21 +10,19 @@ class Elk_erros:
             self.curr_ist_start_time = start_timestamp
             self.curr_ist_end_time = end_timestamp
 
-            self.test_env_file_path = prom_con_obj.test_env_file_path
             self.PROMETHEUS = prom_con_obj.prometheus_path
             self.API_PATH = prom_con_obj.prom_point_api_path
             self.port = prom_con_obj.ssh_port
             self.username = prom_con_obj.abacus_username
             self.password = prom_con_obj.abacus_password
-            with open(self.test_env_file_path, 'r') as file:
-                self.stack_details = json.load(file)
+            elastic_ip=prom_con_obj.elastic_ip
 
             self.contents = ["ruleengine", "tls", "nginx", "metastoredb", "pgbouncer", "osqueryIngestion", "redis",
                              "spark", "data-archival", "compaction", "hdfsWrapper", "loginserver", "maintenance",
                              "postgresql", "cloudqueryConsumer", "ruleenginecc", "cloudcompliancemanager",
                              "cloudGraphSynchronizer", "dbsyncscheduler"]
 
-            self.elasticsearch_host = f"http://{self.stack_details['elastic']}:9200"
+            self.elasticsearch_host = f"http://{elastic_ip}:9200"
             self.elastic_client = Elasticsearch(hosts=[self.elasticsearch_host], timeout=240)
 
             dt_object = datetime.utcfromtimestamp(start_timestamp)
