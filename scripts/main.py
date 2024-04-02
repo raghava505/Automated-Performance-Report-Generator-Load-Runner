@@ -223,7 +223,7 @@ if __name__ == "__main__":
         
         #--------------------------------cpu and mem node-wise---------------------------------------
         print("Fetching resource usages data ...")
-        comp = MC_comparisions(start_timestamp=start_timestamp,end_timestamp=end_timestamp,prom_con_obj=prom_con_obj)
+        comp = MC_comparisions(start_timestamp=start_timestamp,end_timestamp=end_timestamp,prom_con_obj=prom_con_obj,hours=variables["load_duration_in_hrs"],include_nodetypes=load_cls.hostname_types)
         mem_cpu_usages_dict,overall_usage_dict=comp.make_comparisions(load_cls.common_app_names)
         
         #--------------------------------complete resource extraction---------------------------------------
