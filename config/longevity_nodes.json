@@ -504,5 +504,25 @@
     "long-obj3": {
         "storage": {},
         "clst": "1"
+    },
+    "long-redis1": {
+        "storage": {},
+        "clst": "1"
+    },
+    "long-redis2": {
+        "storage": {},
+        "clst": "1"
+    },
+    "long-redis3": {
+        "storage": {},
+        "clst": "1"
+    },
+    "long-redis4": {
+        "storage": {},
+        "clst": "1"
+    },
+    "long-redis5": {
+        "storage": {},
+        "clst": "1"
     }
 }
