@@ -16,12 +16,9 @@ base_stack_config_path = f"{ROOT_PATH}/config"
 class SelfManaged_Accuracy:
 
     def __init__(self,start_timestamp,end_timestamp,prom_con_obj,variables):
-        
-        # test_env_file_path = "{}/{}".format(base_stack_config_path,variables["test_env_file_name"])
         test_env_file_path=prom_con_obj.test_env_file_path
         with open(test_env_file_path,"r") as file:
             data = json.load(file)
-            # print(data)
         
         self.load_start=start_timestamp
         self.load_end=end_timestamp
@@ -39,7 +36,6 @@ class SelfManaged_Accuracy:
         self.vsidata = vsi_data
         self.tables = tables
         self.accuracy = dict()
-        
         
     def fetch_trino_password(self): 
         
@@ -84,13 +80,8 @@ class SelfManaged_Accuracy:
                 query = """select count(*) from {} where system_id like 'bat%'""".format("upt_"+t)
             else:
                 query = """select count(*) from {} where upt_day>={} and upt_time>=timestamp'{}' and upt_time<=timestamp'{}' and upt_hostname like 'self%'""".format(t,self.upt_day,self.load_start,end_time)
-            
-            # trino_password = self.fetch_trino_password()
-            
-            # command = f"sudo -u monkey TRINO_PASSWORD={trino_password} /opt/uptycs/cloud/utilities/trino-cli --insecure --server https://localhost:5665 --schema upt_system --user upt_read_{self.cloud_domain} --catalog uptycs --password --truststore-password sslpassphrase --truststore-path /opt/uptycs/etc/presto/presto.jks --execute \"{query}\""
-            
+                                    
             command="""sudo TRINO_PASSWORD=prestossl /opt/uptycs/cloud/utilities/trino-cli --server https://localhost:5665 --user uptycs --catalog uptycs --schema upt_{} --password --truststore-password sslpassphrase --truststore-path /opt/uptycs/cloud/config/wildcard.jks --insecure --execute "{} ;" """.format(self.cloud_domain, query)
-            # print(self.target_host)
             # print(command)
             conn = Connection(host=self.target_host, user=self.username, connect_kwargs={'password': self.password})
             res = conn.sudo(command, password=self.password, hide='stderr')
