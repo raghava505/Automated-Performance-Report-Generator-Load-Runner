@@ -55,18 +55,28 @@ class MC_comparisions:
                 final[query][hostname] = {"percentage":{"average":avg , "minimum":minimum , "maximum":maximum}}
                 final[query][hostname][unit]={}
                 if tag == memory_tag:
-                    final[query][hostname][unit]={
-                        'average':avg * float(self.node_ram_capacity[hostname]) / 100,
-                        'minimum':minimum * float(self.node_ram_capacity[hostname]) / 100,
-                        'maximum':maximum * float(self.node_ram_capacity[hostname]) / 100
-                    }
+                    try:
+                        current_host_ram=self.node_ram_capacity[hostname]                
+                        final[query][hostname][unit]={
+                            'average':avg * float(current_host_ram) / 100,
+                            'minimum':minimum * float(current_host_ram) / 100,
+                            'maximum':maximum * float(current_host_ram) / 100
+                        }
+                    except Exception as e:
+                        print(f"*****************ERROR: Coudn't find host {hostname} in ram-capacity dictionary. Exception occured while calculating app memory usage for query:{query}. {e}")
+
                 else:
                     if query == HOST:
-                        final[query][hostname][unit]={
-                            'average':avg * float(self.node_cores_capacity[hostname]) / 100,
-                            'minimum':minimum * float(self.node_cores_capacity[hostname]) / 100,
-                            'maximum':maximum * float(self.node_cores_capacity[hostname]) / 100
-                        }
+                        try:
+                            current_host_cores=self.node_cores_capacity[hostname]             
+                            final[query][hostname][unit]={
+                                'average':avg * float(current_host_cores) / 100,
+                                'minimum':minimum * float(current_host_cores) / 100,
+                                'maximum':maximum * float(current_host_cores) / 100
+                            }
+                        except Exception as e:
+                            print(f"*****************ERROR: Coudn't find host {hostname} in cores-capacity dictionary. Exception occured while calculating app cpu usage for query:{query}. {e}")
+
                     else:
                         final[query][hostname][unit]={
                             'average':avg/100,

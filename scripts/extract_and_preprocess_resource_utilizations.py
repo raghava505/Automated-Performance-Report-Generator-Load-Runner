@@ -183,26 +183,35 @@ class resource_usages:
         application_level_memory_query = f'sum(uptycs_app_memory{self.exclude_filter}) by (node_type,host_name,app_name)'
         application_level_final_memory_result=[]
         for line in execute_prometheus_query(self.prom_con_obj,self.start_timestamp,self.end_timestamp,application_level_memory_query,self.hours):
-            application_level_final_memory_result.append({
-                "node_type":line["metric"]["node_type"],
-                "host_name":line["metric"]["host_name"],
-                "application":line["metric"]["app_name"],
-                minimum_column_name : line["values"]["minimum"]*(self.node_ram_capacity[line["metric"]["host_name"]]/100),
-                maximum_column_name : line["values"]["maximum"]*(self.node_ram_capacity[line["metric"]["host_name"]]/100),
-                average_column_name : line["values"]["average"]*(self.node_ram_capacity[line["metric"]["host_name"]]/100)
-            })
+            try:
+                current_host_ram=self.node_ram_capacity[line["metric"]["host_name"]]                
+                application_level_final_memory_result.append({
+                    "node_type":line["metric"]["node_type"],
+                    "host_name":line["metric"]["host_name"],
+                    "application":line["metric"]["app_name"],
+                    minimum_column_name : line["values"]["minimum"]*(current_host_ram/100),
+                    maximum_column_name : line["values"]["maximum"]*(current_host_ram/100),
+                    average_column_name : line["values"]["average"]*(current_host_ram/100)
+                })
+            except Exception as e:
+                print(f"***************** ERROR: Coudn't find host {line["metric"]["host_name"]} in ram-capacity dictionary. Exception occured while calculating app memory usage for app:{line["metric"]["app_name"]}. {e}")   
 
         for app in exclude_applications:
             for line in execute_prometheus_query(self.prom_con_obj,self.start_timestamp,self.end_timestamp,f'sum(uptycs_app_memory{{app_name=~"{app}"}}) by (node_type,host_name)',self.hours):
                 if line["metric"]["node_type"] in self.exclude_nodetypes:continue
-                application_level_final_memory_result.append({
-                    "node_type":line["metric"]["node_type"],
-                    "host_name":line["metric"]["host_name"],
-                    "application":app,
-                    minimum_column_name : line["values"]["minimum"]*(self.node_ram_capacity[line["metric"]["host_name"]]/100),
-                    maximum_column_name : line["values"]["maximum"]*(self.node_ram_capacity[line["metric"]["host_name"]]/100),
-                    average_column_name : line["values"]["average"]*(self.node_ram_capacity[line["metric"]["host_name"]]/100)
-                })
+                try:
+                    current_host_ram=self.node_ram_capacity[line["metric"]["host_name"]]                
+                    application_level_final_memory_result.append({
+                        "node_type":line["metric"]["node_type"],
+                        "host_name":line["metric"]["host_name"],
+                        "application":app,
+                        minimum_column_name : line["values"]["minimum"]*(current_host_ram/100),
+                        maximum_column_name : line["values"]["maximum"]*(current_host_ram/100),
+                        average_column_name : line["values"]["average"]*(current_host_ram/100)
+                    })
+                except Exception as e:
+                    print(f"***************** ERROR: Coudn't find host {line["metric"]["host_name"]} in ram-capacity dictionary. Exception occured while calculating app memory usage for app:{line["metric"]["app_name"]}. {e}")
+
         app_level_memory = pd.DataFrame(application_level_final_memory_result)
         result.update(self.preprocess_df(app_level_memory,'application',for_report))
 
@@ -243,13 +252,18 @@ class resource_usages:
         node_level_final_cpu_result=[]
         node_level_cpu_query_result=execute_prometheus_query(self.prom_con_obj,self.start_timestamp,self.end_timestamp,node_level_cpu_query,self.hours)
         for line in node_level_cpu_query_result:
-            node_level_final_cpu_result.append({
-                "node_type":line["metric"]["node_type"],
-                "host_name":line["metric"]["host_name"],
-                minimum_column_name : line["values"]["minimum"]*float(self.node_cores_capacity[line["metric"]["host_name"]])/100,
-                maximum_column_name : line["values"]["maximum"]*float(self.node_cores_capacity[line["metric"]["host_name"]])/100,
-                average_column_name : line["values"]["average"]*float(self.node_cores_capacity[line["metric"]["host_name"]])/100
-            })
+            try:
+                current_host_cores=self.node_cores_capacity[line["metric"]["host_name"]]             
+                node_level_final_cpu_result.append({
+                    "node_type":line["metric"]["node_type"],
+                    "host_name":line["metric"]["host_name"],
+                    minimum_column_name : line["values"]["minimum"]*float(current_host_cores)/100,
+                    maximum_column_name : line["values"]["maximum"]*float(current_host_cores)/100,
+                    average_column_name : line["values"]["average"]*float(current_host_cores)/100
+                })
+            except Exception as e:
+                print(f"***************** ERROR: Coudn't find host {line["metric"]["host_name"]} in cores-capacity dictionary. Exception occured while calculating app cpu usage for host:{line["metric"]["host_name"]} and app:{line["metric"]["app_name"]}. {e}")
+
         node_level_cpu = pd.DataFrame(node_level_final_cpu_result)   
         result.update(self.preprocess_df(node_level_cpu,None,for_report))
 
