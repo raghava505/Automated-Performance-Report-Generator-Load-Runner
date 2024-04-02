@@ -21,22 +21,13 @@ print(base_stack_config_path)
 class Kube_Accuracy:
 
     def __init__(self,start_timestamp,end_timestamp,prom_con_obj,variables):
-        
-        # test_env_file_path = "{}/{}".format(base_stack_config_path,variables["test_env_file_name"])
         test_env_file_path=prom_con_obj.test_env_file_path
         with open(test_env_file_path,"r") as file:
             data = json.load(file)
-            # print(data)
         
         self.load_start=start_timestamp
         self.load_end=end_timestamp
         self.upt_day="".join(str(start_timestamp.strftime("%Y-%m-%d")).split('-'))
-        # self.test_env_file_path=prom_con_obj.test_env_file_path
-        # self.PROMETHEUS = prom_con_obj.prometheus_path
-        # self.API_PATH = prom_con_obj.prom_point_api_path
-        # self.port=prom_con_obj.ssh_port
-        # self.username = prom_con_obj.abacus_username
-        # self.password  = prom_con_obj.abacus_password
         self.port = 22
         self.username = "abacus"
         self.password  = "abacus"
