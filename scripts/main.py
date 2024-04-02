@@ -227,9 +227,9 @@ if __name__ == "__main__":
         mem_cpu_usages_dict,overall_usage_dict=comp.make_comparisions(load_cls.common_app_names)
         
         #--------------------------------complete resource extraction---------------------------------------
-        complete_resource_details={}
-        # resource_obj=resource_usages(prom_con_obj,start_timestamp,end_timestamp,hours=variables["load_duration_in_hrs"],include_nodetypes=load_cls.hostname_types)
-        # complete_resource_details=resource_obj.get_complete_result()
+        complete_resource_details=None
+        resource_obj=resource_usages(prom_con_obj,start_timestamp,end_timestamp,hours=variables["load_duration_in_hrs"],include_nodetypes=load_cls.hostname_types)
+        complete_resource_details=resource_obj.get_complete_result()
 
         #-------------------------Cloudquery Accuracies----------------------------
         cloudquery_accuracies=None
@@ -318,8 +318,8 @@ if __name__ == "__main__":
                 final_data_to_save.update({"Presto Load details":presto_load_result_dict})
             if realtime_query_results:
                 final_data_to_save.update({"Realtimequery test results":realtime_query_results})
-            # if complete_resource_details:
-            #     final_data_to_save.update(complete_resource_details)
+            if complete_resource_details:
+                final_data_to_save.update(complete_resource_details)
 
 
             final_data_to_save.update({"charts":complete_charts_data_dict})
