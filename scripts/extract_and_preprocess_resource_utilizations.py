@@ -194,7 +194,7 @@ class resource_usages:
                     average_column_name : line["values"]["average"]*(current_host_ram/100)
                 })
             except Exception as e:
-                print(f"***************** ERROR: Coudn't find host {line["metric"]["host_name"]} in ram-capacity dictionary. Exception occured while calculating app memory usage for app:{line["metric"]["app_name"]}. {e}")   
+                print(f'***************** ERROR: Couldnt find host {line["metric"]["host_name"]} in ram-capacity dictionary. Exception occured while calculating app memory usage for app:{line["metric"]["app_name"]}. {e}')   
 
         for app in exclude_applications:
             for line in execute_prometheus_query(self.prom_con_obj,self.start_timestamp,self.end_timestamp,f'sum(uptycs_app_memory{{app_name=~"{app}"}}) by (node_type,host_name)',self.hours):
@@ -210,7 +210,7 @@ class resource_usages:
                         average_column_name : line["values"]["average"]*(current_host_ram/100)
                     })
                 except Exception as e:
-                    print(f"***************** ERROR: Coudn't find host {line["metric"]["host_name"]} in ram-capacity dictionary. Exception occured while calculating app memory usage for app:{line["metric"]["app_name"]}. {e}")
+                    print(f'***************** ERROR: Couldnt find host {line["metric"]["host_name"]} in ram-capacity dictionary. Exception occured while calculating app memory usage for app:{line["metric"]["app_name"]}. {e}')
 
         app_level_memory = pd.DataFrame(application_level_final_memory_result)
         result.update(self.preprocess_df(app_level_memory,'application',for_report))
@@ -262,7 +262,7 @@ class resource_usages:
                     average_column_name : line["values"]["average"]*float(current_host_cores)/100
                 })
             except Exception as e:
-                print(f"***************** ERROR: Coudn't find host {line["metric"]["host_name"]} in cores-capacity dictionary. Exception occured while calculating app cpu usage for host:{line["metric"]["host_name"]} and app:{line["metric"]["app_name"]}. {e}")
+                print(f'***************** ERROR: Couldnt find host {line["metric"]["host_name"]} in cores-capacity dictionary. Exception occured while calculating app cpu usage for host:{line["metric"]["host_name"]} and app:{line["metric"]["app_name"]}. {e}')
 
         node_level_cpu = pd.DataFrame(node_level_final_cpu_result)   
         result.update(self.preprocess_df(node_level_cpu,None,for_report))
