@@ -26,7 +26,6 @@ import os
 from create_chart import create_images_and_save
 from trino_queries_analysis import TRINO_ANALYSE
 from active_conn_by_apps import Active_conn
-from realtimequery_tests.real_time_query import realtime_query
 from bson import ObjectId
 from pg_badger import return_pgbadger_results,get_and_save_pgb_html
 from extract_and_preprocess_resource_utilizations import resource_usages
@@ -96,6 +95,7 @@ if __name__ == "__main__":
         #-------------------------real time query test details--------------------------
         realtime_query_results=None
         if domain=="longevity": 
+            from realtimequery_tests.real_time_query import realtime_query
             print(f"Performing realtime query test on stack '{test_env_json_details['stack']}' ...")
             realtime_query_results=realtime_query()
         #-------------------------disk space--------------------------
