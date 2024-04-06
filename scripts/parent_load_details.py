@@ -8,7 +8,7 @@ class parent:
         return  {"sum":["orc-compaction" ,"uptycs-configdb",  ".*osqLogger.*", "kafka","spark-worker",".*ruleEngine.*",
                         "data-archival",".*redis-server.*","/opt/uptycs/cloud/go/bin/complianceSummaryConsumer","tls",".*airflow.*",
                         "trino","pgbouncer","spark-master","/usr/local/bin/pushgateway" , "auditLogsIngestion","alertsIngestion",
-                        "prestoLogsIngestion","queryPackIngestion","osqueryIngestion"],
+                        "prestoLogsIngestion","queryPackIngestion","osqueryIngestion","uptycs-metastoredb"],
                 "avg":[]
                 }
     
@@ -250,5 +250,73 @@ class parent:
                     "merge_on_cols" : ['source','query_operation','failure_message','failure_type'],
                     "compare_cols":["failure_count"]
                 }
-            }
+            },
+            "Time taken by the queries on an hourly basis":{
+                "query" :  "select \
+                                CAST(upt_day AS varchar) AS upt_day,\
+                                CAST(upt_batch AS varchar) AS upt_batch,\
+                                count(*) as total_queries,\
+                                SUM(CAST(wall_time AS bigint)) AS total_wall_time,\
+                                SUM(CAST(queued_time AS bigint)) AS total_queued_time,\
+                                SUM(CAST(cpu_time AS bigint)) AS total_cpu_time,\
+                                SUM(CAST(analysis_time AS bigint)) AS total_analysis_time\
+                            from presto_query_logs \
+                            where upt_time > timestamp '<start_utc_str>' and upt_time < timestamp '<end_utc_str>'\
+                            group by 1,2 \
+                            order by 1,2;",
+                "columns":['upt_day','upt_batch','total_queries','total_wall_time','total_queued_time','total_cpu_time','total_analysis_time'],
+                "schema":{
+                    "merge_on_cols" : ["upt_batch"],
+                    "compare_cols":["total_queries"],
+                    # "do_not_compare":True
+                }
+            },
+            "Time taken by queries by each source":{
+                "query" :  "select \
+                                source,\
+                                count(*) as total_queries,\
+                                SUM(CAST(wall_time AS bigint)) AS total_wall_time,\
+                                SUM(CAST(queued_time AS bigint)) AS total_queued_time,\
+                                SUM(CAST(cpu_time AS bigint)) AS total_cpu_time,\
+                                SUM(CAST(analysis_time AS bigint)) AS total_analysis_time\
+                            from presto_query_logs \
+                            where upt_time > timestamp '<start_utc_str>' and upt_time < timestamp '<end_utc_str>'\
+                            group by 1 \
+                            order by 3,4,5,6;",
+                "columns":['source','total_queries','total_wall_time','total_queued_time','total_cpu_time','total_analysis_time'],
+                "schema":{
+                    "merge_on_cols" : ["source"],
+                    "compare_cols":["total_wall_time"],
+                }
+            },
+            "Total number of LIKE queries executed per source":{
+                "query" :  "select \
+                                source,\
+                                count(*) as total_queries\
+                            from presto_query_logs \
+                            where upt_time > timestamp '<start_utc_str>' and upt_time < timestamp '<end_utc_str>'\
+                            and (query_text like '%like%')\
+                            group by 1 \
+                            order by 2;",
+                "columns":['source','total_queries'],
+                "schema":{
+                    "merge_on_cols" : ["source"],
+                    "compare_cols":["total_queries"],
+                }
+            },
+            "Total number of REGEX queries executed per source":{
+                "query" :  "select \
+                                source,\
+                                count(*) as total_queries\
+                            from presto_query_logs \
+                            where upt_time > timestamp '<start_utc_str>' and upt_time < timestamp '<end_utc_str>'\
+                            and (query_text like '%regex%')\
+                            group by 1 \
+                            order by 2;",
+                "columns":['source','total_queries'],
+                "schema":{
+                    "merge_on_cols" : ["source"],
+                    "compare_cols":["total_queries"],
+                }
+            },
           }

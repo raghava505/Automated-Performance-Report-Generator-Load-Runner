@@ -51,7 +51,7 @@ class TRINO_ANALYSE:
 #     from parent_load_details import parent
 #     format_data = "%Y-%m-%d %H:%M"
 
-#     start_time_str = "2024-01-31 00:20"
+#     start_time_str = "2024-03-31 00:20"
 #     hours=12
 
 #     start_time = datetime.strptime(start_time_str, format_data)
