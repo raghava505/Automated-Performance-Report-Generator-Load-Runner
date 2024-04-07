@@ -266,7 +266,7 @@ class parent:
                             where upt_time > timestamp '<start_utc_str>' and upt_time < timestamp '<end_utc_str>'\
                             group by 1,2 \
                             order by 1,2;",
-                "columns":['upt_day','upt_batch','total_queries','total_wall_time','total_queued_time','total_cpu_time','total_analysis_time'],
+                "columns":['upt_day','upt_batch','total_queries','like_queries','regex_queries','total_wall_time','total_queued_time','total_cpu_time','total_analysis_time'],
                 "schema":{
                     "merge_on_cols" : ["upt_batch"],
                     "compare_cols":["total_wall_time"],
@@ -287,7 +287,7 @@ class parent:
                             where upt_time > timestamp '<start_utc_str>' and upt_time < timestamp '<end_utc_str>'\
                             group by 1 \
                             order by 5,6;",
-                "columns":['source','total_queries','total_wall_time','total_queued_time','total_cpu_time','total_analysis_time'],
+                "columns":['source','total_queries','like_queries','regex_queries','total_wall_time','total_queued_time','total_cpu_time','total_analysis_time'],
                 "schema":{
                     "merge_on_cols" : ["source"],
                     "compare_cols":["total_wall_time"],
