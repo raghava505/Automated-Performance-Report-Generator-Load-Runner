@@ -345,6 +345,9 @@ class osq_accuracy:
                 print(f"Executing query : {query}")
                 actual = http_query(api, query, self.ext)
                 print(actual)
-            accuracy[table]={"actual":actual,"expected":expect,"accuracy":round((actual/expect)*100,2)}
+            if table=="upt_detections":
+                accuracy[table]={"actual":actual,"expected":expect,"accuracy":0}
+            else:
+                accuracy[table]={"actual":actual,"expected":expect,"accuracy":round((actual/expect)*100,2)}
         return accuracy
         
