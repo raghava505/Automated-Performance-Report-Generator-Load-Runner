@@ -4,7 +4,7 @@ import shutil
 
 class LOGScriptRunner:
     def __init__(self):
-        self.simulators1 = ["s4simhost1a", "s4simhost1d", "s4simhost2b", "s4simhost2d", "s4simhost3b", "s4simhost3d", "s4simhost4b", "s4simhost4d", "s4simhost5b", "s4simhost5d", "s4simhost6b", "s4simhost6d"]
+        self.simulators1 = ["s4simhost1a","s4simhost1c", "s4simhost1d", "s4simhost2a","s4simhost2b","s4simhost2c", "s4simhost2d", "s4simhost3a","s4simhost3b", "s4simhost3c"]
         self.simulators2 = ["long-aws-sim1", "long-aws-sim2"]
         self.simulators3 = ["long-gcp-sim1", "long-gcp-sim2"]
         self.azure_simulators = ["long-azure-sim1"]
