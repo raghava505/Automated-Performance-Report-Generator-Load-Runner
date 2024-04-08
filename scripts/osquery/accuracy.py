@@ -320,7 +320,7 @@ class osq_accuracy:
             api=api_config[self.domain]
         else:
             api=api_config[self.domain+str(cust)]
-        events_tables=["upt_alerts","upt_events"]
+        events_tables=["upt_alerts","upt_events","upt_detections"]
         expected=self.expected_events()
         accuracy={}
         for table in events_tables:
@@ -329,6 +329,12 @@ class osq_accuracy:
                 if expect>events_triggered*self.hours*100000:
                     expect=events_triggered*self.hours*100000
                 query="select count(*) from {} where upt_day>= {} and created_at >= timestamp '{}' and created_at < timestamp '{}' and code like '%-builder-added%'".format(table,self.upt_day,self.start_time,self.end_time)
+                print(f"Executing query : {query}")
+                actual = http_query(api, query,self.ext)
+                print(actual)
+            elif table=="upt_detections":
+                expect=0
+                query="select count(*) from {} where upt_day>= {} and created_at >= timestamp '{}' and created_at < timestamp '{}'".format(table,self.upt_day,self.start_time,self.end_time)
                 print(f"Executing query : {query}")
                 actual = http_query(api, query,self.ext)
                 print(actual)
