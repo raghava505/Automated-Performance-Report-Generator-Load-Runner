@@ -253,8 +253,8 @@ class parent:
             },
             "Time taken by the queries on an hourly basis":{
                 "query" :  "select \
-                                CAST(upt_day AS varchar) AS upt_day,\
-                                CAST(upt_batch AS varchar) AS upt_batch,\
+                                'day-' || CAST(upt_day AS varchar) AS upt_day,\
+                                'batch-' || CAST(upt_batch AS varchar) AS upt_batch,\
                                 count(*) as total_queries,\
                                 COUNT(CASE WHEN query_text LIKE '%like%' THEN 1 END) AS like_queries,\
                                 COUNT(CASE WHEN query_text LIKE '%regex%' THEN 1 END) AS regex_queries,\
@@ -264,8 +264,8 @@ class parent:
                                 SUM(CAST(analysis_time AS bigint)) AS total_analysis_time\
                             from presto_query_logs \
                             where upt_time > timestamp '<start_utc_str>' and upt_time < timestamp '<end_utc_str>'\
-                            group by 1,2 \
-                            order by 1,2;",
+                            GROUP BY 'day-' || CAST(upt_day AS varchar), 'batch-' || CAST(upt_batch AS varchar) \
+                            ORDER BY upt_day, upt_batch;",
                 "columns":['upt_day','upt_batch','total_queries','like_queries','regex_queries','total_wall_time','total_queued_time','total_cpu_time','total_analysis_time'],
                 "schema":{
                     "merge_on_cols" : ["upt_batch"],
