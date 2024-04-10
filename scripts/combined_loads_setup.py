@@ -74,6 +74,13 @@ class all_combined_child(parent):
     
     @classmethod
     @property
+    def common_pod_names(cls):
+        temp = copy.deepcopy(parent.common_pod_names)
+        temp.extend(["configdb-deployment.*","deadletter-consumer-deployment.*","debezium-consumer-deployment.*","compliance-check-runner-deployment.*","compliance-summary-consumer-deployment.*","latest-snapshot-consumer-deployment.*","decorators-consumer-deployment.*","checksum-validator-deployment.*","apiscraper-consumer-deployment.*","cloud-compliance-manager-deployment.*","cloud-crossaccount-processor-deployment.*","cloud-event-decorator-deployment.*","cloud-graph-processor-deployment.*","cloud-graph-synchronizer-deployment.*","cloudinstancemapper-consumer-deployment.*","cloudpreprocessor-deployment.*","cloudquery-consumer-deployment.*","cloudriskprocessor-deployment.*","cloudvuln-consumer-deployment.*","risks-consumer-deployment.*","statedb-deployment.*","osquery-state-manager-deployment.*"])
+        return temp
+    
+    @classmethod
+    @property
     def list_of_observations_to_make(cls):
         return [
                     'Check 100 percent accuracy for inventory tables',
