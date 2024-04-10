@@ -61,10 +61,9 @@ class osquery_child(parent):
         temp['sum'].extend(["/opt/uptycs/cloud/go/bin/ruleEngine-production-ruleengine"])
         return temp
     
-
     @classmethod
     @property
-    def common_pod_names(cls):
-        temp = copy.deepcopy(parent.common_pod_names)
-        temp.extend(["osquery-state-manager-deployment.*"])
+    def kafka_group_names(cls):
+        temp = copy.deepcopy(parent.kafka_group_names)
+        temp.extend(["op"])
         return temp

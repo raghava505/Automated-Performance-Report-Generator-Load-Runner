@@ -27,6 +27,10 @@ class kubequery_child(parent):
                 
                 "total_number_of_customers_for_SelfManaged": 1,
                 "total_assets_for_SelfManaged": 200,
+
+                "Test Parameters":{
+                    "param": 1,
+                },
             }
     }
 
@@ -67,5 +71,12 @@ class kubequery_child(parent):
             "Kubernetes State Manager CPU usage":("sum(uptycs_docker_cpu_stats{container_name=\"kubernetes-state-manager\"}) by (host_name)" , ["host_name"],'%'),
         }
         temp.update(more_cpu_queries)
+        return temp
+    
+    @classmethod
+    @property
+    def common_pod_names(cls):
+        temp = copy.deepcopy(parent.common_pod_names)
+        temp.extend(["osquery-state-manager-deployment.*"])
         return temp
     
