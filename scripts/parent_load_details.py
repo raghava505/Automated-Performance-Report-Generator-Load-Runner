@@ -20,7 +20,7 @@ class parent:
     @classmethod
     @property
     def common_pod_names(cls):
-        return ["debezium-consumer-deployment.*"]
+        return ["configdb-deployment.*","deadletter-consumer-deployment.*","debezium-consumer-deployment.*","compliance-check-runner-deployment.*","compliance-summary-consumer-deployment.*","latest-snapshot-consumer-deployment.*","decorators-consumer-deployment.*","checksum-validator-deployment.*","apiscraper-consumer-deployment.*"]
 
     @classmethod
     @property
