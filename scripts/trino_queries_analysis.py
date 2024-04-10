@@ -36,6 +36,7 @@ class TRINO_ANALYSE:
                 df["query_operation"] = df["query_operation"].astype(str)
             except:
                 pass
+            # df.to_csv(heading+".csv")
             save_dict[heading] = {
                 "schema":schema,
                 "table":df.to_dict(orient="records")
@@ -51,8 +52,8 @@ class TRINO_ANALYSE:
 #     from parent_load_details import parent
 #     format_data = "%Y-%m-%d %H:%M"
 
-#     start_time_str = "2024-03-31 00:20"
-#     hours=12
+#     start_time_str = "2024-03-27 00:39"
+#     hours=10
 
 #     start_time = datetime.strptime(start_time_str, format_data)
 #     end_time = start_time + timedelta(hours=hours)
