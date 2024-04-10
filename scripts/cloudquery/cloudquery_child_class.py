@@ -34,6 +34,13 @@ class cloudquery_child(parent):
     
     @classmethod
     @property
+    def common_pod_names(cls):
+        temp = copy.deepcopy(parent.common_pod_names)
+        temp.extend(["cloud-compliance-manager-deployment.*","cloud-crossaccount-processor-deployment.*"])
+        return temp
+
+    @classmethod
+    @property
     def common_app_names(cls):
         temp = copy.deepcopy(parent.common_app_names)
         temp['sum'].extend([".*effectivePermissions.*","sts.*","/usr/lib/memgraph/memgraph","/opt/uptycs/cloud/go/bin/cloudqueryConsumer","cloudDetectionConsumer",".*statedb.*","cloudConnectorIngestion","/opt/uptycs/cloud/go/bin/ruleEngine-production-ruleenginecc"])

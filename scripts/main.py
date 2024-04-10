@@ -125,7 +125,7 @@ if __name__ == "__main__":
         print("Fetching Trino queries details ...")
         trino_obj = TRINO_ANALYSE(start_utc_str,end_utc_str,prom_con_obj=prom_con_obj)
         trino_queries_analyse_results = trino_obj.fetch_trino_results(load_cls.trino_details_commands)
-        print(f"Returned trino queries results are : {trino_queries_analyse_results}")
+        # print(f"Returned trino queries results are : {trino_queries_analyse_results}")
         #-------------------------API LOAD--------------------------
         api_load_result_dict=None
         presto_load_result_dict=None
@@ -224,7 +224,7 @@ if __name__ == "__main__":
         #--------------------------------cpu and mem node-wise---------------------------------------
         print("Fetching resource usages data ...")
         comp = MC_comparisions(start_timestamp=start_timestamp,end_timestamp=end_timestamp,prom_con_obj=prom_con_obj,hours=variables["load_duration_in_hrs"],include_nodetypes=load_cls.hostname_types)
-        mem_cpu_usages_dict,overall_usage_dict=comp.make_comparisions(load_cls.common_app_names)
+        mem_cpu_usages_dict,overall_usage_dict=comp.make_comparisions(load_cls.common_app_names,load_cls.common_pod_names)
         
         #--------------------------------complete resource extraction---------------------------------------
         complete_resource_details=None

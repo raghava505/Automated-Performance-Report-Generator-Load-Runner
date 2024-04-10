@@ -12,6 +12,15 @@ class parent:
                 "avg":[]
                 }
     
+    @classmethod
+    @property
+    def common_container_names(cls):
+        return ["debezium"]
+    
+    @classmethod
+    @property
+    def common_pod_names(cls):
+        return ["debezium-consumer-deployment.*"]
 
     @classmethod
     @property
@@ -65,10 +74,18 @@ class parent:
         app_level_RAM_used_percentage_queries= dict([(f"Memory Used by {app}",(f"{key}(uptycs_app_memory{{app_name=~'{app}'}}) by (host_name)" , ["host_name"], '%') ) for key,app_list in cls.common_app_names.items() for app in app_list])
         more_memory_queries={
             "Kafka Disk Used Percentage":("uptycs_percentage_used{partition=~'/data/kafka'}" , ["host_name"], '%'),
-            "Debezium memory usage":("uptycs_docker_mem_used{container_name='debezium'}" , ["host_name"],'bytes'),
         }
         app_level_RAM_used_percentage_queries.update(more_memory_queries)
         return app_level_RAM_used_percentage_queries
+    
+    @classmethod
+    def get_docker_level_mem_used_queries(cls):
+        return dict([(f"Memory used by container {cont}",(f"sum(uptycs_docker_mem_used{{container_name=~'{cont}'}}/(1024*1024*1024)) by (host_name)" , ["host_name"], 'GB') ) for cont in cls.common_container_names])
+
+    @classmethod
+    def get_pod_level_mem_used_queries(cls):
+        return dict([(f"Memory used by pod {pod}",(f"sum(container_memory_working_set_bytes{{container_label_io_kubernetes_pod_name=~'{pod}'}}/(1024*1024*1024)) by (node_name)" , ["node_name"], 'GB') ) for pod in cls.common_pod_names])
+
 
     @classmethod
     def get_node_level_CPU_busy_percentage_queries(cls):
@@ -76,14 +93,16 @@ class parent:
     
     @classmethod
     def get_app_level_CPU_used_cores_queries(cls):
-        app_level_CPU_used_cores_queries=dict([(f"CPU Used by {app}", (f"{key}(uptycs_app_cpu{{app_name=~'{app}'}}) by (host_name)" , ["host_name"], '%') ) for key,app_list in cls.common_app_names.items() for app in app_list])
-        more_cpu_queries={
-            "Debezium CPU usage":("uptycs_docker_cpu_stats{container_name='debezium'}" , ["host_name"]),
-        }
+        return dict([(f"CPU Used by {app}", (f"{key}(uptycs_app_cpu{{app_name=~'{app}'}}) by (host_name)" , ["host_name"], '%') ) for key,app_list in cls.common_app_names.items() for app in app_list])
 
-        app_level_CPU_used_cores_queries.update(more_cpu_queries)
-        return app_level_CPU_used_cores_queries
-    
+    @classmethod
+    def get_docker_level_cpu_used_queries(cls):
+        return dict([(f"CPU used by container {cont}",(f"sum(uptycs_docker_cpu_stats{{container_name=~'{cont}'}}/100) by (host_name)" , ["host_name"], 'cores') ) for cont in cls.common_container_names])
+
+    @classmethod
+    def get_pod_level_cpu_used_queries(cls):
+        return dict([(f"CPU used by pod {pod}",(f"sum(rate(container_cpu_usage_seconds_total{{container_label_io_kubernetes_pod_name=~'{pod}'}}[10m])) by (node_name)" , ["node_name"] , 'cores') ) for pod in cls.common_pod_names])
+
 
     @staticmethod
     def get_inject_drain_and_lag_uptycs_mon_spark(topic):
@@ -176,6 +195,10 @@ class parent:
             "Node-level CPU Charts":cls.get_node_level_CPU_busy_percentage_queries(),
             "Application-level Memory Charts":cls.get_app_level_RAM_used_percentage_queries(),
             "Application-level CPU Charts":cls.get_app_level_CPU_used_cores_queries(),
+            "Container-level Memory Charts":cls.get_docker_level_mem_used_queries(),
+            "Container-level CPU Charts":cls.get_docker_level_cpu_used_queries(),
+            "Pod-level Memory Charts":cls.get_pod_level_mem_used_queries(),
+            "Pod-level CPU Charts":cls.get_pod_level_cpu_used_queries(),
             "Inject-Drain rate and Lag Charts":cls.get_inject_drain_rate_and_lag_chart_queries(),
             "Pg Stats Charts": cls.get_pg_charts(),
             "Restart count Charts": cls.get_restart_count_charts(),
@@ -293,34 +316,55 @@ class parent:
                     "compare_cols":["total_wall_time"],
                 }
             },
-            # "Total number of LIKE queries executed per source":{
+            # "Top 25 queries with long analysis time":{
             #     "query" :  "select \
-            #                     source,\
-            #                     count(*) as total_queries\
+            #                 source,\
+            #                 query_text,\
+            #                 upt_day,upt_batch,\
+            #                 analysis_time,cpu_time,queued_time,wall_time,schema,query_operation,query_status,failure_message \
             #                 from presto_query_logs \
             #                 where upt_time > timestamp '<start_utc_str>' and upt_time < timestamp '<end_utc_str>'\
-            #                 and (query_text like '%like%')\
-            #                 group by 1 \
-            #                 order by 2;",
-            #     "columns":['source','total_queries'],
+            #                 order by CAST(analysis_time AS bigint) desc \
+            #                 limit 25;",
+            #     "columns":['source','query_text','upt_day','upt_batch','analysis_time','cpu_time','queued_time','wall_time','schema','query_operation','query_status','failure_message'],
             #     "schema":{
-            #         "merge_on_cols" : ["source"],
-            #         "compare_cols":["total_queries"],
+            #         "merge_on_cols" : [],
+            #         "compare_cols":[],
+            #         "do_not_compare":True
             #     }
             # },
-            # "Total number of REGEX queries executed per source":{
+            # "Top 25 queries with long cpu time":{
             #     "query" :  "select \
-            #                     source,\
-            #                     count(*) as total_queries\
+            #                 source,\
+            #                 query_text,\
+            #                 upt_day,upt_batch,\
+            #                 analysis_time,cpu_time,queued_time,wall_time,schema,query_operation,query_status,failure_message \
             #                 from presto_query_logs \
             #                 where upt_time > timestamp '<start_utc_str>' and upt_time < timestamp '<end_utc_str>'\
-            #                 and (query_text like '%regex%')\
-            #                 group by 1 \
-            #                 order by 2;",
-            #     "columns":['source','total_queries'],
+            #                 order by CAST(cpu_time AS bigint) desc \
+            #                 limit 25;",
+            #     "columns":['source','query_text','upt_day','upt_batch','analysis_time','cpu_time','queued_time','wall_time','schema','query_operation','query_status','failure_message'],
             #     "schema":{
-            #         "merge_on_cols" : ["source"],
-            #         "compare_cols":["total_queries"],
+            #         "merge_on_cols" : [],
+            #         "compare_cols":[],
+            #         "do_not_compare":True
+            #     }
+            # },
+            # "Top 25 queries with long wall time":{
+            #     "query" :  "select \
+            #                 source,\
+            #                 query_text,\
+            #                 upt_day,upt_batch,\
+            #                 analysis_time,cpu_time,queued_time,wall_time,schema,query_operation,query_status,failure_message \
+            #                 from presto_query_logs \
+            #                 where upt_time > timestamp '<start_utc_str>' and upt_time < timestamp '<end_utc_str>'\
+            #                 order by CAST(wall_time AS bigint) desc \
+            #                 limit 25;",
+            #     "columns":['source','query_text','upt_day','upt_batch','analysis_time','cpu_time','queued_time','wall_time','schema','query_operation','query_status','failure_message'],
+            #     "schema":{
+            #         "merge_on_cols" : [],
+            #         "compare_cols":[],
+            #         "do_not_compare":True
             #     }
             # },
           }

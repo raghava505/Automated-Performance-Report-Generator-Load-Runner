@@ -35,14 +35,20 @@ def execute_configdb_query(node,query,prom_con_obj):
     configdb_command = f'sudo docker exec postgres-configdb bash -c "PGPASSWORD=pguptycs psql -U postgres configdb -c \"{query}\""'
     return execute_command_in_node(node,configdb_command,prom_con_obj)
 
-def execute_point_prometheus_query(prom_con_obj,timestamp,query):    
+def execute_point_prometheus_query(prom_con_obj,timestamp,query): 
+    PROMETHEUS = prom_con_obj.prometheus_path
+    for metric in prom_con_obj.kube_metrics:
+        if metric in query:
+            PROMETHEUS = prom_con_obj.kube_prometheus_path 
+            print("pod level metric found.. using prometheous path : " , PROMETHEUS)
+  
     PARAMS = {
         'query': query,
         'time' : timestamp
     }
     print(f"Executing {query} at {prom_con_obj.monitoring_ip} at a single timestamp {timestamp}...")
     try:
-        response = requests.get(prom_con_obj.prometheus_path + prom_con_obj.prom_point_api_path, params=PARAMS)
+        response = requests.get(PROMETHEUS + prom_con_obj.prom_point_api_path, params=PARAMS)
         if response.status_code != 200:
             raise RuntimeError(f"API request failed with status code {response.status_code}")
         result = response.json()['data']['result']
@@ -57,6 +63,11 @@ def execute_point_prometheus_query(prom_con_obj,timestamp,query):
 
 def execute_prometheus_query(prom_con_obj,start_timestamp,end_timestamp,query,hours,preprocess=True):
     PROMETHEUS = prom_con_obj.prometheus_path
+    for metric in prom_con_obj.kube_metrics:
+        if metric in query:
+            PROMETHEUS = prom_con_obj.kube_prometheus_path
+            print("pod level metric found.. using prometheous path : " , PROMETHEUS)
+
     API_PATH = prom_con_obj.prom_api_path
     step=60
     points_per_min = 60/step
