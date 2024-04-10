@@ -35,7 +35,7 @@ class parent:
     @classmethod
     @property
     def kafka_group_names(cls):
-        return ['db-alerts','ruleengine','debeziumconsumer','db-incidents']
+        return ['db-alerts','ruleengine','debeziumconsumer','db-incidents','apiScraperSecPosConsumerGroup','decorators']
     
     @classmethod
     @property

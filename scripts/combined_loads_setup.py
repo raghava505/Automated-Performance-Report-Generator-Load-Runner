@@ -69,7 +69,7 @@ class all_combined_child(parent):
     @property
     def kafka_group_names(cls):
         temp = copy.deepcopy(parent.kafka_group_names)
-        temp.extend(["cloudqueryinventorygroup" , "cloudcompliancemanager" , "ruleenginecc","kubeStateManagerGroup"])
+        temp.extend(["cloudqueryinventorygroup" , "cloudcompliancemanager" , "ruleenginecc","kubeStateManagerGroup","op"])
         return temp
     
     @classmethod
