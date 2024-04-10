@@ -32,4 +32,7 @@ class configuration:
             self.kube_prometheus_path = f"http://{self.monitoring_ip}:{self.kube_prometheus_port}"
             self.execute_kafka_topics_script_in = stack_details['pnodes'][0]       
             self.execute_trino_queries_in = stack_details['dnodes'][0]
-            self.elastic_ip=stack_details['elastic']
+            try:
+                self.elastic_ip=stack_details['elastic']
+            except Exception as e:
+                print("Elastic node ip not found for your stack " , e)
