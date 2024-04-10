@@ -130,8 +130,27 @@ class MC_comparisions:
                 print("Warning : ", e)
             final[query] = {"percentage":{"average":avg , "minimum":minimum , "maximum":maximum}}
         return final 
+    
+    def extract_pod_data(self,queries,tag,unit):
+        final=dict()
+        print(f"----------processing pod level {tag} usages for (timestamp : {self.curr_ist_start_time} to {self.curr_ist_end_time})")
+        for query in queries:
+            print(f"processing {tag} usage for {query} pod (timestamp : {self.curr_ist_start_time} to {self.curr_ist_end_time})")
+            result=execute_prometheus_query(self.prom_con_obj,self.curr_ist_start_time,self.curr_ist_end_time,queries[query],self.hours)
+            if len(result)==0:
+                print(f"WARNING : No data found for : {query}, the query executed is : {queries[query]}")
+                continue
+            avg = result[0]["values"]["average"]
+            minimum = result[0]["values"]["minimum"]
+            maximum = result[0]["values"]["maximum"]
+            # try:
+            #     print(str(query)==str(result[0]['metric']['node_name']))
+            # except Exception as e:
+            #     print("Warning : ", e)
+            final[query] = {f"{unit}":{"average":avg , "minimum":minimum , "maximum":maximum}}
+        return final 
 
-    def make_comparisions(self,app_names):
+    def make_comparisions(self,app_names,pod_names):
         print("All usage queries to be executed are : ")
 
         memory_queries = {f"{HOST}" : 'avg((uptycs_memory_used/uptycs_total_memory) * 100)  by (host_name)',}
@@ -145,6 +164,9 @@ class MC_comparisions:
 
         app_level_memory_queries = dict([(app,f"sum({key}(uptycs_app_memory{{app_name=~'{app}'}}) by (app_name))") for key,app_list in app_names.items() for app in app_list])
         app_level_cpu_queries = dict([(app,f"sum({key}(uptycs_app_cpu{{app_name=~'{app}'}}) by (app_name))") for key,app_list in app_names.items() for app in app_list])
+
+        pod_level_memory_queries = dict([(pod,f"sum(sum(container_memory_working_set_bytes{{container_label_io_kubernetes_pod_name=~'{pod}'}}/(1024*1024*1024)) by (node_name))") for pod in pod_names])
+        pod_level_cpu_queries = dict([(pod,f"sum(sum(rate(container_cpu_usage_seconds_total{{container_label_io_kubernetes_pod_name=~'{pod}'}}[10m])) by (node_name))") for pod in pod_names])
 
         app_level_memory_queries["gprofiler perf-record pns"]="sum(uptycs_app_memory{node_type='process',app_name='/app/gprofiler/resources/perf-record--F'}) by (app_name)"
         app_level_memory_queries["gprofiler perf-script pns"]="sum(uptycs_app_memory{node_type='process',app_name='/app/gprofiler/resources/perf-script--F'}) by (app_name)"
@@ -173,6 +195,9 @@ class MC_comparisions:
         app_memory_data =  self.extract_app_data(app_level_memory_queries,memory_tag,memory_unit)
         app_cpu_data =  self.extract_app_data(app_level_cpu_queries,cpu_tag,cpu_unit)
         
+        pod_memory_data =  self.extract_pod_data(pod_level_memory_queries,memory_tag,memory_unit)
+        pod_cpu_data =  self.extract_pod_data(pod_level_cpu_queries,cpu_tag,cpu_unit)
+        
         current_build_data={
             "node_level_resource_utilization": {
                 "memory":memory_data,
@@ -185,6 +210,10 @@ class MC_comparisions:
             "application_level_resource_utilization":{
                 "memory":app_memory_data,
                 "cpu" : app_cpu_data,
+            },
+            "pod_level_resource_utilization":{
+                "memory":pod_memory_data,
+                "cpu" : pod_cpu_data,
             }
         }
         return current_build_data,{ "node_level_total_average_resource_utilization":{

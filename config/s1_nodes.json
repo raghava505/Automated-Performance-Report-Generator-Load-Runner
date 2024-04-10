@@ -66,11 +66,11 @@
     },
     "s1c1pn2": {
         "storage": {
-            "root_partition": "365G",
+            "root_partition": "1.8T",
             "kafka": "3.6T"
         },
         "ram": "188",
-        "cores": "32",
+        "cores": "48",
         "clst": "1"
     },
     "s1c1pn3": {
@@ -316,11 +316,7 @@
         "clst": "1"
     },
     "s1superset": {
-        "storage": {
-            "root_partition": "196G"
-        },
-        "ram": "47",
-        "cores": "8",
+        "storage": {},
         "clst": "1"
     }
 }
