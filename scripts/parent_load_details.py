@@ -344,15 +344,16 @@ class parent:
                     "compare_cols":["total_wall_time"],
                 }
             },
-            "Details of failed dags":{
+            "client tag details of failed queries":{
                 "query" :  "select \
+                            source,\
                             count(*),client_tags,failure_message \
                             from presto_query_logs \
                             where upt_time > timestamp '<start_utc_str>' and upt_time < timestamp '<end_utc_str>'\
-                            and source='etl-jobs' and query_status='FAILURE' \
-                            group by 2,3 \
-                            order by 1 desc;",
-                "columns":['failed_count','client_tags','failure_message'],
+                            and query_status='FAILURE' \
+                            group by 1,3,4 \
+                            order by 2 desc;",
+                "columns":['source','failed_count','client_tags','failure_message'],
                 "schema":{
                     "merge_on_cols" : [],
                     "compare_cols":[],
@@ -360,15 +361,14 @@ class parent:
                 }
             },
             
-            f"Top {limit} slowest dags sorted by analysis time":{
+            f"Top {limit} slowest queries sorted by analysis time":{
                 "query" :  f"select \
                             source,\
                             client_tags,\
-                            upt_day,upt_batch,\
+                            'day-' || CAST(upt_day AS varchar) AS upt_day,'batch-' || CAST(upt_batch AS varchar) AS upt_batch,\
                             analysis_time,cpu_time,queued_time,wall_time,schema,query_operation,query_status,failure_message \
                             from presto_query_logs \
                             where upt_time > timestamp '<start_utc_str>' and upt_time < timestamp '<end_utc_str>'\
-                            and source='etl-jobs'\
                             order by CAST(analysis_time AS bigint) desc \
                             limit {limit};",
                 "columns":['source','client_tags','upt_day','upt_batch','analysis_time','cpu_time','queued_time','wall_time','schema','query_operation','query_status','failure_message'],
@@ -378,15 +378,14 @@ class parent:
                     "do_not_compare":True
                 }
             },
-            f"Top {limit} slowest dags sorted by cpu time":{
+            f"Top {limit} slowest queries sorted by cpu time":{
                 "query" :  f"select \
                             source,\
                             client_tags,\
-                            upt_day,upt_batch,\
+                            'day-' || CAST(upt_day AS varchar) AS upt_day,'batch-' || CAST(upt_batch AS varchar) AS upt_batch,\
                             analysis_time,cpu_time,queued_time,wall_time,schema,query_operation,query_status,failure_message \
                             from presto_query_logs \
                             where upt_time > timestamp '<start_utc_str>' and upt_time < timestamp '<end_utc_str>'\
-                            and source='etl-jobs'\
                             order by CAST(cpu_time AS bigint) desc \
                             limit {limit};",
                 "columns":['source','client_tags','upt_day','upt_batch','analysis_time','cpu_time','queued_time','wall_time','schema','query_operation','query_status','failure_message'],
@@ -396,15 +395,14 @@ class parent:
                     "do_not_compare":True
                 }
             },
-            f"Top {limit} slowest dags sorted by wall time":{
+            f"Top {limit} slowest queries sorted by wall time":{
                 "query" :  f"select \
                             source,\
                             client_tags,\
-                            upt_day,upt_batch,\
+                            'day-' || CAST(upt_day AS varchar) AS upt_day,'batch-' || CAST(upt_batch AS varchar) AS upt_batch,\
                             analysis_time,cpu_time,queued_time,wall_time,schema,query_operation,query_status,failure_message \
                             from presto_query_logs \
                             where upt_time > timestamp '<start_utc_str>' and upt_time < timestamp '<end_utc_str>'\
-                            and source='etl-jobs'\
                             order by CAST(wall_time AS bigint) desc \
                             limit {limit};",
                 "columns":['source','client_tags','upt_day','upt_batch','analysis_time','cpu_time','queued_time','wall_time','schema','query_operation','query_status','failure_message'],
