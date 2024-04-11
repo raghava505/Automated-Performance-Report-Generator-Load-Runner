@@ -222,7 +222,7 @@ class parent:
     @classmethod
     @property
     def trino_details_commands(cls):
-        limit=400
+        limit=100
         return {
             "Total number of trino queries executed from each source" : {
                 "query" :  "SELECT\
