@@ -26,6 +26,7 @@ class TRINO_ANALYSE:
             #     raise RuntimeError(f"ERROR : command output is empty. Check if trino @ {self.dnode} is in good state. Terminating program ...")
             stringio = StringIO(output)
             df = pd.read_csv(stringio, header=None, names=columns)
+            df=df.fillna("NaN")
             # integer_columns = df.select_dtypes(include='int').columns
             # string_columns = df.select_dtypes(include='object').columns
             # new_row=dict([(int_col,df[int_col].sum()) for int_col in integer_columns])
