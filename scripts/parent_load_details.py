@@ -222,6 +222,7 @@ class parent:
     @classmethod
     @property
     def trino_details_commands(cls):
+        limit=400
         return {
             "Total number of trino queries executed from each source" : {
                 "query" :  "SELECT\
@@ -279,6 +280,8 @@ class parent:
                                 'day-' || CAST(upt_day AS varchar) AS upt_day,\
                                 'batch-' || CAST(upt_batch AS varchar) AS upt_batch,\
                                 count(*) as total_queries,\
+                                COUNT(CASE WHEN query_status = 'SUCCESS' THEN 1 END) as success_count,\
+                                COUNT(CASE WHEN query_status = 'FAILURE' THEN 1 END) as failure_count,\
                                 COUNT(CASE WHEN query_text LIKE '%like%' THEN 1 END) AS like_queries,\
                                 COUNT(CASE WHEN query_text LIKE '%regex%' THEN 1 END) AS regex_queries,\
                                 SUM(CAST(wall_time AS bigint)) AS total_wall_time,\
@@ -289,17 +292,18 @@ class parent:
                             where upt_time > timestamp '<start_utc_str>' and upt_time < timestamp '<end_utc_str>'\
                             GROUP BY 'day-' || CAST(upt_day AS varchar), 'batch-' || CAST(upt_batch AS varchar) \
                             ORDER BY upt_day, upt_batch;",
-                "columns":['upt_day','upt_batch','total_queries','like_queries','regex_queries','total_wall_time','total_queued_time','total_cpu_time','total_analysis_time'],
+                "columns":['upt_day','upt_batch','total_queries','success_count','failure_count','like_queries','regex_queries','total_wall_time','total_queued_time','total_cpu_time','total_analysis_time'],
                 "schema":{
                     "merge_on_cols" : ["upt_batch"],
                     "compare_cols":["total_wall_time"],
-                    # "do_not_compare":True
                 }
             },
             "Time taken by queries by each source":{
                 "query" :  "select \
                                 source,\
                                 count(*) as total_queries,\
+                                COUNT(CASE WHEN query_status = 'SUCCESS' THEN 1 END) as success_count,\
+                                COUNT(CASE WHEN query_status = 'FAILURE' THEN 1 END) as failure_count,\
                                 COUNT(CASE WHEN query_text LIKE '%like%' THEN 1 END) AS like_queries,\
                                 COUNT(CASE WHEN query_text LIKE '%regex%' THEN 1 END) AS regex_queries,\
                                 SUM(CAST(wall_time AS bigint)) AS total_wall_time,\
@@ -309,62 +313,105 @@ class parent:
                             from presto_query_logs \
                             where upt_time > timestamp '<start_utc_str>' and upt_time < timestamp '<end_utc_str>'\
                             group by 1 \
-                            order by 5,6;",
-                "columns":['source','total_queries','like_queries','regex_queries','total_wall_time','total_queued_time','total_cpu_time','total_analysis_time'],
+                            order by 7,8;",
+                "columns":['source','total_queries','success_count','failure_count','like_queries','regex_queries','total_wall_time','total_queued_time','total_cpu_time','total_analysis_time'],
                 "schema":{
                     "merge_on_cols" : ["source"],
                     "compare_cols":["total_wall_time"],
                 }
             },
-            # "Top 25 queries with long analysis time":{
-            #     "query" :  "select \
-            #                 source,\
-            #                 query_text,\
-            #                 upt_day,upt_batch,\
-            #                 analysis_time,cpu_time,queued_time,wall_time,schema,query_operation,query_status,failure_message \
-            #                 from presto_query_logs \
-            #                 where upt_time > timestamp '<start_utc_str>' and upt_time < timestamp '<end_utc_str>'\
-            #                 order by CAST(analysis_time AS bigint) desc \
-            #                 limit 25;",
-            #     "columns":['source','query_text','upt_day','upt_batch','analysis_time','cpu_time','queued_time','wall_time','schema','query_operation','query_status','failure_message'],
-            #     "schema":{
-            #         "merge_on_cols" : [],
-            #         "compare_cols":[],
-            #         "do_not_compare":True
-            #     }
-            # },
-            # "Top 25 queries with long cpu time":{
-            #     "query" :  "select \
-            #                 source,\
-            #                 query_text,\
-            #                 upt_day,upt_batch,\
-            #                 analysis_time,cpu_time,queued_time,wall_time,schema,query_operation,query_status,failure_message \
-            #                 from presto_query_logs \
-            #                 where upt_time > timestamp '<start_utc_str>' and upt_time < timestamp '<end_utc_str>'\
-            #                 order by CAST(cpu_time AS bigint) desc \
-            #                 limit 25;",
-            #     "columns":['source','query_text','upt_day','upt_batch','analysis_time','cpu_time','queued_time','wall_time','schema','query_operation','query_status','failure_message'],
-            #     "schema":{
-            #         "merge_on_cols" : [],
-            #         "compare_cols":[],
-            #         "do_not_compare":True
-            #     }
-            # },
-            # "Top 25 queries with long wall time":{
-            #     "query" :  "select \
-            #                 source,\
-            #                 query_text,\
-            #                 upt_day,upt_batch,\
-            #                 analysis_time,cpu_time,queued_time,wall_time,schema,query_operation,query_status,failure_message \
-            #                 from presto_query_logs \
-            #                 where upt_time > timestamp '<start_utc_str>' and upt_time < timestamp '<end_utc_str>'\
-            #                 order by CAST(wall_time AS bigint) desc \
-            #                 limit 25;",
-            #     "columns":['source','query_text','upt_day','upt_batch','analysis_time','cpu_time','queued_time','wall_time','schema','query_operation','query_status','failure_message'],
-            #     "schema":{
-            #         "merge_on_cols" : [],
-            #         "compare_cols":[],
-            #         "do_not_compare":True
-            #     }
-            # },
+            "Time taken by etl-jobs queries on an hourly basis":{
+                "query" :  "select \
+                                'day-' || CAST(upt_day AS varchar) AS upt_day,\
+                                'batch-' || CAST(upt_batch AS varchar) AS upt_batch,\
+                                count(*) as total_queries,\
+                                COUNT(CASE WHEN query_status = 'SUCCESS' THEN 1 END) as success_count,\
+                                COUNT(CASE WHEN query_status = 'FAILURE' THEN 1 END) as failure_count,\
+                                COUNT(CASE WHEN query_text LIKE '%like%' THEN 1 END) AS like_queries,\
+                                COUNT(CASE WHEN query_text LIKE '%regex%' THEN 1 END) AS regex_queries,\
+                                SUM(CAST(wall_time AS bigint)) AS total_wall_time,\
+                                SUM(CAST(queued_time AS bigint)) AS total_queued_time,\
+                                SUM(CAST(cpu_time AS bigint)) AS total_cpu_time,\
+                                SUM(CAST(analysis_time AS bigint)) AS total_analysis_time\
+                            from presto_query_logs \
+                            where upt_time > timestamp '<start_utc_str>' and upt_time < timestamp '<end_utc_str>'\
+                            and source='etl-jobs'\
+                            GROUP BY 'day-' || CAST(upt_day AS varchar), 'batch-' || CAST(upt_batch AS varchar) \
+                            ORDER BY upt_day, upt_batch;",
+                "columns":['upt_day','upt_batch','total_queries','success_count','failure_count','like_queries','regex_queries','total_wall_time','total_queued_time','total_cpu_time','total_analysis_time'],
+                "schema":{
+                    "merge_on_cols" : ["upt_batch"],
+                    "compare_cols":["total_wall_time"],
+                }
+            },
+            "Details of failed dags":{
+                "query" :  "select \
+                            count(*),client_tags,failure_message \
+                            from presto_query_logs \
+                            where upt_time > timestamp '<start_utc_str>' and upt_time < timestamp '<end_utc_str>'\
+                            and source='etl-jobs' and query_status='FAILURE' \
+                            group by 2,3 \
+                            order by 1 desc;",
+                "columns":['failed_count','client_tags','failure_message'],
+                "schema":{
+                    "merge_on_cols" : [],
+                    "compare_cols":[],
+                    "do_not_compare":True
+                }
+            },
+            
+            f"Top {limit} slowest dags sorted by analysis time":{
+                "query" :  f"select \
+                            source,\
+                            client_tags,\
+                            upt_day,upt_batch,\
+                            analysis_time,cpu_time,queued_time,wall_time,schema,query_operation,query_status,failure_message \
+                            from presto_query_logs \
+                            where upt_time > timestamp '<start_utc_str>' and upt_time < timestamp '<end_utc_str>'\
+                            and source='etl-jobs'\
+                            order by CAST(analysis_time AS bigint) desc \
+                            limit {limit};",
+                "columns":['source','client_tags','upt_day','upt_batch','analysis_time','cpu_time','queued_time','wall_time','schema','query_operation','query_status','failure_message'],
+                "schema":{
+                    "merge_on_cols" : [],
+                    "compare_cols":[],
+                    "do_not_compare":True
+                }
+            },
+            f"Top {limit} slowest dags sorted by cpu time":{
+                "query" :  f"select \
+                            source,\
+                            client_tags,\
+                            upt_day,upt_batch,\
+                            analysis_time,cpu_time,queued_time,wall_time,schema,query_operation,query_status,failure_message \
+                            from presto_query_logs \
+                            where upt_time > timestamp '<start_utc_str>' and upt_time < timestamp '<end_utc_str>'\
+                            and source='etl-jobs'\
+                            order by CAST(cpu_time AS bigint) desc \
+                            limit {limit};",
+                "columns":['source','client_tags','upt_day','upt_batch','analysis_time','cpu_time','queued_time','wall_time','schema','query_operation','query_status','failure_message'],
+                "schema":{
+                    "merge_on_cols" : [],
+                    "compare_cols":[],
+                    "do_not_compare":True
+                }
+            },
+            f"Top {limit} slowest dags sorted by wall time":{
+                "query" :  f"select \
+                            source,\
+                            client_tags,\
+                            upt_day,upt_batch,\
+                            analysis_time,cpu_time,queued_time,wall_time,schema,query_operation,query_status,failure_message \
+                            from presto_query_logs \
+                            where upt_time > timestamp '<start_utc_str>' and upt_time < timestamp '<end_utc_str>'\
+                            and source='etl-jobs'\
+                            order by CAST(wall_time AS bigint) desc \
+                            limit {limit};",
+                "columns":['source','client_tags','upt_day','upt_batch','analysis_time','cpu_time','queued_time','wall_time','schema','query_operation','query_status','failure_message'],
+                "schema":{
+                    "merge_on_cols" : [],
+                    "compare_cols":[],
+                    "do_not_compare":True
+                }
+            },
           }

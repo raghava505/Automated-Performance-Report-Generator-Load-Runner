@@ -22,8 +22,8 @@ class TRINO_ANALYSE:
             query = raw_command.replace("<start_utc_str>",self.start_utc_str).replace( "<end_utc_str>", self.end_utc_str)
             print(f"Command :\n {query}")
             output= execute_trino_query(self.dnode,query,self.prom_con_obj)
-            if not output or output.strip()=="":
-                raise RuntimeError(f"ERROR : command output is empty. Check if trino @ {self.dnode} is in good state. Terminating program ...")
+            # if not output or output.strip()=="":
+            #     raise RuntimeError(f"ERROR : command output is empty. Check if trino @ {self.dnode} is in good state. Terminating program ...")
             stringio = StringIO(output)
             df = pd.read_csv(stringio, header=None, names=columns)
             # integer_columns = df.select_dtypes(include='int').columns
@@ -36,7 +36,7 @@ class TRINO_ANALYSE:
                 df["query_operation"] = df["query_operation"].astype(str)
             except:
                 pass
-            # df.to_csv(heading+".csv")
+            # df.to_csv("152_"+heading+".csv")
             save_dict[heading] = {
                 "schema":schema,
                 "table":df.to_dict(orient="records")
@@ -52,7 +52,7 @@ class TRINO_ANALYSE:
 #     from parent_load_details import parent
 #     format_data = "%Y-%m-%d %H:%M"
 
-#     start_time_str = "2024-03-27 00:39"
+#     start_time_str = "2024-04-03 21:39"
 #     hours=10
 
 #     start_time = datetime.strptime(start_time_str, format_data)
