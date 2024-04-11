@@ -412,4 +412,21 @@ class parent:
                     "do_not_compare":True
                 }
             },
+            f"Top {limit} slowest queries sorted by queued time":{
+                "query" :  f"select \
+                            source,\
+                            client_tags,\
+                            'day-' || CAST(upt_day AS varchar) AS upt_day,'batch-' || CAST(upt_batch AS varchar) AS upt_batch,\
+                            analysis_time,cpu_time,queued_time,wall_time,schema,query_operation,query_status,failure_message \
+                            from presto_query_logs \
+                            where upt_time > timestamp '<start_utc_str>' and upt_time < timestamp '<end_utc_str>'\
+                            order by CAST(queued_time AS bigint) desc \
+                            limit {limit};",
+                "columns":['source','client_tags','upt_day','upt_batch','analysis_time','cpu_time','queued_time','wall_time','schema','query_operation','query_status','failure_message'],
+                "schema":{
+                    "merge_on_cols" : [],
+                    "compare_cols":[],
+                    "do_not_compare":True
+                }
+            },
           }
