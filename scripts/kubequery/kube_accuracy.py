@@ -39,7 +39,7 @@ class Kube_Accuracy:
         self.expected_data = None
         self.actual_data = dict()
         self.simnodes = data["kubesim_nodes"]
-        self.kubedata = {0:0,1:0,2:0,3:0,5:0,6:0,7:0,8:0,9:0,10:0}
+        self.kubedata = kube_data
         self.cvddata = cvd_data
         self.tables = tables
         self.accuracy = dict()
@@ -75,7 +75,7 @@ class Kube_Accuracy:
             ssh_client.connect(node, self.port, self.username, self.password)
             
             for port in kubesim_ports:
-                command = "cd /home/abacus/kubequerysim/accuracy && tail -n 11 Kubesim{}.log".format(port)
+                command = "cd /home/abacus/kubequerysim/accuracy && tail -n 13 Kubesim{}.log".format(port)
                 # command = "cd /home/abacus/kubequerysim/accuracy && tail -n 11 \"$(ls -lrth | tail -n 1 | awk '{print $9}')\" | awk '{ for (i = 7; i <= NF; i++) printf $i \" \"; printf \"\\n\" }'"
                 # command = "cd /home/abacus/kubequerysim/logs && tail -n 11 \"$(ls -lrth | head -n 60 | tail -n 1 | awk '{print $9}')\" | awk '{ for (i = 7; i <= NF; i++) printf $i \" \"; printf \"\\n\" }'"
 
@@ -118,7 +118,7 @@ class Kube_Accuracy:
                         values = json.loads(valid_json_string)
                         self.cvddata = {key: self.cvddata[key] + values[key] for key in self.cvddata}
                 
-               
+
         self.cvddata = {key: self.cvddata[key] * asset_count for key in self.cvddata}
         self.cvddata = {key_mapping[key]: value for key, value in self.cvddata.items()}
         print(json.dumps(self.kube_data, indent=4)) 
@@ -138,11 +138,5 @@ class Kube_Accuracy:
             }
         #print(self.accuracy)
         return self.accuracy
-    
-
-
-
-
-
     
 
