@@ -1,5 +1,6 @@
 import copy
 from collections import defaultdict
+from time_taken_by_all_queries import get_full_query,time_ranges
 
 class parent:
     @classmethod
@@ -344,20 +345,90 @@ class parent:
                     "compare_cols":["total_wall_time"],
                 }
             },
-            "client tag details of failed queries":{
-                "query" :  "select \
-                            source,\
-                            count(*),client_tags,failure_message \
-                            from presto_query_logs \
-                            where upt_time > timestamp '<start_utc_str>' and upt_time < timestamp '<end_utc_str>'\
-                            and query_status='FAILURE' \
-                            group by 1,3,4 \
-                            order by 2 desc;",
-                "columns":['source','failed_count','client_tags','failure_message'],
+            # "client tag details of failed dags":{
+            #     "query" :  "select \
+            #                 source,\
+            #                 count(*),client_tags,failure_message \
+            #                 from presto_query_logs \
+            #                 where upt_time > timestamp '<start_utc_str>' and upt_time < timestamp '<end_utc_str>'\
+            #                 and query_status='FAILURE' \
+            #                 and client_tags like '%dagName%'\
+            #                 group by 1,3,4 \
+            #                 order by 2 desc;",
+            #     "columns":['source','failed_count','client_tags','failure_message'],
+            #     "schema":{
+            #         "merge_on_cols" : [],
+            #         "compare_cols":[],
+            #         "do_not_compare":True
+            #     }
+            # },
+            "Total time taken by each dag":{
+                "query" :  """SELECT\
+                            COALESCE(\
+                                REGEXP_EXTRACT(client_tags, '\\"dagName\\": \\"([^,}]+)\\"', 1),\
+                                'Unknown'\
+                            ) AS dagName,\
+                            COUNT(*) AS total_count, sum(wall_time) as total_wall_time, sum(cpu_time) as total_cpu_time , sum(CAST(analysis_time as bigint)) as total_analysis_time, sum(queued_time) as total_queued_time\
+                            FROM presto_query_logs\
+                            WHERE client_tags IS NOT NULL and client_tags like '%dagName%' and \
+                            upt_time > timestamp '<start_utc_str>' and upt_time < timestamp '<end_utc_str>'\
+                            GROUP BY 1 order by 3 desc;""",
+                "columns":['dagName','total_count','total_wall_time','total_cpu_time','total_analysis_time','total_queued_time'],
                 "schema":{
-                    "merge_on_cols" : [],
-                    "compare_cols":[],
-                    "do_not_compare":True
+                    "merge_on_cols" : ["dagName"],
+                    "compare_cols":["total_wall_time"],
+                }
+            },
+            "Total time taken by each dag in each upt_batch":{
+                "query" :  """SELECT
+                            COALESCE(
+                                REGEXP_EXTRACT(client_tags, '\\"dagName\\": \\"([^,}]+)\\"', 1),
+                                'Unknown'
+                            ) AS dagName,upt_day,upt_batch,
+                            COUNT(*) AS total_count, sum(wall_time) as total_wall_time, sum(cpu_time) as total_cpu_time , sum(CAST(analysis_time as bigint)) as total_analysis_time, sum(queued_time) as total_queued_time
+                            FROM presto_query_logs
+                            WHERE client_tags IS NOT NULL and client_tags like '%dagName%' and 
+                            upt_time > timestamp '<start_utc_str>' and upt_time < timestamp '<end_utc_str>'
+                            GROUP BY 1,2,3 order by 5 desc;""",
+                "columns":['dagName','upt_day','upt_batch','total_count','total_wall_time','total_cpu_time','total_analysis_time','total_queued_time'],
+                "schema":{
+                    "merge_on_cols" : ["dagName","upt_batch"],
+                    "compare_cols":["total_wall_time"],
+                }
+            },
+
+            "Total time taken by each non-dag query":{
+                "query" :  """SELECT
+                            COALESCE(
+                                source || '-' || REGEXP_EXTRACT(client_tags, '\\"queryType\\":\\"([^,}]+)\\"', 1),source || '-' || REGEXP_EXTRACT(client_tags, '\\"queryName\\":\\"([^,}]+)\\"', 1),source  ,
+                                'Unknown'
+                            ) AS query_type_or_name,
+                            COUNT(*) AS total_count, sum(wall_time) as total_wall_time, sum(cpu_time) as total_cpu_time , sum(CAST(analysis_time as bigint)) as total_analysis_time, sum(queued_time) as total_queued_time
+                            FROM presto_query_logs
+                            WHERE client_tags IS NOT NULL and client_tags not like '%dagName%' and 
+                            upt_time > timestamp '<start_utc_str>' and upt_time < timestamp '<end_utc_str>'
+                            GROUP BY 1 order by 3 desc;""",
+                "columns":['query_type_or_name','total_count','total_wall_time','total_cpu_time','total_analysis_time','total_queued_time'],
+                "schema":{
+                    "merge_on_cols" : ["query_type_or_name"],
+                    "compare_cols":["total_wall_time"],
+                }
+            },
+            "Total time taken by each non-dag query in each upt_batch":{
+                "query" :  """SELECT
+                            COALESCE(
+                                source || '-' || REGEXP_EXTRACT(client_tags, '\\"queryType\\":\\"([^,}]+)\\"', 1),source || '-' || REGEXP_EXTRACT(client_tags, '\\"queryName\\":\\"([^,}]+)\\"', 1),source  ,
+                                'Unknown'
+                            ) AS query_type_or_name,upt_day,upt_batch,
+                            COUNT(*) AS total_count, sum(wall_time) as total_wall_time, sum(cpu_time) as total_cpu_time , sum(CAST(analysis_time as bigint)) as total_analysis_time, sum(queued_time) as total_queued_time
+                            FROM presto_query_logs
+                            WHERE client_tags IS NOT NULL and client_tags not like '%dagName%' and 
+                            upt_time > timestamp '<start_utc_str>' and upt_time < timestamp '<end_utc_str>'
+                            GROUP BY 1,2,3 order by 5 desc;""",
+                "columns":['query_type_or_name','upt_day','upt_batch','total_count','total_wall_time','total_cpu_time','total_analysis_time','total_queued_time'],
+                "schema":{
+                    "merge_on_cols" : ["query_type_or_name","upt_batch"],
+                    "compare_cols":["total_wall_time"],
                 }
             },
             
@@ -423,6 +494,33 @@ class parent:
                             order by CAST(queued_time AS bigint) desc \
                             limit {limit};",
                 "columns":['source','client_tags','upt_day','upt_batch','analysis_time','cpu_time','queued_time','wall_time','schema','query_operation','query_status','failure_message'],
+                "schema":{
+                    "merge_on_cols" : [],
+                    "compare_cols":[],
+                    "do_not_compare":True
+                }
+            },
+            "Distribution of time taken by all the queries" : {
+                "query" :  get_full_query("all"),
+                "columns":['metric']+list(time_ranges.keys()),
+                "schema":{
+                    "merge_on_cols" : [],
+                    "compare_cols":[],
+                    "do_not_compare":True
+                }
+            },
+            "Distribution of time taken by all the DAGs" : {
+                "query" :  get_full_query("dag"),
+                "columns":['metric']+list(time_ranges.keys()),
+                "schema":{
+                    "merge_on_cols" : [],
+                    "compare_cols":[],
+                    "do_not_compare":True
+                }
+            },
+            "Distribution of time taken by all non-DAGs" : {
+                "query" :  get_full_query("nondag"),
+                "columns":['metric']+list(time_ranges.keys()),
                 "schema":{
                     "merge_on_cols" : [],
                     "compare_cols":[],
