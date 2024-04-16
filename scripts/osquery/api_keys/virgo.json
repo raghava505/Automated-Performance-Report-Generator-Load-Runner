@@ -1,0 +1,13 @@
+{
+    "virgo":{
+        "id": "6201455b-d599-47f7-b4a0-c983449fdc8b",
+        "user_id": "2b0522e1-a5e0-4974-824b-f3de6278a0f4",
+        "customer_id": "71e002e6-c40d-4407-84ae-63049945e203",
+        "active": "t",
+        "key": "TMUHXQIMVMLDILU4VMN74PIT5SIABY5O",
+        "secret": "tjEXz6kDg7kSLhq4dGy1nQCpPuQjlUj/TOHwQnE1Ap1rdcJuZCUkYRQhOLRUrvq2",
+        "updated_at": "2024-02-27T08:40:56.767Z",
+        "created_at": "2024-02-27T08:40:56.767Z",
+        "domain": "virgo"
+      }
+}
