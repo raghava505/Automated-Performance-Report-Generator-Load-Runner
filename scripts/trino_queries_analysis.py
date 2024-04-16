@@ -32,6 +32,7 @@ class TRINO_ANALYSE:
             # new_row=dict([(int_col,df[int_col].sum()) for int_col in integer_columns])
             # new_row.update(dict([(str_col,"TOTAL") for str_col in string_columns]))
             # df = df._append(new_row, ignore_index=True)
+            if df.empty: continue
             print(df)
             try:
                 df["query_operation"] = df["query_operation"].astype(str)
