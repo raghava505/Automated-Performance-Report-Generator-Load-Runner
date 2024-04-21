@@ -7,9 +7,9 @@ class parent:
     @property
     def common_app_names(cls):
         return  {"sum":["orc-compaction" ,"uptycs-configdb",  ".*osqLogger.*", "kafka","spark-worker",".*ruleEngine.*",
-                        "data-archival",".*redis-server.*","/opt/uptycs/cloud/go/bin/complianceSummaryConsumer","tls",".*airflow.*",
-                        "trino","pgbouncer","spark-master","/usr/local/bin/pushgateway" , "auditLogsIngestion","alertsIngestion",
-                        "prestoLogsIngestion","queryPackIngestion","osqueryIngestion","uptycs-metastoredb"],
+                        "data-archival",".*redis-server.*","/opt/uptycs/cloud/go/bin/complianceSummaryConsumer","tls",
+                        ".*airflow.*","trino","pgbouncer","spark-master","/usr/local/bin/pushgateway" ,"osqueryIngestion",
+                        "uptycs-metastoredb","apiserver"],
                 "avg":[]
                 }
     
