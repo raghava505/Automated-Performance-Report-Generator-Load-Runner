@@ -243,6 +243,32 @@ class resource_usages:
 
         container_level_memory = pd.DataFrame(container_level_final_memory_result)
         result.update(self.preprocess_df(container_level_memory,'container',for_report))
+        # ---------------------------pod level ---------------------------------
+        pod_level_memory_query='sum(container_memory_working_set_bytes{container_label_io_kubernetes_pod_name=~".*deployment.*"}) by (container_label_io_kubernetes_pod_name,node_name)'
+        unique_pod_names=set()
+        for line in execute_prometheus_query(self.prom_con_obj,self.start_timestamp,self.end_timestamp,pod_level_memory_query,self.hours):
+            if self.host_name_type_mapping[line["metric"]["node_name"]] in self.exclude_nodetypes:continue
+            pod_name = line["metric"]["container_label_io_kubernetes_pod_name"].split('-deployment-')[0]
+            unique_pod_names.add(pod_name)
+            
+        print("Unique pod names : " , unique_pod_names)
+        self.unique_pod_names=unique_pod_names
+
+        pod_mem_result=[]
+        for pod in unique_pod_names:
+            for line in execute_prometheus_query(self.prom_con_obj,self.start_timestamp,self.end_timestamp,f'sum(container_memory_working_set_bytes{{container_label_io_kubernetes_pod_name=~"{pod}-deployment.*"}}/(1024*1024*1024)) by (node_name)',self.hours):
+                if self.host_name_type_mapping[line["metric"]["node_name"]] in self.exclude_nodetypes:continue
+                pod_mem_result.append({
+                    "node_type":self.host_name_type_mapping[line["metric"]["node_name"]],
+                    "host_name":line["metric"]["node_name"],
+                    "pod":pod,
+                    minimum_column_name : line["values"]["minimum"],
+                    maximum_column_name : line["values"]["maximum"],
+                    average_column_name : line["values"]["average"]
+                })
+
+        pod_level_memory_df = pd.DataFrame(pod_mem_result)
+        result.update(self.preprocess_df(pod_level_memory_df,'pod',for_report))
         return result
        
     def collect_total_cpu_usages(self,for_report):
@@ -323,6 +349,22 @@ class resource_usages:
             
         container_level_cpu = pd.DataFrame(container_level_final_cpu_result)
         result.update(self.preprocess_df(container_level_cpu,'container',for_report))
+        # --------------------------pod level ----------------------------------
+        pod_cpu_result=[]
+        for pod in self.unique_pod_names:
+            for line in execute_prometheus_query(self.prom_con_obj,self.start_timestamp,self.end_timestamp,f'sum(rate(container_cpu_usage_seconds_total{{container_label_io_kubernetes_pod_name=~"{pod}.*deployment.*"}}[10m])) by (node_name)',self.hours):
+                if self.host_name_type_mapping[line["metric"]["node_name"]] in self.exclude_nodetypes:continue
+                pod_cpu_result.append({
+                    "node_type":self.host_name_type_mapping[line["metric"]["node_name"]],
+                    "host_name":line["metric"]["node_name"],
+                    "pod":pod,
+                    minimum_column_name : line["values"]["minimum"],
+                    maximum_column_name : line["values"]["maximum"],
+                    average_column_name : line["values"]["average"]
+                })
+
+        pod_level_cpu_df = pd.DataFrame(pod_cpu_result)
+        result.update(self.preprocess_df(pod_level_cpu_df,'pod',for_report))
         return result
     
     def collect_total_usages(self,for_report):
@@ -334,6 +376,8 @@ class resource_usages:
         del return_dict["memory_usages"]["nodetype_and_application_level_usages"]
         nodetype_and_container_level_memory_usage=return_dict["memory_usages"]["nodetype_and_container_level_usages"]
         del return_dict["memory_usages"]["nodetype_and_container_level_usages"]
+        nodetype_and_pod_level_memory_usage=return_dict["memory_usages"]["nodetype_and_pod_level_usages"]
+        del return_dict["memory_usages"]["nodetype_and_pod_level_usages"]
         # for nodetype in exclude_nodetypes:
         #     try:del nodetype_and_container_level_memory_usage[nodetype]
         #     except:pass
@@ -342,13 +386,17 @@ class resource_usages:
 
         return_dict.update({"memory_usages_analysis" : {
             "nodetype_and_application_level_memory_usages":nodetype_and_application_level_memory_usage,
-            "nodetype_and_container_level_memory_usages":nodetype_and_container_level_memory_usage
+            "nodetype_and_container_level_memory_usages":nodetype_and_container_level_memory_usage,
+            "nodetype_and_pod_level_memory_usages":nodetype_and_pod_level_memory_usage
+
         }})
 
         nodetype_and_application_level_cpu_usage=return_dict["cpu_usages"]["nodetype_and_application_level_usages"]
         del return_dict["cpu_usages"]["nodetype_and_application_level_usages"]
         nodetype_and_container_level_cpu_usage=return_dict["cpu_usages"]["nodetype_and_container_level_usages"]
         del return_dict["cpu_usages"]["nodetype_and_container_level_usages"]
+        nodetype_and_pod_level_cpu_usage=return_dict["cpu_usages"]["nodetype_and_pod_level_usages"]
+        del return_dict["cpu_usages"]["nodetype_and_pod_level_usages"]
         # for nodetype in exclude_nodetypes:
         #     try:del nodetype_and_container_level_cpu_usage[nodetype]
         #     except:pass
@@ -357,17 +405,19 @@ class resource_usages:
 
         return_dict.update({"cpu_usages_analysis" : {
             "nodetype_and_application_level_cpu_usages":nodetype_and_application_level_cpu_usage,
-            "nodetype_and_container_level_cpu_usages":nodetype_and_container_level_cpu_usage
+            "nodetype_and_container_level_cpu_usages":nodetype_and_container_level_cpu_usage,
+            "nodetype_and_pod_level_cpu_usages":nodetype_and_pod_level_cpu_usage
+
         }})
 
         return return_dict
     
     def get_complete_result(self):
         total_result_for_report=self.collect_total_usages(for_report=True)
-        total_result_for_querying=self.collect_total_usages(for_report=False)
+        # total_result_for_querying=self.collect_total_usages(for_report=False)
         return {
             "resource_utilization_for_report":total_result_for_report,
-            "resource_utilization_for_querying":total_result_for_querying
+            # "resource_utilization_for_querying":total_result_for_querying
         }
 
 
@@ -378,8 +428,8 @@ if __name__=='__main__':
     import pytz
     format_data = "%Y-%m-%d %H:%M"
     
-    start_time_str = "2024-04-01 00:00"
-    hours=60
+    start_time_str = "2024-04-19 01:50"
+    hours=10
 
     start_time = datetime.strptime(start_time_str, format_data)
     end_time = start_time + timedelta(hours=hours)
@@ -398,7 +448,7 @@ if __name__=='__main__':
     end_utc_time = end_ist_time.astimezone(utc_timezone)
     end_utc_str = end_utc_time.strftime(format_data)
 
-    active_obj = resource_usages(configuration('longevity_nodes.json') , start_timestamp,end_timestamp,hours=hours)
+    active_obj = resource_usages(configuration('s1_nodes.json') , start_timestamp,end_timestamp,hours=hours)
     # total_result_for_querying = active_obj.collect_total_usages(for_report=False)
     total_result_for_report = active_obj.collect_total_usages(for_report=True)
 
