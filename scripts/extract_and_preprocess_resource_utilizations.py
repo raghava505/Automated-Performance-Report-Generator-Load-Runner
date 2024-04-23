@@ -144,6 +144,10 @@ class resource_usages:
             return df.to_dict(orient="index")
 
     def preprocess_df(self,df,container_name_or_app_name,for_report):
+        if df.empty:
+            print(df)
+            print(f"WARNING : Found empty dataframe for {container_name_or_app_name}")
+            return {}
         result={}
         if container_name_or_app_name:
             group_by_nodetype_and_app_or_cont=self.groupby_2_cols_and_return_dict(df,'node_type',container_name_or_app_name,for_report)
@@ -176,6 +180,7 @@ class resource_usages:
                 maximum_column_name : line["values"]["maximum"],
                 average_column_name : line["values"]["average"]
             })
+        print("Captured details for node-level memory")
         node_level_memory = pd.DataFrame(node_level_final_memory_result)  
         result.update(self.preprocess_df(node_level_memory,None,for_report))
 
@@ -211,7 +216,7 @@ class resource_usages:
                     })
                 except Exception as e:
                     print(f'***************** ERROR: Couldnt find host {line["metric"]["host_name"]} in ram-capacity dictionary. Exception occured while calculating app memory usage for app:{line["metric"]["app_name"]}. {e}')
-
+        print("Captured details for app-level memory")
         app_level_memory = pd.DataFrame(application_level_final_memory_result)
         result.update(self.preprocess_df(app_level_memory,'application',for_report))
 
@@ -240,7 +245,7 @@ class resource_usages:
                     maximum_column_name : line["values"]["maximum"],
                     average_column_name : line["values"]["average"]
                 })
-
+        print("Captured details for container-level memory")
         container_level_memory = pd.DataFrame(container_level_final_memory_result)
         result.update(self.preprocess_df(container_level_memory,'container',for_report))
         # ---------------------------pod level ---------------------------------
@@ -266,7 +271,7 @@ class resource_usages:
                     maximum_column_name : line["values"]["maximum"],
                     average_column_name : line["values"]["average"]
                 })
-
+        print("Captured details for pod-level memory")
         pod_level_memory_df = pd.DataFrame(pod_mem_result)
         result.update(self.preprocess_df(pod_level_memory_df,'pod',for_report))
         return result
@@ -289,7 +294,7 @@ class resource_usages:
                 })
             except Exception as e:
                 print(f'***************** ERROR: Couldnt find host {line["metric"]["host_name"]} in cores-capacity dictionary. Exception occured while calculating app cpu usage for host:{line["metric"]["host_name"]} and app:{line["metric"]["app_name"]}. {e}')
-
+        print("Captured details for node-level cpu")
         node_level_cpu = pd.DataFrame(node_level_final_cpu_result)   
         result.update(self.preprocess_df(node_level_cpu,None,for_report))
 
@@ -317,7 +322,7 @@ class resource_usages:
                     maximum_column_name : line["values"]["maximum"],
                     average_column_name : line["values"]["average"]
                 })
-
+        print("Captured details for app-level cpu")
         app_level_cpu = pd.DataFrame(application_level_final_cpu_result)
         result.update(self.preprocess_df(app_level_cpu,'application',for_report))
 
@@ -346,7 +351,7 @@ class resource_usages:
                     maximum_column_name : line["values"]["maximum"],
                     average_column_name : line["values"]["average"]
                 })
-            
+        print("Captured details for container-level cpu")
         container_level_cpu = pd.DataFrame(container_level_final_cpu_result)
         result.update(self.preprocess_df(container_level_cpu,'container',for_report))
         # --------------------------pod level ----------------------------------
@@ -362,7 +367,7 @@ class resource_usages:
                     maximum_column_name : line["values"]["maximum"],
                     average_column_name : line["values"]["average"]
                 })
-
+        print("Captured details for pod-level cpu")
         pod_level_cpu_df = pd.DataFrame(pod_cpu_result)
         result.update(self.preprocess_df(pod_level_cpu_df,'pod',for_report))
         return result
@@ -429,7 +434,7 @@ if __name__=='__main__':
     format_data = "%Y-%m-%d %H:%M"
     
     start_time_str = "2024-04-19 01:50"
-    hours=10
+    hours=12
 
     start_time = datetime.strptime(start_time_str, format_data)
     end_time = start_time + timedelta(hours=hours)
