@@ -374,8 +374,8 @@ class resource_usages:
     
     def collect_total_usages(self,for_report):
         return_dict = {
-            "memory_usages" : self.collect_total_memory_usages(for_report),
-            "cpu_usages" : self.collect_total_cpu_usages(for_report)
+            "memory_usages" : defaultdict(dict, self.collect_total_memory_usages(for_report)),
+            "cpu_usages" : defaultdict(dict, self.collect_total_cpu_usages(for_report))
         }
         nodetype_and_application_level_memory_usage=return_dict["memory_usages"]["nodetype_and_application_level_usages"]
         del return_dict["memory_usages"]["nodetype_and_application_level_usages"]
