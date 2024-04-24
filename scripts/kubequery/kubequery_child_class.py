@@ -5,55 +5,60 @@ from collections import defaultdict
 class kubequery_child(parent):
     load_specific_details={
                 "KubeQuery_SingleCustomer":{
-                "total_number_of_customers": 1,
-                "test_title": "Kubequery and K8sosquery Load",
-                "total_number_of_clusters": 20,
-                "total_assets_for_Kubequery": 800,
-                "total_namespaces_for_Kubequery": 2000,
-                "total_pods_for_Kubequery": 40000,
-            },
-                "SelfManaged_SingleCustomer":{
-                "total_number_of_customers": 1,
-                "test_title": "SelfManaged Containers Load",
-                "total_assets": 200,
-            }, 
-                "KubeQuery_and_SelfManaged_Combined": {
-                "test_title": "KubeQuery_and_SelfManaged_Combined",
-                "total_number_of_customers_for_Kubequery": 1,
-                "total_number_of_clusters": 20,
-                "total_assets_for_Kubequery": 800,
-                "total_namespaces_for_Kubequery": 2000,
-                "total_pods_for_Kubequery": 40000,
-                
-                "total_number_of_customers_for_SelfManaged": 1,
-                "total_assets_for_SelfManaged": 200,
-
-                "Test Parameters":{
-                    "param": 1,
+                    "total_number_of_customers": 1,
+                    "test_title": "Kubequery and K8sosquery Load",
+                    "total_number_of_clusters": 20,
+                    "total_assets_for_Kubequery": 800,
+                    "total_namespaces_for_Kubequery": 2000,
+                    "total_pods_for_Kubequery": 40000,
                 },
-            }
+                "SelfManaged_SingleCustomer":{
+                    "total_number_of_customers": 1,
+                    "test_title": "SelfManaged Containers Load",
+                    "total_assets": 200,
+                }, 
+                "KubeQuery_and_SelfManaged_Combined": {
+                    "test_title": "KubeQuery_and_SelfManaged_Combined",
+
+                    "Test Parameters":{
+                        "total_number_of_customers_for_Kubequery": 1,
+                        "total_number_of_clusters": 20,
+                        "total_assets_for_Kubequery": 800,
+                        "total_namespaces_for_Kubequery": 2000,
+                        "total_pods_for_Kubequery": 40000,
+
+                        "Containers created":0,
+                        "Containers deleted":0,
+                        
+                        "total_number_of_customers_for_SelfManaged": 1,
+                        "total_assets_for_SelfManaged": 200,
+                    },
+                }
     }
 
     @classmethod
     @property
     def common_app_names(cls):
         temp = copy.deepcopy(parent.common_app_names)
-        temp['sum'].extend(["genericStateManagerExecutor"])
-        return temp
+        # temp['sum'].extend(["genericStateManagerExecutor"])
+        final = ["genericStateManagerExecutor"] + temp
+        return final
     
     @classmethod
     @property
     def mon_spark_topic_names(cls):
         temp = copy.deepcopy(parent.mon_spark_topic_names)
-        temp.extend(["state","agentkubequery"])
-        return temp
+        # temp.extend(["state","agentkubequery"])
+        final = ["agentkubequery","state"] + temp
+        return final
     
     @classmethod
     @property
     def kafka_group_names(cls):
         temp = copy.deepcopy(parent.kafka_group_names)
-        temp.extend(["kubeStateManagerGroup","containersGroup"])
-        return temp
+        # temp.extend(["kubeStateManagerGroup","containersGroup"])
+        final = ["kubeStateManagerGroup","containersGroup"] + temp
+        return final
     
     @classmethod
     def get_app_level_RAM_used_percentage_queries(cls):
@@ -77,6 +82,7 @@ class kubequery_child(parent):
     @property
     def common_pod_names(cls):
         temp = copy.deepcopy(parent.common_pod_names)
-        temp.extend(["osquery-state-manager-deployment.*"])
-        return temp
+        # temp.extend(["osquery-state-manager-deployment.*"])
+        final = ["osquery-state-manager-deployment.*"] + temp
+        return final
     
