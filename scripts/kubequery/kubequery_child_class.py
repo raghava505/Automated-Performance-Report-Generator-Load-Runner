@@ -41,7 +41,7 @@ class kubequery_child(parent):
     def common_app_names(cls):
         temp = copy.deepcopy(parent.common_app_names)
         # temp['sum'].extend(["genericStateManagerExecutor"])
-        final = ["genericStateManagerExecutor"] + temp
+        final = ["genericStateManagerExecutor"] + temp['sum']
         return final
     
     @classmethod
