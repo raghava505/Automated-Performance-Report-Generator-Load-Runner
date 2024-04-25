@@ -376,7 +376,7 @@ class parent:
                 "columns":['dagName','total_count','total_wall_time','total_cpu_time','total_analysis_time','total_queued_time'],
                 "schema":{
                     "merge_on_cols" : ["dagName"],
-                    "compare_cols":["total_wall_time"],
+                    "compare_cols":["total_wall_time",'total_queued_time','total_cpu_time','total_analysis_time'],
                 }
             },
             "Total time taken by each dag in each upt_batch":{
@@ -393,7 +393,7 @@ class parent:
                 "columns":['dagName','upt_day','upt_batch','total_count','total_wall_time','total_cpu_time','total_analysis_time','total_queued_time'],
                 "schema":{
                     "merge_on_cols" : ["dagName","upt_batch"],
-                    "compare_cols":["total_wall_time"],
+                    "compare_cols":["total_wall_time",'total_queued_time','total_cpu_time','total_analysis_time'],
                 }
             },
 
