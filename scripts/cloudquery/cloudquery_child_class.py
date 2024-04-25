@@ -59,7 +59,7 @@ class cloudquery_child(parent):
     @property
     def kafka_group_names(cls):
         temp = copy.deepcopy(parent.kafka_group_names)
-        temp.extend(["cloudqueryinventorygroup" , "cloudcompliancemanager" , "ruleenginecc"])
+        temp.extend(["cloudqueryinventorygroup" , "cloudcompliancemanager" , "ruleenginecc","cloudqueryinventory_cgs"])
         return temp
     
     @classmethod
