@@ -38,6 +38,9 @@ class publish_to_confluence:
                                 <ac:structured-macro ac:name="toc">
                                     <ac:parameter ac:name="maxLevel">6</ac:parameter>
                                 </ac:structured-macro>
+                                <p><ac:structured-macro ac:name=\"children\" ac:schema-version=\"1\">
+                                    <ac:parameter ac:name=\"all\">true</ac:parameter></ac:structured-macro></p>
+                              
                                 """
 
             parent_page=self.confluence.get_page_by_title(space=self.space, title=self.parent_title)
