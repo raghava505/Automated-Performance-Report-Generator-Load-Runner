@@ -43,10 +43,13 @@ if decision == "y":
             try:
                 shutil.rmtree(pdfs_path)
                 print(f"Folder deleted: {pdfs_path}")
+            except FileNotFoundError:
+                print(f"Folder not found: {pdfs_path}")
+            try:
                 shutil.rmtree(htmls_path)
                 print(f"Folder deleted: {htmls_path}")
             except FileNotFoundError:
-                print(f"Folder not found: {pdfs_path}")
+                print(f"Folder not found: {htmls_path}")
             except Exception as e:
                 print(f"An error occurred while deleting the folders: {e}")
         except FileNotFoundError:
