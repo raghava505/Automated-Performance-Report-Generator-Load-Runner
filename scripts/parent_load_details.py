@@ -363,33 +363,69 @@ class parent:
             #     }
             # },
             "Total time taken by each dag":{
-                "query" :  """SELECT\
-                            COALESCE(\
-                                REGEXP_EXTRACT(client_tags, '\\"dagName\\": \\"([^,}]+)\\"', 1),\
-                                'Unknown'\
-                            ) AS dagName,\
-                            COUNT(*) AS total_count, sum(wall_time) as total_wall_time, sum(cpu_time) as total_cpu_time , sum(CAST(analysis_time as bigint)) as total_analysis_time, sum(queued_time) as total_queued_time\
-                            FROM presto_query_logs\
-                            WHERE client_tags IS NOT NULL and client_tags like '%dagName%' and \
-                            upt_time > timestamp '<start_utc_str>' and upt_time < timestamp '<end_utc_str>'\
-                            GROUP BY 1 order by 3 desc;""",
+                "query" :  """WITH dag_summary AS (\
+                                    SELECT\
+                                    COALESCE(\
+                                        REGEXP_EXTRACT(client_tags, '\\"dagName\\": \\"([^,}]+)\\"', 1),\
+                                        'Unknown'\
+                                    ) AS dagName,\
+                                    COUNT(*) AS total_count, sum(wall_time) as total_wall_time, sum(cpu_time) as total_cpu_time , sum(CAST(analysis_time as bigint)) as total_analysis_time, sum(queued_time) as total_queued_time\
+                                    FROM presto_query_logs\
+                                    WHERE client_tags IS NOT NULL and client_tags like '%dagName%' and \
+                                    client_tags NOT LIKE '%SCHEDULED_GLOBAL_TAG_RULE%' \
+                                    and upt_time > timestamp '<start_utc_str>' and upt_time < timestamp '<end_utc_str>'\
+                                    GROUP BY 1 
+                                ),
+                                scheduled_global_tag_rule_summary AS (\
+                                    SELECT\
+                                    'SCHEDULED_GLOBAL_TAG_RULE' AS dagName,\
+                                    COUNT(*) AS total_count, sum(wall_time) as total_wall_time, sum(cpu_time) as total_cpu_time , sum(CAST(analysis_time as bigint)) as total_analysis_time, sum(queued_time) as total_queued_time\
+                                    FROM presto_query_logs\
+                                    WHERE client_tags IS NOT NULL and client_tags like '%dagName%' and \
+                                    client_tags LIKE '%SCHEDULED_GLOBAL_TAG_RULE%'\
+                                    and upt_time > timestamp '<start_utc_str>' and upt_time < timestamp '<end_utc_str>'\
+                                    GROUP BY 1 
+                                )\
+                                SELECT * FROM dag_summary\
+                                UNION ALL\
+                                SELECT * FROM scheduled_global_tag_rule_summary\
+                                ORDER BY total_wall_time DESC;\
+                            """,
                 "columns":['dagName','total_count','total_wall_time','total_cpu_time','total_analysis_time','total_queued_time'],
                 "schema":{
                     "merge_on_cols" : ["dagName"],
-                    "compare_cols":["total_wall_time",'total_queued_time','total_cpu_time','total_analysis_time'],
+                    "compare_cols":["total_count","total_wall_time",'total_queued_time','total_cpu_time','total_analysis_time'],
                 }
             },
             "Total time taken by each dag in each upt_batch":{
-                "query" :  """SELECT
-                            COALESCE(
-                                REGEXP_EXTRACT(client_tags, '\\"dagName\\": \\"([^,}]+)\\"', 1),
-                                'Unknown'
-                            ) AS dagName,upt_day,upt_batch,
-                            COUNT(*) AS total_count, sum(wall_time) as total_wall_time, sum(cpu_time) as total_cpu_time , sum(CAST(analysis_time as bigint)) as total_analysis_time, sum(queued_time) as total_queued_time
-                            FROM presto_query_logs
-                            WHERE client_tags IS NOT NULL and client_tags like '%dagName%' and 
-                            upt_time > timestamp '<start_utc_str>' and upt_time < timestamp '<end_utc_str>'
-                            GROUP BY 1,2,3 order by 5 desc;""",
+                "query" :  """WITH dag_summary AS (\
+                                    SELECT
+                                    COALESCE(
+                                        REGEXP_EXTRACT(client_tags, '\\"dagName\\": \\"([^,}]+)\\"', 1),
+                                        'Unknown'
+                                    ) AS dagName,upt_day,upt_batch,
+                                    COUNT(*) AS total_count, sum(wall_time) as total_wall_time, sum(cpu_time) as total_cpu_time , sum(CAST(analysis_time as bigint)) as total_analysis_time, sum(queued_time) as total_queued_time
+                                    FROM presto_query_logs
+                                    WHERE client_tags IS NOT NULL and client_tags like '%dagName%' and
+                                    client_tags NOT LIKE '%SCHEDULED_GLOBAL_TAG_RULE%' 
+                                    and upt_time > timestamp '<start_utc_str>' and upt_time < timestamp '<end_utc_str>'
+                                    GROUP BY 1,2,3
+                                ),
+                                scheduled_global_tag_rule_summary AS (\
+                                    SELECT
+                                    'SCHEDULED_GLOBAL_TAG_RULE' AS dagName,upt_day,upt_batch,
+                                    COUNT(*) AS total_count, sum(wall_time) as total_wall_time, sum(cpu_time) as total_cpu_time , sum(CAST(analysis_time as bigint)) as total_analysis_time, sum(queued_time) as total_queued_time
+                                    FROM presto_query_logs
+                                    WHERE client_tags IS NOT NULL and client_tags like '%dagName%' and
+                                    client_tags NOT LIKE '%SCHEDULED_GLOBAL_TAG_RULE%' 
+                                    and upt_time > timestamp '<start_utc_str>' and upt_time < timestamp '<end_utc_str>'
+                                    GROUP BY 1,2,3
+                                )\
+                                SELECT * FROM dag_summary\
+                                UNION ALL\
+                                SELECT * FROM scheduled_global_tag_rule_summary\
+                                ORDER BY total_wall_time DESC;\
+                            """,
                 "columns":['dagName','upt_day','upt_batch','total_count','total_wall_time','total_cpu_time','total_analysis_time','total_queued_time'],
                 "schema":{
                     "merge_on_cols" : ["dagName","upt_batch"],

@@ -1,7 +1,9 @@
 import pandas as pd
 from io import StringIO
 from helper import execute_trino_query
-
+pd.set_option('display.max_rows', None)
+pd.set_option('display.max_columns', None)
+pd.set_option('display.expand_frame_repr', False)
 #configdb_command = "PGPASSWORD=pguptycs psql -h {} -U uptycs -p 5432 -d configdb -c \"select read_password from customer_database where database_name='upt_{}';\"".format(remote_host,self.stack_details['domain'])
 
 class TRINO_ANALYSE:
@@ -20,7 +22,7 @@ class TRINO_ANALYSE:
             columns=value['columns']
             schema = value["schema"]
             query = raw_command.replace("<start_utc_str>",self.start_utc_str).replace( "<end_utc_str>", self.end_utc_str)
-            print(f"Command :\n {query}")
+            print(f"\n************************** {heading} ************************ :\n {query}")
             output= execute_trino_query(self.dnode,query,self.prom_con_obj)
             # if not output or output.strip()=="":
             #     raise RuntimeError(f"ERROR : command output is empty. Check if trino @ {self.dnode} is in good state. Terminating program ...")
@@ -54,7 +56,7 @@ class TRINO_ANALYSE:
 #     from parent_load_details import parent
 #     format_data = "%Y-%m-%d %H:%M"
 
-#     start_time_str = "2024-04-03 21:39"
+#     start_time_str = "2024-04-24 21:50"
 #     hours=10
 
 #     start_time = datetime.strptime(start_time_str, format_data)
