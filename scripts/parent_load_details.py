@@ -244,7 +244,7 @@ class parent:
             "Total number of trino queries executed from each source grouped by query_operation" : {
                 "query" :  "SELECT\
                                 source,\
-                                query_operation,\
+                                COALESCE(query_operation,'NaN') AS query_operation,\
                                 COUNT(CASE WHEN query_status = 'SUCCESS' THEN 1 END) as success_count,\
                                 COUNT(CASE WHEN query_status = 'FAILURE' THEN 1 END) as failure_count,\
                                 COUNT(*) as total_count\
@@ -261,7 +261,7 @@ class parent:
             "Total number of failed queries grouped by failure message" : {
                 "query" :  "select \
                                 source,\
-                                query_operation,\
+                                COALESCE(query_operation,'NaN') AS query_operation,\
                                 failure_message,\
                                 failure_type,\
                                 count(*) as failure_count \
@@ -288,7 +288,7 @@ class parent:
                                 SUM(CAST(wall_time AS bigint)) AS total_wall_time,\
                                 SUM(CAST(queued_time AS bigint)) AS total_queued_time,\
                                 SUM(CAST(cpu_time AS bigint)) AS total_cpu_time,\
-                                SUM(CAST(analysis_time AS bigint)) AS total_analysis_time\
+                                COALESCE(SUM(CAST(analysis_time AS bigint)),0) AS total_analysis_time\
                             from presto_query_logs \
                             where upt_time > timestamp '<start_utc_str>' and upt_time < timestamp '<end_utc_str>'\
                             GROUP BY 'day-' || CAST(upt_day AS varchar), 'batch-' || CAST(upt_batch AS varchar) \
@@ -310,7 +310,7 @@ class parent:
                                 SUM(CAST(wall_time AS bigint)) AS total_wall_time,\
                                 SUM(CAST(queued_time AS bigint)) AS total_queued_time,\
                                 SUM(CAST(cpu_time AS bigint)) AS total_cpu_time,\
-                                SUM(CAST(analysis_time AS bigint)) AS total_analysis_time\
+                                COALESCE(SUM(CAST(analysis_time AS bigint)),0) AS total_analysis_time\
                             from presto_query_logs \
                             where upt_time > timestamp '<start_utc_str>' and upt_time < timestamp '<end_utc_str>'\
                             group by 1 \
@@ -334,7 +334,7 @@ class parent:
                                 SUM(CAST(wall_time AS bigint)) AS total_wall_time,\
                                 SUM(CAST(queued_time AS bigint)) AS total_queued_time,\
                                 SUM(CAST(cpu_time AS bigint)) AS total_cpu_time,\
-                                SUM(CAST(analysis_time AS bigint)) AS total_analysis_time\
+                                COALESCE(SUM(CAST(analysis_time AS bigint)),0) AS total_analysis_time\
                             from presto_query_logs \
                             where upt_time > timestamp '<start_utc_str>' and upt_time < timestamp '<end_utc_str>'\
                             GROUP BY source,'day-' || CAST(upt_day AS varchar), 'batch-' || CAST(upt_batch AS varchar) \
@@ -369,7 +369,7 @@ class parent:
                                         REGEXP_EXTRACT(client_tags, '\\"dagName\\": \\"([^,}]+)\\"', 1),\
                                         'Unknown'\
                                     ) AS dagName,\
-                                    COUNT(*) AS total_count, sum(wall_time) as total_wall_time, sum(cpu_time) as total_cpu_time , sum(CAST(analysis_time as bigint)) as total_analysis_time, sum(queued_time) as total_queued_time\
+                                    COUNT(*) AS total_count, sum(wall_time) as total_wall_time, sum(cpu_time) as total_cpu_time ,COALESCE(SUM(CAST(analysis_time AS bigint)),0) AS total_analysis_time, sum(queued_time) as total_queued_time\
                                     FROM presto_query_logs\
                                     WHERE client_tags IS NOT NULL and client_tags like '%dagName%' and \
                                     client_tags NOT LIKE '%SCHEDULED_GLOBAL_TAG_RULE%' \
@@ -404,7 +404,7 @@ class parent:
                                         REGEXP_EXTRACT(client_tags, '\\"dagName\\": \\"([^,}]+)\\"', 1),
                                         'Unknown'
                                     ) AS dagName,upt_day,upt_batch,
-                                    COUNT(*) AS total_count, sum(wall_time) as total_wall_time, sum(cpu_time) as total_cpu_time , sum(CAST(analysis_time as bigint)) as total_analysis_time, sum(queued_time) as total_queued_time
+                                    COUNT(*) AS total_count, sum(wall_time) as total_wall_time, sum(cpu_time) as total_cpu_time , COALESCE(SUM(CAST(analysis_time AS bigint)),0) AS total_analysis_time, sum(queued_time) as total_queued_time
                                     FROM presto_query_logs
                                     WHERE client_tags IS NOT NULL and client_tags like '%dagName%' and
                                     client_tags NOT LIKE '%SCHEDULED_GLOBAL_TAG_RULE%' 
