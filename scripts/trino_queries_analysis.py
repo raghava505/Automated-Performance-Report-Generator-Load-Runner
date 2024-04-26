@@ -1,5 +1,6 @@
 import pandas as pd
 from io import StringIO
+import numpy as np
 from helper import execute_trino_query
 pd.set_option('display.max_rows', None)
 pd.set_option('display.max_columns', None)
@@ -28,7 +29,16 @@ class TRINO_ANALYSE:
             #     raise RuntimeError(f"ERROR : command output is empty. Check if trino @ {self.dnode} is in good state. Terminating program ...")
             stringio = StringIO(output)
             df = pd.read_csv(stringio, header=None, names=columns)
-            df=df.fillna(0)
+            numeric_cols = df.select_dtypes(include=[np.number]).columns
+            non_numeric_cols = df.select_dtypes(exclude=[np.number]).columns
+            print("Numeric columns : " , numeric_cols)
+            print("Non-Numeric columns : " , non_numeric_cols)
+
+            fill_values = {}
+            fill_values.update({col: 0 for col in numeric_cols})
+            fill_values.update({col: "NaN" for col in non_numeric_cols})
+
+            df = df.fillna(fill_values)
             # integer_columns = df.select_dtypes(include='int').columns
             # string_columns = df.select_dtypes(include='object').columns
             # new_row=dict([(int_col,df[int_col].sum()) for int_col in integer_columns])
@@ -48,41 +58,41 @@ class TRINO_ANALYSE:
 
         return save_dict
     
-# if __name__=='__main__':
-#     print("Testing trino queries analysis ...")
-#     from settings import configuration
-#     from datetime import datetime, timedelta
-#     import pytz
-#     from parent_load_details import parent
-#     format_data = "%Y-%m-%d %H:%M"
+if __name__=='__main__':
+    print("Testing trino queries analysis ...")
+    from settings import configuration
+    from datetime import datetime, timedelta
+    import pytz
+    from parent_load_details import parent
+    format_data = "%Y-%m-%d %H:%M"
 
-#     start_time_str = "2024-04-24 21:50"
-#     hours=10
+    start_time_str = "2024-04-24 21:50"
+    hours=10
 
-#     start_time = datetime.strptime(start_time_str, format_data)
-#     end_time = start_time + timedelta(hours=hours)
-#     end_time_str = end_time.strftime(format_data)
+    start_time = datetime.strptime(start_time_str, format_data)
+    end_time = start_time + timedelta(hours=hours)
+    end_time_str = end_time.strftime(format_data)
 
-#     ist_timezone = pytz.timezone('Asia/Kolkata')
-#     utc_timezone = pytz.utc
+    ist_timezone = pytz.timezone('Asia/Kolkata')
+    utc_timezone = pytz.utc
 
-#     start_ist_time = ist_timezone.localize(datetime.strptime(start_time_str, '%Y-%m-%d %H:%M'))
-#     start_timestamp = int(start_ist_time.timestamp())
-#     start_utc_time = start_ist_time.astimezone(utc_timezone)
-#     start_utc_str = start_utc_time.strftime(format_data)
+    start_ist_time = ist_timezone.localize(datetime.strptime(start_time_str, '%Y-%m-%d %H:%M'))
+    start_timestamp = int(start_ist_time.timestamp())
+    start_utc_time = start_ist_time.astimezone(utc_timezone)
+    start_utc_str = start_utc_time.strftime(format_data)
 
-#     end_ist_time = ist_timezone.localize(datetime.strptime(end_time_str, '%Y-%m-%d %H:%M'))
-#     end_timestamp = int(end_ist_time.timestamp())
-#     end_utc_time = end_ist_time.astimezone(utc_timezone)
-#     end_utc_str = end_utc_time.strftime(format_data)
-#     calc = TRINO_ANALYSE(start_utc_str,end_utc_str,prom_con_obj=configuration('s1_nodes.json'))
-#     trino_queries = calc.fetch_trino_results(parent.trino_details_commands)
-#     import pandas as pd
-#     from pymongo import MongoClient
+    end_ist_time = ist_timezone.localize(datetime.strptime(end_time_str, '%Y-%m-%d %H:%M'))
+    end_timestamp = int(end_ist_time.timestamp())
+    end_utc_time = end_ist_time.astimezone(utc_timezone)
+    end_utc_str = end_utc_time.strftime(format_data)
+    calc = TRINO_ANALYSE(start_utc_str,end_utc_str,prom_con_obj=configuration('s1_nodes.json'))
+    trino_queries = calc.fetch_trino_results(parent.trino_details_commands)
+    import pandas as pd
+    from pymongo import MongoClient
 
-#     # Create a sample DataFrame
-#     client = MongoClient('mongodb://localhost:27017/')
-#     db = client['Osquery_LoadTests']  # Replace 'your_database_name' with your actual database name
-#     collection = db['Testing']  # Replace 'your_collection_name' with your actual collection name
+    # Create a sample DataFrame
+    client = MongoClient('mongodb://localhost:27017/')
+    db = client['Osquery_LoadTests']  # Replace 'your_database_name' with your actual database name
+    collection = db['Testing']  # Replace 'your_collection_name' with your actual collection name
 
-#     collection.insert_one({"data":trino_queries})
+    collection.insert_one({"data":trino_queries})
