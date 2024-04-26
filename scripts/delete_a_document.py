@@ -35,12 +35,16 @@ if decision == "y":
         graphs_path=f"{BASE_GRAPHS_PATH}/{database_name}/{collection_name}/{document_id}"
         BASE_PDFS_PATH = os.path.join(os.path.dirname(prom_con_obj.ROOT_PATH),'pdfs')
         pdfs_path=f"{BASE_PDFS_PATH}/{database_name}/{collection_name}/{document_id}"
+        BASE_HTMLS_PATH = os.path.join(os.path.dirname(prom_con_obj.ROOT_PATH),'htmls')
+        htmls_path=f"{BASE_HTMLS_PATH}/{database_name}/{collection_name}/{document_id}"
         try:
             shutil.rmtree(graphs_path)
             print(f"Folder deleted: {graphs_path}")
             try:
                 shutil.rmtree(pdfs_path)
                 print(f"Folder deleted: {pdfs_path}")
+                shutil.rmtree(htmls_path)
+                print(f"Folder deleted: {htmls_path}")
             except FileNotFoundError:
                 print(f"Folder not found: {pdfs_path}")
             except Exception as e:
