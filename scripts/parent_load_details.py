@@ -339,7 +339,7 @@ class parent:
                             where upt_time > timestamp '<start_utc_str>' and upt_time < timestamp '<end_utc_str>'\
                             GROUP BY source,'day-' || CAST(upt_day AS varchar), 'batch-' || CAST(upt_batch AS varchar) \
                             ORDER BY source,upt_day, upt_batch;",
-                "columns":['upt_day','upt_batch','total_queries','success_count','failure_count','like_queries','regex_queries','total_wall_time','total_queued_time','total_cpu_time','total_analysis_time'],
+                "columns":['source','upt_day','upt_batch','total_queries','success_count','failure_count','like_queries','regex_queries','total_wall_time','total_queued_time','total_cpu_time','total_analysis_time'],
                 "schema":{
                     "merge_on_cols" : ["source","upt_batch"],
                     "compare_cols":["total_queries","total_wall_time",'total_queued_time','total_cpu_time','total_analysis_time'],
