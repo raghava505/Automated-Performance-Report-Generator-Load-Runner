@@ -21,7 +21,7 @@ class EVE_COUNTS:
             "Azure_MultiCustomer": "~/cloud_query_sim/azure_multi/logs",
             "AWS_MultiCustomer": "~/multi_customer_attackpath/aws/logs",
             "GCP_MultiCustomer": "~/multi-customer-cqsim/gcp/logs",
-            "AWS_SingleCustomer": "~/cloud_query_sim/aws/logs",
+            "AWS_SingleCustomer": "~/cloud_query_sim/aws_sts_test/logs",
         }
 
         self.remote_logs_path = self.path_mappings.get(self.load_name, "~/multi_customer_attackpath/aws/logs")
