@@ -321,8 +321,9 @@ class parent:
                     "compare_cols":["total_wall_time"],
                 }
             },
-            "Time taken by etl-jobs queries on an hourly basis":{
+            "Time taken by queries executed from all sources on an hourly basis":{
                 "query" :  "select \
+                                source,\
                                 'day-' || CAST(upt_day AS varchar) AS upt_day,\
                                 'batch-' || CAST(upt_batch AS varchar) AS upt_batch,\
                                 count(*) as total_queries,\
@@ -336,13 +337,12 @@ class parent:
                                 SUM(CAST(analysis_time AS bigint)) AS total_analysis_time\
                             from presto_query_logs \
                             where upt_time > timestamp '<start_utc_str>' and upt_time < timestamp '<end_utc_str>'\
-                            and source='etl-jobs'\
-                            GROUP BY 'day-' || CAST(upt_day AS varchar), 'batch-' || CAST(upt_batch AS varchar) \
-                            ORDER BY upt_day, upt_batch;",
+                            GROUP BY source,'day-' || CAST(upt_day AS varchar), 'batch-' || CAST(upt_batch AS varchar) \
+                            ORDER BY source,upt_day, upt_batch;",
                 "columns":['upt_day','upt_batch','total_queries','success_count','failure_count','like_queries','regex_queries','total_wall_time','total_queued_time','total_cpu_time','total_analysis_time'],
                 "schema":{
-                    "merge_on_cols" : ["upt_batch"],
-                    "compare_cols":["total_wall_time"],
+                    "merge_on_cols" : ["source","upt_batch"],
+                    "compare_cols":["total_queries","total_wall_time",'total_queued_time','total_cpu_time','total_analysis_time'],
                 }
             },
             # "client tag details of failed dags":{
@@ -429,27 +429,54 @@ class parent:
                 "columns":['dagName','upt_day','upt_batch','total_count','total_wall_time','total_cpu_time','total_analysis_time','total_queued_time'],
                 "schema":{
                     "merge_on_cols" : ["dagName","upt_batch"],
-                    "compare_cols":["total_wall_time",'total_queued_time','total_cpu_time','total_analysis_time'],
+                    "compare_cols":["total_count","total_wall_time",'total_queued_time','total_cpu_time','total_analysis_time'],
                 }
             },
 
-            "Total time taken by each non-dag query":{
-                "query" :  """SELECT
-                            COALESCE(
-                                source || '-' || REGEXP_EXTRACT(client_tags, '\\"queryType\\":\\"([^,}]+)\\"', 1),source || '-' || REGEXP_EXTRACT(client_tags, '\\"queryName\\":\\"([^,}]+)\\"', 1),source  ,
-                                'Unknown'
-                            ) AS query_type_or_name,
-                            COUNT(*) AS total_count, sum(wall_time) as total_wall_time, sum(cpu_time) as total_cpu_time , sum(CAST(analysis_time as bigint)) as total_analysis_time, sum(queued_time) as total_queued_time
-                            FROM presto_query_logs
-                            WHERE client_tags IS NOT NULL and client_tags not like '%dagName%' and 
-                            upt_time > timestamp '<start_utc_str>' and upt_time < timestamp '<end_utc_str>'
-                            GROUP BY 1 order by 3 desc;""",
-                "columns":['query_type_or_name','total_count','total_wall_time','total_cpu_time','total_analysis_time','total_queued_time'],
+            # "Total time taken by each non-dag query":{
+            #     "query" :  """SELECT
+            #                 COALESCE(
+            #                     source || '-' || REGEXP_EXTRACT(client_tags, '\\"queryType\\":\\"([^,}]+)\\"', 1),source || '-' || REGEXP_EXTRACT(client_tags, '\\"queryName\\":\\"([^,}]+)\\"', 1),source  ,
+            #                     'Unknown'
+            #                 ) AS query_type_or_name,
+            #                 COUNT(*) AS total_count, sum(wall_time) as total_wall_time, sum(cpu_time) as total_cpu_time , sum(CAST(analysis_time as bigint)) as total_analysis_time, sum(queued_time) as total_queued_time
+            #                 FROM presto_query_logs
+            #                 WHERE client_tags IS NOT NULL and client_tags not like '%dagName%' and 
+            #                 upt_time > timestamp '<start_utc_str>' and upt_time < timestamp '<end_utc_str>'
+            #                 GROUP BY 1 order by 3 desc;""",
+            #     "columns":['query_type_or_name','total_count','total_wall_time','total_cpu_time','total_analysis_time','total_queued_time'],
+            #     "schema":{
+            #         "merge_on_cols" : ["query_type_or_name"],
+            #         "compare_cols":["total_count","total_wall_time",'total_queued_time','total_cpu_time','total_analysis_time'],
+            #     }
+            # },
+
+            #delete this table after 2 sprints
+            "Time taken by etl-jobs queries on an hourly basis":{
+                "query" :  "select \
+                                'day-' || CAST(upt_day AS varchar) AS upt_day,\
+                                'batch-' || CAST(upt_batch AS varchar) AS upt_batch,\
+                                count(*) as total_queries,\
+                                COUNT(CASE WHEN query_status = 'SUCCESS' THEN 1 END) as success_count,\
+                                COUNT(CASE WHEN query_status = 'FAILURE' THEN 1 END) as failure_count,\
+                                COUNT(CASE WHEN query_text LIKE '%like%' THEN 1 END) AS like_queries,\
+                                COUNT(CASE WHEN query_text LIKE '%regex%' THEN 1 END) AS regex_queries,\
+                                SUM(CAST(wall_time AS bigint)) AS total_wall_time,\
+                                SUM(CAST(queued_time AS bigint)) AS total_queued_time,\
+                                SUM(CAST(cpu_time AS bigint)) AS total_cpu_time,\
+                                SUM(CAST(analysis_time AS bigint)) AS total_analysis_time\
+                            from presto_query_logs \
+                            where upt_time > timestamp '<start_utc_str>' and upt_time < timestamp '<end_utc_str>'\
+                            and source='etl-jobs'\
+                            GROUP BY 'day-' || CAST(upt_day AS varchar), 'batch-' || CAST(upt_batch AS varchar) \
+                            ORDER BY upt_day, upt_batch;",
+                "columns":['upt_day','upt_batch','total_queries','success_count','failure_count','like_queries','regex_queries','total_wall_time','total_queued_time','total_cpu_time','total_analysis_time'],
                 "schema":{
-                    "merge_on_cols" : ["query_type_or_name"],
+                    "merge_on_cols" : ["upt_batch"],
                     "compare_cols":["total_wall_time"],
                 }
             },
+            #delete this table after 2 sprints
             "Total time taken by each non-dag query in each upt_batch":{
                 "query" :  """SELECT
                             COALESCE(
