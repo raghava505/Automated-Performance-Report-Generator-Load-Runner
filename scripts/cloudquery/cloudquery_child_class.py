@@ -23,7 +23,7 @@ class cloudquery_child(parent):
                 "Azure Services used to conduct the Load" : "Management, Compute, Network, Storage, Databases, Identity, RBAC",
                 "Tables Validated in the Load" : "azure_network_vnet, azure_network_subnet, azure_compute_vm, azure_compute_disk, azure_network_nic, azure_network_nsg, azure_network_load_balancer, azure_network_public_ip_address, azure_network_route_table, azure_resource_group, azure_network_application_gateway, azure_appservice_site, azure_appservice_appsetting, azure_storage_blob_container, azure_storage_account, azure_sql_database, azure_sql_server, azure_storage_file_share, azure_active_directory_service_principal,azure_active_directory_application, azure_active_directory_role_assignment, azure_active_directory_role_definition, azure_rbac_role_definition, azure_rbac_role_assignment, azure_active_directory_group, azure_active_directory_user",
                 "Total number of Accounts": "67"
-            }
+            },
             "AWS_SingleCustomer":{
                 "total_number_of_customers": "1",
                 "test_title": "AWS SingleCustomer load",
