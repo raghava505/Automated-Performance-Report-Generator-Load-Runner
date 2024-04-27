@@ -33,6 +33,15 @@ base_query_for_nondags = """
             WHERE upt_time > timestamp '<start_utc_str>' and upt_time < timestamp '<end_utc_str>' and client_tags not like '%dagName%'
         """
 
+base_query_for_complete_table = """
+            SELECT
+                source,
+                '{}_time' AS metric,
+                {}
+            FROM presto_query_logs
+            WHERE upt_time > timestamp '<start_utc_str>' and upt_time < timestamp '<end_utc_str>'
+            group by 1
+        """
 time_types = ["queued","analysis","cpu","wall"]
 
 
@@ -47,6 +56,8 @@ def get_query_single_type(time_type,tag):
         return base_query_for_dags.format(time_type,var2)
     elif tag=="nondag":
         return base_query_for_nondags.format(time_type,var2)
+    elif tag=="complete_table":
+        return base_query_for_complete_table.format(time_type,var2)
 
 def get_full_query(tag):
     var1=""
@@ -59,10 +70,19 @@ def get_full_query(tag):
         var2+=get_query_single_type(time_type,tag)
         if i+1 != len(time_types):
             var2+="\n UNION ALL \n"
-
-    complete_query=f"""
+    if tag=="complete_table":
+        complete_query=f"""
             SELECT 
+            source,
             metric,
-            {var1} FROM ({var2}) t GROUP BY metric order by 1;            
+            {var1} FROM ({var2}) t GROUP BY 1,2 order by 1,2;            
             """
-    return complete_query
+        columns = ['source','metric']+list(time_ranges.keys())
+    else:
+        complete_query=f"""
+                SELECT 
+                metric,
+                {var1} FROM ({var2}) t GROUP BY metric order by 1;            
+                """
+        columns = ['metric']+list(time_ranges.keys())
+    return complete_query,columns
