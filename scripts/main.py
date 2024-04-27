@@ -124,7 +124,7 @@ if __name__ == "__main__":
 
         print("Fetching Trino queries details ...")
         trino_obj = TRINO_ANALYSE(start_utc_str,end_utc_str,prom_con_obj=prom_con_obj)
-        trino_queries_analyse_results = trino_obj.fetch_trino_results(load_cls.trino_details_commands)
+        trino_queries_analyse_results = trino_obj.fetch_trino_results()
         # print(f"Returned trino queries results are : {trino_queries_analyse_results}")
         #-------------------------API LOAD--------------------------
         api_load_result_dict=None
