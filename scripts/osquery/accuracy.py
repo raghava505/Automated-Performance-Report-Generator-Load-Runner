@@ -334,7 +334,7 @@ class osq_accuracy:
                 print(actual)
             elif table=="upt_detections":
                 expect=0
-                query="select count(*) from {} where  created_at >= timestamp '{}' and created_at < timestamp '{}'".format(table,self.upt_day,self.start_time,self.end_time)
+                query="select count(*) from {} where  created_at >= timestamp '{}' and created_at < timestamp '{}'".format(table,self.start_time,self.end_time)
                 print(f"Executing query : {query}")
                 actual = http_query(api, query,self.ext)
                 print(actual)
