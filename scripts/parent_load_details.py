@@ -224,6 +224,29 @@ class parent:
     @property
     def trino_details_commands(cls):
         limit=100
+        TIME_AGGREGATIONS = """
+                                SUM(CAST(wall_time AS bigint)) AS total_wall_time,
+                                SUM(CAST(queued_time AS bigint)) AS total_queued_time,
+                                SUM(CAST(cpu_time AS bigint)) AS total_cpu_time,
+                                COALESCE(SUM(CAST(analysis_time AS bigint)),0) AS total_analysis_time,
+                                
+                                ROUND(AVG(CAST(wall_time AS bigint)),3) AS avg_wall_time,
+                                ROUND(AVG(CAST(queued_time AS bigint)),3) AS avg_queued_time,
+                                ROUND(AVG(CAST(cpu_time AS bigint)),3) AS avg_cpu_time,
+                                COALESCE(ROUND(AVG(CAST(analysis_time AS bigint)),3),0) AS avg_analysis_time,
+
+                                MAX(CAST(wall_time AS bigint)) AS max_wall_time,
+                                MAX(CAST(queued_time AS bigint)) AS max_queued_time,
+                                MAX(CAST(cpu_time AS bigint)) AS max_cpu_time,
+                                COALESCE(MAX(CAST(analysis_time AS bigint)),0) AS max_analysis_time,
+
+                                MIN(CAST(wall_time AS bigint)) AS min_wall_time,
+                                MIN(CAST(queued_time AS bigint)) AS min_queued_time,
+                                MIN(CAST(cpu_time AS bigint)) AS min_cpu_time,
+                                COALESCE(MIN(CAST(analysis_time AS bigint)),0) AS min_analysis_time
+                            """
+        TIME_COLUMNS = ['total_wall_time','total_queued_time','total_cpu_time','total_analysis_time','avg_wall_time','avg_queued_time','avg_cpu_time','avg_analysis_time','max_wall_time','max_queued_time','max_cpu_time','max_analysis_time','min_wall_time','min_queued_time','min_cpu_time','min_analysis_time']
+        COMPARE_TIME_COLUMNS = ['total_wall_time','total_queued_time','total_cpu_time','total_analysis_time','avg_wall_time','avg_queued_time','avg_cpu_time','avg_analysis_time']
         return {
             "Total number of trino queries executed from each source" : {
                 "query" :  "SELECT\
@@ -277,7 +300,7 @@ class parent:
                 }
             },
             "Time taken by the queries on an hourly basis":{
-                "query" :  "select \
+                "query" :  f"select \
                                 'day-' || CAST(upt_day AS varchar) AS upt_day,\
                                 'batch-' || CAST(upt_batch AS varchar) AS upt_batch,\
                                 count(*) as total_queries,\
@@ -285,44 +308,38 @@ class parent:
                                 COUNT(CASE WHEN query_status = 'FAILURE' THEN 1 END) as failure_count,\
                                 COUNT(CASE WHEN query_text LIKE '%like%' THEN 1 END) AS like_queries,\
                                 COUNT(CASE WHEN query_text LIKE '%regex%' THEN 1 END) AS regex_queries,\
-                                SUM(CAST(wall_time AS bigint)) AS total_wall_time,\
-                                SUM(CAST(queued_time AS bigint)) AS total_queued_time,\
-                                SUM(CAST(cpu_time AS bigint)) AS total_cpu_time,\
-                                COALESCE(SUM(CAST(analysis_time AS bigint)),0) AS total_analysis_time\
+                                {TIME_AGGREGATIONS}\
                             from presto_query_logs \
                             where upt_time > timestamp '<start_utc_str>' and upt_time < timestamp '<end_utc_str>'\
                             GROUP BY 'day-' || CAST(upt_day AS varchar), 'batch-' || CAST(upt_batch AS varchar) \
                             ORDER BY upt_day, upt_batch;",
-                "columns":['upt_day','upt_batch','total_queries','success_count','failure_count','like_queries','regex_queries','total_wall_time','total_queued_time','total_cpu_time','total_analysis_time'],
+                "columns":['upt_day','upt_batch','total_queries','success_count','failure_count','like_queries','regex_queries']+TIME_COLUMNS,
                 "schema":{
                     "merge_on_cols" : ["upt_batch"],
-                    "compare_cols":["total_wall_time"],
+                    "compare_cols":["total_wall_time","avg_wall_time"],
                 }
             },
             "Time taken by queries by each source":{
-                "query" :  "select \
+                "query" :  f"select \
                                 source,\
                                 count(*) as total_queries,\
                                 COUNT(CASE WHEN query_status = 'SUCCESS' THEN 1 END) as success_count,\
                                 COUNT(CASE WHEN query_status = 'FAILURE' THEN 1 END) as failure_count,\
                                 COUNT(CASE WHEN query_text LIKE '%like%' THEN 1 END) AS like_queries,\
                                 COUNT(CASE WHEN query_text LIKE '%regex%' THEN 1 END) AS regex_queries,\
-                                SUM(CAST(wall_time AS bigint)) AS total_wall_time,\
-                                SUM(CAST(queued_time AS bigint)) AS total_queued_time,\
-                                SUM(CAST(cpu_time AS bigint)) AS total_cpu_time,\
-                                COALESCE(SUM(CAST(analysis_time AS bigint)),0) AS total_analysis_time\
+                                {TIME_AGGREGATIONS}\
                             from presto_query_logs \
                             where upt_time > timestamp '<start_utc_str>' and upt_time < timestamp '<end_utc_str>'\
                             group by 1 \
                             order by 7,8;",
-                "columns":['source','total_queries','success_count','failure_count','like_queries','regex_queries','total_wall_time','total_queued_time','total_cpu_time','total_analysis_time'],
+                "columns":['source','total_queries','success_count','failure_count','like_queries','regex_queries']+TIME_COLUMNS,
                 "schema":{
                     "merge_on_cols" : ["source"],
-                    "compare_cols":["total_wall_time"],
+                    "compare_cols":["total_wall_time","avg_wall_time"],
                 }
             },
             "Time taken by queries executed from all sources on an hourly basis":{
-                "query" :  "select \
+                "query" :  f"select \
                                 source,\
                                 'day-' || CAST(upt_day AS varchar) AS upt_day,\
                                 'batch-' || CAST(upt_batch AS varchar) AS upt_batch,\
@@ -331,18 +348,15 @@ class parent:
                                 COUNT(CASE WHEN query_status = 'FAILURE' THEN 1 END) as failure_count,\
                                 COUNT(CASE WHEN query_text LIKE '%like%' THEN 1 END) AS like_queries,\
                                 COUNT(CASE WHEN query_text LIKE '%regex%' THEN 1 END) AS regex_queries,\
-                                SUM(CAST(wall_time AS bigint)) AS total_wall_time,\
-                                SUM(CAST(queued_time AS bigint)) AS total_queued_time,\
-                                SUM(CAST(cpu_time AS bigint)) AS total_cpu_time,\
-                                COALESCE(SUM(CAST(analysis_time AS bigint)),0) AS total_analysis_time\
+                                {TIME_AGGREGATIONS}\
                             from presto_query_logs \
                             where upt_time > timestamp '<start_utc_str>' and upt_time < timestamp '<end_utc_str>'\
                             GROUP BY source,'day-' || CAST(upt_day AS varchar), 'batch-' || CAST(upt_batch AS varchar) \
                             ORDER BY source,upt_day, upt_batch;",
-                "columns":['source','upt_day','upt_batch','total_queries','success_count','failure_count','like_queries','regex_queries','total_wall_time','total_queued_time','total_cpu_time','total_analysis_time'],
+                "columns":['source','upt_day','upt_batch','total_queries','success_count','failure_count','like_queries','regex_queries']+TIME_COLUMNS,
                 "schema":{
                     "merge_on_cols" : ["source","upt_batch"],
-                    "compare_cols":["total_queries","total_wall_time",'total_queued_time','total_cpu_time','total_analysis_time'],
+                    "compare_cols":["total_queries"]+COMPARE_TIME_COLUMNS,
                 }
             },
             # "client tag details of failed dags":{
@@ -363,13 +377,14 @@ class parent:
             #     }
             # },
             "Total time taken by each dag":{
-                "query" :  """WITH dag_summary AS (\
+                "query" :  f"""WITH dag_summary AS (\
                                     SELECT\
                                     COALESCE(\
-                                        REGEXP_EXTRACT(client_tags, '\\"dagName\\": \\"([^,}]+)\\"', 1),\
+                                        REGEXP_EXTRACT(client_tags, '\\"dagName\\": \\"([^,}}]+)\\"', 1),\
                                         'Unknown'\
                                     ) AS dagName,\
-                                    COUNT(*) AS total_count, sum(wall_time) as total_wall_time, sum(cpu_time) as total_cpu_time ,COALESCE(SUM(CAST(analysis_time AS bigint)),0) AS total_analysis_time, sum(queued_time) as total_queued_time\
+                                    COUNT(*) AS total_count, \
+                                    {TIME_AGGREGATIONS}\
                                     FROM presto_query_logs\
                                     WHERE client_tags IS NOT NULL and client_tags like '%dagName%' and \
                                     client_tags NOT LIKE '%SCHEDULED_GLOBAL_TAG_RULE%' \
@@ -379,7 +394,8 @@ class parent:
                                 scheduled_global_tag_rule_summary AS (\
                                     SELECT\
                                     'SCHEDULED_GLOBAL_TAG_RULE' AS dagName,\
-                                    COUNT(*) AS total_count, sum(wall_time) as total_wall_time, sum(cpu_time) as total_cpu_time , sum(CAST(analysis_time as bigint)) as total_analysis_time, sum(queued_time) as total_queued_time\
+                                    COUNT(*) AS total_count, \
+                                    {TIME_AGGREGATIONS}\
                                     FROM presto_query_logs\
                                     WHERE client_tags IS NOT NULL and client_tags like '%dagName%' and \
                                     client_tags LIKE '%SCHEDULED_GLOBAL_TAG_RULE%'\
@@ -391,20 +407,21 @@ class parent:
                                 SELECT * FROM scheduled_global_tag_rule_summary\
                                 ORDER BY total_wall_time DESC;\
                             """,
-                "columns":['dagName','total_count','total_wall_time','total_cpu_time','total_analysis_time','total_queued_time'],
+                "columns":['dagName','total_count']+TIME_COLUMNS,
                 "schema":{
                     "merge_on_cols" : ["dagName"],
-                    "compare_cols":["total_count","total_wall_time",'total_queued_time','total_cpu_time','total_analysis_time'],
+                    "compare_cols":["total_count"]+COMPARE_TIME_COLUMNS,
                 }
             },
             "Total time taken by each dag in each upt_batch":{
-                "query" :  """WITH dag_summary AS (\
+                "query" :  f"""WITH dag_summary AS (\
                                     SELECT
                                     COALESCE(
-                                        REGEXP_EXTRACT(client_tags, '\\"dagName\\": \\"([^,}]+)\\"', 1),
+                                        REGEXP_EXTRACT(client_tags, '\\"dagName\\": \\"([^,}}]+)\\"', 1),
                                         'Unknown'
                                     ) AS dagName,upt_day,upt_batch,
-                                    COUNT(*) AS total_count, sum(wall_time) as total_wall_time, sum(cpu_time) as total_cpu_time , COALESCE(SUM(CAST(analysis_time AS bigint)),0) AS total_analysis_time, sum(queued_time) as total_queued_time
+                                    COUNT(*) AS total_count, \
+                                    {TIME_AGGREGATIONS}\
                                     FROM presto_query_logs
                                     WHERE client_tags IS NOT NULL and client_tags like '%dagName%' and
                                     client_tags NOT LIKE '%SCHEDULED_GLOBAL_TAG_RULE%' 
@@ -414,7 +431,8 @@ class parent:
                                 scheduled_global_tag_rule_summary AS (\
                                     SELECT
                                     'SCHEDULED_GLOBAL_TAG_RULE' AS dagName,upt_day,upt_batch,
-                                    COUNT(*) AS total_count, sum(wall_time) as total_wall_time, sum(cpu_time) as total_cpu_time , sum(CAST(analysis_time as bigint)) as total_analysis_time, sum(queued_time) as total_queued_time
+                                    COUNT(*) AS total_count, \
+                                    {TIME_AGGREGATIONS}\
                                     FROM presto_query_logs
                                     WHERE client_tags IS NOT NULL and client_tags like '%dagName%' and
                                     client_tags LIKE '%SCHEDULED_GLOBAL_TAG_RULE%' 
@@ -426,10 +444,10 @@ class parent:
                                 SELECT * FROM scheduled_global_tag_rule_summary\
                                 ORDER BY total_wall_time DESC;\
                             """,
-                "columns":['dagName','upt_day','upt_batch','total_count','total_wall_time','total_cpu_time','total_analysis_time','total_queued_time'],
+                "columns":['dagName','upt_day','upt_batch','total_count']+TIME_COLUMNS,
                 "schema":{
                     "merge_on_cols" : ["dagName","upt_batch"],
-                    "compare_cols":["total_count","total_wall_time",'total_queued_time','total_cpu_time','total_analysis_time'],
+                    "compare_cols":["total_count"]+COMPARE_TIME_COLUMNS,
                 }
             },
 
