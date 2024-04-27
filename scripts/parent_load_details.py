@@ -417,7 +417,7 @@ class parent:
                                     COUNT(*) AS total_count, sum(wall_time) as total_wall_time, sum(cpu_time) as total_cpu_time , sum(CAST(analysis_time as bigint)) as total_analysis_time, sum(queued_time) as total_queued_time
                                     FROM presto_query_logs
                                     WHERE client_tags IS NOT NULL and client_tags like '%dagName%' and
-                                    client_tags NOT LIKE '%SCHEDULED_GLOBAL_TAG_RULE%' 
+                                    client_tags LIKE '%SCHEDULED_GLOBAL_TAG_RULE%' 
                                     and upt_time > timestamp '<start_utc_str>' and upt_time < timestamp '<end_utc_str>'
                                     GROUP BY 1,2,3
                                 )\
