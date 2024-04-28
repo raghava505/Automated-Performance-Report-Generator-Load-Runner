@@ -18,14 +18,16 @@ class osquery_child(parent):
                 }
             },
             "SingleCustomer":{
-                "total_number_of_customers": 1,
-                "number_of_customers_with_auto_exception_enabled": 1,
                 "test_title": "Single Customer Rule Engine Load",
-                "total_assets": "24576",
-                "assets_per_cust":"24576",
-                "records_sent_per_hour": "1.592 B",
-                "input_file": "rhel7-6tab_12rec.log",
-                "events_table_name": "dns_lookup_events, socket_events, process_events, process_file_events"
+                "RuleEngine and ControlPlane Load Details" : {
+                    "total_number_of_customers": 1,
+                    "number_of_customers_with_auto_exception_enabled": 1,
+                    "total_assets": "10368",
+                    "assets_per_cust":"10368",
+                    "records_sent_per_hour": "671 million",
+                    "input_file": "rhel7-6tab_12rec.log",
+                    "events_table_name": "dns_lookup_events, socket_events, process_events, process_file_events",
+                }
             },
             "ControlPlane":{
                 "total_number_of_customers": "1",
