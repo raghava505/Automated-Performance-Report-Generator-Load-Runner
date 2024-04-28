@@ -3,6 +3,7 @@ import seaborn as sns
 import pandas as pd
 from PIL import Image
 import io
+from collections import defaultdict
 
 # sns.set_theme(palette="dark", font="arial")
 outer_background_color="#191b1f"
@@ -11,16 +12,42 @@ sns.set(rc={"text.color": text_color})
 
 kwargs={'startangle':270, 
         'wedgeprops': {'edgecolor': outer_background_color, 'linewidth': 1.0},  # Set edge width
-        'textprops': {'fontsize': 11},  # Increase font size of labels
+        'textprops': {'fontsize': 18},  # Increase font size of labels
         'colors' : ['#196F3D','#21618C','#7B241C','#7D6608','#4A148C','#6E2C00','#880E4F',"#330066","#7D4D00"],
         'rotatelabels':False,
         'labeldistance':1.01,
         'pctdistance':0.8,
         }
 
-figsize=(27, 15)
-title_fontsize=18
+figsize=(30, 12)
+title_fontsize=22
 threshold_to_consider_as_less_contributors=2
+
+def stitch_images_horizontally(images):
+    widths, heights = zip(*(i.size for i in images))
+    total_width = sum(widths)
+    max_height = max(heights)
+    # Create a new blank image with the total width and maximum height
+    stitched_image = Image.new('RGB', (total_width, max_height))
+    x_offset = 0
+    for img in images:
+        # Paste each image into the stitched image at the current x_offset
+        stitched_image.paste(img, (x_offset, 0))
+        x_offset += img.width
+    return stitched_image
+
+def stitch_images_vertically(images):
+    # Get the maximum width and total height of the input images
+    max_width = max(img.width for img in images)
+    total_height = sum(img.height for img in images)
+    # Create a new blank image with the maximum width and total height
+    stitched_image = Image.new('RGB', (max_width, total_height))
+    y_offset = 0
+    for img in images:
+        # Paste each image into the stitched image at the current y_offset
+        stitched_image.paste(img, (0, y_offset))
+        y_offset += img.height
+    return stitched_image
 
 def compare_dfs(main,prev,merge_on):
     main.rename(columns={'avg': 'avg_main'}, inplace=True)
@@ -52,70 +79,6 @@ def compress_less_contributors(df,app_or_cont):
     new_df=new_df._append({app_or_cont:f"others ({len(less_contri)})","absolute":less_contri["absolute"].sum()},ignore_index=True)
     return new_df
 
-def create_piechart(mem_or_cpu,app_df,cont_df,nodetype):
-    plots_dict={}
-    if mem_or_cpu=="memory":
-        unit="GB"
-    else:
-        unit="cores"
-    increased = app_df[app_df["absolute"] > 0][["application","absolute"]]
-    sum_app_increased = round(sum(increased["absolute"]),2)
-    increased = compress_less_contributors(increased,"application")
-    decreased = app_df[app_df["absolute"] < 0][["application","absolute"]]
-    sum_app_decreased = round(sum(decreased["absolute"]),2)
-    decreased=decreased.sort_values(by="absolute",ascending=True)
-    decreased = compress_less_contributors(decreased,"application")
-    decreased["absolute"] = decreased["absolute"].abs()
-
-    fig, axs = plt.subplots(2, 2, figsize=figsize)  # 2 row, 2 columns
-
-    axs[0][0].pie(increased['absolute'], labels=increased["application"],autopct=autopct_format(increased['absolute'],mem_or_cpu), **kwargs)
-    title_increased = f'applications contributing to {"increase".upper()} in {mem_or_cpu} usage for "{nodetype}" nodetype (+{sum_app_increased} {unit} ↑)'
-    axs[0][0].set_title(title_increased, fontsize=title_fontsize)
-
-    axs[0][1].pie(decreased['absolute'], labels=decreased["application"],autopct=autopct_format(decreased['absolute'],mem_or_cpu,'-'), **kwargs)
-    title_decreased = f'applications contributing to {"decrease".upper()} in {mem_or_cpu} usage for "{nodetype}" nodetype ({sum_app_decreased} {unit} ↓)'
-    axs[0][1].set_title(title_decreased, fontsize=title_fontsize)
-
-#-----
-    
-    cont_increased = cont_df[cont_df["absolute"] > 0][["container","absolute"]]
-    sum_cont_increased = round(sum(cont_increased["absolute"]),2)
-    cont_increased = compress_less_contributors(cont_increased,"container")
-    cont_decreased = cont_df[cont_df["absolute"] < 0][["container","absolute"]]
-    sum_cont_decreased = round(sum(cont_decreased["absolute"]),2)
-    cont_decreased=cont_decreased.sort_values(by="absolute",ascending=True)
-    cont_decreased = compress_less_contributors(cont_decreased,"container")
-    cont_decreased["absolute"] = cont_decreased["absolute"].abs()
-
-    axs[1][0].pie(cont_increased['absolute'], labels=cont_increased["container"],autopct=autopct_format(cont_increased['absolute'],mem_or_cpu), **kwargs)
-    cont_title_increased = f'containers contributing to {"increase".upper()} in {mem_or_cpu} usage for "{nodetype}" nodetype (+{sum_cont_increased} {unit} ↑)'
-    axs[1][0].set_title(cont_title_increased, fontsize=title_fontsize)
-    
-    axs[1][1].pie(cont_decreased['absolute'], labels=cont_decreased["container"],autopct=autopct_format(cont_decreased['absolute'],mem_or_cpu,'-'), **kwargs)
-    cont_title_decreased = f'containers contributing to {"decrease".upper()} in {mem_or_cpu} usage for "{nodetype}" nodetype ({sum_cont_decreased} {unit} ↓)'
-    axs[1][1].set_title(cont_title_decreased, fontsize=title_fontsize)
-
-    main_title=f"Complete {mem_or_cpu} usage analysis for '{nodetype}' nodetype"
-    fig.suptitle(f"{main_title}\n\n", fontsize=title_fontsize+2)
-
-    plt.gcf().set_facecolor(outer_background_color)
-    # plt.subplots_adjust(left=10.1, right=10.9, bottom=0.1, top=0.9, wspace=70.4, hspace=700.4)
-    plt.tight_layout()
-    # plt.savefig(f"/Users/masabathulararao/Documents/Loadtest/save-report-data-to-mongo/scripts/csv/{mem_or_cpu}_{nodetype}.png")
-
-    # app_df.to_csv(f"/Users/masabathulararao/Documents/Loadtest/save-report-data-to-mongo/scripts/csv/{mem_or_cpu}_application_{nodetype}.csv", index=False) 
-    # cont_df.to_csv(f"/Users/masabathulararao/Documents/Loadtest/save-report-data-to-mongo/scripts/csv/{mem_or_cpu}_container_{nodetype}.csv", index=False) 
-    buffer = io.BytesIO()
-    plt.savefig(buffer, format='png')
-    buffer.seek(0)  # Reset the buffer position
-    
-    image = Image.open(buffer)
-    plt.close()
-    
-    plots_dict[main_title] = image
-    return plots_dict
-
 def compress(val):
     last = val.split('/')[-1]
     if len(last)>30:
@@ -123,53 +86,110 @@ def compress(val):
     last=last.capitalize()
     return last
 
-def call_create_piechart(mem_or_cpu,main_dict,prev_dict):
-    current_main_dict_application=main_dict[f'nodetype_and_application_level_{mem_or_cpu}_usages']
-    current_prev_dict_application=prev_dict[f'nodetype_and_application_level_{mem_or_cpu}_usages']
+def get_piechart(nodetype,df,mem_or_cpu,app_cont_pod):
+    if mem_or_cpu=="memory":unit="GB"
+    else:unit="cores"
 
-    current_main_dict_container=main_dict[f'nodetype_and_container_level_{mem_or_cpu}_usages']
-    current_prev_dict_container=prev_dict[f'nodetype_and_container_level_{mem_or_cpu}_usages']
-    return_piecharts={}
-    for nodetype,schema_dict in current_main_dict_application.items():
-        # if nodetype not in ["process","data","pg","ep"]:continue
-        print(f"Analysing {mem_or_cpu} usages for nodetype '{nodetype}'")
-        main_app_df = pd.DataFrame(schema_dict["table"])
-        try:prev_app_df = pd.DataFrame(current_prev_dict_application[nodetype]["table"])
-        except:
-            print(f"prev application dataframe for {nodetype} doesn't exist, skipping analysis for {nodetype}-{mem_or_cpu}")
-            continue
-        try:main_cont_df = pd.DataFrame(current_main_dict_container[nodetype]["table"])
-        except:
-            print(f"main container dataframe for {nodetype} doesn't exist, skipping analysis for {nodetype}-{mem_or_cpu}")
-            continue
-        try:prev_cont_df = pd.DataFrame(current_prev_dict_container[nodetype]["table"])
-        except:
-            print(f"prev container dataframe for {nodetype} doesn't exist, skipping analysis for {nodetype}-{mem_or_cpu}")
-            continue
+    fig, axs = plt.subplots(1, 2, figsize=figsize) 
 
-        if main_app_df.empty:
-            print(f"Main application dataframe for {nodetype} is found empty")
-            continue
-        elif prev_app_df.empty:
-            print(f"Previous container dataframe for {nodetype} is found empty")
-            continue
-        elif main_cont_df.empty:
-            print(f"Main application dataframe for {nodetype} is found empty")
-            continue
-        elif prev_cont_df.empty:
-            print(f"Previous container dataframe for {nodetype} is found empty")
-            continue
-
-        app_df= compare_dfs(main_app_df,prev_app_df,merge_on=["node_type","application"])
-        cont_df= compare_dfs(main_cont_df,prev_cont_df,merge_on=["node_type","container"])
-
-        app_df["application"] = app_df["application"].apply(compress)
-        cont_df["container"] = cont_df["container"].apply(compress)
-        return_piecharts.update(create_piechart(mem_or_cpu,app_df,cont_df,nodetype))
+    if not df.empty:
+        increased = df[df["absolute"] > 0][[app_cont_pod,"absolute"]]
+        decreased = df[df["absolute"] < 0][[app_cont_pod,"absolute"]]
+    else:
+        increased = pd.DataFrame({})
+        decreased = pd.DataFrame({})
     
-    # for title,im in return_piecharts.items():
-    #     # im.show(title=title)
-    #     im.save("/Users/masabathulararao/Documents/Loadtest/save-report-data-to-mongo/scripts/csv/"+title+".png")
+    
+    if not increased.empty:
+        sum_app_increased = round(sum(increased["absolute"]),2)
+        increased = compress_less_contributors(increased,app_cont_pod)
 
-    return return_piecharts
-        
+        axs[0].pie(increased['absolute'], labels=increased[app_cont_pod],autopct=autopct_format(increased['absolute'],mem_or_cpu), **kwargs)
+        title_increased = f'{app_cont_pod}s contributing to {"increase".upper()} in {mem_or_cpu} usage for "{nodetype}" nodetype (+{sum_app_increased} {unit} ↑)'
+        axs[0].set_title(title_increased, fontsize=title_fontsize)
+    else:
+        axs[0].plot([],[])
+        axs[0].set_title(f"No {app_cont_pod}s found contributing to increase in {mem_or_cpu} for {nodetype} nodetype", fontsize=title_fontsize)
+        axs[0].set_facecolor(outer_background_color)  # Set the background color to light gray
+        axs[0].grid(False) 
+        axs[0].spines['top'].set_visible(False)
+        axs[0].spines['right'].set_visible(False)
+        axs[0].spines['bottom'].set_visible(False)
+        axs[0].spines['left'].set_visible(False)
+
+    if not decreased.empty:
+        sum_app_decreased = round(sum(decreased["absolute"]),2)
+        decreased=decreased.sort_values(by="absolute",ascending=True)
+        decreased = compress_less_contributors(decreased,app_cont_pod)
+        decreased["absolute"] = decreased["absolute"].abs()
+
+        axs[1].pie(decreased['absolute'], labels=decreased[app_cont_pod],autopct=autopct_format(decreased['absolute'],mem_or_cpu,'-'), **kwargs)
+        title_decreased = f'{app_cont_pod}s contributing to {"decrease".upper()} in {mem_or_cpu} usage for "{nodetype}" nodetype ({sum_app_decreased} {unit} ↓)'
+        axs[1].set_title(title_decreased, fontsize=title_fontsize)
+    else:
+        axs[1].plot([],[])
+        axs[1].set_title(f"No {app_cont_pod}s found contributing to decrease in {mem_or_cpu} for {nodetype} nodetype", fontsize=title_fontsize)
+        axs[1].set_facecolor(outer_background_color)  # Set the background color to light gray
+        axs[1].grid(False) 
+        axs[1].spines['top'].set_visible(False)
+        axs[1].spines['right'].set_visible(False)
+        axs[1].spines['bottom'].set_visible(False)
+        axs[1].spines['left'].set_visible(False)
+
+    plt.gcf().set_facecolor(outer_background_color)
+    plt.tight_layout()
+    plt.savefig(f"/Users/masabathulararao/Documents/Loadtest/save-report-data-to-mongo/scripts/csv/{mem_or_cpu}_{app_cont_pod}_{nodetype}.png")
+    
+    buffer = io.BytesIO()
+    plt.savefig(buffer, format='png')
+    buffer.seek(0)  # Reset the buffer position
+    image = Image.open(buffer)
+    plt.close()
+    return image
+
+
+def generate_piecharts(mem_or_cpu,main_dict,prev_dict):
+    images = defaultdict(lambda:{})
+    for key,value in main_dict.items():
+        if value == {}:
+            print(f"Empty dict found for {mem_or_cpu}-{key}")
+            continue
+        app_cont_pod = key.split('_')[2]
+        for nodetype,schema in value.items():
+            current_df = pd.DataFrame(schema["table"])
+            if current_df.empty:continue
+            print(f"Analysing {app_cont_pod} level {mem_or_cpu} usage for {nodetype} nodetype ...")
+            try:
+                previous_df = pd.DataFrame(prev_dict[key][nodetype]["table"])
+                merged_df = compare_dfs(current_df,previous_df,merge_on=["node_type",app_cont_pod])
+                merged_df[app_cont_pod] = merged_df[app_cont_pod].apply(compress)
+            except Exception as e:
+                print(f"ERROR : {app_cont_pod} level {nodetype} nodetype doesnt exist for previous version") 
+                merged_df = pd.DataFrame({})
+            piechart = get_piechart(nodetype,merged_df,mem_or_cpu,app_cont_pod)
+            images[nodetype][app_cont_pod] = piechart
+    return images
+
+
+def analysis_main(mem_main_dict,mem_prev_dict,cpu_main_dict,cpu_prev_dict):
+    memory_images = generate_piecharts("memory",mem_main_dict,mem_prev_dict)
+    cpu_images = generate_piecharts("cpu",cpu_main_dict,cpu_prev_dict)
+
+    app_cont_pod_order = ["application","container","pod"]
+
+    stitched_memory={}
+    for nodetype,images in memory_images.items():
+        stitched_image = stitch_images_horizontally([images[app_cont_pod] for app_cont_pod in app_cont_pod_order])
+        stitched_memory[nodetype]=stitched_image
+
+    stitched_cpu={}
+    for nodetype,images in cpu_images.items():
+        stitched_image = stitch_images_horizontally([images[app_cont_pod] for app_cont_pod in app_cont_pod_order])
+        stitched_cpu[nodetype]=stitched_image
+
+    for node_type in stitched_memory.keys():
+        print(node_type)
+        vertical_stitched_image = stitch_images_vertically([stitched_memory[node_type] , stitched_cpu[node_type]])
+        path = f"/Users/masabathulararao/Documents/Loadtest/save-report-data-to-mongo/scripts/csv/{nodetype}.png"
+        vertical_stitched_image.save(path)
+        vertical_stitched_image.show()
