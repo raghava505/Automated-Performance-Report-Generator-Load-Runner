@@ -138,7 +138,7 @@ def get_piechart(nodetype,df,mem_or_cpu,app_cont_pod):
 
     plt.gcf().set_facecolor(outer_background_color)
     plt.tight_layout()
-    plt.savefig(f"/Users/masabathulararao/Documents/Loadtest/save-report-data-to-mongo/scripts/csv/{mem_or_cpu}_{app_cont_pod}_{nodetype}.png")
+    # plt.savefig(f"/Users/masabathulararao/Documents/Loadtest/save-report-data-to-mongo/scripts/csv/{mem_or_cpu}_{app_cont_pod}_{nodetype}.png")
     
     buffer = io.BytesIO()
     plt.savefig(buffer, format='png')
@@ -179,17 +179,29 @@ def analysis_main(mem_main_dict,mem_prev_dict,cpu_main_dict,cpu_prev_dict):
 
     stitched_memory={}
     for nodetype,images in memory_images.items():
-        stitched_image = stitch_images_horizontally([images[app_cont_pod] for app_cont_pod in app_cont_pod_order])
+        images_to_stitch = []
+        for app_cont_pod in app_cont_pod_order:
+            try:
+                images_to_stitch.append(images[app_cont_pod])
+            except:
+                images_to_stitch.append(get_piechart(nodetype,pd.DataFrame({}),"memory",app_cont_pod))
+        stitched_image = stitch_images_horizontally(images_to_stitch)
         stitched_memory[nodetype]=stitched_image
 
     stitched_cpu={}
     for nodetype,images in cpu_images.items():
-        stitched_image = stitch_images_horizontally([images[app_cont_pod] for app_cont_pod in app_cont_pod_order])
+        images_to_stitch = []
+        for app_cont_pod in app_cont_pod_order:
+            try:
+                images_to_stitch.append(images[app_cont_pod])
+            except:
+                images_to_stitch.append(get_piechart(nodetype,pd.DataFrame({}),"cpu",app_cont_pod))
+        stitched_image = stitch_images_horizontally(images_to_stitch)
         stitched_cpu[nodetype]=stitched_image
 
     for node_type in stitched_memory.keys():
         print(node_type)
         vertical_stitched_image = stitch_images_vertically([stitched_memory[node_type] , stitched_cpu[node_type]])
-        path = f"/Users/masabathulararao/Documents/Loadtest/save-report-data-to-mongo/scripts/csv/{nodetype}.png"
+        path = f"/Users/masabathulararao/Documents/Loadtest/save-report-data-to-mongo/scripts/csv/{node_type}.png"
         vertical_stitched_image.save(path)
-        vertical_stitched_image.show()
+        # vertical_stitched_image.show()
