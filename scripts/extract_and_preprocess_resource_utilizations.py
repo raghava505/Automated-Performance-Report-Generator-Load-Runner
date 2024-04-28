@@ -104,7 +104,7 @@ class resource_usages:
         for index, group_df in grouped_df.groupby(col1):
             group_df = group_df[group_df[average_column_name] >= usage_threshold]
             # if group_df.empty:continue
-
+            if group_df.empty:continue
             if for_report:
                 group_df = group_df.reset_index()
                 if single_level_for_report:
