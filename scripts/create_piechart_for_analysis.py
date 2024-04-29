@@ -34,8 +34,8 @@ green_colors = [
     "#3ed37c", "#4ed787", "#5edb92", "#6ede9d", "#7ee2a8", 
     "#8ee6b3", "#9ee9bd", "#aeedc8", "#bef0d3", "#cef4de"
 ]
-figsize=(20, 8)
-title_fontsize=22
+figsize=(20, 15)
+title_fontsize=26
 threshold_to_consider_as_less_contributors=2
 
 def add_border(image, border_size, border_color=(0, 0, 0)):
@@ -137,7 +137,7 @@ def get_piechart(nodetype,df,mem_or_cpu,app_cont_pod):
         increased = compress_less_contributors(increased,app_cont_pod)
 
         axs[0].pie(increased['absolute'], labels=increased[app_cont_pod],autopct=autopct_format(increased['absolute'],mem_or_cpu),colors=red_colors, **kwargs)
-        title_increased = f'{app_cont_pod}s contributing to {"increase".upper()} \nin {mem_or_cpu} for "{nodetype}" nodetype (+{sum_app_increased} {unit} ↑)'
+        title_increased = f'{app_cont_pod}s contributing to {"increase".upper()} in \n{mem_or_cpu} for "{nodetype}" nodetype (+{sum_app_increased} {unit} ↑)'
         axs[0].set_title(title_increased, fontsize=title_fontsize)
     else:
         axs[0].plot([],[])
@@ -156,7 +156,7 @@ def get_piechart(nodetype,df,mem_or_cpu,app_cont_pod):
         decreased["absolute"] = decreased["absolute"].abs()
 
         axs[1].pie(decreased['absolute'], labels=decreased[app_cont_pod],autopct=autopct_format(decreased['absolute'],mem_or_cpu,'-'),colors=green_colors, **kwargs)
-        title_decreased = f'{app_cont_pod}s contributing to {"decrease".upper()} \nin {mem_or_cpu} for "{nodetype}" nodetype ({sum_app_decreased} {unit} ↓)'
+        title_decreased = f'{app_cont_pod}s contributing to {"decrease".upper()} in \n{mem_or_cpu} for "{nodetype}" nodetype ({sum_app_decreased} {unit} ↓)'
         axs[1].set_title(title_decreased, fontsize=title_fontsize)
     else:
         axs[1].plot([],[])
