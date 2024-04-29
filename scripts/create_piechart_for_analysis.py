@@ -4,6 +4,7 @@ import pandas as pd
 from PIL import Image
 import io
 from collections import defaultdict
+from PIL import Image, ImageOps
 
 # sns.set_theme(palette="dark", font="arial")
 outer_background_color="#191b1f"
@@ -23,17 +24,25 @@ figsize=(30, 12)
 title_fontsize=22
 threshold_to_consider_as_less_contributors=2
 
-def stitch_images_horizontally(images):
-    widths, heights = zip(*(i.size for i in images))
+def add_border(image, border_size, border_color=(0, 0, 0)):
+    # Add a border around the given image
+    return ImageOps.expand(image, border=(border_size, border_size), fill=border_color)
+
+def stitch_images_horizontally(images, border_size=4, border_color="white"):
+    # Calculate dimensions for the stitched image including borders
+    widths, heights = zip(*(add_border(i, border_size).size for i in images))
     total_width = sum(widths)
-    max_height = max(heights)
+    max_height = max(heights) 
+
     # Create a new blank image with the total width and maximum height
-    stitched_image = Image.new('RGB', (total_width, max_height))
+    stitched_image = Image.new('RGB', (total_width, max_height), color=(0,0,0))  # White background
     x_offset = 0
     for img in images:
-        # Paste each image into the stitched image at the current x_offset
-        stitched_image.paste(img, (x_offset, 0))
-        x_offset += img.width
+        # Add border to the current image
+        bordered_img = add_border(img, border_size, border_color)
+        # Paste each bordered image into the stitched image at the current x_offset
+        stitched_image.paste(bordered_img, (x_offset, 0))
+        x_offset += bordered_img.width
     return stitched_image
 
 def stitch_images_vertically(images):
