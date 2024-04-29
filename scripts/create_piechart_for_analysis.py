@@ -68,7 +68,7 @@ def stitch_images_vertically(images,node_type):
     text_image_height=120
     text_image = Image.new('RGB', (max_width, text_image_height), color=outer_background_color)
     draw = ImageDraw.Draw(text_image)
-    txt = f"Complete resource usage analysis for {node_type} nodetype"
+    txt = f"{node_type.title()} nodetype : Complete resource usage analysis"
     x = max_width/2.8
     draw.text((x,0),text=txt,align="right",font_size=65, fill =(255, 255, 255)) #(max_width//2, text_image_height//2),
     images.insert(0,text_image)
@@ -137,11 +137,11 @@ def get_piechart(nodetype,df,mem_or_cpu,app_cont_pod):
         increased = compress_less_contributors(increased,app_cont_pod)
 
         axs[0].pie(increased['absolute'], labels=increased[app_cont_pod],autopct=autopct_format(increased['absolute'],mem_or_cpu),colors=red_colors, **kwargs)
-        title_increased = f'{app_cont_pod}s contributing to {"increase".upper()} in \n{mem_or_cpu} for "{nodetype}" nodetype (+{sum_app_increased} {unit} ↑)'
+        title_increased = f'{app_cont_pod.title()}s contributing to increase in \n{mem_or_cpu} for {nodetype} nodetype (+{sum_app_increased} {unit} ↑)'
         axs[0].set_title(title_increased, fontsize=title_fontsize)
     else:
-        axs[0].plot([],[])
-        axs[0].set_title(f"No {app_cont_pod}s found contributing to \nincrease in {mem_or_cpu} for {nodetype} nodetype", fontsize=title_fontsize)
+        axs[0].pie([],[])
+        axs[0].set_title(f"No {app_cont_pod.title()}s found contributing to \nincrease in {mem_or_cpu} for {nodetype} nodetype", fontsize=title_fontsize)
         axs[0].set_facecolor(outer_background_color)  # Set the background color to light gray
         axs[0].grid(False) 
         axs[0].spines['top'].set_visible(False)
@@ -156,18 +156,29 @@ def get_piechart(nodetype,df,mem_or_cpu,app_cont_pod):
         decreased["absolute"] = decreased["absolute"].abs()
 
         axs[1].pie(decreased['absolute'], labels=decreased[app_cont_pod],autopct=autopct_format(decreased['absolute'],mem_or_cpu,'-'),colors=green_colors, **kwargs)
-        title_decreased = f'{app_cont_pod}s contributing to {"decrease".upper()} in \n{mem_or_cpu} for "{nodetype}" nodetype ({sum_app_decreased} {unit} ↓)'
+        title_decreased = f'{app_cont_pod.title()}s contributing to decrease in \n{mem_or_cpu} for {nodetype} nodetype ({sum_app_decreased} {unit} ↓)'
         axs[1].set_title(title_decreased, fontsize=title_fontsize)
     else:
-        axs[1].plot([],[])
-        axs[1].set_title(f"No {app_cont_pod}s found contributing to \ndecrease in {mem_or_cpu} for {nodetype} nodetype", fontsize=title_fontsize)
+        axs[1].pie([],[])
+        axs[1].set_title(f"No {app_cont_pod.title()}s found contributing to \ndecrease in {mem_or_cpu} for {nodetype} nodetype", fontsize=title_fontsize)
         axs[1].set_facecolor(outer_background_color)  # Set the background color to light gray
         axs[1].grid(False) 
         axs[1].spines['top'].set_visible(False)
         axs[1].spines['right'].set_visible(False)
         axs[1].spines['bottom'].set_visible(False)
         axs[1].spines['left'].set_visible(False)
+    each_piechart_title = f"{app_cont_pod.title()} level {mem_or_cpu.title() if mem_or_cpu=='memory' else mem_or_cpu.upper()} usage comparison and analysis\n"
+    if not df.empty:
+        overall_absolute_increase_decrease = round(float(df["absolute"].sum()),2)
+        overall_relative_increase_decrease = round((df["avg_main"].sum()-df["avg_prev"].sum())*100/df["avg_prev"].sum(),2)
+        if overall_absolute_increase_decrease > 0:
+            each_piechart_title += f" overall absolute increase : +{overall_absolute_increase_decrease} {unit}↑\n"
+            each_piechart_title += f" overall relative increase : +{overall_relative_increase_decrease} %↑"
+        else:
+            each_piechart_title += f" overall absolute decrease: {overall_absolute_increase_decrease} {unit}↓\n"
+            each_piechart_title += f" overall relative decrease: {overall_relative_increase_decrease} %↓"
 
+    plt.suptitle(each_piechart_title,fontsize=title_fontsize+6)
     plt.gcf().set_facecolor(outer_background_color)
     plt.tight_layout()
     # plt.savefig(f"/Users/masabathulararao/Documents/Loadtest/save-report-data-to-mongo/scripts/csv/{mem_or_cpu}_{app_cont_pod}_{nodetype}.png")
