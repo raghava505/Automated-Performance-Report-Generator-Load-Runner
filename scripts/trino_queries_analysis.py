@@ -237,7 +237,7 @@ class TRINO_ANALYSE:
                                 SELECT * FROM dag_summary\
                                 UNION ALL\
                                 SELECT * FROM scheduled_global_tag_rule_summary\
-                                ORDER BY total_wall_time DESC;\
+                                ORDER BY avg_wall_time DESC LIMIT 300;\
                             """,
                 "columns":['dagName','upt_day','upt_batch','total_count']+TIME_COLUMNS,
                 "schema":{
