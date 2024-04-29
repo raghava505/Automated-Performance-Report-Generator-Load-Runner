@@ -4,7 +4,7 @@ import pandas as pd
 from PIL import Image
 import io
 from collections import defaultdict
-from PIL import Image, ImageOps
+from PIL import Image, ImageOps, ImageDraw
 
 # sns.set_theme(palette="dark", font="arial")
 outer_background_color="#191b1f"
@@ -12,15 +12,29 @@ text_color="#FDFEFE"
 sns.set(rc={"text.color": text_color})
 
 kwargs={'startangle':270, 
-        'wedgeprops': {'edgecolor': outer_background_color, 'linewidth': 1.0},  # Set edge width
+        'wedgeprops': {'edgecolor': outer_background_color, 'linewidth': 2.5},  # Set edge width
         'textprops': {'fontsize': 18},  # Increase font size of labels
-        'colors' : ['#196F3D','#21618C','#7B241C','#7D6608','#4A148C','#6E2C00','#880E4F',"#330066","#7D4D00"],
+        # 'colors' : ['#196F3D','#21618C','#7B241C','#7D6608','#4A148C','#6E2C00','#880E4F',"#330066","#7D4D00"],
         'rotatelabels':False,
         'labeldistance':1.01,
         'pctdistance':0.8,
         }
 
-figsize=(30, 12)
+red_colors = [
+    "#4b1611",
+    "#5b1b15", "#6b1f18", "#7b241c", "#8b2920", "#9b2d23", 
+    "#ab3227", "#bb372b", "#cb3b2e", "#d2473a", "#d6564a", 
+    "#d9655a", "#dd746a", "#e1837a", "#e4928a", "#e8a09a", 
+    "#ecafaa", "#efbeba", "#f3cdca", "#f6dcda", "#faebea"
+]
+
+green_colors = [
+    "#0e3f23", "#124f2b", "#155f34", "#196f3d", "#1d7f46", 
+    "#208f4f", "#249f57", "#27af60", "#2bbf69", "#2fcf72", 
+    "#3ed37c", "#4ed787", "#5edb92", "#6ede9d", "#7ee2a8", 
+    "#8ee6b3", "#9ee9bd", "#aeedc8", "#bef0d3", "#cef4de"
+]
+figsize=(20, 8)
 title_fontsize=22
 threshold_to_consider_as_less_contributors=2
 
@@ -45,12 +59,21 @@ def stitch_images_horizontally(images, border_size=4, border_color="white"):
         x_offset += bordered_img.width
     return stitched_image
 
-def stitch_images_vertically(images):
+def stitch_images_vertically(images,node_type):
     # Get the maximum width and total height of the input images
     max_width = max(img.width for img in images)
     total_height = sum(img.height for img in images)
     # Create a new blank image with the maximum width and total height
-    stitched_image = Image.new('RGB', (max_width, total_height))
+
+    text_image_height=120
+    text_image = Image.new('RGB', (max_width, text_image_height), color=outer_background_color)
+    draw = ImageDraw.Draw(text_image)
+    txt = f"Complete resource usage analysis for {node_type} nodetype"
+    x = max_width/2.8
+    draw.text((x,0),text=txt,align="right",font_size=65, fill =(255, 255, 255)) #(max_width//2, text_image_height//2),
+    images.insert(0,text_image)
+
+    stitched_image = Image.new('RGB', (max_width, total_height+text_image_height))
     y_offset = 0
     for img in images:
         # Paste each image into the stitched image at the current y_offset
@@ -113,12 +136,12 @@ def get_piechart(nodetype,df,mem_or_cpu,app_cont_pod):
         sum_app_increased = round(sum(increased["absolute"]),2)
         increased = compress_less_contributors(increased,app_cont_pod)
 
-        axs[0].pie(increased['absolute'], labels=increased[app_cont_pod],autopct=autopct_format(increased['absolute'],mem_or_cpu), **kwargs)
-        title_increased = f'{app_cont_pod}s contributing to {"increase".upper()} in {mem_or_cpu} usage for "{nodetype}" nodetype (+{sum_app_increased} {unit} ↑)'
+        axs[0].pie(increased['absolute'], labels=increased[app_cont_pod],autopct=autopct_format(increased['absolute'],mem_or_cpu),colors=red_colors, **kwargs)
+        title_increased = f'{app_cont_pod}s contributing to {"increase".upper()} \nin {mem_or_cpu} for "{nodetype}" nodetype (+{sum_app_increased} {unit} ↑)'
         axs[0].set_title(title_increased, fontsize=title_fontsize)
     else:
         axs[0].plot([],[])
-        axs[0].set_title(f"No {app_cont_pod}s found contributing to increase in {mem_or_cpu} for {nodetype} nodetype", fontsize=title_fontsize)
+        axs[0].set_title(f"No {app_cont_pod}s found contributing to \nincrease in {mem_or_cpu} for {nodetype} nodetype", fontsize=title_fontsize)
         axs[0].set_facecolor(outer_background_color)  # Set the background color to light gray
         axs[0].grid(False) 
         axs[0].spines['top'].set_visible(False)
@@ -132,12 +155,12 @@ def get_piechart(nodetype,df,mem_or_cpu,app_cont_pod):
         decreased = compress_less_contributors(decreased,app_cont_pod)
         decreased["absolute"] = decreased["absolute"].abs()
 
-        axs[1].pie(decreased['absolute'], labels=decreased[app_cont_pod],autopct=autopct_format(decreased['absolute'],mem_or_cpu,'-'), **kwargs)
-        title_decreased = f'{app_cont_pod}s contributing to {"decrease".upper()} in {mem_or_cpu} usage for "{nodetype}" nodetype ({sum_app_decreased} {unit} ↓)'
+        axs[1].pie(decreased['absolute'], labels=decreased[app_cont_pod],autopct=autopct_format(decreased['absolute'],mem_or_cpu,'-'),colors=green_colors, **kwargs)
+        title_decreased = f'{app_cont_pod}s contributing to {"decrease".upper()} \nin {mem_or_cpu} for "{nodetype}" nodetype ({sum_app_decreased} {unit} ↓)'
         axs[1].set_title(title_decreased, fontsize=title_fontsize)
     else:
         axs[1].plot([],[])
-        axs[1].set_title(f"No {app_cont_pod}s found contributing to decrease in {mem_or_cpu} for {nodetype} nodetype", fontsize=title_fontsize)
+        axs[1].set_title(f"No {app_cont_pod}s found contributing to \ndecrease in {mem_or_cpu} for {nodetype} nodetype", fontsize=title_fontsize)
         axs[1].set_facecolor(outer_background_color)  # Set the background color to light gray
         axs[1].grid(False) 
         axs[1].spines['top'].set_visible(False)
@@ -210,7 +233,7 @@ def analysis_main(mem_main_dict,mem_prev_dict,cpu_main_dict,cpu_prev_dict):
 
     for node_type in stitched_memory.keys():
         print(node_type)
-        vertical_stitched_image = stitch_images_vertically([stitched_memory[node_type] , stitched_cpu[node_type]])
+        vertical_stitched_image = stitch_images_vertically([stitched_memory[node_type] , stitched_cpu[node_type]],node_type)
         path = f"/Users/masabathulararao/Documents/Loadtest/save-report-data-to-mongo/scripts/csv/{node_type}.png"
         vertical_stitched_image.save(path)
         # vertical_stitched_image.show()
