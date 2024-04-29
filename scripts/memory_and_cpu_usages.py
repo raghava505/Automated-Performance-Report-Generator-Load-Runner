@@ -7,7 +7,7 @@ memory_tag = "Memory"
 cpu_tag = "CPU"
 memory_unit = "GB"
 cpu_unit = "cores"
-
+threshold = 0.03
 class MC_comparisions:
     def __init__(self,prom_con_obj,start_timestamp,end_timestamp,hours,include_nodetypes):
         self.curr_ist_start_time=start_timestamp
@@ -108,6 +108,7 @@ class MC_comparisions:
             for res in execute_prometheus_query(self.prom_con_obj,self.curr_ist_start_time,self.curr_ist_end_time,queries[query],self.hours):
                 container_name = res['metric']['container_name']
                 avg = res["values"]["average"]
+                if avg <= threshold:continue
                 minimum = res["values"]["minimum"]
                 maximum = res["values"]["maximum"]
                 final[query][container_name] = {f"{unit}":{"average":avg , "minimum":minimum , "maximum":maximum}}
