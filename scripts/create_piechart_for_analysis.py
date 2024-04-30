@@ -217,7 +217,7 @@ def generate_piecharts(mem_or_cpu,main_dict,prev_dict):
     return images
 
 
-def analysis_main(mem_main_dict,mem_prev_dict,cpu_main_dict,cpu_prev_dict):
+def analysis_main(mem_main_dict,mem_prev_dict,cpu_main_dict,cpu_prev_dict,load_details_text):
     memory_images = generate_piecharts("memory",mem_main_dict,mem_prev_dict)
     cpu_images = generate_piecharts("cpu",cpu_main_dict,cpu_prev_dict)
 
@@ -247,7 +247,7 @@ def analysis_main(mem_main_dict,mem_prev_dict,cpu_main_dict,cpu_prev_dict):
 
     for node_type in stitched_memory.keys():
         print(node_type)
-        vertical_stitched_image = stitch_images_vertically([stitched_memory[node_type] , stitched_cpu[node_type]],node_type)
+        vertical_stitched_image = stitch_images_vertically([stitched_memory[node_type] , stitched_cpu[node_type]],node_type,load_details_text)
         path = f"/Users/masabathulararao/Documents/Loadtest/save-report-data-to-mongo/scripts/csv/{node_type}.png"
         vertical_stitched_image.save(path)
         # vertical_stitched_image.show()
