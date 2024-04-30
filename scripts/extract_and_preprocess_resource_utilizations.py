@@ -30,7 +30,7 @@ def get_exclude_filter(exclude_nodetypes):
 
 
 class resource_usages:
-    def __init__(self,prom_con_obj,start_timestamp,end_timestamp,hours,include_nodetypes=["process","data","pg","airflow"]):
+    def __init__(self,prom_con_obj,start_timestamp,end_timestamp,hours,include_nodetypes=["process","data","pg","airflow","redis","ep","memgraph","cloudquery"]):
         self.start_timestamp=start_timestamp
         self.end_timestamp=end_timestamp
         self.hours=hours
@@ -83,9 +83,15 @@ class resource_usages:
 
     
     def groupby_2_cols_and_return_dict(self,df,col1,col2,for_report,single_level_for_report=False):
+        print(f"************************* Group by 2 cols called with parameters : col1:{col1}, col2:{col2}, for_report:{for_report}, single_level_for_report:{single_level_for_report}")
         if col1=="host_name":
             cols_to_aggregate=[minimum_column_name,maximum_column_name,average_column_name]
             display_exact_table=True
+            print("Primary Grouping by host_name ... ")
+            print(f"Shape of {col2} level, {col1} usages table : {df.shape}")
+            df = df.sort_values(by=average_column_name,ascending=False)
+            df = df.head(300)
+            print(f"Shape of df after filtering the dataframe : {df.shape}")
         else:
             cols_to_aggregate = [average_column_name]
             display_exact_table=False
@@ -127,9 +133,10 @@ class resource_usages:
         return all_dfs_dict
 
     def groupby_a_col_and_return_dict(self,df,col,for_report):
+        print(f"************************* Group by single column called with parameters col:{col}, for_report:{for_report}, df_shape:{df.shape}")
         df=df.groupby(col)[cols_to_aggregate].sum()
         df = df[df[average_column_name] >= usage_threshold]
-        print(self.sum_and_sort_cols(df.copy()))
+        # print(self.sum_and_sort_cols(df.copy()))
         # print(df)
         if for_report:
             return {
@@ -144,6 +151,7 @@ class resource_usages:
             return df.to_dict(orient="index")
 
     def preprocess_df(self,df,container_name_or_app_name,for_report):
+        print(f"************************************************** Main Dataframe received for {container_name_or_app_name} level usages. Shape : {df.shape} ")
         if df.empty:
             print(df)
             print(f"WARNING : Found empty dataframe for {container_name_or_app_name}")
@@ -180,7 +188,7 @@ class resource_usages:
                 maximum_column_name : line["values"]["maximum"],
                 average_column_name : line["values"]["average"]
             })
-        print("Captured details for node-level memory")
+        print("****************************************************************************************************Captured details for node-level memory")
         node_level_memory = pd.DataFrame(node_level_final_memory_result)  
         result.update(self.preprocess_df(node_level_memory,None,for_report))
 
@@ -216,7 +224,7 @@ class resource_usages:
                     })
                 except Exception as e:
                     print(f'***************** ERROR: Couldnt find host {line["metric"]["host_name"]} in ram-capacity dictionary. Exception occured while calculating app memory usage for app:{line["metric"]["app_name"]}. {e}')
-        print("Captured details for app-level memory")
+        print("****************************************************************************************************Captured details for app-level memory")
         app_level_memory = pd.DataFrame(application_level_final_memory_result)
         result.update(self.preprocess_df(app_level_memory,'application',for_report))
 
@@ -245,7 +253,7 @@ class resource_usages:
                     maximum_column_name : line["values"]["maximum"],
                     average_column_name : line["values"]["average"]
                 })
-        print("Captured details for container-level memory")
+        print("****************************************************************************************************Captured details for container-level memory")
         container_level_memory = pd.DataFrame(container_level_final_memory_result)
         result.update(self.preprocess_df(container_level_memory,'container',for_report))
         # ---------------------------pod level ---------------------------------
@@ -271,7 +279,7 @@ class resource_usages:
                     maximum_column_name : line["values"]["maximum"],
                     average_column_name : line["values"]["average"]
                 })
-        print("Captured details for pod-level memory")
+        print("****************************************************************************************************Captured details for pod-level memory")
         pod_level_memory_df = pd.DataFrame(pod_mem_result)
         result.update(self.preprocess_df(pod_level_memory_df,'pod',for_report))
         return result
@@ -294,7 +302,7 @@ class resource_usages:
                 })
             except Exception as e:
                 print(f'***************** ERROR: Couldnt find host {line["metric"]["host_name"]} in cores-capacity dictionary. Exception occured while calculating app cpu usage for host:{line["metric"]["host_name"]} and app:{line["metric"]["app_name"]}. {e}')
-        print("Captured details for node-level cpu")
+        print("****************************************************************************************************Captured details for node-level cpu")
         node_level_cpu = pd.DataFrame(node_level_final_cpu_result)   
         result.update(self.preprocess_df(node_level_cpu,None,for_report))
 
@@ -322,7 +330,7 @@ class resource_usages:
                     maximum_column_name : line["values"]["maximum"],
                     average_column_name : line["values"]["average"]
                 })
-        print("Captured details for app-level cpu")
+        print("****************************************************************************************************Captured details for app-level cpu")
         app_level_cpu = pd.DataFrame(application_level_final_cpu_result)
         result.update(self.preprocess_df(app_level_cpu,'application',for_report))
 
@@ -351,7 +359,7 @@ class resource_usages:
                     maximum_column_name : line["values"]["maximum"],
                     average_column_name : line["values"]["average"]
                 })
-        print("Captured details for container-level cpu")
+        print("****************************************************************************************************Captured details for container-level cpu")
         container_level_cpu = pd.DataFrame(container_level_final_cpu_result)
         result.update(self.preprocess_df(container_level_cpu,'container',for_report))
         # --------------------------pod level ----------------------------------
@@ -367,7 +375,7 @@ class resource_usages:
                     maximum_column_name : line["values"]["maximum"],
                     average_column_name : line["values"]["average"]
                 })
-        print("Captured details for pod-level cpu")
+        print("****************************************************************************************************Captured details for pod-level cpu")
         pod_level_cpu_df = pd.DataFrame(pod_cpu_result)
         result.update(self.preprocess_df(pod_level_cpu_df,'pod',for_report))
         return result
@@ -433,8 +441,8 @@ if __name__=='__main__':
     import pytz
     format_data = "%Y-%m-%d %H:%M"
     
-    start_time_str = "2024-04-19 01:50"
-    hours=12
+    start_time_str = "2024-04-26 15:35"
+    hours=60
 
     start_time = datetime.strptime(start_time_str, format_data)
     end_time = start_time + timedelta(hours=hours)
@@ -453,7 +461,7 @@ if __name__=='__main__':
     end_utc_time = end_ist_time.astimezone(utc_timezone)
     end_utc_str = end_utc_time.strftime(format_data)
 
-    active_obj = resource_usages(configuration('s1_nodes.json') , start_timestamp,end_timestamp,hours=hours)
+    active_obj = resource_usages(configuration('longevity_nodes.json') , start_timestamp,end_timestamp,hours=hours)
     # total_result_for_querying = active_obj.collect_total_usages(for_report=False)
     total_result_for_report = active_obj.collect_total_usages(for_report=True)
 

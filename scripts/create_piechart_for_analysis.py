@@ -59,7 +59,8 @@ def stitch_images_horizontally(images, border_size=4, border_color="white"):
         x_offset += bordered_img.width
     return stitched_image
 
-def stitch_images_vertically(images,node_type):
+def stitch_images_vertically(images,node_type,load_details=""):
+    # load_details="153033:AllFeaturesetsEnabled_run06 VS 153033_run05 \n Stack : Longevity \n Multicustomer and ruleengine load"
     # Get the maximum width and total height of the input images
     max_width = max(img.width for img in images)
     total_height = sum(img.height for img in images)
@@ -71,6 +72,7 @@ def stitch_images_vertically(images,node_type):
     txt = f"{node_type.title()} nodetype : Complete resource usage analysis"
     x = max_width/2.8
     draw.text((x,0),text=txt,align="right",font_size=65, fill =(255, 255, 255)) #(max_width//2, text_image_height//2),
+    draw.text((0,0),text=f"{load_details}",align="left",font_size=35, fill =(255, 255, 255)) #(max_width//2, text_image_height//2),
     images.insert(0,text_image)
 
     stitched_image = Image.new('RGB', (max_width, total_height+text_image_height))
@@ -127,6 +129,7 @@ def get_piechart(nodetype,df,mem_or_cpu,app_cont_pod):
     if not df.empty:
         increased = df[df["absolute"] > 0][[app_cont_pod,"absolute"]]
         decreased = df[df["absolute"] < 0][[app_cont_pod,"absolute"]]
+        # df.to_csv(f"/Users/masabathulararao/Documents/Loadtest/save-report-data-to-mongo/scripts/csv/{mem_or_cpu}_{app_cont_pod}_{nodetype}.csv")
     else:
         increased = pd.DataFrame({})
         decreased = pd.DataFrame({})
