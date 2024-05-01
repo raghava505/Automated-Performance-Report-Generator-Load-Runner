@@ -177,6 +177,7 @@ class resource_usages:
     def collect_total_memory_usages(self,for_report):
         result={}
         #---------------------------node level----------------------------
+        print("****************************************************************************************************Capturing details for node-level memory")
         node_level_memory_query = f"sum(uptycs_memory_used{self.exclude_filter} /(1024*1024)) by (node_type,host_name)"
         node_level_final_memory_result=[]
         node_level_memory_query_result=execute_prometheus_query(self.prom_con_obj,self.start_timestamp,self.end_timestamp,node_level_memory_query,self.hours)
@@ -188,11 +189,11 @@ class resource_usages:
                 maximum_column_name : line["values"]["maximum"],
                 average_column_name : line["values"]["average"]
             })
-        print("****************************************************************************************************Captured details for node-level memory")
         node_level_memory = pd.DataFrame(node_level_final_memory_result)  
         result.update(self.preprocess_df(node_level_memory,None,for_report))
 
         #---------------------------app level----------------------------
+        print("****************************************************************************************************Capturing details for app-level memory")
         application_level_memory_query = f'sum(uptycs_app_memory{self.exclude_filter}) by (node_type,host_name,app_name)'
         application_level_final_memory_result=[]
         for line in execute_prometheus_query(self.prom_con_obj,self.start_timestamp,self.end_timestamp,application_level_memory_query,self.hours):
@@ -224,45 +225,57 @@ class resource_usages:
                     })
                 except Exception as e:
                     print(f'***************** ERROR: Couldnt find host {line["metric"]["host_name"]} in ram-capacity dictionary. Exception occured while calculating app memory usage for app:{line["metric"]["app_name"]}. {e}')
-        print("****************************************************************************************************Captured details for app-level memory")
         app_level_memory = pd.DataFrame(application_level_final_memory_result)
         result.update(self.preprocess_df(app_level_memory,'application',for_report))
 
         # ---------------------------container level----------------------------
+        print("****************************************************************************************************Capturing details for container-level memory")
         container_level_memory_query='sum(uptycs_docker_mem_used{}/(1024*1024*1024)) by (container_name,host_name)'.format(self.exclude_filter)
         container_level_final_memory_result=[]
         for line in execute_prometheus_query(self.prom_con_obj,self.start_timestamp,self.end_timestamp,container_level_memory_query,self.hours):
-            if self.host_name_type_mapping[line["metric"]["host_name"]] in self.exclude_nodetypes:continue
-            container_level_final_memory_result.append({
-                "node_type":self.host_name_type_mapping[line["metric"]["host_name"]],
-                "host_name":line["metric"]["host_name"],
-                "container":line["metric"]["container_name"],
-                minimum_column_name : line["values"]["minimum"],
-                maximum_column_name : line["values"]["maximum"],
-                average_column_name : line["values"]["average"]
-            })
-
-        for cont in exclude_containers:
-            for line in execute_prometheus_query(self.prom_con_obj,self.start_timestamp,self.end_timestamp,f'sum(uptycs_docker_mem_used{{container_name=~"{cont}"}}/(1024*1024*1024)) by (host_name)',self.hours):
+            try:
                 if self.host_name_type_mapping[line["metric"]["host_name"]] in self.exclude_nodetypes:continue
                 container_level_final_memory_result.append({
                     "node_type":self.host_name_type_mapping[line["metric"]["host_name"]],
                     "host_name":line["metric"]["host_name"],
-                    "container":cont,
+                    "container":line["metric"]["container_name"],
                     minimum_column_name : line["values"]["minimum"],
                     maximum_column_name : line["values"]["maximum"],
                     average_column_name : line["values"]["average"]
                 })
-        print("****************************************************************************************************Captured details for container-level memory")
+            except Exception as e:
+                print(f'***************** ERROR: Couldnt find host {line["metric"]["host_name"]} in host_name_type_mapping dictionary. Exception occured while calculating container memory usage for container:{line["metric"]["container_name"]}. {e}')
+
+
+        for cont in exclude_containers:
+            for line in execute_prometheus_query(self.prom_con_obj,self.start_timestamp,self.end_timestamp,f'sum(uptycs_docker_mem_used{{container_name=~"{cont}"}}/(1024*1024*1024)) by (host_name)',self.hours):
+                try:
+                    if self.host_name_type_mapping[line["metric"]["host_name"]] in self.exclude_nodetypes:continue
+                    container_level_final_memory_result.append({
+                        "node_type":self.host_name_type_mapping[line["metric"]["host_name"]],
+                        "host_name":line["metric"]["host_name"],
+                        "container":cont,
+                        minimum_column_name : line["values"]["minimum"],
+                        maximum_column_name : line["values"]["maximum"],
+                        average_column_name : line["values"]["average"]
+                    })
+                except Exception as e:
+                    print(f'***************** ERROR: Couldnt find host {line["metric"]["host_name"]} in host_name_type_mapping dictionary. Exception occured while calculating container memory usage for container:{line["metric"]["container_name"]}. {e}')
+
         container_level_memory = pd.DataFrame(container_level_final_memory_result)
         result.update(self.preprocess_df(container_level_memory,'container',for_report))
         # ---------------------------pod level ---------------------------------
+        print("****************************************************************************************************Capturing details for pod-level memory")
         pod_level_memory_query='sum(container_memory_working_set_bytes{container_label_io_kubernetes_pod_name=~".*deployment.*"}) by (container_label_io_kubernetes_pod_name,node_name)'
         unique_pod_names=set()
         for line in execute_prometheus_query(self.prom_con_obj,self.start_timestamp,self.end_timestamp,pod_level_memory_query,self.hours):
-            if self.host_name_type_mapping[line["metric"]["node_name"]] in self.exclude_nodetypes:continue
-            pod_name = line["metric"]["container_label_io_kubernetes_pod_name"].split('-deployment-')[0]
-            unique_pod_names.add(pod_name)
+            try:
+                if self.host_name_type_mapping[line["metric"]["node_name"]] in self.exclude_nodetypes:continue
+                pod_name = line["metric"]["container_label_io_kubernetes_pod_name"].split('-deployment-')[0]
+                unique_pod_names.add(pod_name)
+            except Exception as e:
+                print(f'***************** ERROR: Couldnt find host {line["metric"]["node_name"]} in host_name_type_mapping dictionary. Exception occured while calculating pod memory usage for pod:{line["metric"]["container_label_io_kubernetes_pod_name"]}. {e}')
+
             
         print("Unique pod names : " , unique_pod_names)
         self.unique_pod_names=unique_pod_names
@@ -270,16 +283,19 @@ class resource_usages:
         pod_mem_result=[]
         for pod in unique_pod_names:
             for line in execute_prometheus_query(self.prom_con_obj,self.start_timestamp,self.end_timestamp,f'sum(container_memory_working_set_bytes{{container_label_io_kubernetes_pod_name=~"{pod}-deployment.*"}}/(1024*1024*1024)) by (node_name)',self.hours):
-                if self.host_name_type_mapping[line["metric"]["node_name"]] in self.exclude_nodetypes:continue
-                pod_mem_result.append({
-                    "node_type":self.host_name_type_mapping[line["metric"]["node_name"]],
-                    "host_name":line["metric"]["node_name"],
-                    "pod":pod,
-                    minimum_column_name : line["values"]["minimum"],
-                    maximum_column_name : line["values"]["maximum"],
-                    average_column_name : line["values"]["average"]
-                })
-        print("****************************************************************************************************Captured details for pod-level memory")
+                try:
+                    if self.host_name_type_mapping[line["metric"]["node_name"]] in self.exclude_nodetypes:continue
+                    pod_mem_result.append({
+                        "node_type":self.host_name_type_mapping[line["metric"]["node_name"]],
+                        "host_name":line["metric"]["node_name"],
+                        "pod":pod,
+                        minimum_column_name : line["values"]["minimum"],
+                        maximum_column_name : line["values"]["maximum"],
+                        average_column_name : line["values"]["average"]
+                    })
+                except Exception as e:
+                    print(f'***************** ERROR: Couldnt find host {line["metric"]["node_name"]} in host_name_type_mapping dictionary. Exception occured while calculating pod memory usage for pod:{line["metric"]["container_label_io_kubernetes_pod_name"]}. {e}')
+
         pod_level_memory_df = pd.DataFrame(pod_mem_result)
         result.update(self.preprocess_df(pod_level_memory_df,'pod',for_report))
         return result
@@ -287,6 +303,7 @@ class resource_usages:
     def collect_total_cpu_usages(self,for_report):
         result={}
         #---------------------------node level----------------------------
+        print("****************************************************************************************************Capturing details for node-level cpu")
         node_level_cpu_query = f"sum(100-uptycs_idle_cpu{self.exclude_filter}) by (node_type,host_name)"
         node_level_final_cpu_result=[]
         node_level_cpu_query_result=execute_prometheus_query(self.prom_con_obj,self.start_timestamp,self.end_timestamp,node_level_cpu_query,self.hours)
@@ -302,11 +319,11 @@ class resource_usages:
                 })
             except Exception as e:
                 print(f'***************** ERROR: Couldnt find host {line["metric"]["host_name"]} in cores-capacity dictionary. Exception occured while calculating app cpu usage for host:{line["metric"]["host_name"]} and app:{line["metric"]["app_name"]}. {e}')
-        print("****************************************************************************************************Captured details for node-level cpu")
         node_level_cpu = pd.DataFrame(node_level_final_cpu_result)   
         result.update(self.preprocess_df(node_level_cpu,None,for_report))
 
         #---------------------------app level----------------------------
+        print("****************************************************************************************************Capturing details for app-level cpu")
         application_level_cpu_query = f'sum(uptycs_app_cpu{self.exclude_filter}) by (node_type,host_name,app_name)/100'
         application_level_final_cpu_result=[]
         for line in execute_prometheus_query(self.prom_con_obj,self.start_timestamp,self.end_timestamp,application_level_cpu_query,self.hours):
@@ -330,52 +347,63 @@ class resource_usages:
                     maximum_column_name : line["values"]["maximum"],
                     average_column_name : line["values"]["average"]
                 })
-        print("****************************************************************************************************Captured details for app-level cpu")
         app_level_cpu = pd.DataFrame(application_level_final_cpu_result)
         result.update(self.preprocess_df(app_level_cpu,'application',for_report))
 
         #----------------------------container level-----------------------------
+        print("****************************************************************************************************Capturing details for container-level cpu")
         container_level_cpu_query='sum(uptycs_docker_cpu_stats{}) by (container_name,host_name)/100'.format(self.exclude_filter)
         container_level_final_cpu_result=[]
         for line in execute_prometheus_query(self.prom_con_obj,self.start_timestamp,self.end_timestamp,container_level_cpu_query,self.hours):
-            if self.host_name_type_mapping[line["metric"]["host_name"]] in self.exclude_nodetypes:continue
-            container_level_final_cpu_result.append({
-                "node_type":self.host_name_type_mapping[line["metric"]["host_name"]],
-                "host_name":line["metric"]["host_name"],
-                "container":line["metric"]["container_name"],
-                minimum_column_name : line["values"]["minimum"],
-                maximum_column_name : line["values"]["maximum"],
-                average_column_name : line["values"]["average"]
-            })
-
-        for cont in exclude_containers:
-            for line in execute_prometheus_query(self.prom_con_obj,self.start_timestamp,self.end_timestamp,f'sum(uptycs_docker_cpu_stats{{container_name=~"{cont}"}}) by (host_name)/100',self.hours):
+            try:
                 if self.host_name_type_mapping[line["metric"]["host_name"]] in self.exclude_nodetypes:continue
                 container_level_final_cpu_result.append({
                     "node_type":self.host_name_type_mapping[line["metric"]["host_name"]],
                     "host_name":line["metric"]["host_name"],
-                    "container":cont,
+                    "container":line["metric"]["container_name"],
                     minimum_column_name : line["values"]["minimum"],
                     maximum_column_name : line["values"]["maximum"],
                     average_column_name : line["values"]["average"]
                 })
-        print("****************************************************************************************************Captured details for container-level cpu")
+            except Exception as e:
+                print(f'***************** ERROR: Couldnt find host {line["metric"]["host_name"]} in host_name_type_mapping dictionary. Exception occured while calculating container cpu usage for container:{line["metric"]["container_name"]}. {e}')
+
+
+        for cont in exclude_containers:
+            for line in execute_prometheus_query(self.prom_con_obj,self.start_timestamp,self.end_timestamp,f'sum(uptycs_docker_cpu_stats{{container_name=~"{cont}"}}) by (host_name)/100',self.hours):
+                try:
+                    if self.host_name_type_mapping[line["metric"]["host_name"]] in self.exclude_nodetypes:continue
+                    container_level_final_cpu_result.append({
+                        "node_type":self.host_name_type_mapping[line["metric"]["host_name"]],
+                        "host_name":line["metric"]["host_name"],
+                        "container":cont,
+                        minimum_column_name : line["values"]["minimum"],
+                        maximum_column_name : line["values"]["maximum"],
+                        average_column_name : line["values"]["average"]
+                    })
+                except Exception as e:
+                    print(f'***************** ERROR: Couldnt find host {line["metric"]["host_name"]} in host_name_type_mapping dictionary. Exception occured while calculating container cpu usage for container:{line["metric"]["container_name"]}. {e}')
+
         container_level_cpu = pd.DataFrame(container_level_final_cpu_result)
         result.update(self.preprocess_df(container_level_cpu,'container',for_report))
         # --------------------------pod level ----------------------------------
+        print("****************************************************************************************************Capturing details for pod-level cpu")
         pod_cpu_result=[]
         for pod in self.unique_pod_names:
             for line in execute_prometheus_query(self.prom_con_obj,self.start_timestamp,self.end_timestamp,f'sum(rate(container_cpu_usage_seconds_total{{container_label_io_kubernetes_pod_name=~"{pod}.*deployment.*"}}[10m])) by (node_name)',self.hours):
-                if self.host_name_type_mapping[line["metric"]["node_name"]] in self.exclude_nodetypes:continue
-                pod_cpu_result.append({
-                    "node_type":self.host_name_type_mapping[line["metric"]["node_name"]],
-                    "host_name":line["metric"]["node_name"],
-                    "pod":pod,
-                    minimum_column_name : line["values"]["minimum"],
-                    maximum_column_name : line["values"]["maximum"],
-                    average_column_name : line["values"]["average"]
-                })
-        print("****************************************************************************************************Captured details for pod-level cpu")
+                try:
+                    if self.host_name_type_mapping[line["metric"]["node_name"]] in self.exclude_nodetypes:continue
+                    pod_cpu_result.append({
+                        "node_type":self.host_name_type_mapping[line["metric"]["node_name"]],
+                        "host_name":line["metric"]["node_name"],
+                        "pod":pod,
+                        minimum_column_name : line["values"]["minimum"],
+                        maximum_column_name : line["values"]["maximum"],
+                        average_column_name : line["values"]["average"]
+                    })
+                except Exception as e:
+                    print(f'***************** ERROR: Couldnt find host {line["metric"]["node_name"]} in host_name_type_mapping dictionary. Exception occured while calculating pod cpu usage for pod:{line["metric"]["container_label_io_kubernetes_pod_name"]}. {e}')
+
         pod_level_cpu_df = pd.DataFrame(pod_cpu_result)
         result.update(self.preprocess_df(pod_level_cpu_df,'pod',for_report))
         return result
@@ -441,8 +469,8 @@ if __name__=='__main__':
     import pytz
     format_data = "%Y-%m-%d %H:%M"
     
-    start_time_str = "2024-04-26 15:35"
-    hours=60
+    start_time_str = "2024-04-05 00:00"
+    hours=168
 
     start_time = datetime.strptime(start_time_str, format_data)
     end_time = start_time + timedelta(hours=hours)
