@@ -107,7 +107,7 @@ class TRINO_ANALYSE:
                             from presto_query_logs \
                             where upt_time > timestamp '<start_utc_str>' and upt_time < timestamp '<end_utc_str>'\
                             GROUP BY 'day-' || CAST(upt_day AS varchar), 'batch-' || CAST(upt_batch AS varchar) \
-                            ORDER BY ORDER BY avg_wall_time desc LIMIT 50;",
+                            ORDER BY avg_wall_time desc LIMIT 50;",
                 "columns":['upt_day','upt_batch','total_queries','success_count','failure_count','like_queries','regex_queries']+TIME_COLUMNS,
                 "schema":{
                     "merge_on_cols" : ["upt_batch"],
