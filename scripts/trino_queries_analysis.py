@@ -94,7 +94,7 @@ class TRINO_ANALYSE:
                     "compare_cols":["failure_count"]
                 }
             },
-            "Time taken by the queries on an hourly basis":{
+            "Number of queries running each hour":{
                 "query" :  f"select \
                                 'day-' || CAST(upt_day AS varchar) AS upt_day,\
                                 'batch-' || CAST(upt_batch AS varchar) AS upt_batch,\
@@ -107,8 +107,27 @@ class TRINO_ANALYSE:
                             from presto_query_logs \
                             where upt_time > timestamp '<start_utc_str>' and upt_time < timestamp '<end_utc_str>'\
                             GROUP BY 'day-' || CAST(upt_day AS varchar), 'batch-' || CAST(upt_batch AS varchar) \
-                            ORDER BY avg_wall_time desc LIMIT 50;",
+                            ORDER BY upt_day,upt_batch LIMIT 168;",
                 "columns":['upt_day','upt_batch','total_queries','success_count','failure_count','like_queries','regex_queries']+TIME_COLUMNS,
+                "schema":{
+                    "merge_on_cols" : [],
+                    "compare_cols":[],
+                }
+            },
+            "Time taken by the queries on an hourly basis":{
+                "query" :  f"select \
+                                'batch-' || CAST(upt_batch AS varchar) AS upt_batch,\
+                                count(*) as total_queries,\
+                                COUNT(CASE WHEN query_status = 'SUCCESS' THEN 1 END) as success_count,\
+                                COUNT(CASE WHEN query_status = 'FAILURE' THEN 1 END) as failure_count,\
+                                COUNT(CASE WHEN query_text LIKE '%like%' THEN 1 END) AS like_queries,\
+                                COUNT(CASE WHEN query_text LIKE '%regex%' THEN 1 END) AS regex_queries,\
+                                {TIME_AGGREGATIONS}\
+                            from presto_query_logs \
+                            where upt_time > timestamp '<start_utc_str>' and upt_time < timestamp '<end_utc_str>'\
+                            GROUP BY  'batch-' || CAST(upt_batch AS varchar) \
+                            ORDER BY avg_wall_time desc;",
+                "columns":['upt_batch','total_queries','success_count','failure_count','like_queries','regex_queries']+TIME_COLUMNS,
                 "schema":{
                     "merge_on_cols" : ["upt_batch"],
                     "compare_cols":["total_queries"]+COMPARE_TIME_COLUMNS,
@@ -136,7 +155,6 @@ class TRINO_ANALYSE:
             "Time taken by queries executed from all sources on an hourly basis":{
                 "query" :  f"select \
                                 source,\
-                                'day-' || CAST(upt_day AS varchar) AS upt_day,\
                                 'batch-' || CAST(upt_batch AS varchar) AS upt_batch,\
                                 count(*) as total_queries,\
                                 COUNT(CASE WHEN query_status = 'SUCCESS' THEN 1 END) as success_count,\
@@ -146,9 +164,9 @@ class TRINO_ANALYSE:
                                 {TIME_AGGREGATIONS}\
                             from presto_query_logs \
                             where upt_time > timestamp '<start_utc_str>' and upt_time < timestamp '<end_utc_str>'\
-                            GROUP BY source,'day-' || CAST(upt_day AS varchar), 'batch-' || CAST(upt_batch AS varchar) \
+                            GROUP BY source,'batch-' || CAST(upt_batch AS varchar) \
                             ORDER BY avg_wall_time desc LIMIT 150;",
-                "columns":['source','upt_day','upt_batch','total_queries','success_count','failure_count','like_queries','regex_queries']+TIME_COLUMNS,
+                "columns":['source','upt_batch','total_queries','success_count','failure_count','like_queries','regex_queries']+TIME_COLUMNS,
                 "schema":{
                     "merge_on_cols" : ["source","upt_batch"],
                     "compare_cols":["total_queries"]+COMPARE_TIME_COLUMNS,
@@ -214,32 +232,32 @@ class TRINO_ANALYSE:
                                     COALESCE(
                                         REGEXP_EXTRACT(client_tags, '\\"dagName\\": \\"([^,}}]+)\\"', 1),
                                         'Unknown'
-                                    ) AS dagName,upt_day,upt_batch,
+                                    ) AS dagName,upt_batch,
                                     COUNT(*) AS total_count, \
                                     {TIME_AGGREGATIONS}\
                                     FROM presto_query_logs
                                     WHERE client_tags IS NOT NULL and client_tags like '%dagName%' and
                                     client_tags NOT LIKE '%SCHEDULED_GLOBAL_TAG_RULE%' 
                                     and upt_time > timestamp '<start_utc_str>' and upt_time < timestamp '<end_utc_str>'
-                                    GROUP BY 1,2,3
+                                    GROUP BY 1,2
                                 ),
                                 scheduled_global_tag_rule_summary AS (\
                                     SELECT
-                                    'SCHEDULED_GLOBAL_TAG_RULE' AS dagName,upt_day,upt_batch,
+                                    'SCHEDULED_GLOBAL_TAG_RULE' AS dagName,upt_batch,
                                     COUNT(*) AS total_count, \
                                     {TIME_AGGREGATIONS}\
                                     FROM presto_query_logs
                                     WHERE client_tags IS NOT NULL and client_tags like '%dagName%' and
                                     client_tags LIKE '%SCHEDULED_GLOBAL_TAG_RULE%' 
                                     and upt_time > timestamp '<start_utc_str>' and upt_time < timestamp '<end_utc_str>'
-                                    GROUP BY 1,2,3
+                                    GROUP BY 1,2
                                 )\
                                 SELECT * FROM dag_summary\
                                 UNION ALL\
                                 SELECT * FROM scheduled_global_tag_rule_summary\
                                 ORDER BY avg_wall_time DESC LIMIT 150;\
                             """,
-                "columns":['dagName','upt_day','upt_batch','total_count']+TIME_COLUMNS,
+                "columns":['dagName','upt_batch','total_count']+TIME_COLUMNS,
                 "schema":{
                     "merge_on_cols" : ["dagName","upt_batch"],
                     "compare_cols":["total_count"]+COMPARE_TIME_COLUMNS,
@@ -439,7 +457,7 @@ class TRINO_ANALYSE:
             # new_row.update(dict([(str_col,"TOTAL") for str_col in string_columns]))
             # df = df._append(new_row, ignore_index=True)
             if df.empty: continue
-            df = df.head(150)
+            df = df.head(168)
             print(df)
             try:
                 df["query_operation"] = df["query_operation"].astype(str)
@@ -460,8 +478,8 @@ if __name__=='__main__':
     import pytz
     format_data = "%Y-%m-%d %H:%M"
 
-    start_time_str = "2024-04-24 21:50"
-    hours=10
+    start_time_str = "2024-04-05 00:00"
+    hours=168
 
     start_time = datetime.strptime(start_time_str, format_data)
     end_time = start_time + timedelta(hours=hours)
