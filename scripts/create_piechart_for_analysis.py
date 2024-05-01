@@ -217,7 +217,7 @@ def generate_piecharts(mem_or_cpu,main_dict,prev_dict):
     return images
 
 
-def analysis_main(mem_main_dict,mem_prev_dict,cpu_main_dict,cpu_prev_dict,load_details_text):
+def analysis_main(mem_main_dict,mem_prev_dict,cpu_main_dict,cpu_prev_dict,load_details_text=""):
     memory_images = generate_piecharts("memory",mem_main_dict,mem_prev_dict)
     cpu_images = generate_piecharts("cpu",cpu_main_dict,cpu_prev_dict)
 
