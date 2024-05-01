@@ -107,11 +107,11 @@ class TRINO_ANALYSE:
                             from presto_query_logs \
                             where upt_time > timestamp '<start_utc_str>' and upt_time < timestamp '<end_utc_str>'\
                             GROUP BY 'day-' || CAST(upt_day AS varchar), 'batch-' || CAST(upt_batch AS varchar) \
-                            ORDER BY upt_day, upt_batch;",
+                            ORDER BY ORDER BY avg_wall_time desc LIMIT 50;",
                 "columns":['upt_day','upt_batch','total_queries','success_count','failure_count','like_queries','regex_queries']+TIME_COLUMNS,
                 "schema":{
                     "merge_on_cols" : ["upt_batch"],
-                    "compare_cols":["total_wall_time","avg_wall_time"],
+                    "compare_cols":["total_queries"]+COMPARE_TIME_COLUMNS,
                 }
             },
             "Time taken by queries by each source":{
@@ -130,7 +130,7 @@ class TRINO_ANALYSE:
                 "columns":['source','total_queries','success_count','failure_count','like_queries','regex_queries']+TIME_COLUMNS,
                 "schema":{
                     "merge_on_cols" : ["source"],
-                    "compare_cols":["total_wall_time","avg_wall_time"],
+                    "compare_cols":COMPARE_TIME_COLUMNS,
                 }
             },
             "Time taken by queries executed from all sources on an hourly basis":{
@@ -147,7 +147,7 @@ class TRINO_ANALYSE:
                             from presto_query_logs \
                             where upt_time > timestamp '<start_utc_str>' and upt_time < timestamp '<end_utc_str>'\
                             GROUP BY source,'day-' || CAST(upt_day AS varchar), 'batch-' || CAST(upt_batch AS varchar) \
-                            ORDER BY avg_wall_time desc LIMIT 300;",
+                            ORDER BY avg_wall_time desc LIMIT 150;",
                 "columns":['source','upt_day','upt_batch','total_queries','success_count','failure_count','like_queries','regex_queries']+TIME_COLUMNS,
                 "schema":{
                     "merge_on_cols" : ["source","upt_batch"],
@@ -200,7 +200,7 @@ class TRINO_ANALYSE:
                                 SELECT * FROM dag_summary\
                                 UNION ALL\
                                 SELECT * FROM scheduled_global_tag_rule_summary\
-                                ORDER BY total_wall_time DESC;\
+                                ORDER BY avg_wall_time DESC LIMIT 100;\
                             """,
                 "columns":['dagName','total_count']+TIME_COLUMNS,
                 "schema":{
@@ -237,7 +237,7 @@ class TRINO_ANALYSE:
                                 SELECT * FROM dag_summary\
                                 UNION ALL\
                                 SELECT * FROM scheduled_global_tag_rule_summary\
-                                ORDER BY avg_wall_time DESC LIMIT 300;\
+                                ORDER BY avg_wall_time DESC LIMIT 150;\
                             """,
                 "columns":['dagName','upt_day','upt_batch','total_count']+TIME_COLUMNS,
                 "schema":{
@@ -439,6 +439,7 @@ class TRINO_ANALYSE:
             # new_row.update(dict([(str_col,"TOTAL") for str_col in string_columns]))
             # df = df._append(new_row, ignore_index=True)
             if df.empty: continue
+            df = df.head(150)
             print(df)
             try:
                 df["query_operation"] = df["query_operation"].astype(str)
