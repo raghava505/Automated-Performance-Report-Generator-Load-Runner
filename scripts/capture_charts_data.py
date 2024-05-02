@@ -1,12 +1,12 @@
 from helper import execute_prometheus_query
 
 class Charts:
-    def __init__(self,prom_con_obj,start_timestamp,end_timestamp,add_extra_time_for_charts_at_end_in_min,fs,hours):
+    def __init__(self,prom_con_obj,start_timestamp,end_timestamp,fs,hours):
         self.curr_ist_start_time=start_timestamp
         self.curr_ist_end_time=end_timestamp
         self.prom_con_obj=prom_con_obj
-        self.add_extra_time_for_charts_at_end_in_min=add_extra_time_for_charts_at_end_in_min
-        self.add_extra_time_for_charts_at_start_in_min=10
+        self.add_extra_time_for_charts_at_end_in_min=2*hours
+        self.add_extra_time_for_charts_at_start_in_min=2*hours
         self.fs=fs
         self.hours=hours
 

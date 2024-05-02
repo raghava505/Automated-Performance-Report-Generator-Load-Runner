@@ -117,9 +117,9 @@ def http_query(config, query_str, url_ext):
 class osq_accuracy:
     def __init__(self,start_time_utc,end_time_utc,api_path,domain,endline,assets_per_cust,ext,trans,hours,input_file):
         format_data = "%Y-%m-%d %H:%M"
-        start_time = start_time_utc - timedelta(minutes=10)
+        start_time = start_time_utc - timedelta(minutes=20)
         self.start_time = start_time.strftime(format_data)
-        end_time = end_time_utc + timedelta(minutes=20) #+ timedelta(hours=4)
+        end_time = end_time_utc + timedelta(minutes=40) #+ timedelta(hours=4)
         self.end_time = end_time.strftime(format_data)
         self.api_path=api_path
         self.domain=domain

@@ -211,7 +211,7 @@ if __name__=="__main__":
 
     format_data = "%Y-%m-%d %H:%M"
     start_time_str = "2024-04-05 00:00"
-    hours=300
+    hours=168
 
     start_time = datetime.strptime(start_time_str, format_data)
     end_time = start_time + timedelta(hours=hours)
@@ -232,17 +232,20 @@ if __name__=="__main__":
     prom_con_obj=configuration('s1_nodes.json')
 
     print("Fetching charts data ...")
-    charts_obj = Charts(start_timestamp=start_timestamp,end_timestamp=end_timestamp,prom_con_obj=prom_con_obj,
-    add_extra_time_for_charts_at_end_in_min=10,fs=fs,hours=hours)
+    charts_obj = Charts(start_timestamp=start_timestamp,end_timestamp=end_timestamp,prom_con_obj=prom_con_obj,fs=fs,hours=hours)
     
-    step_factor=hours/24 if hours>24 else 1
+    step_factor=hours/16 if hours>16 else 1
     complete_charts_data_dict,all_gridfs_fileids=charts_obj.capture_charts_and_save({"Node-level Memory Charts":load_cls.get_node_level_RAM_used_percentage_queries()},step_factor=step_factor)
     print("Saved charts data successfully !")
-
-    path = "/Users/masabathulararao/Documents/Loadtest/save-report-data-to-mongo/other/images"
+    path = "/Users/masabathulararao/Documents/Loadtest/save-report-data-to-mongo/publish_practice/images"
     collection = database["Testing"]
     inserted_id = collection.insert_one({"charts":complete_charts_data_dict})    
-    create_images_and_save(path,str(inserted_id.inserted_id),collection,fs,hours,defaultdict(lambda:0),0,0,0,0,step_factor)
+    variables={
+        "build":"141232",
+        "start_time_str_ist":start_time_str,
+        "load_duration_in_hrs":hours
+    }
+    create_images_and_save(path,str(inserted_id.inserted_id),collection,fs,hours,variables,end_time_str,0,"s1","Ruleeng test",step_factor)
     f3_at = time.perf_counter()
     print(f"Collecting the report data took : {round(f3_at - s_at,2)} seconds in total")
 else:

@@ -247,11 +247,10 @@ if __name__ == "__main__":
         #--------------------------------Capture charts data---------------------------------------
         try:
             hours=variables["load_duration_in_hrs"]
-            step_factor=hours/24 if hours>24 else 1
+            step_factor=hours/16 if hours>16 else 1
             fs = GridFS(db)
             print("Fetching charts data ...")
-            charts_obj = Charts(start_timestamp=start_timestamp,end_timestamp=end_timestamp,prom_con_obj=prom_con_obj,
-                    add_extra_time_for_charts_at_end_in_min=variables["add_extra_time_for_charts_at_end_in_min"],fs=fs,hours=variables['load_duration_in_hrs'])
+            charts_obj = Charts(start_timestamp=start_timestamp,end_timestamp=end_timestamp,prom_con_obj=prom_con_obj,fs=fs,hours=variables['load_duration_in_hrs'])
             complete_charts_data_dict,all_gridfs_fileids=charts_obj.capture_charts_and_save(load_cls.get_all_chart_queries(),step_factor=step_factor)
             print("Saved charts data successfully !")
             #--------------------------------take screenshots---------------------------------------

@@ -42,7 +42,6 @@ def create_input_form():
             "load_duration_in_hrs": 10,
             "sprint": 144,
             "build": "144068",
-            "add_extra_time_for_charts_at_end_in_min": 10
             # "fetch_node_parameters_before_generating_report" :  False,
             }
     
