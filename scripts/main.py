@@ -118,7 +118,7 @@ if __name__ == "__main__":
         all_gridfs_fileids=[]
 
         #-------------------------real time query test details--------------------------
-        if domain=="longevity": 
+        if domain=="longevity" and variables["load_type"] in ["all_loads_combined"]: 
             from realtimequery_tests.real_time_query import realtime_query
             print(f"Performing realtime query test on stack '{test_env_json_details['stack']}' ...")
             realtime_query_results=realtime_query()
