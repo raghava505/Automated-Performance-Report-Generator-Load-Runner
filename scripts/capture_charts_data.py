@@ -10,7 +10,7 @@ class Charts:
         self.fs=fs
         self.hours=hours
 
-    def extract_charts_data(self,queries):
+    def extract_charts_data(self,queries,step_factor):
         final=dict()
         file_ids=[]
         ste = self.curr_ist_start_time - (self.add_extra_time_for_charts_at_start_in_min * (60))
@@ -18,7 +18,7 @@ class Charts:
 
         for query in queries:
             main_query = queries[query][0]
-            result=execute_prometheus_query(self.prom_con_obj,ste,ete,main_query,self.hours,preprocess=False)
+            result=execute_prometheus_query(self.prom_con_obj,ste,ete,main_query,self.hours,preprocess=False,step_factor=step_factor)
             legend_list = queries[query][1]
             try:unit = queries[query][2]
             except:unit=""
@@ -47,11 +47,11 @@ class Charts:
             
         return final,file_ids
             
-    def capture_charts_and_save(self,all_chart_queries): 
+    def capture_charts_and_save(self,all_chart_queries,step_factor): 
         all_gridfs_fileids = []
         final_dict={}
         for key,value in all_chart_queries.items():
             print(f"----------------------Processing {key} queries----------------------")
-            final_dict[key],file_ids = self.extract_charts_data(value)
+            final_dict[key],file_ids = self.extract_charts_data(value,step_factor)
             all_gridfs_fileids.extend(file_ids)
         return final_dict,all_gridfs_fileids
