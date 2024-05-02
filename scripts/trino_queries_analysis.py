@@ -33,15 +33,12 @@ class TRINO_ANALYSE:
                                 MAX(CAST(wall_time AS bigint)) AS max_wall_time,
                                 MAX(CAST(queued_time AS bigint)) AS max_queued_time,
                                 MAX(CAST(cpu_time AS bigint)) AS max_cpu_time,
-                                COALESCE(MAX(CAST(analysis_time AS bigint)),0) AS max_analysis_time,
-
-                                MIN(CAST(wall_time AS bigint)) AS min_wall_time,
-                                MIN(CAST(queued_time AS bigint)) AS min_queued_time,
-                                MIN(CAST(cpu_time AS bigint)) AS min_cpu_time,
-                                COALESCE(MIN(CAST(analysis_time AS bigint)),0) AS min_analysis_time
+                                COALESCE(MAX(CAST(analysis_time AS bigint)),0) AS max_analysis_time
                             """
-        TIME_COLUMNS = ['total_wall_time','total_queued_time','total_cpu_time','total_analysis_time','avg_wall_time','avg_queued_time','avg_cpu_time','avg_analysis_time','max_wall_time','max_queued_time','max_cpu_time','max_analysis_time','min_wall_time','min_queued_time','min_cpu_time','min_analysis_time']
-        COMPARE_TIME_COLUMNS = ['total_wall_time','total_queued_time','total_cpu_time','total_analysis_time','avg_wall_time','avg_queued_time','avg_cpu_time','avg_analysis_time']
+        TIME_COLUMNS = ['total_wall_time','total_queued_time','total_cpu_time','total_analysis_time','avg_wall_time','avg_queued_time','avg_cpu_time','avg_analysis_time','max_wall_time','max_queued_time','max_cpu_time','max_analysis_time']
+        AVG_COMPARE_TIME_COLUMNS = ['avg_wall_time','avg_queued_time','avg_cpu_time','avg_analysis_time']
+        TOTAL_COMPARE_TIME_COLUMNS = ['total_wall_time','total_queued_time','total_cpu_time','total_analysis_time']
+
         return {
             "Total number of trino queries executed from each source" : {
                 "query" :  "SELECT\
@@ -79,41 +76,39 @@ class TRINO_ANALYSE:
             "Total number of failed queries grouped by failure message" : {
                 "query" :  "select \
                                 source,\
-                                COALESCE(query_operation,'NaN') AS query_operation,\
                                 failure_message,\
-                                failure_type,\
                                 count(*) as failure_count \
                             from presto_query_logs \
                             where upt_time > timestamp '<start_utc_str>' and upt_time < timestamp '<end_utc_str>'\
                             and query_status='FAILURE' \
-                            group by 1,2,3,4 \
-                            order by 1,2;",
-                "columns":['source','query_operation','failure_message','failure_type','failure_count'],
+                            group by 1,2 \
+                            order by 1;",
+                "columns":['source','failure_message','failure_count'],
                 "schema":{
-                    "merge_on_cols" : ['source','query_operation','failure_message','failure_type'],
+                    "merge_on_cols" : ['source','failure_message'],
                     "compare_cols":["failure_count"]
                 }
             },
-            "Number of queries running each hour":{
-                "query" :  f"select \
-                                'day-' || CAST(upt_day AS varchar) AS upt_day,\
-                                'batch-' || CAST(upt_batch AS varchar) AS upt_batch,\
-                                count(*) as total_queries,\
-                                COUNT(CASE WHEN query_status = 'SUCCESS' THEN 1 END) as success_count,\
-                                COUNT(CASE WHEN query_status = 'FAILURE' THEN 1 END) as failure_count,\
-                                COUNT(CASE WHEN query_text LIKE '%like%' THEN 1 END) AS like_queries,\
-                                COUNT(CASE WHEN query_text LIKE '%regex%' THEN 1 END) AS regex_queries,\
-                                {TIME_AGGREGATIONS}\
-                            from presto_query_logs \
-                            where upt_time > timestamp '<start_utc_str>' and upt_time < timestamp '<end_utc_str>'\
-                            GROUP BY 'day-' || CAST(upt_day AS varchar), 'batch-' || CAST(upt_batch AS varchar) \
-                            ORDER BY upt_day,upt_batch LIMIT 168;",
-                "columns":['upt_day','upt_batch','total_queries','success_count','failure_count','like_queries','regex_queries']+TIME_COLUMNS,
-                "schema":{
-                    "merge_on_cols" : [],
-                    "compare_cols":[],
-                }
-            },
+            # "Number of queries running each hour":{
+            #     "query" :  f"select \
+            #                     'day-' || CAST(upt_day AS varchar) AS upt_day,\
+            #                     'batch-' || CAST(upt_batch AS varchar) AS upt_batch,\
+            #                     count(*) as total_queries,\
+            #                     COUNT(CASE WHEN query_status = 'SUCCESS' THEN 1 END) as success_count,\
+            #                     COUNT(CASE WHEN query_status = 'FAILURE' THEN 1 END) as failure_count,\
+            #                     COUNT(CASE WHEN query_text LIKE '%like%' THEN 1 END) AS like_queries,\
+            #                     COUNT(CASE WHEN query_text LIKE '%regex%' THEN 1 END) AS regex_queries,\
+            #                     {TIME_AGGREGATIONS}\
+            #                 from presto_query_logs \
+            #                 where upt_time > timestamp '<start_utc_str>' and upt_time < timestamp '<end_utc_str>'\
+            #                 GROUP BY 'day-' || CAST(upt_day AS varchar), 'batch-' || CAST(upt_batch AS varchar) \
+            #                 ORDER BY upt_day,upt_batch LIMIT 168;",
+            #     "columns":['upt_day','upt_batch','total_queries','success_count','failure_count','like_queries','regex_queries']+TIME_COLUMNS,
+            #     "schema":{
+            #         "merge_on_cols" : [],
+            #         "compare_cols":[],
+            #     }
+            # },
             "Time taken by the queries on an hourly basis":{
                 "query" :  f"select \
                                 'batch-' || CAST(upt_batch AS varchar) AS upt_batch,\
@@ -130,7 +125,7 @@ class TRINO_ANALYSE:
                 "columns":['upt_batch','total_queries','success_count','failure_count','like_queries','regex_queries']+TIME_COLUMNS,
                 "schema":{
                     "merge_on_cols" : ["upt_batch"],
-                    "compare_cols":["total_queries"]+COMPARE_TIME_COLUMNS,
+                    "compare_cols":["total_queries"]+AVG_COMPARE_TIME_COLUMNS+TOTAL_COMPARE_TIME_COLUMNS,
                 }
             },
             "Time taken by queries by each source":{
@@ -149,7 +144,7 @@ class TRINO_ANALYSE:
                 "columns":['source','total_queries','success_count','failure_count','like_queries','regex_queries']+TIME_COLUMNS,
                 "schema":{
                     "merge_on_cols" : ["source"],
-                    "compare_cols":COMPARE_TIME_COLUMNS,
+                    "compare_cols":AVG_COMPARE_TIME_COLUMNS+TOTAL_COMPARE_TIME_COLUMNS,
                 }
             },
             "Time taken by queries executed from all sources on an hourly basis":{
@@ -169,7 +164,7 @@ class TRINO_ANALYSE:
                 "columns":['source','upt_batch','total_queries','success_count','failure_count','like_queries','regex_queries']+TIME_COLUMNS,
                 "schema":{
                     "merge_on_cols" : ["source","upt_batch"],
-                    "compare_cols":["total_queries"]+COMPARE_TIME_COLUMNS,
+                    "compare_cols":["total_queries"]+AVG_COMPARE_TIME_COLUMNS,
                 }
             },
             # "client tag details of failed dags":{
@@ -223,7 +218,7 @@ class TRINO_ANALYSE:
                 "columns":['dagName','total_count']+TIME_COLUMNS,
                 "schema":{
                     "merge_on_cols" : ["dagName"],
-                    "compare_cols":["total_count"]+COMPARE_TIME_COLUMNS,
+                    "compare_cols":["total_count"]+AVG_COMPARE_TIME_COLUMNS,
                 }
             },
             "Total time taken by each dag in each upt_batch":{
@@ -260,7 +255,7 @@ class TRINO_ANALYSE:
                 "columns":['dagName','upt_batch','total_count']+TIME_COLUMNS,
                 "schema":{
                     "merge_on_cols" : ["dagName","upt_batch"],
-                    "compare_cols":["total_count"]+COMPARE_TIME_COLUMNS,
+                    "compare_cols":["total_count"]+AVG_COMPARE_TIME_COLUMNS,
                 }
             },
 
@@ -374,22 +369,22 @@ class TRINO_ANALYSE:
                     "compare_cols":[],
                 }
             },
-            # f"Top {limit} slowest queries sorted by queued time":{
-            #     "query" :  f"select \
-            #                 source,\
-            #                 client_tags,\
-            #                 'day-' || CAST(upt_day AS varchar) AS upt_day,'batch-' || CAST(upt_batch AS varchar) AS upt_batch,\
-            #                 analysis_time,cpu_time,queued_time,wall_time,schema,query_operation,query_status,failure_message \
-            #                 from presto_query_logs \
-            #                 where upt_time > timestamp '<start_utc_str>' and upt_time < timestamp '<end_utc_str>'\
-            #                 order by CAST(queued_time AS bigint) desc \
-            #                 limit {limit};",
-            #     "columns":['source','client_tags','upt_day','upt_batch','analysis_time','cpu_time','queued_time','wall_time','schema','query_operation','query_status','failure_message'],
-            #     "schema":{
-            #         "merge_on_cols" : [],
-            #         "compare_cols":[],
-            #     }
-            # },
+            f"Top {limit} queries with high queued time":{
+                "query" :  f"select \
+                            source,\
+                            client_tags,\
+                            'day-' || CAST(upt_day AS varchar) AS upt_day,'batch-' || CAST(upt_batch AS varchar) AS upt_batch,\
+                            analysis_time,cpu_time,queued_time,wall_time,schema,query_operation,query_status,failure_message \
+                            from presto_query_logs \
+                            where upt_time > timestamp '<start_utc_str>' and upt_time < timestamp '<end_utc_str>'\
+                            order by CAST(queued_time AS bigint) desc \
+                            limit {limit};",
+                "columns":['source','client_tags','upt_day','upt_batch','analysis_time','cpu_time','queued_time','wall_time','schema','query_operation','query_status','failure_message'],
+                "schema":{
+                    "merge_on_cols" : [],
+                    "compare_cols":[],
+                }
+            },
             "Distribution of time taken by all the queries from each source" : {
                 "query" :  get_full_query("complete_table")[0],
                 "columns": get_full_query("complete_table")[1],
