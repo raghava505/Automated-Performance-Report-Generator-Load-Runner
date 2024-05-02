@@ -92,31 +92,51 @@ if __name__ == "__main__":
                 max_run = max(document['load_details']['run'] , max_run)
             run=max_run+1
             print(f"you have already saved the details for this load in this sprint, setting run value to {run}")
-        #-------------------------real time query test details--------------------------
+
+        #all result variables
         realtime_query_results=None
+        disk_space_usage_dict=None
+        kafka_topics_list=None
+        active_conn_results=None
+        trino_queries_analyse_results=None
+        api_load_result_dict=None
+        presto_load_result_dict=None
+        Osquery_table_accuracies=None
+        Osquery_event_accuracies=None
+        kubequery_accuracies=None
+        selfmanaged_accuracies=None
+        azure_accuracies=None
+        evecount = None
+        sts = None
+        db_op = None
+        pg_stats = None
+        elk_errors = None
+        mem_cpu_usages_dict,overall_usage_dict = None,None
+        complete_resource_details=None
+        cloudquery_accuracies=None
+        complete_charts_data_dict=None
+        all_gridfs_fileids=[]
+
+        #-------------------------real time query test details--------------------------
         if domain=="longevity": 
             from realtimequery_tests.real_time_query import realtime_query
             print(f"Performing realtime query test on stack '{test_env_json_details['stack']}' ...")
             realtime_query_results=realtime_query()
         #-------------------------disk space--------------------------
-        disk_space_usage_dict=None
         if variables["load_name"] != "ControlPlane":
             print("Performing disk space calculations ...")
             calc = DISK(start_timestamp=start_timestamp,end_timestamp=end_timestamp,prom_con_obj=prom_con_obj)
             disk_space_usage_dict=calc.make_calculations()
         #--------------------------------- add kafka topics ---------------------------------------
-        kafka_topics_list=None
         if variables["load_type"] in ["Osquery","osquery_cloudquery_combined","all_loads_combined"]:
             print("Fetching kafka topics ...")
             kafka_obj = kafka_topics(prom_con_obj=prom_con_obj)
             kafka_topics_list = kafka_obj.add_topics_to_report()
         #---------------No.of Active connections by application---------------
-        active_conn_results=None
         active_conn_obj = Active_conn(prom_con_obj,start_timestamp,end_timestamp,hours=variables["load_duration_in_hrs"])
         active_conn_results = active_conn_obj.get_avg_active_conn()
         #-------------------------Trino Queries--------------------------
         # trino_queries=None
-        trino_queries_analyse_results=None
         # if variables["load_type"] != "KubeQuery":
             # print("Performing trino queries ...")
             # calc = TRINO(curr_ist_start_time=variables["start_time_str_ist"],curr_ist_end_time=end_time_str,prom_con_obj=prom_con_obj)
@@ -127,8 +147,6 @@ if __name__ == "__main__":
         trino_queries_analyse_results = trino_obj.fetch_trino_results()
         # print(f"Returned trino queries results are : {trino_queries_analyse_results}")
         #-------------------------API LOAD--------------------------
-        api_load_result_dict=None
-        presto_load_result_dict=None
         if 'api_presto_load_reports_node_ip' in test_env_json_details:
             print(f"Looking for api load  and presto load csv files in {test_env_json_details['api_presto_load_reports_node_ip']}")
             stack_starttime_string=str(test_env_json_details['stack']).lower() + "-" + str(variables["start_time_str_ist"])
@@ -144,8 +162,6 @@ if __name__ == "__main__":
             print(f"Skipping API load details because 'api_presto_load_reports_node_ip' is not present in stack json file")
 
         #-------------------------Osquery Table Accuracies----------------------------
-        Osquery_table_accuracies=None
-        Osquery_event_accuracies=None
         if variables["load_type"] in ["Osquery","osquery_cloudquery_combined","all_loads_combined"] and variables["load_name"] != "ControlPlane":
             assets_per_cust=int(load_cls.get_load_specific_details(variables['load_name'])["RuleEngine and ControlPlane Load Details"]['assets_per_cust'])
             input_file = load_cls.get_load_specific_details(variables['load_name'])["RuleEngine and ControlPlane Load Details"]['input_file']
@@ -167,7 +183,6 @@ if __name__ == "__main__":
         
 
         #-------------------------Kubequery Accuracies----------------------------
-        kubequery_accuracies=None
         if variables["load_name"] in ["KubeQuery_SingleCustomer","KubeQuery_and_SelfManaged_Combined"] or variables["load_type"] in ["all_loads_combined"]:
             print("Calculating accuracies for KubeQuery ...")
             accuracy = Kube_Accuracy(start_timestamp=start_utc_time,end_timestamp=end_utc_time,prom_con_obj=prom_con_obj,variables=variables)
@@ -175,7 +190,6 @@ if __name__ == "__main__":
             print(json.dumps(kubequery_accuracies, indent=2))
 
         #-------------------------SelfManaged Accuracies----------------------------
-        selfmanaged_accuracies=None
         if variables["load_name"] in ["SelfManaged_SingleCustomer","KubeQuery_and_SelfManaged_Combined"] or variables["load_type"] in ["all_loads_combined"]:
             print("Calculating accuracies for SelfManaged ...")
             accuracy = SelfManaged_Accuracy(start_timestamp=start_utc_time,end_timestamp=end_utc_time,prom_con_obj=prom_con_obj,variables=variables)
@@ -183,19 +197,16 @@ if __name__ == "__main__":
             print(json.dumps(selfmanaged_accuracies, indent=2))
 
         #-------------------------Azure Load Accuracies----------------------------
-        azure_accuracies=None
         if variables["load_name"] == "Azure_MultiCustomer" or variables["load_type"] in ["all_loads_combined"]:
             print("Calculating accuracies for Azure Load ...")
         
         #--------------------------------------Events Counts--------------------------------------
-        evecount = None
         if variables["load_type"] in ["CloudQuery","osquery_cloudquery_combined","all_loads_combined"]:
             print("Calculating the counts of various events during the load ...")
             calc = EVE_COUNTS(variables=variables)
             evecount = calc.get_events_count()
 
         #--------------------------------------STS Records-------------------------------------------
-        sts = None
         # if variables["load_name"] == "AWS_MultiCustomer":
         #     print("Calculating STS Records ...")
         #     calc = STS_RECORDS(start_timestamp=start_utc_time,end_timestamp=end_utc_time,prom_con_obj=prom_con_obj,variables=variables)
@@ -203,20 +214,17 @@ if __name__ == "__main__":
 
 
         #-----------------------------Processing Time for Db Operations------------------------------
-        db_op = None
         if variables["load_type"] in ["CloudQuery","osquery_cloudquery_combined","all_loads_combined"]:
             print("Processing time for Db Operations ...")
             calc = DB_OPERATIONS_TIME(start_timestamp=start_timestamp,end_timestamp=end_timestamp,prom_con_obj=prom_con_obj)
             db_op=calc.db_operations()
 
         #-------------------------------PG Stats Calculations -------------------------------------
-        pg_stats = None
         print("Calculating Postgress Tables Details ...")
         pgtable = PG_STATS(start_timestamp,end_timestamp,variables["load_duration_in_hrs"],prom_con_obj)
         pg_stats = pgtable.process_output()
 
         #--------------------------------Elk Erros------------------------------------------------
-        elk_errors = None
         print("Fetching Elk Errors ...")
         elk = Elk_erros(start_timestamp=start_timestamp,end_timestamp=end_timestamp,prom_con_obj=prom_con_obj)
         elk_errors = elk.fetch_errors()
@@ -227,25 +235,24 @@ if __name__ == "__main__":
         mem_cpu_usages_dict,overall_usage_dict=comp.make_comparisions(load_cls.common_app_names,load_cls.common_pod_names)
         
         #--------------------------------complete resource extraction---------------------------------------
-        complete_resource_details=None
         resource_obj=resource_usages(prom_con_obj,start_timestamp,end_timestamp,hours=variables["load_duration_in_hrs"],include_nodetypes=load_cls.hostname_types)
         complete_resource_details=resource_obj.get_complete_result()
 
         #-------------------------Cloudquery Accuracies----------------------------
-        cloudquery_accuracies=None
         if variables["load_type"] in ["CloudQuery","osquery_cloudquery_combined","all_loads_combined"]:
             print("Calculating accuracies for cloudquery ...")
             accu= ACCURACY(start_timestamp=start_utc_time,end_timestamp=end_utc_time,prom_con_obj=prom_con_obj,variables=variables)
             cloudquery_accuracies = accu.calculate_accuracy()
         
         #--------------------------------Capture charts data---------------------------------------
-        all_gridfs_fileids=[]
         try:
+            hours=variables["load_duration_in_hrs"]
+            step_factor=hours/24 if hours>24 else 1
             fs = GridFS(db)
             print("Fetching charts data ...")
             charts_obj = Charts(start_timestamp=start_timestamp,end_timestamp=end_timestamp,prom_con_obj=prom_con_obj,
                     add_extra_time_for_charts_at_end_in_min=variables["add_extra_time_for_charts_at_end_in_min"],fs=fs,hours=variables['load_duration_in_hrs'])
-            complete_charts_data_dict,all_gridfs_fileids=charts_obj.capture_charts_and_save(load_cls.get_all_chart_queries())
+            complete_charts_data_dict,all_gridfs_fileids=charts_obj.capture_charts_and_save(load_cls.get_all_chart_queries(),step_factor=step_factor)
             print("Saved charts data successfully !")
             #--------------------------------take screenshots---------------------------------------
             # print("Capturing compaction status screenshots  ...")
@@ -279,9 +286,8 @@ if __name__ == "__main__":
                 "load_details":load_details,
                 "test_environment_details":test_env_json_details
             }
-
-            final_data_to_save.update(overall_usage_dict)
-
+            if overall_usage_dict:
+                final_data_to_save.update(overall_usage_dict)
             if disk_space_usage_dict:
                 final_data_to_save.update({"disk_space_usages":disk_space_usage_dict})
             if kafka_topics_list:
@@ -320,10 +326,10 @@ if __name__ == "__main__":
                 final_data_to_save.update({"Realtimequery test results":realtime_query_results})
             if complete_resource_details:
                 final_data_to_save.update(complete_resource_details)
-
-
-            final_data_to_save.update({"charts":complete_charts_data_dict})
-            final_data_to_save.update(mem_cpu_usages_dict)
+            if complete_charts_data_dict:
+                final_data_to_save.update({"charts":complete_charts_data_dict})
+            if mem_cpu_usages_dict:
+                final_data_to_save.update(mem_cpu_usages_dict)
             final_data_to_save.update({"observations":load_cls.get_dictionary_of_observations()})
             # all_gridfs_referenced_ids=all_gridfs_fileids[:]
             # final_data_to_save.update({"all_gridfs_referenced_ids":all_gridfs_referenced_ids})
@@ -340,7 +346,7 @@ if __name__ == "__main__":
                     test_title = "Test title : "+str(load_cls.get_load_specific_details(variables['load_name'])['test_title'])
                 except:
                     test_title=""
-                create_images_and_save(graphs_path,inserted_id,collection,fs,variables["load_duration_in_hrs"],variables=variables,end_time_str=end_time_str,run=run,stack=test_env_json_details["stack"],test_title=test_title)
+                create_images_and_save(graphs_path,inserted_id,collection,fs,variables["load_duration_in_hrs"],variables=variables,end_time_str=end_time_str,run=run,stack=test_env_json_details["stack"],test_title=test_title,step_factor=step_factor)
                 print("Done!")
             except Exception as e:
                 print(f"Error while generating graphs into {graphs_path} : {str(e)}")

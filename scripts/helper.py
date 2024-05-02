@@ -61,7 +61,7 @@ def execute_point_prometheus_query(prom_con_obj,timestamp,query):
     except Exception as e:
         raise RuntimeError(f"An unexpected error occurred: {e}")
 
-def execute_prometheus_query(prom_con_obj,start_timestamp,end_timestamp,query,hours,preprocess=True):
+def execute_prometheus_query(prom_con_obj,start_timestamp,end_timestamp,query,hours,preprocess=True,step_factor=None):
     PROMETHEUS = prom_con_obj.prometheus_path
     for metric in prom_con_obj.kube_metrics:
         if metric in query:
@@ -69,7 +69,8 @@ def execute_prometheus_query(prom_con_obj,start_timestamp,end_timestamp,query,ho
             print("pod level metric found.. using prometheous path : " , PROMETHEUS)
 
     API_PATH = prom_con_obj.prom_api_path
-    step_factor=hours/24 if hours>24 else 1
+    if not step_factor:
+        step_factor=hours/24 if hours>24 else 1
     step=60*step_factor
     points_per_min = 60/step
     points_per_hour = points_per_min*60

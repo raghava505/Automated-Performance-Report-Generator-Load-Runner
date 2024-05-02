@@ -1,6 +1,5 @@
 from bson import ObjectId
 import matplotlib.pyplot as plt
-import datetime
 import pytz
 import seaborn as sns
 import os
@@ -12,6 +11,7 @@ import numpy as np
 area_fill_titles=["No.of active connections group by application for configdb on master"]
 
 def convert_to_ist_time(timestamp):
+    import datetime
     ist_timezone = pytz.timezone('Asia/Kolkata')
     ist_datetime = datetime.datetime.fromtimestamp(timestamp, tz = ist_timezone)
     return ist_datetime
@@ -26,12 +26,12 @@ def format_y_ticks(value,pos,unit):
     else:
         return f"{float(value):.2f} {unit}"
 
-def eliminate_long_breaks(old_x,old_y):
+def eliminate_long_breaks(old_x,old_y,step_factor):
     x=[]
     y=[]
     prev_point=None
     for point in zip(old_x,old_y):
-        if prev_point and (point[0]-prev_point)> 0.00069445 :
+        if prev_point and (point[0]-prev_point)> (0.00069445)*step_factor :
             x.append(None)
             y.append(None)
         x.append(point[0])
@@ -39,12 +39,12 @@ def eliminate_long_breaks(old_x,old_y):
         prev_point=point[0]
     return x,y
 
-def eliminate_long_breaks_for_area_plot(old_x,old_y):
+def eliminate_long_breaks_for_area_plot(old_x,old_y,step_factor):
     x=[]
     y=[]
     prev_point=None
     for point in zip(old_x,old_y):
-        if prev_point and (point[0]-prev_point)> 0.00069445 :
+        if prev_point and (point[0]-prev_point)> (0.00069445)*step_factor :
             x.append(prev_point+0.00000001)
             y.append(0)
             x.append(point[0]-0.00000001)
@@ -69,7 +69,7 @@ initial_legend_fontsize=fig_width/1.90
 fontsize_decrease_rate_with_rows=fig_width/165
 ncol_increase_rate_with_rows=8000
 
-def create_images_and_save(path,doc_id,collection,fs,duration,variables,end_time_str,run,stack,test_title):
+def create_images_and_save(path,doc_id,collection,fs,duration,variables,end_time_str,run,stack,test_title,step_factor):
     print(f"Delete saved images data set to : {delete_image_data}")
     sns.set_style("darkgrid")
     sns.plotting_context("talk")
@@ -105,9 +105,9 @@ def create_images_and_save(path,doc_id,collection,fs,duration,variables,end_time
                     y = [float(point[1]) for point in large_array]
                     # y = pd.Series(y).rolling(window=5).mean()
                     if title in area_fill_titles or 'Lag' in category or 'Lag' in title:
-                        x_values_ist,y=eliminate_long_breaks_for_area_plot(x_values_ist,y)
+                        x_values_ist,y=eliminate_long_breaks_for_area_plot(x_values_ist,y,step_factor)
                     else:
-                        x_values_ist,y=eliminate_long_breaks(x_values_ist,y)
+                        x_values_ist,y=eliminate_long_breaks(x_values_ist,y,step_factor)
                     line_plot, = plt.plot_date(x_values_ist, y, linestyle='solid', label=line["legend"], markersize=0.1, linewidth=fig_width/21)
                     list_of_legend_lengths.append(len(str(line["legend"])))
                     num_lines+=1
@@ -194,19 +194,55 @@ def create_images_and_save(path,doc_id,collection,fs,duration,variables,end_time
     print("Total number of charts generated : " , total_charts)
 
 if __name__=="__main__":
-    print("Testing charts creation ...")
     global delete_image_data
     delete_image_data=False
     import time,pymongo
     from collections import defaultdict
     from gridfs import GridFS
+    from settings import configuration
+    from datetime import datetime, timedelta
+    import pytz
+    from capture_charts_data import Charts
+    from parent_load_details import parent as load_cls
     s_at = time.perf_counter()
-    path = "/Users/masabathulararao/Documents/Loadtest/save-report-data-to-mongo/other/images"
     client = pymongo.MongoClient("mongodb://localhost:27017")
     database = client["Osquery_LoadTests"]
     fs = GridFS(database)
-    collection = database["ControlPlane"]
-    create_images_and_save(path,"65b20ae28991656708431345",collection,fs,0,defaultdict(lambda:0),0,0,0,0)
+
+    format_data = "%Y-%m-%d %H:%M"
+    start_time_str = "2024-04-05 00:00"
+    hours=300
+
+    start_time = datetime.strptime(start_time_str, format_data)
+    end_time = start_time + timedelta(hours=hours)
+    end_time_str = end_time.strftime(format_data)
+
+    ist_timezone = pytz.timezone('Asia/Kolkata')
+    utc_timezone = pytz.utc
+
+    start_ist_time = ist_timezone.localize(datetime.strptime(start_time_str, '%Y-%m-%d %H:%M'))
+    start_timestamp = int(start_ist_time.timestamp())
+    start_utc_time = start_ist_time.astimezone(utc_timezone)
+    start_utc_str = start_utc_time.strftime(format_data)
+
+    end_ist_time = ist_timezone.localize(datetime.strptime(end_time_str, '%Y-%m-%d %H:%M'))
+    end_timestamp = int(end_ist_time.timestamp())
+    end_utc_time = end_ist_time.astimezone(utc_timezone)
+    end_utc_str = end_utc_time.strftime(format_data)
+    prom_con_obj=configuration('s1_nodes.json')
+
+    print("Fetching charts data ...")
+    charts_obj = Charts(start_timestamp=start_timestamp,end_timestamp=end_timestamp,prom_con_obj=prom_con_obj,
+    add_extra_time_for_charts_at_end_in_min=10,fs=fs,hours=hours)
+    
+    step_factor=hours/24 if hours>24 else 1
+    complete_charts_data_dict,all_gridfs_fileids=charts_obj.capture_charts_and_save({"Node-level Memory Charts":load_cls.get_node_level_RAM_used_percentage_queries()},step_factor=step_factor)
+    print("Saved charts data successfully !")
+
+    path = "/Users/masabathulararao/Documents/Loadtest/save-report-data-to-mongo/other/images"
+    collection = database["Testing"]
+    inserted_id = collection.insert_one({"charts":complete_charts_data_dict})    
+    create_images_and_save(path,str(inserted_id.inserted_id),collection,fs,hours,defaultdict(lambda:0),0,0,0,0,step_factor)
     f3_at = time.perf_counter()
     print(f"Collecting the report data took : {round(f3_at - s_at,2)} seconds in total")
 else:
