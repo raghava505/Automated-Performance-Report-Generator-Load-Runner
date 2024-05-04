@@ -133,7 +133,7 @@ def create_images_and_save(path,doc_id,collection,fs,duration,variables,end_time
                 # date_formatter = DateFormatter('%H:%M')
                 plt.gca().xaxis.set_major_formatter(x_date_formatter)
                 plt.gca().get_yaxis().set_major_formatter(FuncFormatter(lambda value,pos:format_y_ticks(value,pos,unit)))
-                other_details=f"{test_title}\nLoad time : {variables['start_time_str_ist']} - {end_time_str} IST ({variables['load_duration_in_hrs']}hrs)"
+                other_details=f"{test_title}\nLoad time : {variables['start_time_str_ist']} - {end_time_str} IST ({variables['load_duration_in_hrs']} hrs)"
                 plt.title(other_details,fontsize=fig_width/2.18,y=1,loc="left")
                 plt.title(f"Build and run : {variables['build']} , run{run}\nStack : {stack}",fontsize=fig_width/2.18,y=1,loc="right")
                 plt.title("\n"+str(title),fontsize=fig_width/1.48,pad=fig_width/0.9,y=1)
@@ -235,7 +235,8 @@ if __name__=="__main__":
     charts_obj = Charts(start_timestamp=start_timestamp,end_timestamp=end_timestamp,prom_con_obj=prom_con_obj,fs=fs,hours=hours)
     
     step_factor=hours/16 if hours>16 else 1
-    complete_charts_data_dict,all_gridfs_fileids=charts_obj.capture_charts_and_save({"Node-level Memory Charts":load_cls.get_node_level_RAM_used_percentage_queries()},step_factor=step_factor)
+    # complete_charts_data_dict,all_gridfs_fileids=charts_obj.capture_charts_and_save(load_cls.get_all_chart_queries(),step_factor=step_factor)
+    complete_charts_data_dict,all_gridfs_fileids=charts_obj.capture_charts_and_save({"live Charts":load_cls.get_basic_chart_queries()},step_factor=step_factor)
     print("Saved charts data successfully !")
     path = "/Users/masabathulararao/Documents/Loadtest/save-report-data-to-mongo/publish_practice/images"
     collection = database["Testing"]
