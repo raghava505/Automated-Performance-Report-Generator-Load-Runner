@@ -62,7 +62,7 @@ class parent:
     @staticmethod
     def get_basic_chart_queries():
         return {"Live Assets Count":("sum(uptycs_live_count)" , []),
-                "Kafka Lag for all groups":("uptycs_kafka_group_lag{group!~'db-events|cloudconnectorsgroup'} or uptycs_mon_spark_lag{ topic='event'} or uptycs_mon_spark_lag{topic!~'event|cloudconnectorsink|agentosquery'}",['cluster_id','topic','group']),
+                "Kafka Lag for all groups":("uptycs_kafka_group_lag or uptycs_mon_spark_lag",['cluster_id','topic','group']),
                 }
     
     @classmethod
@@ -123,7 +123,7 @@ class parent:
     @classmethod
     def get_inject_drain_rate_and_lag_chart_queries(cls):
         queries={}
-        queries['Debezium Replication Lag']=('sum(uptycs_pg_logical_replication_lag{slot_name=~".*debezium.*"}) by (database,lag_type,slot_name,slot_type)' , ['slot_name','lag_type'] , 'bytes' )
+        queries['Debezium Replication Lag']=('sum(uptycs_pg_logical_replication_lag{slot_name=~".*debezium.*"}) by (database,lag_type,slot_name,slot_type) / (1024*1024*1024)' , ['slot_name','lag_type'] , 'GB' )
         for topic in cls.mon_spark_topic_names:
             queries.update(cls.get_inject_drain_and_lag_uptycs_mon_spark(topic))
         for group in cls.kafka_group_names:
@@ -160,9 +160,9 @@ class parent:
             "Transaction count in configdb":("uptycs_configdb_stats{col =~ \"xact.*\"}",["col"]),
             "Row count in configdb":("uptycs_configdb_stats{col =~ \"tup.*\"}",["col"]),
             "Assets table stats":("uptycs_psql_table_stats",["col"]),
-            "pg and data partition disk usage" : ("uptycs_used_disk_bytes{node_type=\"pg\",partition=\"/data\"} or uptycs_used_disk_bytes{node_type=\"pg\",partition=\"/pg\"}" , ["partition","host_name"],'bytes'),
-            "configdb partition disk usage" : ("uptycs_used_disk_bytes{node_type=\"pg\",partition=\"/data/pgdata/configdb\"}" , ["partition","host_name"],'bytes'),
-            "statedb partition disk usage" :  ("uptycs_used_disk_bytes{node_type=\"pg\",partition=\"/data/pgdata/statedb\"}" , ["partition","host_name"],'bytes'),
+            "pg and data partition disk usage" : ("uptycs_used_disk_bytes{node_type=\"pg\",partition=\"/data\"} or uptycs_used_disk_bytes{node_type=\"pg\",partition=\"/pg\"} / (1024*1024*1024)" , ["partition","host_name"],'GB'),
+            "configdb partition disk usage" : ("uptycs_used_disk_bytes{node_type=\"pg\",partition=\"/data/pgdata/configdb\"} / (1024*1024*1024)" , ["partition","host_name"],'GB'),
+            "statedb partition disk usage" :  ("uptycs_used_disk_bytes{node_type=\"pg\",partition=\"/data/pgdata/statedb\"} / (1024*1024*1024)" , ["partition","host_name"],'GB'),
             "StateDB errors":("sum(curr_state_db_errors) by (error,table_name)" , ["error" , "table_name"])
         }
     
