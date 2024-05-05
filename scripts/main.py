@@ -247,7 +247,7 @@ if __name__ == "__main__":
         #--------------------------------Capture charts data---------------------------------------
         try:
             hours=variables["load_duration_in_hrs"]
-            step_factor=hours/16 if hours>16 else 1
+            step_factor=hours/10 if hours>10 else 1
             fs = GridFS(db)
             print("Fetching charts data ...")
             charts_obj = Charts(start_timestamp=start_timestamp,end_timestamp=end_timestamp,prom_con_obj=prom_con_obj,fs=fs,hours=variables['load_duration_in_hrs'])

@@ -70,7 +70,7 @@ def execute_prometheus_query(prom_con_obj,start_timestamp,end_timestamp,query,ho
 
     API_PATH = prom_con_obj.prom_api_path
     if not step_factor:
-        step_factor=hours/16 if hours>16 else 1
+        step_factor=hours/10 if hours>10 else 1
     step=60*step_factor
     points_per_min = 60/step
     points_per_hour = points_per_min*60
@@ -81,7 +81,7 @@ def execute_prometheus_query(prom_con_obj,start_timestamp,end_timestamp,query,ho
         'end': end_timestamp,
         'step':step
     }
-    print(f"Executing {query} at {prom_con_obj.monitoring_ip} ...")
+    # print(f"Executing {query} at {prom_con_obj.monitoring_ip} ...")
 
     try:
         response = requests.get(PROMETHEUS + API_PATH, params=PARAMS)

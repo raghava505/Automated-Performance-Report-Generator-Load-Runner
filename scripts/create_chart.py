@@ -63,8 +63,8 @@ inner_background_color = "#191b1f"
 gridline_color = "#404144"
 gridline_width = 0.01
 
-fig_width=34
-character_width = 14.5                      #inversly prop to initial ncol
+fig_width=24
+character_width = 9.0                     #inversly prop to initial ncol
 initial_legend_fontsize=fig_width/1.90
 fontsize_decrease_rate_with_rows=fig_width/165
 ncol_increase_rate_with_rows=8000
@@ -158,9 +158,10 @@ def create_images_and_save(path,doc_id,collection,fs,duration,variables,end_time
                     final_ncol = ncol + scale*font_diff*(rows-1)
                     # print(f"ncol : {ncol}, finalncol: {final_ncol}, font diff:{initial_legend_fontsize-fontsize} , rows:{rows}")
                     # final_ncol = ncol + ((ncol_increase_rate_with_rows/((average_legend_length**2.09) * (fontsize**2.21))) * (rows-1))
-                    leg=plt.legend(loc='upper center', bbox_to_anchor=(0.5, -0.050), ncol=final_ncol, fontsize=fontsize,handlelength=1,frameon=False)
-                    for legobj in leg.legendHandles:
-                        legobj.set_linewidth(fig_width/6) 
+                    if num_lines<50:
+                        leg=plt.legend(loc='upper center', bbox_to_anchor=(0.5, -0.050), ncol=final_ncol, fontsize=fontsize,handlelength=1,frameon=False)
+                        for legobj in leg.legendHandles:
+                            legobj.set_linewidth(fig_width/6) 
                 file_name = title.replace("/", "-")
                 plt.xticks(fontsize=fig_width/1.935,color=text_color)
                 plt.yticks(fontsize=fig_width/1.935,color=text_color)
@@ -195,7 +196,7 @@ def create_images_and_save(path,doc_id,collection,fs,duration,variables,end_time
 
 if __name__=="__main__":
     global delete_image_data
-    delete_image_data=False
+    delete_image_data=True
     import time,pymongo
     from collections import defaultdict
     from gridfs import GridFS
@@ -210,8 +211,8 @@ if __name__=="__main__":
     fs = GridFS(database)
 
     format_data = "%Y-%m-%d %H:%M"
-    start_time_str = "2024-04-05 00:00"
-    hours=168
+    start_time_str = "2024-05-05 00:00"
+    hours=10
 
     start_time = datetime.strptime(start_time_str, format_data)
     end_time = start_time + timedelta(hours=hours)
@@ -234,9 +235,9 @@ if __name__=="__main__":
     print("Fetching charts data ...")
     charts_obj = Charts(start_timestamp=start_timestamp,end_timestamp=end_timestamp,prom_con_obj=prom_con_obj,fs=fs,hours=hours)
     
-    step_factor=hours/16 if hours>16 else 1
+    step_factor=hours/10 if hours>10 else 1
     # complete_charts_data_dict,all_gridfs_fileids=charts_obj.capture_charts_and_save(load_cls.get_all_chart_queries(),step_factor=step_factor)
-    complete_charts_data_dict,all_gridfs_fileids=charts_obj.capture_charts_and_save({"live Charts":load_cls.get_basic_chart_queries()},step_factor=step_factor)
+    complete_charts_data_dict,all_gridfs_fileids=charts_obj.capture_charts_and_save({"live Charts":load_cls.get_app_level_CPU_used_cores_queries()},step_factor=step_factor)
     print("Saved charts data successfully !")
     path = "/Users/masabathulararao/Documents/Loadtest/save-report-data-to-mongo/publish_practice/images"
     collection = database["Testing"]
