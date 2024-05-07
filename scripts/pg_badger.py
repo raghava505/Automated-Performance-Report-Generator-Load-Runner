@@ -24,7 +24,7 @@ def get_links(elastic_url,start_time_ist_str, end_time_ist_str):
     resp = requests.get(url, verify=False)
     return_links={}
     if resp.status_code == 200:
-        dbs={"configdb","statedb"}
+        dbs={"configdb","statedb","metastoredb","vaultdb","threatdb","rangerdb","prestogatewaydb"}
         for db in dbs :
             start_end_string=f"{current_time}_{start_time_ist_str.replace('T','_')}_to_{end_time_ist_str.replace('T','_')}"
             report_name=f"{start_end_string}_{db}"

@@ -23,3 +23,4 @@ scripts/realtimequery_tests/logs
 scripts/csv/
 project
 scripts/make_resource_analysis_from_scratch.py
+scripts/find_metric_output.py
