@@ -92,7 +92,7 @@ def create_input_form():
 
         details[key] = Type(input_value)
 
-    print("The details you entered are : ")
+    print("\n************************** The details you entered are : **************************")
     for key,val in details.items():
         print(f"{key} : {val}")
 
@@ -103,7 +103,7 @@ def create_input_form():
     except:
         print(f"WARNING: load class for {load_type_options[details['load_type']]} is not found , hence using the parent class : {parent}")
         load_cls = parent
-    print(f"Please verify the below load details for {details['load_type']}:{details['load_name']} : ")
+    print(f"\nPlease verify the below load details for {details['load_type']}:{details['load_name']} : ")
     print(json.dumps(load_cls.get_load_specific_details(details["load_name"]), indent=4))
     edit_inp=input(f"These details will be saved to database. Enter any one of the 2 strings (edit/proceed) : ").strip().lower()
     if edit_inp == 'edit':
