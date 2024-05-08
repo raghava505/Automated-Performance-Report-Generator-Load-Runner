@@ -15,7 +15,7 @@ class parent:
     @classmethod
     @property
     def common_container_names(cls):
-        return ["debezium"]
+        return ["debezium","query-runner","graph-query-runner"]
     
     @classmethod
     @property

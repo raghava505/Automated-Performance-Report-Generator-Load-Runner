@@ -5,7 +5,7 @@ from osquery.osquery_child_class import osquery_child
 from cloudquery.cloudquery_child_class import cloudquery_child
 from kubequery.kubequery_child_class import kubequery_child
 from combined_loads_setup import all_combined_child
-
+from collections import defaultdict
 bool_options=[False,True]
 load_type_options = {   
                         'Osquery':{
@@ -109,11 +109,19 @@ def create_input_form():
     if edit_inp == 'edit':
         print("(NOTE : To set default value press enter)")
         old_dictionary = load_cls.get_load_specific_details(details["load_name"])
-        new_dictionary={}
+        new_dictionary=defaultdict(lambda:{})
         for key,val in old_dictionary.items():
-            new_input = input(f"Enter '{key}' (default : {val}) : ").strip()
-            if new_input=="":new_dictionary[key] = old_dictionary[key]
-            else:new_dictionary[key] = new_input
+            if type(val) == dict:
+                print("Nested dictionary found")
+                for sub_key,sub_val in val.items():
+                    new_input = input(f"Enter '{sub_key}' (default : {sub_val}) : ").strip()
+                    if new_input=="":new_dictionary[key][sub_key] = old_dictionary[key][sub_key]
+                    else:new_dictionary[key][sub_key] = new_input
+            else:
+                new_input = input(f"Enter '{key}' (default : {val}) : ").strip()
+                if new_input=="":new_dictionary[key] = old_dictionary[key]
+                else:new_dictionary[key] = new_input
+
         load_cls.load_specific_details[details["load_name"]]=new_dictionary
         print("Your new details are : ")
         print(json.dumps(load_cls.get_load_specific_details(details["load_name"]), indent=4))
