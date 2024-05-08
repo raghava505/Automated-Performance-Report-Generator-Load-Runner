@@ -152,7 +152,7 @@ class parent:
             "Configdb folder size":("configdb_size" , ["host_name"]),
             "Average records in pg bouncer":("uptycs_pbouncer_stats{col=~'avg.*', col!~'.*time'}" , ["col"]),
             "Average time spent by pg bouncer":("uptycs_pbouncer_stats{col=~'avg.*time'}" , ["col"] , 'μs'),
-            "iowait time":("uptycs_iowait{}" , ["host_name"]),
+            "iowait time":("uptycs_iowait{}" , ["host_name"],'%'),
             "iowait util%":("uptycs_iowait_util_percent{}" , ["host_name" , "device"]),
             "Disk read wait time":("uptycs_r_await{}" , ["host_name" , "device"],'ms'),
             "Disk write wait time":("uptycs_w_await{}", ["host_name" , "device"],'ms'),
