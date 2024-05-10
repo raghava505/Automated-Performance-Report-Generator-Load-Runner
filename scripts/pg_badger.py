@@ -40,7 +40,10 @@ def get_links(elastic_url,start_time_ist_str, end_time_ist_str):
             print
             if response.status_code == 200:
                 sleep(10)
-                report_link=f'http://{elastic_url}:5602/reports/view?file=/data/ondemand_reports/{report_name}/postgres.html'
+                dynamic_path = "data"
+                if elastic_url == "192.168.131.50":
+                    dynamic_path = "opt/uptycs/etc/elk"
+                report_link=f'http://{elastic_url}:5602/reports/view?file=/{dynamic_path}/ondemand_reports/{report_name}/postgres.html'
 
                 print(report_link)   
                 return_links[db]=report_link
