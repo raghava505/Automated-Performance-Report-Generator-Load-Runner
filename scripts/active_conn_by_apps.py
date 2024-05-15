@@ -1,6 +1,6 @@
 from helper import execute_prometheus_query
 import pandas as pd
-
+import numpy as np
 class Active_conn:
     def __init__(self,prom_con_obj,start_timestamp,end_timestamp,hours):
         self.start_timestamp=start_timestamp
@@ -29,6 +29,20 @@ class Active_conn:
             # df = df._append(new_row, ignore_index=True)
             print(f"Printing details for active connections by app for {db} on master : ")
             print(df)
+            if df.empty: 
+                print("Empty dataframe found.. skipping to save this key to mongo")
+                continue
+
+            numeric_cols = df.select_dtypes(include=[np.number]).columns
+            non_numeric_cols = df.select_dtypes(exclude=[np.number]).columns
+            print("Numeric columns : " , numeric_cols)
+            print("Non-Numeric columns : " , non_numeric_cols)
+
+            fill_values = {}
+            fill_values.update({col: 0 for col in numeric_cols})
+            fill_values.update({col: "NaN" for col in non_numeric_cols})
+
+            df = df.fillna(fill_values)
             result_dict[db] = {
                 "schema":{
                     "merge_on_cols" : ["application"],
