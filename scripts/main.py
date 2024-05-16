@@ -369,8 +369,11 @@ if __name__ == "__main__":
                 curr_pgbad_html_path=f"{BASE_HTML_PATH}/{pgbadger_tail_path}"
                 print(f'Saving the html page to {curr_pgbad_html_path}')
                 os.makedirs(curr_pgbad_html_path,exist_ok=True)
-                pgbadger_links=get_and_save_pgb_html(start_utc_time,end_utc_time,test_env_json_details['elastic'],curr_pgbad_html_path,pgbadger_tail_path)
+                pgbadger_links,extracted_tables=get_and_save_pgb_html(start_utc_time,end_utc_time,test_env_json_details['elastic'],curr_pgbad_html_path,pgbadger_tail_path)
                 collection.update_one({"_id": ObjectId(inserted_id)}, {"$set": {f"Pgbadger downloaded report links": pgbadger_links}})
+                if extracted_tables!={}:
+                    print("Empty extracted tables dictionary found !")
+                    collection.update_one({"_id": ObjectId(inserted_id)}, {"$set": {f"Postgres Queries Analysis": extracted_tables}})
 
             except Exception as e:
                 print(f"ERROR occured while processing pg badger details : {e}")
