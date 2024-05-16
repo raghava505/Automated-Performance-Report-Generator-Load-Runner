@@ -44,12 +44,6 @@ class all_combined_child(parent):
                 }
     }
 
-    @classmethod
-    @property
-    def hostname_types(cls):
-        temp = copy.deepcopy(parent.hostname_types)
-        temp.extend(["ep","memgraph","cloudquery"])
-        return temp
 
     @classmethod
     @property

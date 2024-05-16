@@ -89,14 +89,16 @@ class MC_comparisions:
         for node_type in self.include_nodetypes:
             print(f"Calculating overall {tag} usages for node-type : {node_type}")
             new_sum=0
+            flag=0
             for node in self.all_node_types_mapping[node_type]:
+                flag=1
                 try:
                     new_sum+=new_data[node][unit]["average"]
                 except KeyError as e:
                     print(f"ERROR : key {node} not found in : {new_data}")
                     raise RuntimeError(f"ERROR : key {node} is present in {node_type} but not found in host groups from prometheus: {new_data}")
-                
-            return_overall[node_type] = {f"{unit}":new_sum}
+            if flag==1:
+                return_overall[node_type] = {f"{unit}":new_sum}
             print(f"{node_type} : {new_sum} {unit}")
         return final,return_overall
 

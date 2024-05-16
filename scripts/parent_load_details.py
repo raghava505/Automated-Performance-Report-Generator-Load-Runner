@@ -25,7 +25,7 @@ class parent:
     @classmethod
     @property
     def hostname_types(cls):
-        return ["process","data","pg","airflow","redis"]
+        return ["process","data","pg","airflow","redis","ep","memgraph","cloudquery"]
     
     @classmethod
     @property
