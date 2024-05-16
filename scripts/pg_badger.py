@@ -12,7 +12,7 @@ from datetime import datetime, timedelta
 import os
 import pytz
 from helper import save_html_page
-
+from scrape_pgbadger_tables import scrape_func
 
 current_time = datetime.now()
 current_time = current_time.strftime("%Y-%m-%d_%H:%M:%S")
@@ -152,11 +152,11 @@ def return_pgbadger_results(start_time_utc,end_time_utc,elastic_url,images_path)
 def get_and_save_pgb_html(start_time_utc,end_time_utc,elastic_url,base_save_path,pgbadger_tail_path):
     format_data = "%Y-%m-%dT%H:%M"
     return_file_names={}
-    start_time = start_time_utc - timedelta(minutes=10)
+    start_time = start_time_utc + timedelta(hours=1)
     start_time = start_time.strftime(format_data)
-    end_time = end_time_utc + timedelta(minutes=10) + timedelta(hours=1)
+    end_time = end_time_utc + timedelta(hours=1)
     end_time = end_time.strftime(format_data)
-
+    extracted_tables={}
     print("Converted start time UTC string is : " , start_time)
     print("Converted end time UTC string is : " , end_time)
     links=get_links(elastic_url , start_time, end_time)
@@ -168,15 +168,19 @@ def get_and_save_pgb_html(start_time_utc,end_time_utc,elastic_url,base_save_path
             print("Saving this webpage failed, hence saving the direct link of pgbadger UI !")
             return_file_names[db] = link
         perf_prod_dashboard = "192.168.146.69"
-        if status:return_file_names[db] = os.path.join(f"http://{perf_prod_dashboard}:8000",pgbadger_tail_path,f"pgbadger_report_{db}.html")
+        if status:
+            scraped_res = scrape_func(save_path,db)
+            if scraped_res!={}:
+                extracted_tables.update(scraped_res)
+            return_file_names[db] = os.path.join(f"http://{perf_prod_dashboard}:8000",pgbadger_tail_path,f"pgbadger_report_{db}.html")
     print("Returning pgbadger links dict : ", return_file_names)
-    return return_file_names
+    return return_file_names,extracted_tables
 
    
 
 if __name__=="__main__":
-    start_time_ist_str="2024-02-26 14:00"
-    end_time_ist_str="2024-02-27 00:00"
+    start_time_ist_str="2024-05-15 14:00"
+    end_time_ist_str="2024-05-16 00:00"
     elastic_url="192.168.131.50"
 
     BASE_PGBADGER_IMAGES_PATH = os.path.join("/Users/masabathulararao/Documents/Loadtest",'pgbadger_im')
@@ -193,7 +197,14 @@ if __name__=="__main__":
     end_utc_time = end_ist_time.astimezone(utc_timezone)
 
     # res = return_pgbadger_results(start_utc_time,end_utc_time,elastic_url,BASE_PGBADGER_IMAGES_PATH)
-    res= get_and_save_pgb_html(start_utc_time,end_utc_time,elastic_url,BASE_PGBADGER_IMAGES_PATH,"custom_path/sample")
+    res,extracted_tables= get_and_save_pgb_html(start_utc_time,end_utc_time,elastic_url,BASE_PGBADGER_IMAGES_PATH,"custom_path/sample")
 
     print(res)
+    from pymongo import MongoClient
+    # Create a sample DataFrame
+    client = MongoClient('mongodb://localhost:27017/')
+    db = client['Osquery_LoadTests']  # Replace 'your_database_name' with your actual database name
+    collection = db['Testing']  # Replace 'your_collection_name' with your actual collection name
+
+    collection.insert_one({"data":extracted_tables})
    
