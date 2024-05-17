@@ -1,6 +1,11 @@
 from parent_load_details import parent
 import copy
+from collections import OrderedDict
+from osquery.osquery_child_class import osquery_child
+from cloudquery.cloudquery_child_class import cloudquery_child
+from kubequery.kubequery_child_class import kubequery_child
 
+all_combined_child_classes = [osquery_child, cloudquery_child,kubequery_child]
 class all_combined_child(parent):
     load_specific_details={
                 "GoldenTest":{
@@ -48,86 +53,58 @@ class all_combined_child(parent):
     @classmethod
     @property
     def common_app_names(cls):
-        temp = copy.deepcopy(parent.common_app_names)
-        temp['sum'].extend(["/opt/uptycs/cloud/go/bin/ruleEngine-production-ruleengine",".*effectivePermissions.*","sts.*","/usr/lib/memgraph/memgraph","/opt/uptycs/cloud/go/bin/cloudqueryConsumer","cloudDetectionConsumer",".*statedb.*","cloudConnectorIngestion","/opt/uptycs/cloud/go/bin/ruleEngine-production-ruleenginecc","genericStateManagerExecutor"])
-        return temp
+        final_sum=[]
+        final_avg=[]
+        for load_class in all_combined_child_classes:
+            temp=copy.deepcopy(load_class.common_app_names)
+            print(temp)
+            temp_sum=temp["sum"]
+            temp_avg=temp["avg"]
+            final_sum=list(OrderedDict.fromkeys(temp_sum+final_sum))
+            final_avg=list(OrderedDict.fromkeys(temp_avg+final_avg))
+        return {"sum":final_sum,"avg":final_avg}
     
     @classmethod
     @property
     def common_container_names(cls):
-        temp = copy.deepcopy(parent.common_container_names)
-        final = ["kubernetes-state-manager","kubernetes-network-manager","kubernetes-schedule-runner"] + temp
+        final=[]
+        for load_class in all_combined_child_classes:
+            temp=copy.deepcopy(load_class.common_container_names)
+            final=list(OrderedDict.fromkeys(temp+final))
         return final
     
     @classmethod
     @property
     def mon_spark_topic_names(cls):
-        temp = copy.deepcopy(parent.mon_spark_topic_names)
-        temp.extend(["cloudconnectorsink" , 'agentosquery',"state","agentkubequery","containers","decorators"])
-        return temp
+        final=[]
+        for load_class in all_combined_child_classes:
+            temp=copy.deepcopy(load_class.mon_spark_topic_names)
+            final=list(OrderedDict.fromkeys(temp+final))
+        return final
     
     @classmethod
     @property
     def kafka_group_names(cls):
-        temp = copy.deepcopy(parent.kafka_group_names)
-        temp.extend(["cloudqueryinventorygroup" , "cloudcompliancemanager" , "ruleenginecc","kubeStateManagerGroup","op","cloudqueryinventory_cgs"])
-        return temp
+        final=[]
+        for load_class in all_combined_child_classes:
+            temp=copy.deepcopy(load_class.kafka_group_names)
+            final=list(OrderedDict.fromkeys(temp+final))
+        return final
     
     @classmethod
     @property
     def common_pod_names(cls):
-        temp = copy.deepcopy(parent.common_pod_names)
-        temp.extend(["configdb-deployment.*","deadletter-consumer-deployment.*","debezium-consumer-deployment.*","compliance-check-runner-deployment.*","compliance-summary-consumer-deployment.*","latest-snapshot-consumer-deployment.*","decorators-consumer-deployment.*","checksum-validator-deployment.*","apiscraper-consumer-deployment.*","cloud-compliance-manager-deployment.*","cloud-crossaccount-processor-deployment.*","cloud-event-decorator-deployment.*","cloud-graph-processor-deployment.*","cloud-graph-synchronizer-deployment.*","cloudinstancemapper-consumer-deployment.*","cloudpreprocessor-deployment.*","cloudquery-consumer-deployment.*","cloudriskprocessor-deployment.*","cloudvuln-consumer-deployment.*","risks-consumer-deployment.*","statedb-deployment.*","osquery-state-manager-deployment.*"])
-        return temp
+        final=[]
+        for load_class in all_combined_child_classes:
+            temp=copy.deepcopy(load_class.common_pod_names)
+            final=list(OrderedDict.fromkeys(temp+final))
+        return final
     
     @classmethod
     @property
     def list_of_observations_to_make(cls):
-        return [
-                    'Check for Ingestion lag',
-                    'Check for Rule engine Lag',
-                    'Check for db-events Lag',
-                    'Data loss check for raw tables like processes, process_env etc (accuracy)',
-                    'Data loss check for processed data like events, alerts and incidents etc (accuracy)',
-                    "Check if CPU/memory utilisation in line with previous sprints. If not, are the differences expected?",
-                    'Check for variations in the Count of queries executed on presto',
-                    'Triage bugs and check for blockers',
-                    'Check if PG master is in sync with replica',
-                    'Check for memory leaks',
-                    'Check for variation in HDFS disk usage',
-                    'Check for variation in PG disk usage',
-                    'Check for variation in Kafka disk usage',
-                    'Check for new kafka topics',
-                    'Check for steady state of live assets count'
-
-                    'Check 100 percent accuracy for inventory tables',
-                    'Check 100 percent accuracy for current tables',
-                    'Check for Statedb Errors',
-                    'Check for Ruleenginecc lag',
-                    'Check for cloudquery inventory lag',
-                    'Check for cloudtrial events lag',
-                    'Check for cloudcompliance manager lag',
-                    'Check for Db events lag',
-                    'Check for cloudconnector Ingestion lag',
-
-                    "Check for agentkubequery Topic Lag",
-                    "Check for containers Topic Lag",
-                    "Check for state topic Lag"
-                ]
-
-
-
-class osquery_cloudquery_combined_child(parent):
-    load_specific_details={
-                "Osquery(multi)_CloudQuery(aws_gcp_multi)":{
-                    "test_title": "Multiple Customer Rule Engine, Control Plane and CloudQuery Load",
-                    "total_number_of_customers": 120,
-                    "number_of_customers_with_auto_exception_enabled": 0,
-                    "total_assets": "52k (12k Multicustomer + 40 k Control plane)",
-                    "records_sent_per_hour_per_customer": "6,480,000",
-                    "records_sent_per_hour" : "77,76,00,000",
-                    "assets_per_cust":100,
-                    "input_file": "rhel7-6tab_12rec.log",
-                    "events_table_name": "dns_lookup_events, socket_events, process_events, process_file_events"
-                }
-    }
+        final=[]
+        for load_class in all_combined_child_classes:
+            temp=copy.deepcopy(load_class.list_of_observations_to_make)
+            final=list(OrderedDict.fromkeys(temp+final))
+        return final
