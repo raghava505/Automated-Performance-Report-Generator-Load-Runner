@@ -6,6 +6,7 @@
     "extension": "net",
     "stack_url": "https://alphacentauri.uptycs.net/",
     "elastic": "192.168.140.73",
+    "pgbadger_reports_mount":"data",
     "event_rules_per_cust":{"enabled":39,"triggered":33},
     "alert_rules_per_cust":{"enabled":39,"triggered":33},
     "pnodes": [

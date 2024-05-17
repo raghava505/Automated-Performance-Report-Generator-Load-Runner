@@ -18,7 +18,7 @@ current_time = datetime.now()
 current_time = current_time.strftime("%Y-%m-%d_%H:%M:%S")
 print("Formatted current time:", current_time)
 
-def get_links(elastic_url,start_time_ist_str, end_time_ist_str):
+def get_links(elastic_url,start_time_ist_str, end_time_ist_str,pgbadger_reports_mount):
     url = f"http://{elastic_url}:5602/ondemand"
 
     resp = requests.get(url, verify=False)
@@ -40,11 +40,7 @@ def get_links(elastic_url,start_time_ist_str, end_time_ist_str):
             print
             if response.status_code == 200:
                 sleep(10)
-                dynamic_path = "data"
-                if elastic_url == "192.168.131.50":
-                    dynamic_path = "opt/uptycs/etc/elk"
-                report_link=f'http://{elastic_url}:5602/reports/view?file=/{dynamic_path}/ondemand_reports/{report_name}/postgres.html'
-
+                report_link=f'http://{elastic_url}:5602/reports/view?file=/{pgbadger_reports_mount}/ondemand_reports/{report_name}/postgres.html'
                 print(report_link)   
                 return_links[db]=report_link
             else:
@@ -149,7 +145,7 @@ def return_pgbadger_results(start_time_utc,end_time_utc,elastic_url,images_path)
     res=take_screenshots_and_save(links,images_path)
     return res
 
-def get_and_save_pgb_html(start_time_utc,end_time_utc,elastic_url,base_save_path,pgbadger_tail_path,perf_prod_dashboard):
+def get_and_save_pgb_html(start_time_utc,end_time_utc,elastic_url,base_save_path,pgbadger_tail_path,perf_prod_dashboard,pgbadger_reports_mount):
     format_data = "%Y-%m-%dT%H:%M"
     return_file_names={}
     start_time = start_time_utc + timedelta(hours=1)
@@ -159,7 +155,7 @@ def get_and_save_pgb_html(start_time_utc,end_time_utc,elastic_url,base_save_path
     extracted_tables={}
     print("Converted start time UTC string is : " , start_time)
     print("Converted end time UTC string is : " , end_time)
-    links=get_links(elastic_url , start_time, end_time)
+    links=get_links(elastic_url , start_time, end_time,pgbadger_reports_mount)
     for db,link in links.items():
         print("Processing pgbadger report for database : "  , db)
         save_path = os.path.join(base_save_path,f"pgbadger_report_{db}.html")
@@ -179,9 +175,9 @@ def get_and_save_pgb_html(start_time_utc,end_time_utc,elastic_url,base_save_path
    
 
 if __name__=="__main__":
-    start_time_ist_str="2024-05-15 14:00"
-    end_time_ist_str="2024-05-16 00:00"
-    elastic_url="192.168.131.50"
+    start_time_ist_str="2024-05-16 23:00"
+    end_time_ist_str="2024-05-17 10:00"
+    elastic_url="192.168.129.52"
 
     BASE_PGBADGER_IMAGES_PATH = os.path.join("/Users/masabathulararao/Documents/Loadtest",'pgbadger_im')
     os.makedirs(BASE_PGBADGER_IMAGES_PATH,exist_ok=True)
@@ -197,7 +193,7 @@ if __name__=="__main__":
     end_utc_time = end_ist_time.astimezone(utc_timezone)
 
     # res = return_pgbadger_results(start_utc_time,end_utc_time,elastic_url,BASE_PGBADGER_IMAGES_PATH)
-    res,extracted_tables= get_and_save_pgb_html(start_utc_time,end_utc_time,elastic_url,BASE_PGBADGER_IMAGES_PATH,"custom_path/sample")
+    res,extracted_tables= get_and_save_pgb_html(start_utc_time,end_utc_time,elastic_url,BASE_PGBADGER_IMAGES_PATH,"custom_path/sample","sample_ip","elk")
 
     print(res)
     from pymongo import MongoClient
