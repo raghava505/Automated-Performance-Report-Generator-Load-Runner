@@ -245,9 +245,12 @@ def analysis_main(mem_main_dict,mem_prev_dict,cpu_main_dict,cpu_prev_dict,load_d
         stitched_image = stitch_images_horizontally(images_to_stitch)
         stitched_cpu[nodetype]=stitched_image
 
+    final_result={}
     for node_type in stitched_memory.keys():
         print(node_type)
         vertical_stitched_image = stitch_images_vertically([stitched_memory[node_type] , stitched_cpu[node_type]],node_type,load_details_text)
-        path = f"/Users/masabathulararao/Documents/Loadtest/save-report-data-to-mongo/scripts/csv/{node_type}.png"
-        vertical_stitched_image.save(path)
+        # path = f"/Users/masabathulararao/Documents/Loadtest/save-report-data-to-mongo/scripts/csv/{node_type}.png"
+        # vertical_stitched_image.save(path)
+        final_result[node_type] = vertical_stitched_image
         # vertical_stitched_image.show()
+    return final_result
