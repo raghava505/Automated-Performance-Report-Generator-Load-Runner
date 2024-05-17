@@ -5,17 +5,16 @@ class parent:
     @classmethod
     @property
     def common_app_names(cls):
-        return  {"sum":["orc-compaction" ,"uptycs-configdb",  ".*osqLogger.*", "kafka","spark-worker",".*ruleEngine.*",
-                        "data-archival",".*redis-server.*","/opt/uptycs/cloud/go/bin/complianceSummaryConsumer","tls",
-                        ".*airflow.*","trino","pgbouncer","spark-master","/usr/local/bin/pushgateway" ,"osqueryIngestion",
-                        "uptycs-metastoredb","apiserver"],
+        return  {"sum":["tls","trino",".*airflow.*",".*osqLogger.*","kafka",".*ruleEngine.*",".*redis-server.*","pgbouncer",
+                        "osqueryIngestion","/usr/local/bin/pushgateway","uptycs-metastoredb","uptycs-configdb",
+                        "/opt/uptycs/cloud/go/bin/complianceSummaryConsumer","orc-compaction","data-archival",],
                 "avg":[]
                 }
     
     @classmethod
     @property
     def common_container_names(cls):
-        return ["debezium","query-runner","graph-query-runner"]
+        return ["ingestion","debezium","api","query-runner","graph-query-runner"]
     
     @classmethod
     @property
@@ -93,7 +92,7 @@ class parent:
     
     @classmethod
     def get_app_level_CPU_used_cores_queries(cls):
-        return dict([(f"CPU Used by {app}", (f"{key}(uptycs_app_cpu{{app_name=~'{app}'}}) by (host_name)" , ["host_name"], '%') ) for key,app_list in cls.common_app_names.items() for app in app_list])
+        return dict([(f"CPU Used by {app}", (f"{key}(uptycs_app_cpu{{app_name=~'{app}'}}) by (host_name) / 100 " , ["host_name"], 'cores') ) for key,app_list in cls.common_app_names.items() for app in app_list])
 
     @classmethod
     def get_docker_level_cpu_used_queries(cls):
