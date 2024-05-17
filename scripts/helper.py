@@ -199,9 +199,10 @@ def extract_stack_details(nodes_file_path,prom_con_obj):
     with open(nodes_file_path,'w') as file:
         json.dump(data,file,indent=4)
 
-def save_html_page(url,file_path):
+def save_html_page(url,file_path,check):
     response = requests.get(url)
     if response.status_code == 200:
+        if check: return True
         page_content = response.content
         with open(file_path, "wb") as file:
             file.write(page_content)

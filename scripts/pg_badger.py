@@ -18,13 +18,16 @@ current_time = datetime.now()
 current_time = current_time.strftime("%Y-%m-%d_%H:%M:%S")
 print("Formatted current time:", current_time)
 
-def get_links(elastic_url,start_time_ist_str, end_time_ist_str,pgbadger_reports_mount):
+def get_links(elastic_url,start_time_ist_str, end_time_ist_str,pgbadger_reports_mount,check):
     url = f"http://{elastic_url}:5602/ondemand"
 
     resp = requests.get(url, verify=False)
     return_links={}
     if resp.status_code == 200:
-        dbs={"configdb","statedb","metastoredb","vaultdb","threatdb","rangerdb","prestogatewaydb"}
+        if check:
+            dbs={"configdb"}
+        else:
+            dbs={"configdb","statedb","metastoredb","vaultdb","threatdb","rangerdb","prestogatewaydb"}
         for db in dbs :
             start_end_string=f"{current_time}_{start_time_ist_str.replace('T','_')}_to_{end_time_ist_str.replace('T','_')}"
             report_name=f"{start_end_string}_{db}"
@@ -145,7 +148,7 @@ def return_pgbadger_results(start_time_utc,end_time_utc,elastic_url,images_path)
     res=take_screenshots_and_save(links,images_path)
     return res
 
-def get_and_save_pgb_html(start_time_utc,end_time_utc,elastic_url,base_save_path,pgbadger_tail_path,perf_prod_dashboard,pgbadger_reports_mount):
+def get_and_save_pgb_html(start_time_utc,end_time_utc,elastic_url,base_save_path,pgbadger_tail_path,perf_prod_dashboard,pgbadger_reports_mount,check=False):
     format_data = "%Y-%m-%dT%H:%M"
     return_file_names={}
     start_time = start_time_utc + timedelta(hours=1)
@@ -155,16 +158,20 @@ def get_and_save_pgb_html(start_time_utc,end_time_utc,elastic_url,base_save_path
     extracted_tables={}
     print("Converted start time UTC string is : " , start_time)
     print("Converted end time UTC string is : " , end_time)
-    links=get_links(elastic_url , start_time, end_time,pgbadger_reports_mount)
+    links=get_links(elastic_url , start_time, end_time,pgbadger_reports_mount,check)
     for db,link in links.items():
         print("Processing pgbadger report for database : "  , db)
         save_path = os.path.join(base_save_path,f"pgbadger_report_{db}.html")
-        status=save_html_page(link,save_path)
+        status=save_html_page(link,save_path,check)
         if not status:
+            if check :
+                print(f"ERROR : Could not save pgbadger html page for database {db}.")
+                return False,link
             print("Saving this webpage failed, hence saving the direct link of pgbadger UI !")
             return_file_names[db] = link
         
         if status:
+            if check:return True,"nothing"
             scraped_res = scrape_func(save_path,db)
             if scraped_res!={}:
                 extracted_tables.update(scraped_res)
@@ -175,8 +182,8 @@ def get_and_save_pgb_html(start_time_utc,end_time_utc,elastic_url,base_save_path
    
 
 if __name__=="__main__":
-    start_time_ist_str="2024-05-16 23:00"
-    end_time_ist_str="2024-05-17 10:00"
+    start_time_ist_str="2024-05-17 10:00"
+    end_time_ist_str="2024-05-17 15:00"
     elastic_url="192.168.129.52"
 
     BASE_PGBADGER_IMAGES_PATH = os.path.join("/Users/masabathulararao/Documents/Loadtest",'pgbadger_im')
