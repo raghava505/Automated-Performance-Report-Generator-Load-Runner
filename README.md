@@ -15,11 +15,6 @@
 Enter the required load details and the report data will be saved to Mongodb.
 
 
-# Accessing the Mongodb
-```
-sudo docker exec -it mongo bash 
-```
-
 # Configure a New Lab Stack
 
 Create "<your_stack>_nodes.json" file inside "config" folder if not present 
