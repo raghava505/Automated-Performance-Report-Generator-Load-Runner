@@ -149,7 +149,7 @@ def return_pgbadger_results(start_time_utc,end_time_utc,elastic_url,images_path)
     res=take_screenshots_and_save(links,images_path)
     return res
 
-def get_and_save_pgb_html(start_time_utc,end_time_utc,elastic_url,base_save_path,pgbadger_tail_path):
+def get_and_save_pgb_html(start_time_utc,end_time_utc,elastic_url,base_save_path,pgbadger_tail_path,perf_prod_dashboard):
     format_data = "%Y-%m-%dT%H:%M"
     return_file_names={}
     start_time = start_time_utc + timedelta(hours=1)
@@ -167,7 +167,7 @@ def get_and_save_pgb_html(start_time_utc,end_time_utc,elastic_url,base_save_path
         if not status:
             print("Saving this webpage failed, hence saving the direct link of pgbadger UI !")
             return_file_names[db] = link
-        perf_prod_dashboard = "192.168.146.69"
+        
         if status:
             scraped_res = scrape_func(save_path,db)
             if scraped_res!={}:

@@ -18,6 +18,7 @@ class configuration:
         self.api_loads_folder_path = "/home/abacus/apache-jmeter-5.6.2/bin/reports/"
         self.presto_loads_folder_path = "/home/abacus/benchto_reports/"
         self.kube_metrics = ["container_memory_working_set_bytes","container_cpu_usage_seconds_total"]
+        self.perf_prod_dashboard = "192.168.146.69"
 
         if test_env_file_name:
             self.test_env_file_path = f"{self.base_stack_config_path}/{test_env_file_name}"
