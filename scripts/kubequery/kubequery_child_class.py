@@ -46,10 +46,17 @@ class kubequery_child(parent):
     
     @classmethod
     @property
+    def common_container_names(cls):
+        temp = copy.deepcopy(parent.common_container_names)
+        final = ["kubernetes-state-manager","kubernetes-network-manager","kubernetes-schedule-runner"] + temp
+        return final
+    
+    @classmethod
+    @property
     def mon_spark_topic_names(cls):
         temp = copy.deepcopy(parent.mon_spark_topic_names)
         # temp.extend(["state","agentkubequery"])
-        final = ["agentkubequery","state"] + temp
+        final = ["agentkubequery","state","containers","decorators"] + temp
         return final
     
     @classmethod
@@ -61,24 +68,6 @@ class kubequery_child(parent):
         return final
     
     @classmethod
-    def get_app_level_RAM_used_percentage_queries(cls):
-        temp = copy.deepcopy(parent.get_app_level_RAM_used_percentage_queries())
-        more_memory_queries={
-            "Kubernetes State Manager memory usage":("sum(uptycs_docker_mem_used{container_name=\"kubernetes-state-manager\"}) by (host_name)" , ["host_name"],'bytes'),
-        }
-        temp.update(more_memory_queries)
-        return temp
-    
-    @classmethod
-    def get_app_level_CPU_used_cores_queries(cls):
-        temp = copy.deepcopy(parent.get_app_level_CPU_used_cores_queries())
-        more_cpu_queries={
-            "Kubernetes State Manager CPU usage":("sum(uptycs_docker_cpu_stats{container_name=\"kubernetes-state-manager\"}) by (host_name)" , ["host_name"],'%'),
-        }
-        temp.update(more_cpu_queries)
-        return temp
-    
-    @classmethod
     @property
     def common_pod_names(cls):
         temp = copy.deepcopy(parent.common_pod_names)
@@ -86,3 +75,24 @@ class kubequery_child(parent):
         final = ["osquery-state-manager-deployment.*"] + temp
         return final
     
+    @classmethod
+    @property
+    def list_of_observations_to_make(cls):
+        return [
+                    'Check for Ingestion lag',
+                    'Check for Rule engine Lag',
+                    'Check for db-events Lag',
+                    "Check for agentkubequery Topic Lag",
+                    "Check for containers Topic Lag",
+                    "Check for state topic Lag"
+                    'Data loss check for raw tables like processes, process_env etc (accuracy)',
+                    'Data loss check for processed data like events, alerts and incidents etc (accuracy)',
+                    "Check if CPU/memory utilisation in line with previous sprints. If not, are the differences expected?",
+                    'Check for variations in the Count of queries executed on presto',
+                    'Triage bugs and check for blockers',
+                    'Check if PG master is in sync with replica',
+                    'Check for memory leaks',
+                    'Check for variation in HDFS disk usage',
+                    'Check for variation in PG disk usage',
+                    'Check for variation in Kafka disk usage',
+                ]

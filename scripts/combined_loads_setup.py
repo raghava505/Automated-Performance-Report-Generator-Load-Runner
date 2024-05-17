@@ -54,9 +54,16 @@ class all_combined_child(parent):
     
     @classmethod
     @property
+    def common_container_names(cls):
+        temp = copy.deepcopy(parent.common_container_names)
+        final = ["kubernetes-state-manager","kubernetes-network-manager","kubernetes-schedule-runner"] + temp
+        return final
+    
+    @classmethod
+    @property
     def mon_spark_topic_names(cls):
         temp = copy.deepcopy(parent.mon_spark_topic_names)
-        temp.extend(["cloudconnectorsink" , 'agentosquery',"state","agentkubequery"])
+        temp.extend(["cloudconnectorsink" , 'agentosquery',"state","agentkubequery","containers","decorators"])
         return temp
     
     @classmethod
@@ -77,16 +84,6 @@ class all_combined_child(parent):
     @property
     def list_of_observations_to_make(cls):
         return [
-                    'Check 100 percent accuracy for inventory tables',
-                    'Check 100 percent accuracy for current tables',
-                    'Check for Statedb Errors',
-                    'Check for Ruleenginecc lag',
-                    'Check for cloudquery inventory lag',
-                    'Check for cloudtrial events lag',
-                    'Check for cloudcompliance manager lag',
-                    'Check for Db events lag',
-                    'Check for cloudconnector Ingestion lag',
-
                     'Check for Ingestion lag',
                     'Check for Rule engine Lag',
                     'Check for db-events Lag',
@@ -102,6 +99,20 @@ class all_combined_child(parent):
                     'Check for variation in Kafka disk usage',
                     'Check for new kafka topics',
                     'Check for steady state of live assets count'
+
+                    'Check 100 percent accuracy for inventory tables',
+                    'Check 100 percent accuracy for current tables',
+                    'Check for Statedb Errors',
+                    'Check for Ruleenginecc lag',
+                    'Check for cloudquery inventory lag',
+                    'Check for cloudtrial events lag',
+                    'Check for cloudcompliance manager lag',
+                    'Check for Db events lag',
+                    'Check for cloudconnector Ingestion lag',
+
+                    "Check for agentkubequery Topic Lag",
+                    "Check for containers Topic Lag",
+                    "Check for state topic Lag"
                 ]
 
 
