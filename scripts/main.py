@@ -117,6 +117,23 @@ if __name__ == "__main__":
         api_load_folder_name=None
         all_gridfs_fileids=[]
 
+        if 'elastic' in test_env_json_details and 'pgbadger_reports_mount' in test_env_json_details:
+            print("\n\n------------------------------ \nChecking health of PGbadger ... \n\n")
+            status,link=get_and_save_pgb_html(start_utc_time,end_utc_time,test_env_json_details['elastic'],"curr_pgbad_html_path","pgbadger_tail_path",prom_con_obj.perf_prod_dashboard,test_env_json_details['pgbadger_reports_mount'],check=True)
+            if not status:
+                print("PGBadger seems to be not working in your stack. Please try to generate a pgbadger report manually to check if working fine.")
+                print("Here is the sample report generated through automation just now : " , link)
+                user_decision = input("Continue without pgbadger details in the report? (y/n) : ")
+                if user_decision == "y":
+                    pass
+                else:
+                    print("Terminating program ...")
+                    sys.exit()
+            else:
+                print("\nCHECK PASSED : PGbadger is in good condition !")
+                print("--------------------------------------\n")
+
+
         #-------------------------real time query test details--------------------------
         if domain=="longevity" and variables["load_type"] in ["all_loads_combined"]: 
             from realtimequery_tests.real_time_query import realtime_query
