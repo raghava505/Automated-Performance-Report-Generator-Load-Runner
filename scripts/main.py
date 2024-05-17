@@ -115,6 +115,7 @@ if __name__ == "__main__":
         complete_resource_details=None
         cloudquery_accuracies=None
         complete_charts_data_dict=None
+        api_load_folder_name=None
         all_gridfs_fileids=[]
 
         #-------------------------real time query test details--------------------------
@@ -329,6 +330,8 @@ if __name__ == "__main__":
                 final_data_to_save.update({"charts":complete_charts_data_dict})
             if mem_cpu_usages_dict:
                 final_data_to_save.update(mem_cpu_usages_dict)
+            if api_load_folder_name and 'api_presto_load_reports_node_ip' in test_env_json_details:
+                final_data_to_save.update({"Api load report link":os.path.join(f"http://{test_env_json_details['api_presto_load_reports_node_ip']}:8000",prom_con_obj.api_loads_folder_path,api_load_folder_name,f"index.html")})
             final_data_to_save.update({"observations":load_cls.get_dictionary_of_observations()})
             # all_gridfs_referenced_ids=all_gridfs_fileids[:]
             # final_data_to_save.update({"all_gridfs_referenced_ids":all_gridfs_referenced_ids})
@@ -369,7 +372,7 @@ if __name__ == "__main__":
                 curr_pgbad_html_path=f"{BASE_HTML_PATH}/{pgbadger_tail_path}"
                 print(f'Saving the html page to {curr_pgbad_html_path}')
                 os.makedirs(curr_pgbad_html_path,exist_ok=True)
-                pgbadger_links,extracted_tables=get_and_save_pgb_html(start_utc_time,end_utc_time,test_env_json_details['elastic'],curr_pgbad_html_path,pgbadger_tail_path)
+                pgbadger_links,extracted_tables=get_and_save_pgb_html(start_utc_time,end_utc_time,test_env_json_details['elastic'],curr_pgbad_html_path,pgbadger_tail_path,prom_con_obj.perf_prod_dashboard)
                 collection.update_one({"_id": ObjectId(inserted_id)}, {"$set": {f"Pgbadger downloaded report links": pgbadger_links}})
                 if extracted_tables!={}:
                     print("Empty extracted tables dictionary found !")
