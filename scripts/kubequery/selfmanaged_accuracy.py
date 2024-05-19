@@ -8,6 +8,7 @@ from .selfmanaged_configs import *
 from fabric import Connection
 from datetime import timedelta
 from pathlib import Path
+from helper import measure_time
 
 # Variables
 ROOT_PATH = os.path.dirname(os.path.dirname(os.path.dirname(os.path.realpath(__file__))))
@@ -36,40 +37,9 @@ class SelfManaged_Accuracy:
         self.vsidata = vsi_data
         self.tables = tables
         self.accuracy = dict()
-        
-    def fetch_trino_password(self): 
-        
-        remote_host = self.target_host
-        remote_username = 'abacus'
-        remote_password = 'abacus'
 
 
-        psql_command = "PGPASSWORD=pguptycs psql -h {} -U uptycs -p 5432 -d configdb -c \"select read_password from customer_database where database_name='upt_{}';\"".format(remote_host,self.cloud_domain)
-
-        ssh = paramiko.SSHClient()
-        ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-
-        try:
-            ssh.connect(remote_host, username=remote_username, password=remote_password)
-            print("SSH connection established successfully.")
-
-            stdin, stdout, stderr = ssh.exec_command(psql_command)
-            output = stdout.read().decode('utf-8')
-            error_output = stderr.read().decode('utf-8')
-            password = output.split()[2]
-            
-            if error_output:
-                print("Error output:")
-                print(error_output)
-
-        finally:
-            
-            stdin.close()
-            stdout.close()
-            stderr.close()
-            ssh.close()
-        return password
-
+    @measure_time
     def actual_records(self):
         
         time_change = timedelta(minutes=deltaTime)
@@ -89,6 +59,7 @@ class SelfManaged_Accuracy:
             self.actual_data[t] = int(result_list[0].split("\"")[1])
         # print(self.actual_data)
 
+    @measure_time
     def expected_records(self):
         for node in self.simnodes:
             ssh_client = paramiko.SSHClient()
