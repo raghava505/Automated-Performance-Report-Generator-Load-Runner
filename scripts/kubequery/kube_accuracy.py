@@ -8,6 +8,7 @@ from .kubequery_configs import *
 from fabric import Connection
 from datetime import datetime, timedelta
 from pathlib import Path
+from helper import measure_time
 
 
 # PROJECT_ROOT = Path(__file__).resolve().parent
@@ -45,6 +46,7 @@ class Kube_Accuracy:
         self.accuracy = dict()
 
 
+    @measure_time
     def actual_records(self):
         
         time_change = timedelta(minutes=deltaTime)
@@ -68,6 +70,7 @@ class Kube_Accuracy:
         #print(self.actual_data)
 
 
+    @measure_time
     def expected_records(self):
         for node in self.simnodes:
             ssh_client = paramiko.SSHClient()
