@@ -2,7 +2,19 @@ import json
 import socket,paramiko
 import concurrent.futures
 import requests
+import time
 from collections import defaultdict
+
+def measure_time(func):
+    """Decorator to measure the execution time of a function."""
+    def wrapper(*args, **kwargs):
+        start_time = time.perf_counter()
+        result = func(*args, **kwargs)
+        end_time = time.perf_counter()
+        elapsed = end_time - start_time
+        print(f"\nFunction '{func.__name__}' took {elapsed:.6f} seconds to complete. \n")
+        return result
+    return wrapper
 
 def execute_command_in_node(node,command,prom_con_obj):
     try:

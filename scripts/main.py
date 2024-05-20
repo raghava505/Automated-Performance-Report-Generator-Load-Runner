@@ -29,12 +29,14 @@ from bson import ObjectId
 from pg_badger import return_pgbadger_results,get_and_save_pgb_html
 from extract_and_preprocess_resource_utilizations import resource_usages
 
+from load_params import Load_Params
+
 if __name__ == "__main__":
     variables , prom_con_obj,load_cls =create_input_form()
     if not variables or not prom_con_obj : 
         print("Received NoneType objects, terminating the program ...")
         sys.exit()
-        
+    
     TEST_ENV_FILE_PATH   = prom_con_obj.test_env_file_path
     print("Test environment file path is : " + TEST_ENV_FILE_PATH)
     #---------------------start time and endtime (timestamps) for prometheus queries-------------------
@@ -116,6 +118,14 @@ if __name__ == "__main__":
         complete_charts_data_dict=None
         api_load_folder_name=None
         all_gridfs_fileids=[]
+        
+        # get necessary load parameters
+        params = None
+        if variables["load_name"] in ["KubeQuery_SingleCustomer","SelfManaged_SingleCustomer","KubeQuery_and_SelfManaged_Combined"] or variables["load_type"] in ["all_loads_combined"]:
+            load_params = Load_Params(start_time=start_utc_time, connection_object=prom_con_obj)
+            load_name = variables["load_name"]
+            params = load_params.get_load_params(load_name=load_name)
+            print(json.dumps(params, indent=4))
 
         if 'elastic' in test_env_json_details and 'pgbadger_reports_mount' in test_env_json_details:
             print("\n\n------------------------------ \nChecking health of PGbadger ... \n\n")
@@ -288,6 +298,12 @@ if __name__ == "__main__":
                 load_details.update(load_cls.get_load_specific_details(variables['load_name']))
             except:
                 print(f"WARNING : Load specific details for {variables['load_name']} in {load_cls} is not found!")
+
+            try:
+                if params:
+                    load_details[variables["load_name"]].update(params)
+            except Exception as err:
+                print(f"ERR : load_details.update(params) => {err}")
 
             final_data_to_save = {
                 "load_details":load_details,
