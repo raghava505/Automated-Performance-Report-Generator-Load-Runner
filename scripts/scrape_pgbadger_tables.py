@@ -90,7 +90,7 @@ def get_pgbadger_tables_schema():
                 "Count":int
             }
         },
-        "Histogram of Query Times" : {
+        "Distribution of Query Times" : {
             "html_id" : "histogram-query-times",
             "schema":{
                     "merge_on_cols" : ["Range"],
