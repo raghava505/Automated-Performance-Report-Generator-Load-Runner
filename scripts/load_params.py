@@ -76,8 +76,8 @@ class Load_Params:
             "k8s_namespaces": 0,
             "k8s_pods": 0,
             "k8s_containers": 0,
-            "total_k8s_containers_deleted": 0,
             "total_k8s_containers_created": 0,
+            "total_k8s_containers_deleted": 0,
             "selfmanaged_assets": 0,
             "selfmanaged_containers": 0,
         }

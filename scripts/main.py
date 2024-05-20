@@ -120,7 +120,8 @@ if __name__ == "__main__":
         all_gridfs_fileids=[]
         
         # get necessary load parameters
-        if variables["load_name"] in ["KubeQuery_SingleCustomer","KubeQuery_and_SelfManaged_Combined"] or variables["load_type"] in ["all_loads_combined"]:
+        params = None
+        if variables["load_name"] in ["KubeQuery_SingleCustomer","SelfManaged_SingleCustomer","KubeQuery_and_SelfManaged_Combined"] or variables["load_type"] in ["all_loads_combined"]:
             load_params = Load_Params(start_time=start_utc_time, connection_object=prom_con_obj)
             load_name = variables["load_name"]
             params = load_params.get_load_params(load_name=load_name)
@@ -297,6 +298,12 @@ if __name__ == "__main__":
                 load_details.update(load_cls.get_load_specific_details(variables['load_name']))
             except:
                 print(f"WARNING : Load specific details for {variables['load_name']} in {load_cls} is not found!")
+
+            try:
+                if params:
+                    load_details[variables["load_name"]].update(params)
+            except Exception as err:
+                print(f"ERR : load_details.update(params) => {err}")
 
             final_data_to_save = {
                 "load_details":load_details,
