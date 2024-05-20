@@ -23,7 +23,7 @@ def convert_to_seconds(string):
                 print(f"Unknown pattern found  in {string} : {i}")
                 return -1
         total_seconds = (days * 86400) + (hours * 3600) + (minutes * 60) + seconds + (millisec / 1000)
-        return total_seconds
+        return round(total_seconds,2)
     else:
         # print(f"No substrings found in '{string}'")
         return string
@@ -98,7 +98,8 @@ def get_pgbadger_tables_schema():
                 },
             "type_cast":{
                 "Count":int
-            }
+            },
+            "dont_convert_to_seconds_cols":["Range"]
         },
         "General Activity Queries" : {
             "html_id" : "general-activity-queries",
@@ -200,18 +201,20 @@ def scrape_func(path,db):
                 if df.empty : continue
                 df = fill_null(df)
                 for column in df.columns:
-                    df[column]=df[column].apply(convert_to_seconds)
+                    if "dont_convert_to_seconds_cols" in value:
+                        if column not in value["dont_convert_to_seconds_cols"]:
+                            df[column]=df[column].apply(convert_to_seconds)
                 for col,typ in value["type_cast"].items():
                     df[col] = df[col].apply(lambda x: int(x.replace(',', '')))
                     df[col] = df[col].astype(typ)
 
                 if "Duration" in df.columns and "Count" in df.columns:
                     try:
-                        df["Avg Duration"] = df["Duration"]/df["Count"]
+                        df["Avg Duration"] = round(df["Duration"]/df["Count"],2)
                     except Exception as e:
                         print(f"Error while calculating avg duration for {heading}:{db}. {e}")
                         print(df)
-                        df["Avg Duration"] = df["Duration"]/1
+                        df["Avg Duration"] = round(df["Duration"]/1,2)
                 try:
                     df=df.sort_values(by=value["sort_by"],ascending=False)
                     df=df.head(value["limit"])
