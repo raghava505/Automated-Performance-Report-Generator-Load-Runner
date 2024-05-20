@@ -27,7 +27,7 @@ def get_links(elastic_url,start_time_ist_str, end_time_ist_str,pgbadger_reports_
         if check:
             dbs={"configdb"}
         else:
-            dbs={"configdb","statedb","metastoredb","vaultdb","threatdb","rangerdb","prestogatewaydb"}
+            dbs={"configdb","statedb","metastoredb","vaultdb"}#,"threatdb","rangerdb","prestogatewaydb"}
         for db in dbs :
             start_end_string=f"{current_time}_{start_time_ist_str.replace('T','_')}_to_{end_time_ist_str.replace('T','_')}"
             report_name=f"{start_end_string}_{db}"
