@@ -13,28 +13,29 @@ sns.set(rc={"text.color": text_color})
 
 kwargs={'startangle':270, 
         'wedgeprops': {'edgecolor': outer_background_color, 'linewidth': 2.5},  # Set edge width
-        'textprops': {'fontsize': 18},  # Increase font size of labels
+        'textprops': {'fontsize': 23},  # Increase font size of labels
         # 'colors' : ['#196F3D','#21618C','#7B241C','#7D6608','#4A148C','#6E2C00','#880E4F',"#330066","#7D4D00"],
         'rotatelabels':False,
         'labeldistance':1.01,
-        'pctdistance':0.8,
+        'pctdistance':0.78,
         }
 
 red_colors = [
-    "#4b1611",
-    "#5b1b15", "#6b1f18", "#7b241c", "#8b2920", "#9b2d23", 
+    # "#4b1611","#5b1b15",
+    "#6b1f18", "#7b241c", "#8b2920", "#9b2d23", 
     "#ab3227", "#bb372b", "#cb3b2e", "#d2473a", "#d6564a", 
     "#d9655a", "#dd746a", "#e1837a", "#e4928a", "#e8a09a", 
     "#ecafaa", "#efbeba", "#f3cdca", "#f6dcda", "#faebea"
 ]
 
 green_colors = [
-    "#0e3f23", "#124f2b", "#155f34", "#196f3d", "#1d7f46", 
+    # "#0e3f23","#124f2b",
+    "#155f34", "#196f3d", "#1d7f46", 
     "#208f4f", "#249f57", "#27af60", "#2bbf69", "#2fcf72", 
     "#3ed37c", "#4ed787", "#5edb92", "#6ede9d", "#7ee2a8", 
     "#8ee6b3", "#9ee9bd", "#aeedc8", "#bef0d3", "#cef4de"
 ]
-figsize=(20, 15)
+figsize=(23, 14)
 title_fontsize=26
 threshold_to_consider_as_less_contributors=2
 
@@ -59,18 +60,21 @@ def stitch_images_horizontally(images, border_size=4, border_color="white"):
         x_offset += bordered_img.width
     return stitched_image
 
-def stitch_images_vertically(images,node_type,load_details=""):
+def stitch_images_vertically(images,node_type,mem_or_cpu,load_details=""):
     # load_details="153033:AllFeaturesetsEnabled_run06 VS 153033_run05 \n Stack : Longevity \n Multicustomer and ruleengine load"
     # Get the maximum width and total height of the input images
-    max_width = max(img.width for img in images)
-    total_height = sum(img.height for img in images)
+    border_size=4
+    border_color="white"
+    widths, heights = zip(*(add_border(i, border_size).size for i in images))
+    max_width = max(widths)
+    total_height = sum(heights)
     # Create a new blank image with the maximum width and total height
 
     text_image_height=120
     text_image = Image.new('RGB', (max_width, text_image_height), color=outer_background_color)
     draw = ImageDraw.Draw(text_image)
-    txt = f"{node_type.title()} nodetype : Complete resource usage analysis"
-    x = max_width/2.8
+    txt = f"{node_type.title()} nodetype : {mem_or_cpu} usage comparison and analysis"
+    x = max_width/8
     draw.text((x,0),text=txt,align="right",font_size=65, fill =(255, 255, 255)) #(max_width//2, text_image_height//2),
     draw.text((0,0),text=f"{load_details}",align="left",font_size=35, fill =(255, 255, 255)) #(max_width//2, text_image_height//2),
     images.insert(0,text_image)
@@ -78,8 +82,9 @@ def stitch_images_vertically(images,node_type,load_details=""):
     stitched_image = Image.new('RGB', (max_width, total_height+text_image_height))
     y_offset = 0
     for img in images:
+        bordered_img = add_border(img, border_size, border_color)
         # Paste each image into the stitched image at the current y_offset
-        stitched_image.paste(img, (0, y_offset))
+        stitched_image.paste(bordered_img, (0, y_offset))
         y_offset += img.height
     return stitched_image
 
@@ -170,16 +175,16 @@ def get_piechart(nodetype,df,mem_or_cpu,app_cont_pod):
         axs[1].spines['right'].set_visible(False)
         axs[1].spines['bottom'].set_visible(False)
         axs[1].spines['left'].set_visible(False)
-    each_piechart_title = f"{app_cont_pod.title()} level {mem_or_cpu.title() if mem_or_cpu=='memory' else mem_or_cpu.upper()} usage comparison and analysis\n"
+    each_piechart_title = f"{app_cont_pod.title()} level {mem_or_cpu.title() if mem_or_cpu=='memory' else mem_or_cpu.upper()}\n"
     if not df.empty:
         overall_absolute_increase_decrease = round(float(df["absolute"].sum()),2)
         overall_relative_increase_decrease = round((df["avg_main"].sum()-df["avg_prev"].sum())*100/df["avg_prev"].sum(),2)
         if overall_absolute_increase_decrease > 0:
-            each_piechart_title += f" overall absolute increase : +{overall_absolute_increase_decrease} {unit}↑\n"
-            each_piechart_title += f" overall relative increase : +{overall_relative_increase_decrease} %↑"
+            each_piechart_title += f"absolute increase: +{overall_absolute_increase_decrease} {unit}↑\n"
+            each_piechart_title += f"relative increase: +{overall_relative_increase_decrease} %↑"
         else:
-            each_piechart_title += f" overall absolute decrease: {overall_absolute_increase_decrease} {unit}↓\n"
-            each_piechart_title += f" overall relative decrease: {overall_relative_increase_decrease} %↓"
+            each_piechart_title += f"absolute decrease: {overall_absolute_increase_decrease} {unit}↓\n"
+            each_piechart_title += f"relative decrease: {overall_relative_increase_decrease} %↓"
 
     plt.suptitle(each_piechart_title,fontsize=title_fontsize+6)
     plt.gcf().set_facecolor(outer_background_color)
@@ -231,8 +236,10 @@ def analysis_main(mem_main_dict,mem_prev_dict,cpu_main_dict,cpu_prev_dict,load_d
                 images_to_stitch.append(images[app_cont_pod])
             except:
                 images_to_stitch.append(get_piechart(nodetype,pd.DataFrame({}),"memory",app_cont_pod))
-        stitched_image = stitch_images_horizontally(images_to_stitch)
+        stitched_image = stitch_images_vertically(images_to_stitch,nodetype,"Memory")
         stitched_memory[nodetype]=stitched_image
+        # path = f"/Users/masabathulararao/Documents/Loadtest/save-report-data-to-mongo/scripts/csv/{nodetype}_memory.png"
+        # stitched_image.save(path)
 
     stitched_cpu={}
     for nodetype,images in cpu_images.items():
@@ -242,13 +249,15 @@ def analysis_main(mem_main_dict,mem_prev_dict,cpu_main_dict,cpu_prev_dict,load_d
                 images_to_stitch.append(images[app_cont_pod])
             except:
                 images_to_stitch.append(get_piechart(nodetype,pd.DataFrame({}),"cpu",app_cont_pod))
-        stitched_image = stitch_images_horizontally(images_to_stitch)
+        stitched_image = stitch_images_vertically(images_to_stitch,nodetype,"CPU")
         stitched_cpu[nodetype]=stitched_image
+        # path = f"/Users/masabathulararao/Documents/Loadtest/save-report-data-to-mongo/scripts/csv/{nodetype}_cpu.png"
+        # stitched_image.save(path)
 
     final_result={}
     for node_type in stitched_memory.keys():
         print(node_type)
-        vertical_stitched_image = stitch_images_vertically([stitched_memory[node_type] , stitched_cpu[node_type]],node_type,load_details_text)
+        vertical_stitched_image = stitch_images_horizontally([stitched_memory[node_type] , stitched_cpu[node_type]])
         # path = f"/Users/masabathulararao/Documents/Loadtest/save-report-data-to-mongo/scripts/csv/{node_type}.png"
         # vertical_stitched_image.save(path)
         final_result[node_type] = vertical_stitched_image
