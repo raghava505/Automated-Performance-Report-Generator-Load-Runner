@@ -13,6 +13,7 @@ from gridfs import GridFS
 # from trino_queries import TRINO
 from elk_errors import Elk_erros
 from cloudquery.accuracy import ACCURACY
+from compaction_status import CompactionStatus
 from osquery.accuracy import osq_accuracy
 from kubequery.kube_accuracy import Kube_Accuracy
 from kubequery.selfmanaged_accuracy import SelfManaged_Accuracy
@@ -237,6 +238,12 @@ if __name__ == "__main__":
             print("Calculating accuracies for cloudquery ...")
             accu= ACCURACY(start_timestamp=start_utc_time,end_timestamp=end_utc_time,prom_con_obj=prom_con_obj,variables=variables)
             cloudquery_accuracies = accu.calculate_accuracy()
+
+        #-------------------------Compaction Status----------------------------
+        compaction_status = None
+        print("Fetching Compaction Status ...")
+        compaction = CompactionStatus(start_timestamp=start_timestamp,end_timestamp=end_timestamp,prom_con_obj=prom_con_obj)
+        compaction_status = compaction.execute_query()
         
         #--------------------------------Capture charts data---------------------------------------
         all_gridfs_fileids=[]
@@ -298,6 +305,8 @@ if __name__ == "__main__":
                 final_data_to_save.update({"Number of active connections group by application on master":active_conn_results})
             if cloudquery_accuracies:
                 final_data_to_save.update({"Cloudquery Table Accuracies":cloudquery_accuracies})
+            if compaction_status:
+                final_data_to_save.update({"Compaction Status":compaction_status})
             if db_op:
                 final_data_to_save.update({"Cloudquery Db Operations Processing Time":db_op})
             if kubequery_accuracies:
