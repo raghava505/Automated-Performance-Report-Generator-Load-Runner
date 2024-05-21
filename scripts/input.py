@@ -42,9 +42,9 @@ def create_input_form():
             }
     
     # These three lines are for Debugging Purposes :)
-    load_cls = load_type_options[details["load_type"]]['class']
-    prom_con_obj = configuration(test_env_file_name=details['test_env_file_name'] , fetch_node_parameters_before_generating_report=False)
-    return details,prom_con_obj,load_cls
+    # load_cls = load_type_options[details["load_type"]]['class']
+    # prom_con_obj = configuration(test_env_file_name=details['test_env_file_name'] , fetch_node_parameters_before_generating_report=False)
+    # return details,prom_con_obj,load_cls
 
     print("Please enter the following load details ...")
     for key,value in details.items():

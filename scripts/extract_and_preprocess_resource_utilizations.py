@@ -86,7 +86,7 @@ class resource_usages:
         print(f"************************* Group by 2 cols called with parameters : col1:{col1}, col2:{col2}, for_report:{for_report}, single_level_for_report:{single_level_for_report}")
         if col1=="host_name":
             cols_to_aggregate=[minimum_column_name,maximum_column_name,average_column_name]
-            display_exact_table=True
+            display_exact_table=False
             print("Primary Grouping by host_name ... ")
             print(f"Shape of {col2} level, {col1} usages table : {df.shape}")
             df = df.sort_values(by=average_column_name,ascending=False)
