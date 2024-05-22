@@ -196,16 +196,22 @@ def get_piechart(nodetype,df,mem_or_cpu,app_cont_pod):
     buffer.seek(0)  # Reset the buffer position
     image = Image.open(buffer)
     plt.close()
+    if app_cont_pod=="container":short="cont"
+    elif app_cont_pod=="application":short="app"
+    else:short=app_cont_pod
+
     if not increased.empty:
-        increased["contributer"]=increased[app_cont_pod].apply(lambda x : x+" "+app_cont_pod)
+        increased["contributer"]=increased[app_cont_pod].apply(lambda x : x+" "+short)
         increased.drop(columns=app_cont_pod, inplace=True)
     if not decreased.empty:
-        decreased["contributer"]=decreased[app_cont_pod].apply(lambda x : x+" "+app_cont_pod)
+        decreased["contributer"]=decreased[app_cont_pod].apply(lambda x : x+" "+short)
         decreased.drop(columns=app_cont_pod, inplace=True)
     return image,increased,decreased
 
 
 def generate_piecharts(mem_or_cpu,main_dict,prev_dict):
+    if mem_or_cpu=="memory":unit="GB"
+    else:unit="cores"
     images = defaultdict(lambda:{})
     increased_df=defaultdict(lambda:pd.DataFrame({}))
     decreased_df=defaultdict(lambda:pd.DataFrame({}))
@@ -229,25 +235,42 @@ def generate_piecharts(mem_or_cpu,main_dict,prev_dict):
             images[nodetype][app_cont_pod] = piechart
             increased_df[nodetype]=pd.concat([increased_df[nodetype], increased], ignore_index=True)
             decreased_df[nodetype]=pd.concat([decreased_df[nodetype], decreased], ignore_index=True)
+    total_combined_dict =defaultdict(lambda:{})
     for ndtype,df in increased_df.items():
         if not df.empty:
             df = df.sort_values(by="absolute",ascending=False)
             df = df.head(5)
             df.drop(columns="contributions",inplace=True)
-            increased_df[ndtype] = df 
+            string=""
+            for row in df.itertuples(index=True, name='Pandas'):
+                # Access columns by their names
+                a_value = row.contributer
+                b_value = round(row.absolute,2)
+                string+=f'{a_value}: {b_value} {unit}⬆️\n'
+            total_combined_dict[ndtype]["Top 5 contributors to increase"]=string 
     for ndtype,df in decreased_df.items():
         if not df.empty:
             df = df.sort_values(by="absolute",ascending=False)
             df = df.head(5)
             df.drop(columns="contributions",inplace=True)
-            decreased_df[ndtype] = df
-    return images,increased_df,decreased_df
+            string=""
+            for row in df.itertuples(index=True, name='Pandas'):
+                # Access columns by their names
+                a_value = row.contributer
+                b_value = round(row.absolute,2)
+                string+=f'{a_value}: {b_value} {unit}⬇️\n'
+            total_combined_dict[ndtype]["Top 5 contributors to decrease"]=string
+    total_combined_df = pd.DataFrame(total_combined_dict)
+    total_combined_df=total_combined_df.T
+    total_combined_df=total_combined_df.reset_index().rename(columns={'index': 'nodetype'})
+    return images,total_combined_df
 
 
 def analysis_main(mem_main_dict,mem_prev_dict,cpu_main_dict,cpu_prev_dict,load_details_text=""):
-    memory_images,mem_increased,mem_decreased = generate_piecharts("memory",mem_main_dict,mem_prev_dict)
-    cpu_images,cpu_increased,cpu_decreased = generate_piecharts("cpu",cpu_main_dict,cpu_prev_dict)
-
+    memory_images,memory_combined_df = generate_piecharts("memory",mem_main_dict,mem_prev_dict)
+    cpu_images,cpu_combined_df = generate_piecharts("cpu",cpu_main_dict,cpu_prev_dict)
+    # memory_combined_df.to_csv("memory_combined_df.csv")  
+    # cpu_combined_df.to_csv("cpu_combined_df.csv")    
     app_cont_pod_order = ["application","container","pod"]
 
     stitched_memory={}
@@ -282,6 +305,6 @@ def analysis_main(mem_main_dict,mem_prev_dict,cpu_main_dict,cpu_prev_dict,load_d
         vertical_stitched_image = stitch_images_horizontally([stitched_memory[node_type] , stitched_cpu[node_type]])
         # path = f"/Users/masabathulararao/Documents/Loadtest/save-report-data-to-mongo/scripts/csv/{node_type}.png"
         # vertical_stitched_image.save(path)
-        final_result[node_type] = {"image":vertical_stitched_image, "top_mem_inc":mem_increased[node_type],"top_mem_dec":mem_decreased[node_type],"top_cpu_inc":cpu_increased[node_type], "top_cpu_dec":cpu_decreased[node_type]}
+        final_result[node_type] = {"image":vertical_stitched_image, "memory_combined_df":memory_combined_df,"cpu_combined_df":cpu_combined_df}
         # vertical_stitched_image.show()
     return final_result
