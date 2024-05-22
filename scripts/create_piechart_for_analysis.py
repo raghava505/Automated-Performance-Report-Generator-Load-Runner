@@ -13,7 +13,7 @@ sns.set(rc={"text.color": text_color})
 
 kwargs={'startangle':270, 
         'wedgeprops': {'edgecolor': outer_background_color, 'linewidth': 2.5},  # Set edge width
-        'textprops': {'fontsize': 23},  # Increase font size of labels
+        'textprops': {'fontsize': 23,'fontweight': 'bold'},  # Increase font size of labels
         # 'colors' : ['#196F3D','#21618C','#7B241C','#7D6608','#4A148C','#6E2C00','#880E4F',"#330066","#7D4D00"],
         'rotatelabels':False,
         'labeldistance':1.01,
@@ -196,11 +196,19 @@ def get_piechart(nodetype,df,mem_or_cpu,app_cont_pod):
     buffer.seek(0)  # Reset the buffer position
     image = Image.open(buffer)
     plt.close()
-    return image
+    if not increased.empty:
+        increased["contributer"]=increased[app_cont_pod].apply(lambda x : x+" "+app_cont_pod)
+        increased.drop(columns=app_cont_pod, inplace=True)
+    if not decreased.empty:
+        decreased["contributer"]=decreased[app_cont_pod].apply(lambda x : x+" "+app_cont_pod)
+        decreased.drop(columns=app_cont_pod, inplace=True)
+    return image,increased,decreased
 
 
 def generate_piecharts(mem_or_cpu,main_dict,prev_dict):
     images = defaultdict(lambda:{})
+    increased_df=defaultdict(lambda:pd.DataFrame({}))
+    decreased_df=defaultdict(lambda:pd.DataFrame({}))
     for key,value in main_dict.items():
         if value == {}:
             print(f"Empty dict found for {mem_or_cpu}-{key}")
@@ -217,14 +225,28 @@ def generate_piecharts(mem_or_cpu,main_dict,prev_dict):
             except Exception as e:
                 print(f"ERROR : {app_cont_pod} level {nodetype} nodetype doesnt exist for previous version") 
                 merged_df = pd.DataFrame({})
-            piechart = get_piechart(nodetype,merged_df,mem_or_cpu,app_cont_pod)
+            piechart,increased,decreased = get_piechart(nodetype,merged_df,mem_or_cpu,app_cont_pod)
             images[nodetype][app_cont_pod] = piechart
-    return images
+            increased_df[nodetype]=pd.concat([increased_df[nodetype], increased], ignore_index=True)
+            decreased_df[nodetype]=pd.concat([decreased_df[nodetype], decreased], ignore_index=True)
+    for ndtype,df in increased_df.items():
+        if not df.empty:
+            df = df.sort_values(by="absolute",ascending=False)
+            df = df.head(5)
+            df.drop(columns="contributions",inplace=True)
+            increased_df[ndtype] = df 
+    for ndtype,df in decreased_df.items():
+        if not df.empty:
+            df = df.sort_values(by="absolute",ascending=False)
+            df = df.head(5)
+            df.drop(columns="contributions",inplace=True)
+            decreased_df[ndtype] = df
+    return images,increased_df,decreased_df
 
 
 def analysis_main(mem_main_dict,mem_prev_dict,cpu_main_dict,cpu_prev_dict,load_details_text=""):
-    memory_images = generate_piecharts("memory",mem_main_dict,mem_prev_dict)
-    cpu_images = generate_piecharts("cpu",cpu_main_dict,cpu_prev_dict)
+    memory_images,mem_increased,mem_decreased = generate_piecharts("memory",mem_main_dict,mem_prev_dict)
+    cpu_images,cpu_increased,cpu_decreased = generate_piecharts("cpu",cpu_main_dict,cpu_prev_dict)
 
     app_cont_pod_order = ["application","container","pod"]
 
@@ -235,7 +257,7 @@ def analysis_main(mem_main_dict,mem_prev_dict,cpu_main_dict,cpu_prev_dict,load_d
             try:
                 images_to_stitch.append(images[app_cont_pod])
             except:
-                images_to_stitch.append(get_piechart(nodetype,pd.DataFrame({}),"memory",app_cont_pod))
+                images_to_stitch.append(get_piechart(nodetype,pd.DataFrame({}),"memory",app_cont_pod)[0])
         stitched_image = stitch_images_vertically(images_to_stitch,nodetype,"Memory")
         stitched_memory[nodetype]=stitched_image
         # path = f"/Users/masabathulararao/Documents/Loadtest/save-report-data-to-mongo/scripts/csv/{nodetype}_memory.png"
@@ -248,7 +270,7 @@ def analysis_main(mem_main_dict,mem_prev_dict,cpu_main_dict,cpu_prev_dict,load_d
             try:
                 images_to_stitch.append(images[app_cont_pod])
             except:
-                images_to_stitch.append(get_piechart(nodetype,pd.DataFrame({}),"cpu",app_cont_pod))
+                images_to_stitch.append(get_piechart(nodetype,pd.DataFrame({}),"cpu",app_cont_pod)[0])
         stitched_image = stitch_images_vertically(images_to_stitch,nodetype,"CPU")
         stitched_cpu[nodetype]=stitched_image
         # path = f"/Users/masabathulararao/Documents/Loadtest/save-report-data-to-mongo/scripts/csv/{nodetype}_cpu.png"
@@ -260,6 +282,6 @@ def analysis_main(mem_main_dict,mem_prev_dict,cpu_main_dict,cpu_prev_dict,load_d
         vertical_stitched_image = stitch_images_horizontally([stitched_memory[node_type] , stitched_cpu[node_type]])
         # path = f"/Users/masabathulararao/Documents/Loadtest/save-report-data-to-mongo/scripts/csv/{node_type}.png"
         # vertical_stitched_image.save(path)
-        final_result[node_type] = vertical_stitched_image
+        final_result[node_type] = {"image":vertical_stitched_image, "top_mem_inc":mem_increased[node_type],"top_mem_dec":mem_decreased[node_type],"top_cpu_inc":cpu_increased[node_type], "top_cpu_dec":cpu_decreased[node_type]}
         # vertical_stitched_image.show()
     return final_result
