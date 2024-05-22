@@ -119,9 +119,10 @@ if __name__ == "__main__":
         complete_charts_data_dict=None
         api_load_folder_name=None
         all_gridfs_fileids=[]
+        compaction_status = None
+        params = None
         
         # get necessary load parameters
-        params = None
         if variables["load_name"] in ["KubeQuery_SingleCustomer","SelfManaged_SingleCustomer","KubeQuery_and_SelfManaged_Combined"] or variables["load_type"] in ["all_loads_combined"]:
             load_params = Load_Params(start_time=start_utc_time, connection_object=prom_con_obj)
             load_name = variables["load_name"]
@@ -266,7 +267,6 @@ if __name__ == "__main__":
             cloudquery_accuracies = accu.calculate_accuracy()
 
         #-------------------------Compaction Status----------------------------
-        compaction_status = None
         print("Fetching Compaction Status ...")
         compaction = CompactionStatus(start_timestamp=start_timestamp,end_timestamp=end_timestamp,prom_con_obj=prom_con_obj)
         compaction_status = compaction.execute_query()
@@ -308,7 +308,10 @@ if __name__ == "__main__":
 
             try:
                 if params:
-                    load_details[variables["load_name"]].update(params)
+                    if "KubeQuery Load Details" in load_details:
+                        load_details["KubeQuery Load Details"].update(params)
+                    else:
+                        load_details.update(params)
             except Exception as err:
                 print(f"ERR : load_details.update(params) => {err}")
 
