@@ -5,7 +5,8 @@ time_ranges = {
     "between_50ms_and_500ms":[50,500],
     "between_500ms_and_1s":[500,1000],
     "between_1s_and_10s":[1000,10000],
-    "above_10s":[10000,10000000000],
+    "between_10s_and_200s":[10000,200000],
+    "above_200s":[200000,10000000000],
 }
 
 base_query_for_all = """
