@@ -1,12 +1,11 @@
 time_ranges = {
-    "below_25s":[0,25000],
-    "between_25s_and_50s":[25000,50000],
-    "between_50s_and_75s":[50000,75000],
-    "between_75s_and_100s":[75000,100000],
-    "between_100s_and_130s":[100000,130000],
-    "between_130s_and_160s":[130000,160000],
-    "between_160s_and_200s":[160000,200000],
-    "above_200s":[200000,10000000000],
+    "below_1ms":[0,1],
+    "between_1ms_and_5ms":[1,5],
+    "between_5ms_and_50ms":[5,50],
+    "between_50ms_and_500ms":[50,500],
+    "between_500ms_and_1s":[500,1000],
+    "between_1s_and_10s":[1000,10000],
+    "above_10s":[10000,10000000000],
 }
 
 base_query_for_all = """
