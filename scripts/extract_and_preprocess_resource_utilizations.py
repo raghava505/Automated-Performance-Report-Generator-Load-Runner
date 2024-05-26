@@ -137,7 +137,7 @@ class resource_usages:
         df=df.groupby(col)[cols_to_aggregate].sum()
         df = df[df[average_column_name] >= usage_threshold]
         # print(self.sum_and_sort_cols(df.copy()))
-        # print(df)
+        print(df)
         if for_report:
             return {
                 "schema":{
@@ -266,12 +266,12 @@ class resource_usages:
         result.update(self.preprocess_df(container_level_memory,'container',for_report))
         # ---------------------------pod level ---------------------------------
         print("****************************************************************************************************Capturing details for pod-level memory")
-        pod_level_memory_query='sum(container_memory_working_set_bytes{container_label_io_kubernetes_pod_name=~".*deployment.*"}) by (container_label_io_kubernetes_pod_name,node_name)'
+        pod_level_memory_query='sum(uptycs_kubernetes_memory_stats{pod=~".*deployment.*"}) by (node,pod)'
         unique_pod_names=set()
         for line in execute_prometheus_query(self.prom_con_obj,self.start_timestamp,self.end_timestamp,pod_level_memory_query,self.hours):
             try:
-                if self.host_name_type_mapping[line["metric"]["node_name"]] in self.exclude_nodetypes:continue
-                pod_name = line["metric"]["container_label_io_kubernetes_pod_name"].split('-deployment-')[0]
+                if self.host_name_type_mapping[line["metric"]["node"]] in self.exclude_nodetypes:continue
+                pod_name = line["metric"]["pod"].split('-deployment-')[0]
                 unique_pod_names.add(pod_name)
             except Exception as e:
                 print(f'***************** ERROR: Couldnt find host {line["metric"]["node_name"]} in host_name_type_mapping dictionary. Exception occured while calculating pod memory usage for pod:{line["metric"]["container_label_io_kubernetes_pod_name"]}. {e}')
@@ -282,12 +282,12 @@ class resource_usages:
 
         pod_mem_result=[]
         for pod in unique_pod_names:
-            for line in execute_prometheus_query(self.prom_con_obj,self.start_timestamp,self.end_timestamp,f'sum(container_memory_working_set_bytes{{container_label_io_kubernetes_pod_name=~"{pod}-deployment.*"}}/(1024*1024*1024)) by (node_name)',self.hours):
+            for line in execute_prometheus_query(self.prom_con_obj,self.start_timestamp,self.end_timestamp,f'sum(uptycs_kubernetes_memory_stats{{pod=~"{pod}-deployment.*"}}) by (node_type,node,pod) / (1024*1024*1024)',self.hours):
                 try:
-                    if self.host_name_type_mapping[line["metric"]["node_name"]] in self.exclude_nodetypes:continue
+                    if line["metric"]["node_type"] in self.exclude_nodetypes:continue
                     pod_mem_result.append({
-                        "node_type":self.host_name_type_mapping[line["metric"]["node_name"]],
-                        "host_name":line["metric"]["node_name"],
+                        "node_type":line["metric"]["node_type"],
+                        "host_name":line["metric"]["node"],
                         "pod":pod,
                         minimum_column_name : line["values"]["minimum"],
                         maximum_column_name : line["values"]["maximum"],
@@ -390,12 +390,12 @@ class resource_usages:
         print("****************************************************************************************************Capturing details for pod-level cpu")
         pod_cpu_result=[]
         for pod in self.unique_pod_names:
-            for line in execute_prometheus_query(self.prom_con_obj,self.start_timestamp,self.end_timestamp,f'sum(rate(container_cpu_usage_seconds_total{{container_label_io_kubernetes_pod_name=~"{pod}.*deployment.*"}}[10m])) by (node_name)',self.hours):
+            for line in execute_prometheus_query(self.prom_con_obj,self.start_timestamp,self.end_timestamp,f'sum(uptycs_kubernetes_cpu_stats{{pod=~"{pod}-deployment.*"}}) by (node_type,node,pod) / 100',self.hours):
                 try:
-                    if self.host_name_type_mapping[line["metric"]["node_name"]] in self.exclude_nodetypes:continue
+                    if line["metric"]["node_type"] in self.exclude_nodetypes:continue
                     pod_cpu_result.append({
-                        "node_type":self.host_name_type_mapping[line["metric"]["node_name"]],
-                        "host_name":line["metric"]["node_name"],
+                        "node_type":line["metric"]["node_type"],
+                        "host_name":line["metric"]["node"],
                         "pod":pod,
                         minimum_column_name : line["values"]["minimum"],
                         maximum_column_name : line["values"]["maximum"],
@@ -469,8 +469,8 @@ if __name__=='__main__':
     import pytz
     format_data = "%Y-%m-%d %H:%M"
     
-    start_time_str = "2024-04-05 00:00"
-    hours=168
+    start_time_str = "2024-05-21 01:34"
+    hours=12
 
     start_time = datetime.strptime(start_time_str, format_data)
     end_time = start_time + timedelta(hours=hours)
@@ -489,7 +489,7 @@ if __name__=='__main__':
     end_utc_time = end_ist_time.astimezone(utc_timezone)
     end_utc_str = end_utc_time.strftime(format_data)
 
-    active_obj = resource_usages(configuration('longevity_nodes.json') , start_timestamp,end_timestamp,hours=hours)
+    active_obj = resource_usages(configuration('s1_nodes.json') , start_timestamp,end_timestamp,hours=hours)
     # total_result_for_querying = active_obj.collect_total_usages(for_report=False)
     total_result_for_report = active_obj.collect_total_usages(for_report=True)
 
