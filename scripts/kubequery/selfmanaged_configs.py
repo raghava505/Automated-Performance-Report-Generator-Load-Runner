@@ -3,7 +3,7 @@ from pathlib import Path
 #json_directory = ""
 PROJECT_ROOT = Path(__file__).resolve().parent
 
-tables = ['vulnerabilities_scanned_images', 'vulnerabilities','process_events','socket_events', 'process_file_events','containers','docker_images','crio_images']
+tables = ['vulnerabilities_scanned_images', 'vulnerabilities','process_events','socket_events', 'process_file_events','containers','container_images','docker_images','crio_images']
 
 
 vsi_data = {"VulnerabilitiesScannedImages_Count": 0, 
@@ -13,6 +13,7 @@ vsi_data = {"VulnerabilitiesScannedImages_Count": 0,
              "SocketEvents_Count": 0, 
              "ProcessFileEvents_Count": 0, 
              "Containers_Count": 0,
+             "ContainerImages_Count": 0,
              "DockerImages_Count": 0,
              "CrioImages_Count": 0}
 
@@ -31,5 +32,6 @@ key_mapping = {
     'SocketEvents_Count': 'socket_events',
     'ProcessFileEvents_Count': 'process_file_events',
     'Containers_Count': 'containers',
+    'ContainerImages_Count': 'container_images',
     "DockerImages_Count":"docker_images",
     "CrioImages_Count":"crio_images"}
