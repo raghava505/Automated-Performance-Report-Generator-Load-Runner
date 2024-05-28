@@ -126,7 +126,9 @@ if __name__ == "__main__":
         if variables["load_name"] in ["KubeQuery_SingleCustomer","SelfManaged_SingleCustomer","KubeQuery_and_SelfManaged_Combined"] or variables["load_type"] in ["all_loads_combined"]:
             load_params = Load_Params(start_time=start_utc_time, connection_object=prom_con_obj)
             load_name = variables["load_name"]
-            params = load_params.get_load_params(load_name=load_name)
+            params = {
+                "KubeQuery_SelfManaged_Load_Details" : load_params.get_load_params(load_name=load_name)
+            }
             print(json.dumps(params, indent=4))
 
         if 'elastic' in test_env_json_details and 'pgbadger_reports_mount' in test_env_json_details:

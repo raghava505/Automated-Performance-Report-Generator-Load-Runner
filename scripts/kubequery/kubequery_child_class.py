@@ -51,18 +51,20 @@ class kubequery_child(parent):
     def common_pod_names(cls):
         temp = copy.deepcopy(parent.common_pod_names)
         # temp.extend(["osquery-state-manager-deployment.*"])
-        final = ["osquery-state-manager-deployment.*"] + temp
+        final = ["osquery-state-manager-deployment.*", "kubernetes-schedule-runner-deployment.*"] + temp
         return final
     
     @classmethod
     @property
     def list_of_observations_to_make(cls):
         return [
+                    "Check for agentkubequery Topic Lag",
+                    "Check for containers Topic Lag",
+                    "Check for kubestatemanagerGroup Lag",
+                    "Check for containersGroup Lag",
                     'Check for Ingestion lag',
                     'Check for Rule engine Lag',
                     'Check for db-events Lag',
-                    "Check for agentkubequery Topic Lag",
-                    "Check for containers Topic Lag",
                     "Check for state topic Lag"
                     'Data loss check for raw tables like processes, process_env etc (accuracy)',
                     'Data loss check for processed data like events, alerts and incidents etc (accuracy)',
