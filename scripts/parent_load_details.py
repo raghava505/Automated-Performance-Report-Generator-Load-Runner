@@ -61,7 +61,8 @@ class parent:
     @staticmethod
     def get_basic_chart_queries():
         return {"Live Assets Count":("sum(uptycs_live_count)" , []),
-                "Kafka Lag for all groups":("uptycs_kafka_group_lag or uptycs_mon_spark_lag",['cluster_id','topic','group']),
+                "Kafka Lag for all groups":("uptycs_kafka_group_lag",['cluster_id','group']),
+                "Spark Lag for all topics":("uptycs_mon_spark_lag",['cluster_id','topic']),
                 }
     
     @classmethod
@@ -189,7 +190,7 @@ class parent:
     @classmethod
     def get_all_chart_queries(cls):
         return {
-            "Live Assets and Kafka lag for all groups":cls.get_basic_chart_queries(),
+            "Live Assets and All Lags":cls.get_basic_chart_queries(),
             "Node-level Memory Charts":cls.get_node_level_RAM_used_percentage_queries(),
             "Node-level CPU Charts":cls.get_node_level_CPU_busy_percentage_queries(),
             "Application-level Memory Charts":cls.get_app_level_RAM_used_percentage_queries(),
