@@ -168,8 +168,8 @@ class MC_comparisions:
         app_level_memory_queries = dict([(app,f"sum({key}(uptycs_app_memory{{app_name=~'{app}'}}) by (app_name))") for key,app_list in app_names.items() for app in app_list])
         app_level_cpu_queries = dict([(app,f"sum({key}(uptycs_app_cpu{{app_name=~'{app}'}}) by (app_name))") for key,app_list in app_names.items() for app in app_list])
 
-        pod_level_memory_queries = dict([(pod,f'sum(uptycs_kubernetes_memory_stats{{pod=~"{pod}-deployment.*"}}) / (1024*1024*1024)') for pod in pod_names])
-        pod_level_cpu_queries = dict([(pod,f'sum(uptycs_kubernetes_cpu_stats{{pod=~"{pod}-deployment.*"}}) / 100') for pod in pod_names])
+        pod_level_memory_queries = dict([(pod,f'sum(uptycs_kubernetes_memory_stats{{pod=~"{pod}"}}) / (1024*1024*1024)') for pod in pod_names])
+        pod_level_cpu_queries = dict([(pod,f'sum(uptycs_kubernetes_cpu_stats{{pod=~"{pod}"}}) / 100') for pod in pod_names])
 
         app_level_memory_queries["gprofiler perf-record pns"]="sum(uptycs_app_memory{node_type='process',app_name='/app/gprofiler/resources/perf-record--F'}) by (app_name)"
         app_level_memory_queries["gprofiler perf-script pns"]="sum(uptycs_app_memory{node_type='process',app_name='/app/gprofiler/resources/perf-script--F'}) by (app_name)"
