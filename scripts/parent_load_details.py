@@ -83,7 +83,7 @@ class parent:
 
     @classmethod
     def get_pod_level_mem_used_queries(cls):
-        return dict([(f"Memory used by pod {pod}",(f'sum(uptycs_kubernetes_memory_stats{{pod=~"{pod}-deployment.*"}}) by (node) / (1024*1024*1024)' , ["node"], 'GB') ) for pod in cls.common_pod_names])
+        return dict([(f"Memory used by pod {pod}",(f'sum(uptycs_kubernetes_memory_stats{{pod=~"{pod}"}}) by (node) / (1024*1024*1024)' , ["node"], 'GB') ) for pod in cls.common_pod_names])
 
 
     @classmethod
@@ -100,7 +100,7 @@ class parent:
 
     @classmethod
     def get_pod_level_cpu_used_queries(cls):
-        return dict([(f"CPU used by pod {pod}",(f'sum(uptycs_kubernetes_cpu_stats{{pod=~"{pod}-deployment.*"}}) by (node) / 100' , ["node"] , 'cores') ) for pod in cls.common_pod_names])
+        return dict([(f"CPU used by pod {pod}",(f'sum(uptycs_kubernetes_cpu_stats{{pod=~"{pod}"}}) by (node) / 100' , ["node"] , 'cores') ) for pod in cls.common_pod_names])
 
 
     @staticmethod
