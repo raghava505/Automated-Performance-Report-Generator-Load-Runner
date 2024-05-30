@@ -201,9 +201,9 @@ if __name__ == "__main__":
             accuracy_obj= osq_accuracy(start_time_utc=start_utc_time,end_time_utc=end_utc_time,api_path=api_path,domain=domain,endline=1800*variables['load_duration_in_hrs'],assets_per_cust=assets_per_cust,ext=extension,trans=True,hours=variables['load_duration_in_hrs'],input_file=input_file_path)
             Osquery_table_accuracies = accuracy_obj.table_accuracy()
             print("Osquery_table_accuracies : ",Osquery_table_accuracies)
-            print("Calculating Events accuracies for Osquery Load ...")
-            Osquery_event_accuracies = accuracy_obj.events_accuracy(alert_rules_triggered_per_cust,event_rules_triggered_per_cust)
-            print("Osquery_event_accuracies : ",Osquery_event_accuracies)
+            # print("Calculating Events accuracies for Osquery Load ...")
+            # Osquery_event_accuracies = accuracy_obj.events_accuracy(alert_rules_triggered_per_cust,event_rules_triggered_per_cust)
+            # print("Osquery_event_accuracies : ",Osquery_event_accuracies)
         
 
         #-------------------------Kubequery Accuracies----------------------------
