@@ -129,6 +129,8 @@ class MC_comparisions:
             maximum = result[0]["values"]["maximum"]
             try:
                 print(str(query)==str(result[0]['metric']['app_name']))
+                print(str(query))
+                print(str(result[0]['metric']['app_name']))
             except Exception as e:
                 print("Warning : ", e)
             final[query] = {"percentage":{"average":avg , "minimum":minimum , "maximum":maximum}}
