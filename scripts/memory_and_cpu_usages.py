@@ -127,12 +127,12 @@ class MC_comparisions:
             avg = result[0]["values"]["average"]
             minimum = result[0]["values"]["minimum"]
             maximum = result[0]["values"]["maximum"]
-            try:
-                print(str(query)==str(result[0]['metric']['app_name']))
-                print(str(query))
-                print(str(result[0]['metric']['app_name']))
-            except Exception as e:
-                print("Warning : ", e)
+            # try:
+            #     print(str(query)==str(result[0]['metric']['app_name']))
+            #     print(str(query))
+            #     print(str(result[0]['metric']['app_name']))
+            # except Exception as e:
+            #     print("Warning : ", e)
             final[query] = {"percentage":{"average":avg , "minimum":minimum , "maximum":maximum}}
         return final 
     
@@ -167,8 +167,8 @@ class MC_comparisions:
         container_memory_queries = {'container' : "sum(uptycs_docker_mem_used{}/(1000*1000*1000)) by (container_name)",}
         container_cpu_queries = {'container' : "sum(uptycs_docker_cpu_stats{}/100) by (container_name)",}
 
-        app_level_memory_queries = dict([(app,f"sum({key}(uptycs_app_memory{{app_name=~'{app}'}}) by (app_name))") for key,app_list in app_names.items() for app in app_list])
-        app_level_cpu_queries = dict([(app,f"sum({key}(uptycs_app_cpu{{app_name=~'{app}'}}) by (app_name))") for key,app_list in app_names.items() for app in app_list])
+        app_level_memory_queries = dict([(app,f"{key}(uptycs_app_memory{{app_name=~'{app}'}})") for key,app_list in app_names.items() for app in app_list])
+        app_level_cpu_queries = dict([(app,f"{key}(uptycs_app_cpu{{app_name=~'{app}'}})") for key,app_list in app_names.items() for app in app_list])
 
         pod_level_memory_queries = dict([(pod,f'sum(uptycs_kubernetes_memory_stats{{pod=~"{pod}"}}) / (1024*1024*1024)') for pod in pod_names])
         pod_level_cpu_queries = dict([(pod,f'sum(uptycs_kubernetes_cpu_stats{{pod=~"{pod}"}}) / 100') for pod in pod_names])
