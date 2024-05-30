@@ -44,7 +44,8 @@ def execute_trino_query(node,query,prom_con_obj):
     return execute_command_in_node(node,trino_command,prom_con_obj)
 
 def execute_configdb_query(node,query,prom_con_obj):
-    configdb_command = f'sudo docker exec postgres-configdb bash -c "PGPASSWORD=pguptycs psql -U postgres configdb -c \"{query}\""'
+    configdb_command = f'sudo docker exec postgres-configdb bash -c "PGPASSWORD=pguptycs psql -U postgres configdb -c \\"{query}\\""'
+    print(configdb_command)
     return execute_command_in_node(node,configdb_command,prom_con_obj)
 
 def execute_point_prometheus_query(prom_con_obj,timestamp,query): 
