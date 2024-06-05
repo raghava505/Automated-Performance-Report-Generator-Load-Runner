@@ -37,7 +37,7 @@ class cloudquery_child(parent):
     @property
     def common_pod_names(cls):
         temp = copy.deepcopy(parent.common_pod_names)
-        temp.extend(["cloud-compliance-manager-deployment.*","cloud-crossaccount-processor-deployment.*","cloud-event-decorator-deployment.*","cloud-graph-processor-deployment.*","cloud-graph-synchronizer-deployment.*","cloudinstancemapper-consumer-deployment.*","cloudpreprocessor-deployment.*","cloudquery-consumer-deployment.*","cloudriskprocessor-deployment.*","cloudvuln-consumer-deployment.*","risks-consumer-deployment.*","statedb-deployment.*","dbsync-scheduler.*","cloud-detection-consumer.*"])
+        temp.extend(["cloud-compliance-manager-deployment.*","cloud-crossaccount-processor-deployment.*","cloud-event-decorator-deployment.*","cloud-graph-processor-deployment.*","cloud-graph-synchronizer-deployment.*","cloudinstancemapper-consumer-deployment.*","cloudpreprocessor-deployment.*","cloudquery-consumer-deployment.*","cloudriskprocessor-deployment.*","cloudvuln-consumer-deployment.*","risks-consumer-deployment.*","statedb-deployment.*","dbsync-scheduler.*","cloud-detection-consumer-deployment.*"])
         return temp
 
     @classmethod
