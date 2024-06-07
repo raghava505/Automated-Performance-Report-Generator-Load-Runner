@@ -7,9 +7,15 @@
     "stack_url": "https://neptune.uptycs.io/",
     "trino_password": "24e3ed40-0ea8-4051-b8c5-00ea379e843a",
     "elastic": "192.168.131.50",
-    "pgbadger_reports_mount":"opt/uptycs/etc/elk",
-    "event_rules_per_cust":{"enabled":39,"triggered":33},
-    "alert_rules_per_cust":{"enabled":39,"triggered":33},
+    "pgbadger_reports_mount": "opt/uptycs/etc/elk",
+    "event_rules_per_cust": {
+        "enabled": 39,
+        "triggered": 33
+    },
+    "alert_rules_per_cust": {
+        "enabled": 39,
+        "triggered": 33
+    },
     "pnodes": [
         "s2c1pn1",
         "s2c1pn2",
@@ -33,9 +39,7 @@
     "monitoring_node": [
         "s2monitor"
     ],
-    "stsnodes": [
-        
-    ],
+    "stsnodes": [],
     "kubesim_nodes": [
         "s2simhost2a",
         "s2simhost2b"
@@ -259,19 +263,11 @@
         "clst": "1"
     },
     "mlbank1b": {
-        "storage": {
-            "root_partition": "196G"
-        },
-        "ram": "47",
-        "cores": "8",
+        "storage": {},
         "clst": "1"
     },
     "mlbank1c": {
-        "storage": {
-            "root_partition": "196G"
-        },
-        "ram": "47",
-        "cores": "8",
+        "storage": {},
         "clst": "1"
     }
 }

@@ -1,5 +1,5 @@
 import concurrent.futures as cf
-from helper import execute_command_in_node , measure_time
+from helper import execute_trino_query , measure_time
 import json
 
 
@@ -30,17 +30,19 @@ configurations = {
 }
 
 
-def execute_on_trino_middleware(key,target_node,query,conn_object,schema="system") -> dict:
+def execute_on_trino_middleware(key,target_node,query,conn_object,schema) -> dict:
     res = {}
     res[key] = ""
     # print(f"Executing for {key}")
-    command = f"sudo -u monkey TRINO_PASSWORD=prestossl /opt/uptycs/cloud/utilities/trino-cli --insecure --server https://localhost:5665 --schema upt_{schema} --user uptycs --catalog uptycs --password --truststore-password sslpassphrase --truststore-path /opt/uptycs/etc/presto/presto.jks --execute \"{query}\""
+    # command = f"sudo -u monkey TRINO_PASSWORD=prestossl /opt/uptycs/cloud/utilities/trino-cli --insecure --server https://localhost:5665 --schema upt_{schema} --user uptycs --catalog uptycs --password --truststore-password sslpassphrase --truststore-path /opt/uptycs/etc/presto/presto.jks --execute \"{query}\""
     try:
-        value = execute_command_in_node(target_node,command,conn_object)
-        # "30" removing the "
-        value = value.replace('"',' ')
+        value = execute_trino_query(node=target_node,query=query,prom_con_obj=conn_object,schema=schema)
+        # print(value)
         
-        res[key] = int(value)
+        value = value.replace('"', ' ')
+        value = int(value)
+        res[key] = value
+        
         return res
     except Exception as err:
         print(f"ERR: load_params execute_on_trino_middleware {key} => {err}")

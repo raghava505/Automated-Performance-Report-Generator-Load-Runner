@@ -39,8 +39,8 @@ def execute_command_in_node(node,command,prom_con_obj):
     except socket.gaierror as e:
         raise RuntimeError(f"ERROR : Unable to connect to {node} , {e}") from e
 
-def execute_trino_query(node,query,prom_con_obj):
-    trino_command = f"sudo -u monkey TRINO_PASSWORD=prestossl /opt/uptycs/cloud/utilities/trino-cli --insecure --server https://localhost:5665 --schema upt_system --user uptycs --catalog uptycs --password --truststore-password sslpassphrase --truststore-path /opt/uptycs/etc/presto/presto.jks --execute \"{query}\""
+def execute_trino_query(node,query,prom_con_obj,schema="system"):
+    trino_command = f"sudo -u monkey docker exec trino-monitoring /opt/uptycs/cloud/utilities/trino-cli.sh --user uptycs --password prestossl --catalog uptycs --schema upt_{schema} --execute  \"{query}\""
     return execute_command_in_node(node,trino_command,prom_con_obj)
 
 def execute_configdb_query(node,query,prom_con_obj):
