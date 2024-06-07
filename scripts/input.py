@@ -34,7 +34,7 @@ def create_input_form():
             "test_env_file_name":'s2_nodes.json',
             "load_type":"KubeQuery_and_SelfManaged",
             "load_name": "KubeQuery_and_SelfManaged_Combined",
-            "start_time_str_ist":  "2024-05-17 02:49",
+            "start_time_str_ist":  "2024-06-06 21:41",
             "load_duration_in_hrs": 10,
             "sprint": 155,
             "build": "155007",
