@@ -6,7 +6,7 @@
     "extension": "net",
     "stack_url": "https://longevity.uptycs.net/",
     "elastic": "192.168.148.52",
-    "pgbadger_reports_mount":"data",
+    "pgbadger_reports_mount": "data",
     "api_presto_load_reports_node_ip": "192.168.145.94",
     "event_rules_per_cust": {
         "enabled": 39,
@@ -18,8 +18,8 @@
     },
     "pnodes": [
         "long-c1pn1",
-        "long-c2pn1",
         "long-c1pn2",
+        "long-c2pn1",
         "long-c2pn2",
         "long-c1pn3",
         "long-c2pn3",
