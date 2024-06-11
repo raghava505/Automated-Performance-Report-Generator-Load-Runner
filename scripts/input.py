@@ -31,7 +31,7 @@ test_env_path_options = sorted([file for file in all_files if file.endswith('.js
 
 def create_input_form():
     details = {
-            "test_env_file_name":'s2_nodes.json',
+            "test_env_file_name":'longevity_nodes.json',
             "load_type":"KubeQuery_and_SelfManaged",
             "load_name": "KubeQuery_and_SelfManaged_Combined",
             "start_time_str_ist":  "2024-06-06 21:41",
@@ -43,6 +43,7 @@ def create_input_form():
             }
     
     # These three lines are for Debugging Purposes :)
+    # print("DEBUG: EARLY RETURN IN INPUT.PY")
     # load_cls = load_type_options[details["load_type"]]['class']
     # prom_con_obj = configuration(test_env_file_name=details['test_env_file_name'] , fetch_node_parameters_before_generating_report=False)
     # return details,prom_con_obj,load_cls
