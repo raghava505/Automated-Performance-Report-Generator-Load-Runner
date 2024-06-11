@@ -117,11 +117,12 @@ if __name__ == "__main__":
         complete_resource_details=None
         cloudquery_accuracies=None
         complete_charts_data_dict=None
-        api_load_folder_name=None
         all_gridfs_fileids=[]
         compaction_status = None
         params = None
         
+        api_load_folder_name=str(variables["apiload_remote_directory_name"]).strip()
+
         # get necessary load parameters
         if variables["load_name"] in ["KubeQuery_SingleCustomer","SelfManaged_SingleCustomer","KubeQuery_and_SelfManaged_Combined"] or variables["load_type"] in ["all_loads_combined"]:
             load_params = Load_Params(start_time=start_utc_time, connection_object=prom_con_obj)
@@ -365,8 +366,8 @@ if __name__ == "__main__":
                 final_data_to_save.update({"charts":complete_charts_data_dict})
             if mem_cpu_usages_dict:
                 final_data_to_save.update(mem_cpu_usages_dict)
-            if api_load_folder_name and 'api_presto_load_reports_node_ip' in test_env_json_details:
-                final_data_to_save.update({"Api load report link":os.path.join(f"http://{test_env_json_details['api_presto_load_reports_node_ip']}:8000",prom_con_obj.api_loads_folder_path,api_load_folder_name,f"index.html")})
+            if api_load_folder_name and 'api_presto_load_reports_node_ip' in test_env_json_details and api_load_folder_name!="":
+                final_data_to_save.update({"Api load report link":os.path.join(f"http://{test_env_json_details['api_presto_load_reports_node_ip']}:8001",api_load_folder_name,f"index.html")})
             final_data_to_save.update({"observations":load_cls.get_dictionary_of_observations()})
             # all_gridfs_referenced_ids=all_gridfs_fileids[:]
             # final_data_to_save.update({"all_gridfs_referenced_ids":all_gridfs_referenced_ids})

@@ -38,6 +38,7 @@ def create_input_form():
             "load_duration_in_hrs": 10,
             "sprint": 155,
             "build": "155007",
+            "apiload_remote_directory_name":"jupiter_50_2024-06-11_15-38-03"
             # "fetch_node_parameters_before_generating_report" :  False,
             }
     
@@ -71,6 +72,8 @@ def create_input_form():
                 helper_text += "\n select one option " 
                 input_index = int(input(f"Enter : {' '.join(str(key).split('_')).title()} {helper_text} : ").strip())
                 input_value = test_env_path_options[input_index]
+            elif key == "apiload_remote_directory_name":
+                input_value=str(input(f"Enter : {' '.join(str(key).split('_')).title()}  (example: {value}) (NOTE : Press enter if None) : ").strip())
             else:
                 input_value=str(input(f"Enter : {' '.join(str(key).split('_')).title()}  (example: {value}) : ").strip())
         
