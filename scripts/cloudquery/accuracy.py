@@ -20,13 +20,8 @@ PROJECT_ROOT = Path(__file__).resolve().parent
 
 class ACCURACY:
 
-    def __init__(self,start_timestamp,end_timestamp,prom_con_obj,variables):
+    def __init__(self,start_timestamp,end_timestamp,stack_obj,variables):
         format_data = "%Y-%m-%d %H:%M"
-        self.PROMETHEUS = prom_con_obj.prometheus_path
-        self.API_PATH = prom_con_obj.prom_point_api_path
-        self.port=prom_con_obj.ssh_port
-        self.username = prom_con_obj.abacus_username
-        self.password  = prom_con_obj.abacus_password
         start_time = start_timestamp - timedelta(minutes=10)
         self.load_start = start_time.strftime(format_data)
         end_time = end_timestamp + timedelta(minutes=10)

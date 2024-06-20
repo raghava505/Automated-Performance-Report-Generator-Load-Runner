@@ -1,7 +1,7 @@
 import paramiko
 import pandas as pd
 import os
-
+from config_vars import *
 
 def fetch_and_extract_csv(remote_csv_path,reports_node_ip,prom_com_obj):
     if remote_csv_path == None or remote_csv_path == "":
@@ -14,7 +14,7 @@ def fetch_and_extract_csv(remote_csv_path,reports_node_ip,prom_com_obj):
     try:
         # Use SCP to copy the file from the remote host to the local machine
         with paramiko.Transport((reports_node_ip, 22)) as transport:
-            transport.connect(username=prom_com_obj.abacus_username, password=prom_com_obj.abacus_password)
+            transport.connect(username=abacus_username, password=abacus_password)
             sftp = paramiko.SFTPClient.from_transport(transport)
             sftp.get(remote_csv_path, local_csv_path)
             print(f"Fetched csv file successfully: {remote_csv_path}")
@@ -31,7 +31,7 @@ def fetch_and_extract_csv(remote_csv_path,reports_node_ip,prom_com_obj):
         print(e)
         return None
 
-def fetch_and_save_pdf(remote_pdf_path,reports_node_ip,prom_com_obj , local_pdf_path):
+def fetch_and_save_pdf(remote_pdf_path,reports_node_ip , local_pdf_path):
     if remote_pdf_path == None or remote_pdf_path == "":
         return None
     
@@ -41,7 +41,7 @@ def fetch_and_save_pdf(remote_pdf_path,reports_node_ip,prom_com_obj , local_pdf_
     try:
         # Use SCP to copy the file from the remote host to the local machine
         with paramiko.Transport((reports_node_ip, 22)) as transport:
-            transport.connect(username=prom_com_obj.abacus_username, password=prom_com_obj.abacus_password)
+            transport.connect(username=abacus_username, password=abacus_password)
             sftp = paramiko.SFTPClient.from_transport(transport)
             sftp.get(remote_pdf_path, local_pdf_path)
             print(f"Fetched PDF file successfully: {remote_pdf_path}")

@@ -1,18 +1,17 @@
 import requests
 import pandas as pd
-
+from config_vars import *
 databases = ["configdb","statedb"]
 
 
 
 class PG_STATS:
-    def __init__(self,start_timestamp,end_timestamp,load_dur,prom_con_obj):
+    def __init__(self,start_timestamp,end_timestamp,load_dur,stack_obj):
         self.curr_ist_start_time=start_timestamp
         self.curr_ist_end_time=end_timestamp
-        self.prom_con_obj=prom_con_obj
         self.load_duration=load_dur
-        self.PROMETHEUS = self.prom_con_obj.prometheus_path
-        self.API_PATH = self.prom_con_obj.prom_api_path
+        self.PROMETHEUS = stack_obj.prometheus_path
+        self.API_PATH = prom_api_path
         
     def get_data(self,db):
         query = f'uptycs_pg_stats{{db=~"{db}"}}'
@@ -82,6 +81,6 @@ class PG_STATS:
         
         return table_dict
 
-# from settings import configuration
-# cls  = PG_STATS(1702926000,1702947600,6,configuration("longevity_nodes.json"))
+# from settings import stack_configuration
+# cls  = PG_STATS(1702926000,1702947600,6,stack_configuration("longevity_nodes.json"))
 # print("FINAL O/P : " ,cls.process_output())

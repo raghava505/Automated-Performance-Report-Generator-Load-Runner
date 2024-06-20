@@ -14,15 +14,11 @@ from helper import measure_time
 # PROJECT_ROOT = Path(__file__).resolve().parent
 # CONFIG_PATH = "./config"
 
-# Variables
-ROOT_PATH = os.path.dirname(os.path.dirname(os.path.dirname(os.path.realpath(__file__))))
-base_stack_config_path = f"{ROOT_PATH}/config"
-print(base_stack_config_path)
 
 class Kube_Accuracy:
 
-    def __init__(self,start_timestamp,end_timestamp,prom_con_obj,variables):
-        test_env_file_path=prom_con_obj.test_env_file_path
+    def __init__(self,start_timestamp,end_timestamp,stack_obj,variables):
+        test_env_file_path=stack_obj.test_env_file_path
         with open(test_env_file_path,"r") as file:
             data = json.load(file)
         
@@ -32,7 +28,7 @@ class Kube_Accuracy:
         self.port = 22
         self.username = "abacus"
         self.password  = "abacus"
-        self.target_host = prom_con_obj.execute_trino_queries_in
+        self.target_host = stack_obj.execute_trino_queries_in
         self.cloud_domain = data["domain"]
         if self.cloud_domain ==  "longevity":
             self.cloud_domain = "longevity1"

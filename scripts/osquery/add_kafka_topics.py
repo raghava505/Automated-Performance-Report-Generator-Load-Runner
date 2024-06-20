@@ -1,21 +1,16 @@
 import paramiko
-import json
-
+from config_vars import *
 class kafka_topics:
-    def __init__(self,prom_con_obj):
-        self.local_script_path = f'{prom_con_obj.ROOT_PATH}/scripts/kafka_topics.py'
-        self.host = prom_con_obj.execute_kafka_topics_script_in
-        self.port=prom_con_obj.ssh_port
-        self.username = prom_con_obj.abacus_username
-        self.password  = prom_con_obj.abacus_password
-        # self.remote_directory = f'/home/{self.username}'
+    def __init__(self,stack_obj):
+        self.local_script_path = f'{ROOT_PATH}/scripts/kafka_topics.py'
+        self.host = stack_obj.execute_kafka_topics_script_in
 
     def add_topics_to_report(self):
         ssh = paramiko.SSHClient()
         ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
         try:
             print(f"Executing kafka topics script in host {self.host}")
-            ssh.connect(self.host, self.port, self.username, self.password)
+            ssh.connect(self.host, ssh_port, abacus_username, abacus_password)
             sftp = ssh.open_sftp()
             # remote_script_path = f'{self.remote_directory}/get_kafka_topics.py'
             remote_script_path="get_kafka_topics.py"

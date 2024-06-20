@@ -9,25 +9,22 @@ from fabric import Connection
 from datetime import timedelta
 from pathlib import Path
 from helper import measure_time
+from config_vars import *
 
-# Variables
-ROOT_PATH = os.path.dirname(os.path.dirname(os.path.dirname(os.path.realpath(__file__))))
-base_stack_config_path = f"{ROOT_PATH}/config"
 
 class SelfManaged_Accuracy:
 
-    def __init__(self,start_timestamp,end_timestamp,prom_con_obj,variables):
-        test_env_file_path=prom_con_obj.test_env_file_path
+    def __init__(self,start_timestamp,end_timestamp,stack_obj,variables):
+        test_env_file_path=stack_obj.test_env_file_path
         with open(test_env_file_path,"r") as file:
             data = json.load(file)
         
         self.load_start=start_timestamp
         self.load_end=end_timestamp
         self.upt_day="".join(str(start_timestamp.strftime("%Y-%m-%d")).split('-'))
-        self.port=prom_con_obj.ssh_port
-        self.username = prom_con_obj.abacus_username
-        self.password  = prom_con_obj.abacus_password
-        self.target_host = prom_con_obj.execute_trino_queries_in
+        self.username = abacus_username
+        self.password  = abacus_password
+        self.target_host = stack_obj.execute_trino_queries_in
         self.cloud_domain = data["domain"]
         if self.cloud_domain ==  "longevity":
             self.cloud_domain = "longevity1"
@@ -64,7 +61,7 @@ class SelfManaged_Accuracy:
         for node in self.simnodes:
             ssh_client = paramiko.SSHClient()
             ssh_client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-            ssh_client.connect(node, self.port, self.username, self.password)
+            ssh_client.connect(node, ssh_port, self.username, self.password)
             
             for port in ports: 
                 command = "cd /home/abacus/vsi_selfmanaged && cat osx_log{}.out | grep statistic".format(port)

@@ -5,17 +5,9 @@ import json
 import concurrent.futures
 
 class Elk_erros:
-    def __init__(self, start_timestamp, end_timestamp, prom_con_obj):
+    def __init__(self, start_timestamp, end_timestamp, stack_obj):
         try:
-            self.curr_ist_start_time = start_timestamp
-            self.curr_ist_end_time = end_timestamp
-
-            self.PROMETHEUS = prom_con_obj.prometheus_path
-            self.API_PATH = prom_con_obj.prom_point_api_path
-            self.port = prom_con_obj.ssh_port
-            self.username = prom_con_obj.abacus_username
-            self.password = prom_con_obj.abacus_password
-            elastic_ip=prom_con_obj.elastic_ip
+            elastic_ip=stack_obj.elastic_ip
 
             self.contents = ["ruleengine", "tls", "nginx", "metastoredb", "pgbouncer", "osqueryIngestion", "redis",
                              "spark", "data-archival", "compaction", "hdfsWrapper", "loginserver", "maintenance",

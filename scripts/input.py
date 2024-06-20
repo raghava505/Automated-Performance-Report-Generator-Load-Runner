@@ -1,4 +1,4 @@
-from settings import configuration
+from settings import stack_configuration
 import os,json
 from parent_load_details import parent
 from osquery.osquery_child_class import osquery_child
@@ -6,6 +6,8 @@ from cloudquery.cloudquery_child_class import cloudquery_child
 from kubequery.kubequery_child_class import kubequery_child
 from combined_loads_setup import all_combined_child
 from collections import defaultdict
+from config_vars import base_stack_config_path
+
 bool_options=[False,True]
 load_type_options = {   
                         'Osquery':{
@@ -26,7 +28,7 @@ load_type_options = {
                                     }
                      }
 
-all_files = os.listdir(configuration().base_stack_config_path)
+all_files = os.listdir(base_stack_config_path)
 test_env_path_options = sorted([file for file in all_files if file.endswith('.json') and '_nodes' in file])
 
 def create_input_form():
@@ -39,14 +41,13 @@ def create_input_form():
             "sprint": 155,
             "build": "155007",
             "apiload_remote_directory_name":"jupiter_50_2024-06-11_15-38-03"
-            # "fetch_node_parameters_before_generating_report" :  False,
             }
     
     # These three lines are for Debugging Purposes :)
     # print("DEBUG: EARLY RETURN IN INPUT.PY")
     # load_cls = load_type_options[details["load_type"]]['class']
-    # prom_con_obj = configuration(test_env_file_name=details['test_env_file_name'] , fetch_node_parameters_before_generating_report=False)
-    # return details,prom_con_obj,load_cls
+    # stack_obj = stack_configuration(test_env_file_name=details['test_env_file_name'])
+    # return details,stack_obj,load_cls
 
     print("Please enter the following load details ...")
     for key,value in details.items():
@@ -130,8 +131,8 @@ def create_input_form():
 
     if user_input =='y':
         print("Continuing ...")
-        prom_con_obj = configuration(test_env_file_name=details['test_env_file_name'] , fetch_node_parameters_before_generating_report=True)
-        return details,prom_con_obj,load_cls
+        stack_obj = stack_configuration(test_env_file_name=details['test_env_file_name'])
+        return details,stack_obj,load_cls
     elif user_input =='n':
         print("OK! Enter the modified details ...")
         return create_input_form()

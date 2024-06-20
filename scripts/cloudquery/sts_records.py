@@ -16,14 +16,9 @@ import pandas as pd
 PROJECT_ROOT = Path(__file__).resolve().parent
 
 class STS_RECORDS:
-    def __init__(self,start_timestamp,end_timestamp,prom_con_obj,variables):
+    def __init__(self,start_timestamp,end_timestamp,stack_obj,variables):
         self.load_start=start_timestamp
         self.load_end=end_timestamp
-        self.PROMETHEUS = prom_con_obj.prometheus_path
-        self.API_PATH = prom_con_obj.prom_point_api_path
-        self.port=prom_con_obj.ssh_port
-        self.username = prom_con_obj.abacus_username
-        self.password  = prom_con_obj.abacus_password
         self.api_path=None
         self.load_name = variables['load_name']
 
