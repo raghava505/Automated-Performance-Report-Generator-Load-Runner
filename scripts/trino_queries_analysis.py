@@ -9,13 +9,10 @@ pd.set_option('display.expand_frame_repr', False)
 from time_taken_by_all_queries import get_full_query,time_ranges
 
 class TRINO_ANALYSE:
-    def __init__(self,start_utc_str,end_utc_str,prom_con_obj):
-        self.prom_con_obj = prom_con_obj
+    def __init__(self,start_utc_str,end_utc_str,stack_obj):
         self.start_utc_str=start_utc_str
         self.end_utc_str=end_utc_str
-        self.remote_username = prom_con_obj.abacus_username
-        self.remote_password  = prom_con_obj.abacus_password
-        self.dnode = prom_con_obj.execute_trino_queries_in
+        self.dnode = stack_obj.execute_trino_queries_in
 
     def get_trino_commands(self):
         limit=20
@@ -431,7 +428,7 @@ class TRINO_ANALYSE:
             schema = value["schema"]
             query = raw_command.replace("<start_utc_str>",self.start_utc_str).replace( "<end_utc_str>", self.end_utc_str)
             print(f"\n************************** {heading} ************************ :\n {query}")
-            output= execute_trino_query(self.dnode,query,self.prom_con_obj)
+            output= execute_trino_query(self.dnode,query)
             # if not output or output.strip()=="":
             #     raise RuntimeError(f"ERROR : command output is empty. Check if trino @ {self.dnode} is in good state. Terminating program ...")
             stringio = StringIO(output)
@@ -468,7 +465,7 @@ class TRINO_ANALYSE:
     
 if __name__=='__main__':
     print("Testing trino queries analysis ...")
-    from settings import configuration
+    from settings import stack_configuration
     from datetime import datetime, timedelta
     import pytz
     format_data = "%Y-%m-%d %H:%M"
@@ -492,7 +489,7 @@ if __name__=='__main__':
     end_timestamp = int(end_ist_time.timestamp())
     end_utc_time = end_ist_time.astimezone(utc_timezone)
     end_utc_str = end_utc_time.strftime(format_data)
-    calc = TRINO_ANALYSE(start_utc_str,end_utc_str,prom_con_obj=configuration('s1_nodes.json'))
+    calc = TRINO_ANALYSE(start_utc_str,end_utc_str,stack_obj=stack_configuration('s1_nodes.json'))
     trino_queries = calc.fetch_trino_results()
     import pandas as pd
     from pymongo import MongoClient

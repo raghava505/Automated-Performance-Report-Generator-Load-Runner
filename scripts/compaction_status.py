@@ -5,12 +5,12 @@ import json
 import concurrent.futures
 
 class CompactionStatus:
-    def __init__(self, start_timestamp, end_timestamp, prom_con_obj):
+    def __init__(self, start_timestamp, end_timestamp, stack_obj):
         try:
             self.curr_ist_start_time = start_timestamp
             self.curr_ist_end_time = end_timestamp
             
-            self.elasticsearch_host = f"http://{prom_con_obj.elastic_ip}:9200"
+            self.elasticsearch_host = f"http://{stack_obj.elastic_ip}:9200"
             self.elastic_client = Elasticsearch(hosts=[self.elasticsearch_host], timeout=240)
 
             dt_object = datetime.utcfromtimestamp(start_timestamp)

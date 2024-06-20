@@ -200,7 +200,7 @@ if __name__=="__main__":
     import time,pymongo
     from collections import defaultdict
     from gridfs import GridFS
-    from settings import configuration
+    from settings import stack_configuration
     from datetime import datetime, timedelta
     import pytz
     from capture_charts_data import Charts
@@ -230,10 +230,10 @@ if __name__=="__main__":
     end_timestamp = int(end_ist_time.timestamp())
     end_utc_time = end_ist_time.astimezone(utc_timezone)
     end_utc_str = end_utc_time.strftime(format_data)
-    prom_con_obj=configuration('longevity_nodes.json')
+    stack_obj=stack_configuration('longevity_nodes.json')
 
     print("Fetching charts data ...")
-    charts_obj = Charts(start_timestamp=start_timestamp,end_timestamp=end_timestamp,prom_con_obj=prom_con_obj,fs=fs,hours=hours)
+    charts_obj = Charts(start_timestamp=start_timestamp,end_timestamp=end_timestamp,stack_obj=stack_obj,fs=fs,hours=hours)
     
     step_factor=hours/10 if hours>10 else 1
     # complete_charts_data_dict,all_gridfs_fileids=charts_obj.capture_charts_and_save(load_cls.get_all_chart_queries(),step_factor=step_factor)

@@ -4,6 +4,7 @@ import concurrent.futures
 import requests
 import time
 from collections import defaultdict
+from config_vars import *
 
 def measure_time(func):
     """Decorator to measure the execution time of a function."""
@@ -16,14 +17,14 @@ def measure_time(func):
         return result
     return wrapper
 
-def execute_command_in_node(node,command,prom_con_obj):
+def execute_command_in_node(node,command):
     try:
         print(f"Executing the command in node : {node}")
         client = paramiko.SSHClient()
         client.load_system_host_keys() 
         client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
         try:
-            client.connect(node, prom_con_obj.ssh_port, prom_con_obj.abacus_username, prom_con_obj.abacus_password)
+            client.connect(node, ssh_port, abacus_username, abacus_password)
             stdin, stdout, stderr = client.exec_command(command)
             out = stdout.read().decode('utf-8').strip()
             errors = stderr.read().decode('utf-8')
@@ -39,29 +40,29 @@ def execute_command_in_node(node,command,prom_con_obj):
     except socket.gaierror as e:
         raise RuntimeError(f"ERROR : Unable to connect to {node} , {e}") from e
 
-def execute_trino_query(node,query,prom_con_obj,schema="system"):
+def execute_trino_query(node,query,schema="system"):
     trino_command = f"sudo -u monkey docker exec trino-monitoring /opt/uptycs/cloud/utilities/trino-cli.sh --user uptycs --password prestossl --catalog uptycs --schema upt_{schema} --execute  \"{query}\""
-    return execute_command_in_node(node,trino_command,prom_con_obj)
+    return execute_command_in_node(node,trino_command)
 
-def execute_configdb_query(node,query,prom_con_obj):
+def execute_configdb_query(node,query):
     configdb_command = f'sudo docker exec postgres-configdb bash -c "PGPASSWORD=pguptycs psql -U postgres configdb -c \\"{query}\\""'
     print(configdb_command)
-    return execute_command_in_node(node,configdb_command,prom_con_obj)
+    return execute_command_in_node(node,configdb_command)
 
-def execute_point_prometheus_query(prom_con_obj,timestamp,query): 
-    PROMETHEUS = prom_con_obj.prometheus_path
-    for metric in prom_con_obj.kube_metrics:
+def execute_point_prometheus_query(stack_obj,timestamp,query): 
+    PROMETHEUS = stack_obj.prometheus_path
+    for metric in kube_metrics:
         if metric in query:
-            PROMETHEUS = prom_con_obj.kube_prometheus_path 
+            PROMETHEUS = stack_obj.kube_prometheus_path 
             print("pod level metric found.. using prometheous path : " , PROMETHEUS)
   
     PARAMS = {
         'query': query,
         'time' : timestamp
     }
-    print(f"Executing {query} at {prom_con_obj.monitoring_ip} at a single timestamp {timestamp}...")
+    print(f"Executing {query} at {stack_obj.monitoring_ip} at a single timestamp {timestamp}...")
     try:
-        response = requests.get(PROMETHEUS + prom_con_obj.prom_point_api_path, params=PARAMS)
+        response = requests.get(PROMETHEUS + prom_point_api_path, params=PARAMS)
         if response.status_code != 200:
             raise RuntimeError(f"API request failed with status code {response.status_code}")
         result = response.json()['data']['result']
@@ -74,14 +75,14 @@ def execute_point_prometheus_query(prom_con_obj,timestamp,query):
     except Exception as e:
         raise RuntimeError(f"An unexpected error occurred: {e}")
 
-def execute_prometheus_query(prom_con_obj,start_timestamp,end_timestamp,query,hours,preprocess=True,step_factor=None):
-    PROMETHEUS = prom_con_obj.prometheus_path
-    for metric in prom_con_obj.kube_metrics:
+def execute_prometheus_query(stack_obj,start_timestamp,end_timestamp,query,hours,preprocess=True,step_factor=None):
+    PROMETHEUS = stack_obj.prometheus_path
+    for metric in kube_metrics:
         if metric in query:
-            PROMETHEUS = prom_con_obj.kube_prometheus_path
+            PROMETHEUS = stack_obj.kube_prometheus_path
             print("pod level metric found.. using prometheous path : " , PROMETHEUS)
 
-    API_PATH = prom_con_obj.prom_api_path
+    API_PATH = prom_api_path
     if not step_factor:
         step_factor=hours/10 if hours>10 else 1
     step=60*step_factor
@@ -94,7 +95,6 @@ def execute_prometheus_query(prom_con_obj,start_timestamp,end_timestamp,query,ho
         'end': end_timestamp,
         'step':step
     }
-    # print(f"Executing {query} at {prom_con_obj.monitoring_ip} ...")
 
     try:
         response = requests.get(PROMETHEUS + API_PATH, params=PARAMS)
@@ -123,10 +123,7 @@ def execute_prometheus_query(prom_con_obj,start_timestamp,end_timestamp,query,ho
     except Exception as e:
         raise RuntimeError(f"An unexpected error occurred: {e}")
 
-def extract_node_detail(data,node_type,prom_con_obj):
-    port=prom_con_obj.ssh_port
-    username = prom_con_obj.abacus_username
-    password  = prom_con_obj.abacus_password
+def extract_node_detail(data,node_type):
     return_dict={}
     for hostname in data[node_type]:
         return_dict[hostname] = {}
@@ -136,7 +133,7 @@ def extract_node_detail(data,node_type,prom_con_obj):
             client.load_system_host_keys() 
             client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
             try:
-                client.connect(hostname, port, username, password)
+                client.connect(hostname, ssh_port, abacus_username, abacus_password)
                 commands = {"ram" : "free -g | awk '/Mem:/ {print $2}'" , "cores":"lscpu | awk '/^CPU\(s\):/ {print $2}'"}
                 for label,command in commands.items():
                     stdin, stdout, stderr = client.exec_command(command)
@@ -183,18 +180,18 @@ def extract_node_detail(data,node_type,prom_con_obj):
         else:return_dict[hostname]['clst'] = "1"
     return return_dict
 
-def extract_stack_details(nodes_file_path,prom_con_obj):
+def extract_stack_details(nodes_file_path):
     with open(nodes_file_path,'r') as file:
         data = json.load(file)
-    def extract_node_detail_wrapper(data, node_type, prom_con_obj):
-        return extract_node_detail(data, node_type, prom_con_obj)
+    def extract_node_detail_wrapper(data, node_type):
+        return extract_node_detail(data, node_type)
     with concurrent.futures.ThreadPoolExecutor(max_workers=4) as executor:
-        future1 = executor.submit(extract_node_detail_wrapper, data, 'pnodes', prom_con_obj)
-        future2 = executor.submit(extract_node_detail_wrapper, data, 'dnodes', prom_con_obj)
-        future3 = executor.submit(extract_node_detail_wrapper, data, 'pgnodes', prom_con_obj)
-        future4 = executor.submit(extract_node_detail_wrapper, data, 'monitoring_node', prom_con_obj)
-        future5 = executor.submit(extract_node_detail_wrapper, data, 'other_nodes', prom_con_obj)
-        future6 = executor.submit(extract_node_detail_wrapper, data, 'stsnodes', prom_con_obj)
+        future1 = executor.submit(extract_node_detail_wrapper, data, 'pnodes')
+        future2 = executor.submit(extract_node_detail_wrapper, data, 'dnodes')
+        future3 = executor.submit(extract_node_detail_wrapper, data, 'pgnodes')
+        future4 = executor.submit(extract_node_detail_wrapper, data, 'monitoring_node')
+        future5 = executor.submit(extract_node_detail_wrapper, data, 'other_nodes')
+        future6 = executor.submit(extract_node_detail_wrapper, data, 'stsnodes')
         completed_futures, _ = concurrent.futures.wait([future1, future2, future3, future4 , future5,future6])
     pnodes = future1.result()
     dnodes = future2.result()

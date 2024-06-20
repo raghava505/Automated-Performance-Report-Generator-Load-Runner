@@ -1,10 +1,8 @@
 import pymongo
 # from gridfs import GridFS
-from settings import configuration
 from bson.objectid import ObjectId
 import shutil,os
-
-prom_con_obj=configuration()
+from config_vars import ROOT_PATH,mongo_connection_string
 
 print("Enter the details to delete a docoment : ")
 database_name=input("Enter the database name : ")
@@ -14,7 +12,6 @@ document_id=input("Enter the document ID : ")
 decision = input("This will delete a document in the database. Are you sure you want to proceed? (y/n) ")
 
 if decision == "y":
-    mongo_connection_string=prom_con_obj.mongo_connection_string
     client = pymongo.MongoClient(mongo_connection_string)
     db=client[database_name]
     collection = db[collection_name]
@@ -31,11 +28,11 @@ if decision == "y":
         #     fs.delete(file_id=file_id)
             
         result = collection.delete_one({'_id': ObjectId(document_id)})
-        BASE_GRAPHS_PATH = os.path.join(os.path.dirname(prom_con_obj.ROOT_PATH),'graphs')
+        BASE_GRAPHS_PATH = os.path.join(os.path.dirname(ROOT_PATH),'graphs')
         graphs_path=f"{BASE_GRAPHS_PATH}/{database_name}/{collection_name}/{document_id}"
-        BASE_PDFS_PATH = os.path.join(os.path.dirname(prom_con_obj.ROOT_PATH),'pdfs')
+        BASE_PDFS_PATH = os.path.join(os.path.dirname(ROOT_PATH),'pdfs')
         pdfs_path=f"{BASE_PDFS_PATH}/{database_name}/{collection_name}/{document_id}"
-        BASE_HTMLS_PATH = os.path.join(os.path.dirname(prom_con_obj.ROOT_PATH),'htmls')
+        BASE_HTMLS_PATH = os.path.join(os.path.dirname(ROOT_PATH),'htmls')
         htmls_path=f"{BASE_HTMLS_PATH}/{database_name}/{collection_name}/{document_id}"
         try:
             shutil.rmtree(graphs_path)

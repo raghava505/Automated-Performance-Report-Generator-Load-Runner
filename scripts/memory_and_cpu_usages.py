@@ -9,15 +9,15 @@ memory_unit = "GB"
 cpu_unit = "cores"
 threshold = 0.03
 class MC_comparisions:
-    def __init__(self,prom_con_obj,start_timestamp,end_timestamp,hours,include_nodetypes):
+    def __init__(self,stack_obj,start_timestamp,end_timestamp,hours,include_nodetypes):
         self.curr_ist_start_time=start_timestamp
         self.curr_ist_end_time=end_timestamp
-        self.prom_con_obj=prom_con_obj
+        self.stack_obj=stack_obj
         self.hours=hours
         self.include_nodetypes=include_nodetypes
 
         total_memory_capacity_query = "sum(uptycs_total_memory/(1024*1024)) by (node_type,host_name)"
-        memory_result = execute_point_prometheus_query(self.prom_con_obj,self.curr_ist_start_time,total_memory_capacity_query)
+        memory_result = execute_point_prometheus_query(self.stack_obj,self.curr_ist_start_time,total_memory_capacity_query)
         self.node_ram_capacity = {}
         self.all_node_types_mapping=defaultdict(lambda:[])
 
@@ -28,7 +28,7 @@ class MC_comparisions:
             self.all_node_types_mapping[line["metric"]["node_type"]].append(node_name)
      
         total_cpu_capacity_query = "sum(uptycs_loadavg_cpu_info) by (host_name,cpu_processor)"
-        cpu_result = execute_point_prometheus_query(self.prom_con_obj,self.curr_ist_start_time,total_cpu_capacity_query)
+        cpu_result = execute_point_prometheus_query(self.stack_obj,self.curr_ist_start_time,total_cpu_capacity_query)
         self.node_cores_capacity = {}
         for line in cpu_result:
             node_name = line["metric"]["host_name"]
@@ -47,7 +47,7 @@ class MC_comparisions:
         for query in queries:
             final[query] = {}
             print(f"-------processing {tag} for {query} (timestamp : {self.curr_ist_start_time} to {self.curr_ist_end_time})")
-            for res in execute_prometheus_query(self.prom_con_obj,self.curr_ist_start_time,self.curr_ist_end_time,queries[query],self.hours):
+            for res in execute_prometheus_query(self.stack_obj,self.curr_ist_start_time,self.curr_ist_end_time,queries[query],self.hours):
                 hostname = res['metric']['host_name'] 
                 avg = res["values"]["average"]
                 minimum = res["values"]["minimum"]
@@ -107,7 +107,7 @@ class MC_comparisions:
         for query in queries:
             final[query] = {}
             print(f"----------processing {tag} for {query} (timestamp : {self.curr_ist_start_time} to {self.curr_ist_end_time})")
-            for res in execute_prometheus_query(self.prom_con_obj,self.curr_ist_start_time,self.curr_ist_end_time,queries[query],self.hours):
+            for res in execute_prometheus_query(self.stack_obj,self.curr_ist_start_time,self.curr_ist_end_time,queries[query],self.hours):
                 container_name = res['metric']['container_name']
                 avg = res["values"]["average"]
                 if avg <= threshold:continue
@@ -120,7 +120,7 @@ class MC_comparisions:
         print(f"----------processing application level {tag} usages for (timestamp : {self.curr_ist_start_time} to {self.curr_ist_end_time})")
         for query in queries:
             print(f"processing {tag} usage for {query} application (timestamp : {self.curr_ist_start_time} to {self.curr_ist_end_time})")
-            result=execute_prometheus_query(self.prom_con_obj,self.curr_ist_start_time,self.curr_ist_end_time,queries[query],self.hours)
+            result=execute_prometheus_query(self.stack_obj,self.curr_ist_start_time,self.curr_ist_end_time,queries[query],self.hours)
             if len(result)==0:
                 print(f"WARNING : No data found for : {query}, the query executed is : {queries[query]}")
                 continue
@@ -141,7 +141,7 @@ class MC_comparisions:
         print(f"----------processing pod level {tag} usages for (timestamp : {self.curr_ist_start_time} to {self.curr_ist_end_time})")
         for query in queries:
             print(f"processing {tag} usage for {query} pod (timestamp : {self.curr_ist_start_time} to {self.curr_ist_end_time})")
-            result=execute_prometheus_query(self.prom_con_obj,self.curr_ist_start_time,self.curr_ist_end_time,queries[query],self.hours)
+            result=execute_prometheus_query(self.stack_obj,self.curr_ist_start_time,self.curr_ist_end_time,queries[query],self.hours)
             if len(result)==0:
                 print(f"WARNING : No data found for : {query}, the query executed is : {queries[query]}")
                 continue

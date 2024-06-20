@@ -1,10 +1,10 @@
 from helper import execute_prometheus_query
 
 class Charts:
-    def __init__(self,prom_con_obj,start_timestamp,end_timestamp,fs,hours):
+    def __init__(self,stack_obj,start_timestamp,end_timestamp,fs,hours):
         self.curr_ist_start_time=start_timestamp
         self.curr_ist_end_time=end_timestamp
-        self.prom_con_obj=prom_con_obj
+        self.stack_obj=stack_obj
         self.add_extra_time_for_charts_at_end_in_min=2*hours
         self.add_extra_time_for_charts_at_start_in_min=2*hours
         self.fs=fs
@@ -18,7 +18,7 @@ class Charts:
 
         for query in queries:
             main_query = queries[query][0]
-            result=execute_prometheus_query(self.prom_con_obj,ste,ete,main_query,self.hours,preprocess=False,step_factor=step_factor)
+            result=execute_prometheus_query(self.stack_obj,ste,ete,main_query,self.hours,preprocess=False,step_factor=step_factor)
             legend_list = queries[query][1]
             try:unit = queries[query][2]
             except:unit=""

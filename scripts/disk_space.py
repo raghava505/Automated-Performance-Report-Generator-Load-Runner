@@ -2,10 +2,10 @@ import json
 from helper import execute_point_prometheus_query
 
 class DISK:
-    def __init__(self,start_timestamp,end_timestamp,prom_con_obj):
+    def __init__(self,start_timestamp,end_timestamp,stack_obj):
         self.curr_ist_start_time=start_timestamp
         self.curr_ist_end_time=end_timestamp
-        self.prom_con_obj=prom_con_obj
+        self.stack_obj=stack_obj
 
         # self.kafka_total_space = {}
         # for pnode in self.stack_details['pnodes']:
@@ -28,7 +28,7 @@ class DISK:
 
     def extract_data(self,query,timestamp , TAG):
         final=dict()
-        result= execute_point_prometheus_query(self.prom_con_obj,timestamp,query)
+        result= execute_point_prometheus_query(self.stack_obj,timestamp,query)
         for res in result:
             node = res['metric'][TAG]
             remaining =  float(res['value'][1])
