@@ -19,29 +19,22 @@
     "pnodes": [
         "s2c1pn1",
         "s2c1pn2",
-        "s2c1pn3",
-        "s2c1pn4",
-        "s2c1pn5",
-        "s2c1pn6"
+        "s2c1pn3"
     ],
     "dnodes": [
         "s2c1dn1",
         "s2c1dn2",
-        "s2c1dn3",
-        "s2c1dn4",
-        "s2c1dn5",
-        "s2c1dn6"
+        "s2c1dn3"
     ],
     "pgnodes": [
-        "s2configdb1",
-        "s2configdb2"
+        "s2configdb1"
     ],
     "monitoring_node": [
         "s2monitor"
     ],
     "stsnodes": [],
     "kubesim_nodes": [
-        "s2simhost2a",
+        "s2simhost2c",
         "s2simhost2b"
     ],
     "selfsim_nodes": [
