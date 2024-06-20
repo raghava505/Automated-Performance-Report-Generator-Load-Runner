@@ -48,6 +48,8 @@ class DISK:
             total_space=self.extract_data(self.get_kafka_total_space,self.curr_ist_start_time,'host_name')
             used_space_before_load = self.extract_data(self.kafka_disk_used_percentage,self.curr_ist_start_time,'host_name')
             used_space_after_load = self.extract_data(self.kafka_disk_used_percentage,self.curr_ist_end_time,'host_name')
+            print("used_space_before_load : ", used_space_before_load)
+            print("used_space_after_load : ", used_space_after_load)
             nodes = [node for node in used_space_before_load]
         print(f"Total {TYPE} space configured: ")
         print(json.dumps(total_space, indent=4))
@@ -57,18 +59,21 @@ class DISK:
         bytes_in_a_gb=(1024**3)
 
         for node in nodes:
-            if TYPE=='hdfs':
-                total = total_space[node]/bytes_in_a_tb
-                remaining_before_load = remaining_space_before_load[node]/bytes_in_a_tb
-                remaining_after_load = remaining_space_after_load[node]/bytes_in_a_tb
-                percentage_used_before_load=((total-remaining_before_load)/total)*100
-                percentage_used_after_load=((total-remaining_after_load)/total)*100
-            elif TYPE=='kafka':
-                total = total_space[node]/bytes_in_a_gb
-                percentage_used_before_load=used_space_before_load[node]
-                percentage_used_after_load=used_space_after_load[node]
-            used_space=(percentage_used_after_load-percentage_used_before_load)*total*(1024/100)
-            save_dict[node] = {f"{TYPE}_total_space_configured_in_tb" : total , f"{TYPE}_disk_used_percentage_before_load" :percentage_used_before_load,f"{TYPE}_disk_used_percentage_after_load":percentage_used_after_load,f"{TYPE} used_space_during_load_in_gb":used_space}
+            try:
+                if TYPE=='hdfs':
+                    total = total_space[node]/bytes_in_a_tb
+                    remaining_before_load = remaining_space_before_load[node]/bytes_in_a_tb
+                    remaining_after_load = remaining_space_after_load[node]/bytes_in_a_tb
+                    percentage_used_before_load=((total-remaining_before_load)/total)*100
+                    percentage_used_after_load=((total-remaining_after_load)/total)*100
+                elif TYPE=='kafka':
+                    total = total_space[node]/bytes_in_a_gb
+                    percentage_used_before_load=used_space_before_load[node]
+                    percentage_used_after_load=used_space_after_load[node]
+                used_space=(percentage_used_after_load-percentage_used_before_load)*total*(1024/100)
+                save_dict[node] = {f"{TYPE}_total_space_configured_in_tb" : total , f"{TYPE}_disk_used_percentage_before_load" :percentage_used_before_load,f"{TYPE}_disk_used_percentage_after_load":percentage_used_after_load,f"{TYPE} used_space_during_load_in_gb":used_space}
+            except Exception as e:
+                print(f"error calculating {TYPE} usage for node {node}")
         print("Final dictionary to save : " , )
         print(json.dumps(save_dict, indent=4))
         return TYPE,save_dict
