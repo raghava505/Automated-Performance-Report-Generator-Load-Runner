@@ -14,12 +14,12 @@ class parent:
     @classmethod
     @property
     def common_container_names(cls):
-        return ["ingestion","debezium","api","query-runner","graph-query-runner"]
+        return ["ingestion","spark-master","spark-worker","debezium","nginx","mongo","alluxio-master","alluxio-worker","metastore"]
     
     @classmethod
     @property
     def common_pod_names(cls):
-        return ["configdb-deployment.*","deadletter-consumer-deployment.*","debezium-consumer-deployment.*","compliance-check-runner-deployment.*","compliance-summary-consumer-deployment.*","latest-snapshot-consumer-deployment.*","decorators-consumer-deployment.*","checksum-validator-deployment.*","apiscraper-consumer-deployment.*"]
+        return ["api.*","query-runner.*","graph-query-runner.*","configdb-deployment.*","deadletter-consumer-deployment.*","debezium-consumer-deployment.*","compliance-check-runner-deployment.*","compliance-summary-consumer-deployment.*","latest-snapshot-consumer-deployment.*","decorators-consumer-deployment.*","checksum-validator-deployment.*","apiscraper-consumer-deployment.*"]
 
     @classmethod
     @property
@@ -34,7 +34,7 @@ class parent:
     @classmethod
     @property
     def kafka_group_names(cls):
-        return ['db-alerts','ruleengine','debeziumconsumer','db-incidents','apiScraperSecPosConsumerGroup','decorators']
+        return ['db-events','db-alerts','db-incidents','ruleengine','debeziumconsumer','apiScraperSecPosConsumerGroup','decorators']
     
     @classmethod
     @property
