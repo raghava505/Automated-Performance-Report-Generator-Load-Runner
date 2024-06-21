@@ -3,7 +3,7 @@ import pandas as pd
 import os
 from config_vars import *
 
-def fetch_and_extract_csv(remote_csv_path,reports_node_ip,prom_com_obj):
+def fetch_and_extract_csv(remote_csv_path,reports_node_ip):
     if remote_csv_path == None or remote_csv_path == "":
         return None
     

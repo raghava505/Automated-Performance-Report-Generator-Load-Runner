@@ -98,7 +98,7 @@ if __name__ == "__main__":
         kafka_topics_list=None
         active_conn_results=None
         trino_queries_analyse_results=None
-        api_load_result_dict=None
+        # api_load_result_dict=None
         presto_load_result_dict=None
         Osquery_table_accuracies=None
         Osquery_event_accuracies=None
@@ -172,20 +172,20 @@ if __name__ == "__main__":
         print("Fetching Trino queries details ...")
         trino_obj = TRINO_ANALYSE(start_utc_str,end_utc_str,stack_obj=stack_obj)
         trino_queries_analyse_results = trino_obj.fetch_trino_results()
-        #-------------------------API LOAD--------------------------
-        if 'api_presto_load_reports_node_ip' in test_env_json_details:
-            print(f"Looking for api load  and presto load csv files in {test_env_json_details['api_presto_load_reports_node_ip']}")
+        #-------------------------Presto LOAD--------------------------
+        if 'prestoload_simulator_ip' in test_env_json_details:
+            print(f"Looking for presto load csv files in {test_env_json_details['prestoload_simulator_ip']}")
             stack_starttime_string=str(stack).lower() + "-" + str(variables["start_time_str_ist"])
-            api_load_csv_path = os.path.join(api_loads_folder_path , stack_starttime_string+".csv")
+            # api_load_csv_path = os.path.join(api_loads_folder_path , stack_starttime_string+".csv")
             benchto_load_csv_path=os.path.join(presto_loads_folder_path, stack_starttime_string, "benchto.csv")
             benchto_load_pdf_path=os.path.join(presto_loads_folder_path , stack_starttime_string, "Benchto.pdf")
-            print("CSV file path for API/Jmeter load : " , api_load_csv_path)
-            api_load_result_dict = fetch_and_extract_csv(api_load_csv_path,test_env_json_details['api_presto_load_reports_node_ip'])
+            # print("CSV file path for API/Jmeter load : " , api_load_csv_path)
+            # api_load_result_dict = fetch_and_extract_csv(api_load_csv_path,test_env_json_details['prestoload_simulator_ip'])
             print("CSV file path for Presto/benchto load : " , benchto_load_csv_path)
-            presto_load_result_dict = fetch_and_extract_csv(benchto_load_csv_path,test_env_json_details['api_presto_load_reports_node_ip'])
+            presto_load_result_dict = fetch_and_extract_csv(benchto_load_csv_path,test_env_json_details['prestoload_simulator_ip'])
 
         else:
-            print(f"Skipping API load details because 'api_presto_load_reports_node_ip' is not present in stack json file")
+            print(f"Skipping API load details because 'prestoload_simulator_ip' is not present in stack json file")
 
         #-------------------------Osquery Table Accuracies----------------------------
         if variables["load_type"] in ["Osquery","osquery_cloudquery_combined","all_loads_combined"] and variables["load_name"] != "ControlPlane":
@@ -203,9 +203,10 @@ if __name__ == "__main__":
             accuracy_obj= osq_accuracy(start_time_utc=start_utc_time,end_time_utc=end_utc_time,api_path=api_path,domain=domain,endline=1800*variables['load_duration_in_hrs'],assets_per_cust=assets_per_cust,ext=extension,trans=True,hours=variables['load_duration_in_hrs'],input_file=input_file_path)
             Osquery_table_accuracies = accuracy_obj.table_accuracy()
             print("Osquery_table_accuracies : ",Osquery_table_accuracies)
-            # print("Calculating Events accuracies for Osquery Load ...")
-            # Osquery_event_accuracies = accuracy_obj.events_accuracy(alert_rules_triggered_per_cust,event_rules_triggered_per_cust)
-            # print("Osquery_event_accuracies : ",Osquery_event_accuracies)
+            if input_file != "inputFile6tab_12rec.log":
+                print("Calculating Events accuracies for Osquery Load ...")
+                Osquery_event_accuracies = accuracy_obj.events_accuracy(alert_rules_triggered_per_cust,event_rules_triggered_per_cust)
+                print("Osquery_event_accuracies : ",Osquery_event_accuracies)
         
 
         #-------------------------Kubequery Accuracies----------------------------
@@ -356,8 +357,8 @@ if __name__ == "__main__":
                 final_data_to_save.update({"Osquery Table Accuracies":Osquery_table_accuracies})
             if Osquery_event_accuracies:
                 final_data_to_save.update({"Osquery Event Accuracies":Osquery_event_accuracies})
-            if api_load_result_dict:
-                final_data_to_save.update({"API Load details":api_load_result_dict})
+            # if api_load_result_dict:
+            #     final_data_to_save.update({"API Load details":api_load_result_dict})
             if presto_load_result_dict:
                 final_data_to_save.update({"Presto Load details":presto_load_result_dict})
             if realtime_query_results:
@@ -376,7 +377,6 @@ if __name__ == "__main__":
             inserted_id = collection.insert_one(final_data_to_save).inserted_id
             print(f"Document pushed to mongo successfully into database:{database_name}, collection:{collection_name} with id {inserted_id}")
             
-            BASE_GRAPHS_PATH = os.path.join(os.path.dirname(ROOT_PATH),'graphs')
             graphs_path=f"{BASE_GRAPHS_PATH}/{database_name}/{collection_name}/{inserted_id}"
             os.makedirs(graphs_path,exist_ok=True)
             #---------------CREATING GRAPHS-----------------
@@ -405,7 +405,6 @@ if __name__ == "__main__":
 
             try:
                 print("Capturing details from PG Badger ... ")
-                BASE_HTML_PATH = os.path.join(os.path.dirname(ROOT_PATH),'htmls')
                 pgbadger_tail_path=f"{database_name}/{collection_name}/{inserted_id}/pgbadger_reports"
                 curr_pgbad_html_path=f"{BASE_HTML_PATH}/{pgbadger_tail_path}"
                 print(f'Saving the html page to {curr_pgbad_html_path}')
@@ -422,12 +421,11 @@ if __name__ == "__main__":
             #---------------FETCHING PDFS-----------------
             try:
                 if presto_load_result_dict:
-                    print(f"Fetching presto load charts pdf from {test_env_json_details['api_presto_load_reports_node_ip']}:{benchto_load_csv_path}")
-                    BASE_PDFS_PATH = os.path.join(os.path.dirname(ROOT_PATH),'pdfs')
+                    print(f"Fetching presto load charts pdf from {test_env_json_details['prestoload_simulator_ip']}:{benchto_load_csv_path}")
                     presto_load_local_pdf_path=f"{BASE_PDFS_PATH}/{database_name}/{collection_name}/{inserted_id}/Presto Load Charts pdf.pdf"
                     print(f'Saving the presto load pdf to {presto_load_local_pdf_path}')
                     os.makedirs(os.path.dirname(presto_load_local_pdf_path),exist_ok=True)
-                    fetch_and_save_pdf(benchto_load_pdf_path,test_env_json_details['api_presto_load_reports_node_ip'],presto_load_local_pdf_path)
+                    fetch_and_save_pdf(benchto_load_pdf_path,test_env_json_details['prestoload_simulator_ip'],presto_load_local_pdf_path)
             except Exception as e:
                 print(f"Error while fetching pdfs : {str(e)}")
 

@@ -15,7 +15,7 @@ prom_point_api_path = "/api/v1/query"
 abacus_username = 'abacus'  
 abacus_password = 'abacus' 
 mongo_connection_string = "mongodb://localhost:27017"
-api_loads_folder_path = "/home/abacus/apache-jmeter-5.6.2/bin/reports/"
+# api_loads_folder_path = "/home/abacus/apache-jmeter-5.6.2/bin/reports/"
 presto_loads_folder_path = "/home/abacus/benchto_reports/"
 
 #other types
@@ -24,5 +24,8 @@ kube_metrics = ["container_memory_working_set_bytes","container_cpu_usage_second
 #dynamic
 ROOT_PATH = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
 base_stack_config_path = f"{ROOT_PATH}/config"
+BASE_GRAPHS_PATH = os.path.join(os.path.dirname(ROOT_PATH),'graphs')
+BASE_HTML_PATH = os.path.join(os.path.dirname(ROOT_PATH),'htmls')
+BASE_PDFS_PATH = os.path.join(os.path.dirname(ROOT_PATH),'pdfs')
 
 

@@ -2,8 +2,6 @@ scripts/__pycache__/*
 scripts/osquery/__pycache__/*
 config/test.json
 scripts/cloudquery/__pycache__/*
-config/s11_nodes.json
-config/sdev2_nodes.json
 publish_practice/*
 scripts/cloudquery/expected_logs/*
 atlassian_api/use_publish.py
