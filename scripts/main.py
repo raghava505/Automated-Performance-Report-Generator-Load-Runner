@@ -70,8 +70,7 @@ if __name__ == "__main__":
     with open(stack_obj.test_env_file_path , 'r') as file:
         test_env_json_details = json.load(file)
     skip_fetching_data=False
-    domain = test_env_json_details['domain']
-    extension = test_env_json_details['extension']
+    stack = test_env_json_details["stack"]
     #---------------------Check for previous runs------------------------------------
     client = pymongo.MongoClient(mongo_connection_string)
     database_name = variables['load_type']+"_LoadTests"
@@ -79,9 +78,9 @@ if __name__ == "__main__":
     db=client[database_name]
     collection = db[collection_name]
 
-    documents_with_same_load_time_and_stack = collection.find({"load_details.sprint":variables['sprint'] ,"load_details.stack":test_env_json_details["stack"] , "load_details.load_start_time_ist":f"{variables['start_time_str_ist']}" , "load_details.load_duration_in_hrs":variables['load_duration_in_hrs']})
+    documents_with_same_load_time_and_stack = collection.find({"load_details.sprint":variables['sprint'] ,"load_details.stack":stack , "load_details.load_start_time_ist":f"{variables['start_time_str_ist']}" , "load_details.load_duration_in_hrs":variables['load_duration_in_hrs']})
     if len(list(documents_with_same_load_time_and_stack)) > 0:
-        print(f"ERROR! A document with load time ({variables['start_time_str_ist']}) - ({end_time_str}) on {test_env_json_details['stack']} for this sprint for {database_name}-{collection_name} load is already available.")
+        print(f"ERROR! A document with load time ({variables['start_time_str_ist']}) - ({end_time_str}) on {stack} for this sprint for {database_name}-{collection_name} load is already available.")
         skip_fetching_data=True
     if skip_fetching_data == False:
         run=1
@@ -121,6 +120,10 @@ if __name__ == "__main__":
         
         api_load_folder_name=str(variables["apiload_remote_directory_name"]).strip()
 
+        #stack details variables
+        domain = test_env_json_details['domain']
+        extension = str(test_env_json_details['suffix']).split('.')[1]
+
         # get necessary load parameters
         if variables["load_name"] in ["KubeQuery_SingleCustomer","SelfManaged_SingleCustomer","KubeQuery_and_SelfManaged_Combined"] or variables["load_type"] in ["all_loads_combined"]:
             load_params = Load_Params(start_time=start_utc_time, connection_object=stack_obj)
@@ -150,7 +153,7 @@ if __name__ == "__main__":
         #-------------------------real time query test details--------------------------
         # if domain=="longevity" and variables["load_type"] in ["all_loads_combined"]: 
         #     from realtimequery_tests.real_time_query import realtime_query
-        #     print(f"Performing realtime query test on stack '{test_env_json_details['stack']}' ...")
+        #     print(f"Performing realtime query test on stack '{stack}' ...")
         #     realtime_query_results=realtime_query()
         #-------------------------disk space--------------------------
         if variables["load_name"] != "ControlPlane":
@@ -172,7 +175,7 @@ if __name__ == "__main__":
         #-------------------------API LOAD--------------------------
         if 'api_presto_load_reports_node_ip' in test_env_json_details:
             print(f"Looking for api load  and presto load csv files in {test_env_json_details['api_presto_load_reports_node_ip']}")
-            stack_starttime_string=str(test_env_json_details['stack']).lower() + "-" + str(variables["start_time_str_ist"])
+            stack_starttime_string=str(stack).lower() + "-" + str(variables["start_time_str_ist"])
             api_load_csv_path = os.path.join(api_loads_folder_path , stack_starttime_string+".csv")
             benchto_load_csv_path=os.path.join(presto_loads_folder_path, stack_starttime_string, "benchto.csv")
             benchto_load_pdf_path=os.path.join(presto_loads_folder_path , stack_starttime_string, "Benchto.pdf")
@@ -288,16 +291,16 @@ if __name__ == "__main__":
             #-------------------------- Saving the json data to mongo -------------------------
             print("Saving data to mongoDB ...")
             load_details =  {
-                "stack":test_env_json_details["stack"],
-                "stack_url":test_env_json_details["stack_url"],
-                "architecture":str(test_env_json_details["clusters"]) + " x " + str(test_env_json_details["SU"]) + "SU",
+                "stack":stack,
+                "stack_url":str(test_env_json_details["domain"])+"."+str(test_env_json_details["suffix"]),
+                "architecture":test_env_json_details["architecture"],
                 "sprint": variables['sprint'],
                 "build": variables['build'],
                 "load_name":f"{variables['load_name']}",
                 "load_type":f"{variables['load_type']}",
+                "load_duration_in_hrs":variables['load_duration_in_hrs'],
                 "load_start_time_utc" : f"{start_utc_str}",
                 "load_end_time_utc" : f"{end_utc_str}",
-                "load_duration_in_hrs":variables['load_duration_in_hrs'],
                 "load_start_time_ist" : f"{variables['start_time_str_ist']}",
                 "load_end_time_ist" : f"{end_time_str}",
                 "run":run,
@@ -365,8 +368,8 @@ if __name__ == "__main__":
                 final_data_to_save.update({"charts":complete_charts_data_dict})
             if mem_cpu_usages_dict:
                 final_data_to_save.update(mem_cpu_usages_dict)
-            if api_load_folder_name and 'api_presto_load_reports_node_ip' in test_env_json_details and api_load_folder_name!="":
-                final_data_to_save.update({"Api load report link":os.path.join(f"http://{test_env_json_details['api_presto_load_reports_node_ip']}:{api_report_port}",api_load_folder_name,f"index.html")})
+            if api_load_folder_name and 'apiload_simulator_ip' in test_env_json_details and api_load_folder_name!="":
+                final_data_to_save.update({"Api load report link":os.path.join(f"http://{test_env_json_details['apiload_simulator_ip']}:{api_report_port}",api_load_folder_name,f"index.html")})
             final_data_to_save.update({"observations":load_cls.get_dictionary_of_observations()})
             # all_gridfs_referenced_ids=all_gridfs_fileids[:]
             # final_data_to_save.update({"all_gridfs_referenced_ids":all_gridfs_referenced_ids})
@@ -383,7 +386,7 @@ if __name__ == "__main__":
                     test_title = "Test title : "+str(load_cls.get_load_specific_details(variables['load_name'])['test_title'])
                 except:
                     test_title=""
-                create_images_and_save(graphs_path,inserted_id,collection,fs,variables["load_duration_in_hrs"],variables=variables,end_time_str=end_time_str,run=run,stack=test_env_json_details["stack"],test_title=test_title,step_factor=step_factor)
+                create_images_and_save(graphs_path,inserted_id,collection,fs,variables["load_duration_in_hrs"],variables=variables,end_time_str=end_time_str,run=run,stack=stack,test_title=test_title,step_factor=step_factor)
                 print("Done!")
             except Exception as e:
                 print(f"Error while generating graphs into {graphs_path} : {str(e)}")

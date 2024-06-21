@@ -1,16 +1,17 @@
 {
     "stack": "S13",
-    "clusters": 1,
-    "SU": 3,
+    "architecture": "1 X 3SU",
     "domain": "alphacentauri",
-    "extension": "net",
-    "stack_url": "https://alphacentauri.uptycs.net/",
-    "elastic": "192.168.140.73",
-    "pgbadger_reports_mount":"data",
+    "suffix": "uptycs.net",
+
     "event_rules_per_cust":{"enabled":39,"triggered":33},
     "alert_rules_per_cust":{"enabled":39,"triggered":33},
+    
     "execute_kafka_topics_script_in":"s13pn1",
     "execute_trino_queries_in":"s13pn2",
+
+    "elastic": "192.168.140.73",
+    "pgbadger_reports_mount":"data",
     "pnodes": [
         "s13pn1",
         "s13pn2",
