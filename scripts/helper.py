@@ -122,91 +122,91 @@ def execute_prometheus_query(stack_obj,start_timestamp,end_timestamp,query,hours
     except Exception as e:
         raise RuntimeError(f"An unexpected error occurred: {e}")
 
-def extract_node_detail(data,node_type):
-    return_dict={}
-    for hostname in data[node_type]:
-        return_dict[hostname] = {}
-        return_dict[hostname]['storage'] = {}
-        try:
-            client = paramiko.SSHClient()
-            client.load_system_host_keys() 
-            client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-            try:
-                client.connect(hostname, ssh_port, abacus_username, abacus_password)
-                commands = {"ram" : "free -g | awk '/Mem:/ {print $2}'" , "cores":"lscpu | awk '/^CPU\(s\):/ {print $2}'"}
-                for label,command in commands.items():
-                    stdin, stdout, stderr = client.exec_command(command)
-                    out = stdout.read().decode('utf-8').strip()
-                    if out and out!='':
-                        return_dict[hostname][label] = out
-                        print(f"Fetched '{label}' value for {hostname} : {out}")
-                    else:
-                        raise RuntimeError(f"ERROR : Unable to determine {label} value for {hostname} , {e}")
+# def extract_node_detail(data,node_type):
+#     return_dict={}
+#     for hostname in data[node_type]:
+#         return_dict[hostname] = {}
+#         return_dict[hostname]['storage'] = {}
+#         try:
+#             client = paramiko.SSHClient()
+#             client.load_system_host_keys() 
+#             client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+#             try:
+#                 client.connect(hostname, ssh_port, abacus_username, abacus_password)
+#                 commands = {"ram" : "free -g | awk '/Mem:/ {print $2}'" , "cores":"lscpu | awk '/^CPU\(s\):/ {print $2}'"}
+#                 for label,command in commands.items():
+#                     stdin, stdout, stderr = client.exec_command(command)
+#                     out = stdout.read().decode('utf-8').strip()
+#                     if out and out!='':
+#                         return_dict[hostname][label] = out
+#                         print(f"Fetched '{label}' value for {hostname} : {out}")
+#                     else:
+#                         raise RuntimeError(f"ERROR : Unable to determine {label} value for {hostname} , {e}")
                 
-                storage_commands = {'root_partition':"df -h | awk '$6 == \"/\" {print $2}'",
-                                    'kafka' : "df -h | awk '$6 == \"/data/kafka\" {print $2}'",
-                                    'spark' : "df -h | awk '$6 == \"/data/spark\" {print $2}'",
-                                    'dn1' : "df -h | awk '$6 == \"/data/dn1\" {print $2}'",
-                                    'dn2' : "df -h | awk '$6 == \"/data/dn2\" {print $2}'",
-                                    'dn3' : "df -h | awk '$6 == \"/data/dn3\" {print $2}'",
-                                    'pg' : "df -h | awk '$6 == \"/pg\" {print $2}'",
-                                    'data' : "df -h | awk '$6 == \"/data\" {print $2}'",
-                                    'data_prometheus' : "df -h | awk '$6 == \"/data/prometheus\" {print $2}'",
-                                    }
+#                 storage_commands = {'root_partition':"df -h | awk '$6 == \"/\" {print $2}'",
+#                                     'kafka' : "df -h | awk '$6 == \"/data/kafka\" {print $2}'",
+#                                     'spark' : "df -h | awk '$6 == \"/data/spark\" {print $2}'",
+#                                     'dn1' : "df -h | awk '$6 == \"/data/dn1\" {print $2}'",
+#                                     'dn2' : "df -h | awk '$6 == \"/data/dn2\" {print $2}'",
+#                                     'dn3' : "df -h | awk '$6 == \"/data/dn3\" {print $2}'",
+#                                     'pg' : "df -h | awk '$6 == \"/pg\" {print $2}'",
+#                                     'data' : "df -h | awk '$6 == \"/data\" {print $2}'",
+#                                     'data_prometheus' : "df -h | awk '$6 == \"/data/prometheus\" {print $2}'",
+#                                     }
 
-                for label,command in storage_commands.items():
-                    stdin, stdout, stderr = client.exec_command(command)
-                    out = stdout.read().decode('utf-8').strip()
-                    if out and out!='':
-                        return_dict[hostname]['storage'][label] = out
-                        print(f"Fetched '{label}' value for {hostname} : {out}")
-                    else:pass
-                        # print(f"WARNING : Unable to determine '{label}' value for {hostname}")
+#                 for label,command in storage_commands.items():
+#                     stdin, stdout, stderr = client.exec_command(command)
+#                     out = stdout.read().decode('utf-8').strip()
+#                     if out and out!='':
+#                         return_dict[hostname]['storage'][label] = out
+#                         print(f"Fetched '{label}' value for {hostname} : {out}")
+#                     else:pass
+#                         # print(f"WARNING : Unable to determine '{label}' value for {hostname}")
 
-            except Exception as e:
-                if node_type=="other_nodes":
-                    print(f"WARNING : Unable connect to {hostname} (other_node category), {e}")
-                else:
-                    raise RuntimeError(f"ERROR : Unable connect to {hostname} , {e}") from e
-            finally:
-                client.close()
-        except socket.gaierror as e:
-            if node_type=="other_nodes":
-                print(f"WARNING : Could not resolve {hostname} , {e}")
-            else:
-                raise RuntimeError(f"ERROR : Could not resolve {hostname} , {e}") from e
-        if 'c2' in hostname:return_dict[hostname]['clst'] = "2"
-        else:return_dict[hostname]['clst'] = "1"
-    return return_dict
+#             except Exception as e:
+#                 if node_type=="other_nodes":
+#                     print(f"WARNING : Unable connect to {hostname} (other_node category), {e}")
+#                 else:
+#                     raise RuntimeError(f"ERROR : Unable connect to {hostname} , {e}") from e
+#             finally:
+#                 client.close()
+#         except socket.gaierror as e:
+#             if node_type=="other_nodes":
+#                 print(f"WARNING : Could not resolve {hostname} , {e}")
+#             else:
+#                 raise RuntimeError(f"ERROR : Could not resolve {hostname} , {e}") from e
+#         if 'c2' in hostname:return_dict[hostname]['clst'] = "2"
+#         else:return_dict[hostname]['clst'] = "1"
+#     return return_dict
 
-def extract_stack_details(nodes_file_path):
-    with open(nodes_file_path,'r') as file:
-        data = json.load(file)
-    def extract_node_detail_wrapper(data, node_type):
-        return extract_node_detail(data, node_type)
-    with concurrent.futures.ThreadPoolExecutor(max_workers=4) as executor:
-        future1 = executor.submit(extract_node_detail_wrapper, data, 'pnodes')
-        future2 = executor.submit(extract_node_detail_wrapper, data, 'dnodes')
-        future3 = executor.submit(extract_node_detail_wrapper, data, 'pgnodes')
-        future4 = executor.submit(extract_node_detail_wrapper, data, 'monitoring_node')
-        future5 = executor.submit(extract_node_detail_wrapper, data, 'other_nodes')
-        future6 = executor.submit(extract_node_detail_wrapper, data, 'stsnodes')
-        completed_futures, _ = concurrent.futures.wait([future1, future2, future3, future4 , future5,future6])
-    pnodes = future1.result()
-    dnodes = future2.result()
-    pgnodes = future3.result()
-    monitoring_node = future4.result()
-    other_nodes = future5.result()
-    sts_nodes = future6.result()
+# def extract_stack_details(nodes_file_path):
+#     with open(nodes_file_path,'r') as file:
+#         data = json.load(file)
+#     def extract_node_detail_wrapper(data, node_type):
+#         return extract_node_detail(data, node_type)
+#     with concurrent.futures.ThreadPoolExecutor(max_workers=4) as executor:
+#         future1 = executor.submit(extract_node_detail_wrapper, data, 'pnodes')
+#         future2 = executor.submit(extract_node_detail_wrapper, data, 'dnodes')
+#         future3 = executor.submit(extract_node_detail_wrapper, data, 'pgnodes')
+#         future4 = executor.submit(extract_node_detail_wrapper, data, 'monitoring_node')
+#         future5 = executor.submit(extract_node_detail_wrapper, data, 'other_nodes')
+#         future6 = executor.submit(extract_node_detail_wrapper, data, 'stsnodes')
+#         completed_futures, _ = concurrent.futures.wait([future1, future2, future3, future4 , future5,future6])
+#     pnodes = future1.result()
+#     dnodes = future2.result()
+#     pgnodes = future3.result()
+#     monitoring_node = future4.result()
+#     other_nodes = future5.result()
+#     sts_nodes = future6.result()
 
-    data.update(pnodes)
-    data.update(dnodes)
-    data.update(pgnodes)
-    data.update(monitoring_node)
-    data.update(sts_nodes)
-    data.update(other_nodes)
-    with open(nodes_file_path,'w') as file:
-        json.dump(data,file,indent=4)
+#     data.update(pnodes)
+#     data.update(dnodes)
+#     data.update(pgnodes)
+#     data.update(monitoring_node)
+#     data.update(sts_nodes)
+#     data.update(other_nodes)
+#     with open(nodes_file_path,'w') as file:
+#         json.dump(data,file,indent=4)
 
 def save_html_page(url,file_path,check):
     response = requests.get(url)

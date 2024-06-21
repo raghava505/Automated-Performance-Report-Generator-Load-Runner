@@ -9,7 +9,7 @@ class stack_configuration:
         with open(self.test_env_file_path , 'r') as file:
             stack_details = json.load(file)
             
-        self.monitoring_ip=  stack_details["monitoring_node"][0]
+        self.monitoring_ip=  stack_details["monitoring_node_ip"]
         self.prometheus_path = f"http://{self.monitoring_ip}:{prometheus_port}"
         self.kube_prometheus_path = f"http://{self.monitoring_ip}:{kube_prometheus_port}"
 
@@ -21,4 +21,4 @@ class stack_configuration:
         except Exception as e:
             print("Elastic node ip not found for your stack " , e)
     
-        extract_stack_details(self.test_env_file_path)        #extract all the stack details
+        # extract_stack_details(self.test_env_file_path)        #extract all the stack details

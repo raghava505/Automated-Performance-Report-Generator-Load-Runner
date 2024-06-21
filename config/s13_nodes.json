@@ -10,34 +10,11 @@
     "execute_kafka_topics_script_in":"s13pn1",
     "execute_trino_queries_in":"s13pn2",
 
+    "monitoring_node_ip":"s13monitor",
+
     "elastic": "192.168.140.73",
     "pgbadger_reports_mount":"data",
-    "pnodes": [
-        "s13pn1",
-        "s13pn2",
-        "s13pn3"
-    ],
-    "dnodes": [
-        "s13dn1",
-        "s13dn2",
-        "s13dn3"
-    ],
-    "pgnodes": [
-        "s13configdb1",
-        "s13configdb2",
-        "s13statedb"
-    ],
-    "monitoring_node": [
-        "s13monitor"
-    ],
-    "stsnodes": [
-        
-    ],
-    "other_nodes": [
-        "s13elasticsearch",
-        "s13kibana",
-        "s13logstash"
-    ],
+    
     "kubesim_nodes": [
         "s13sim1",
         "s13sim2",
@@ -49,132 +26,5 @@
         "s13sim2",
         "s13sim3",
         "s13sim4"
-    ],
-    "s13pn1": {
-        "storage": {
-            "root_partition": "1.8T",
-            "kafka": "1.8T"
-        },
-        "ram": "188",
-        "cores": "32",
-        "clst": "1"
-    },
-    "s13pn2": {
-        "storage": {
-            "root_partition": "1.8T",
-            "kafka": "1.8T"
-        },
-        "ram": "188",
-        "cores": "32",
-        "clst": "1"
-    },
-    "s13pn3": {
-        "storage": {
-            "root_partition": "1.8T",
-            "kafka": "1.8T"
-        },
-        "ram": "188",
-        "cores": "32",
-        "clst": "1"
-    },
-    "s13dn1": {
-        "storage": {
-            "root_partition": "1.8T",
-            "spark": "879G",
-            "dn1": "1.8T",
-            "dn2": "1.8T",
-            "dn3": "1.8T"
-        },
-        "ram": "251",
-        "cores": "32",
-        "clst": "1"
-    },
-    "s13dn2": {
-        "storage": {
-            "root_partition": "1.8T",
-            "spark": "879G",
-            "dn1": "1.8T",
-            "dn2": "1.8T",
-            "dn3": "1.8T"
-        },
-        "ram": "251",
-        "cores": "32",
-        "clst": "1"
-    },
-    "s13dn3": {
-        "storage": {
-            "root_partition": "1.8T",
-            "spark": "879G",
-            "dn1": "1.8T",
-            "dn2": "1.8T",
-            "dn3": "1.8T"
-        },
-        "ram": "251",
-        "cores": "32",
-        "clst": "1"
-    },
-    "s13configdb1": {
-        "storage": {
-            "root_partition": "1.8T",
-            "pg": "1.8T",
-            "data": "1.8T"
-        },
-        "ram": "188",
-        "cores": "32",
-        "clst": "1"
-    },
-    "s13configdb2": {
-        "storage": {
-            "root_partition": "1.8T",
-            "pg": "1.8T",
-            "data": "1.8T"
-        },
-        "ram": "188",
-        "cores": "32",
-        "clst": "1"
-    },
-    "s13monitor": {
-        "storage": {
-            "root_partition": "196G",
-            "data": "5.5T"
-        },
-        "ram": "62",
-        "cores": "16",
-        "clst": "1"
-    },
-    "s13elasticsearch": {
-        "storage": {
-            "root_partition": "196G",
-            "data": "5.5T"
-        },
-        "ram": "62",
-        "cores": "8",
-        "clst": "1"
-    },
-    "s13kibana": {
-        "storage": {
-            "root_partition": "196G"
-        },
-        "ram": "31",
-        "cores": "4",
-        "clst": "1"
-    },
-    "s13logstash": {
-        "storage": {
-            "root_partition": "196G"
-        },
-        "ram": "23",
-        "cores": "4",
-        "clst": "1"
-    },
-    "s13statedb": {
-        "storage": {
-            "root_partition": "246G",
-            "pg": "1.8T",
-            "data": "1.8T"
-        },
-        "ram": "125",
-        "cores": "16",
-        "clst": "1"
-    }
+    ]
 }

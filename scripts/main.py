@@ -322,8 +322,8 @@ if __name__ == "__main__":
 
             final_data_to_save = {
                 "load_details":load_details,
-                "test_environment_details":test_env_json_details,
-                # "Test environment details": extract_ram_cores_storage_details(stack_obj,start_timestamp)
+                # "test_environment_details":test_env_json_details,
+                "Test environment details": extract_ram_cores_storage_details(stack_obj,start_timestamp)
             }
             if overall_usage_dict:
                 final_data_to_save.update(overall_usage_dict)
