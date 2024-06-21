@@ -20,7 +20,6 @@ from pg_stats import PG_STATS
 from cloudquery.db_operations_time import DB_OPERATIONS_TIME
 from cloudquery.events_count import EVE_COUNTS
 from cloudquery.sts_records import STS_RECORDS
-from api_presto_load import fetch_and_extract_csv,fetch_and_save_pdf
 import pytz
 import os
 from create_chart import create_images_and_save
@@ -32,6 +31,7 @@ from extract_and_preprocess_resource_utilizations import resource_usages
 from config_vars import *
 from load_params import Load_Params
 from extract_stack_details import extract_ram_cores_storage_details
+from helper import fetch_and_save_pdf,fetch_and_extract_csv
 
 if __name__ == "__main__":
     variables , stack_obj,load_cls =create_input_form()
