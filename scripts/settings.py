@@ -1,5 +1,5 @@
 import json
-from helper import extract_stack_details
+# from helper import extract_stack_details
 from config_vars import *
 
 class stack_configuration:
