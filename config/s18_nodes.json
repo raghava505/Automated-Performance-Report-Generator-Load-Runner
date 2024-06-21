@@ -10,28 +10,8 @@
     "execute_kafka_topics_script_in":"s18c1pn1",
     "execute_trino_queries_in":"s18c1pn2",
 
-    "pnodes": [
-        "s18c1pn1",
-        "s18c1pn2",
-        "s18c1pn3"
-    ],
-    "dnodes": [
-        "s18c1dn1",
-        "s18c1dn2",
-        "s18c1dn3"
-    ],
-    "pgnodes": [
-        "s18configdb1"
-    ],
-    "monitoring_node": [
-        "s18monitor1"
-    ],
-    "stsnodes": [
-        
-    ],
-    "other_nodes": [
-        
-    ],
+    "monitoring_node_ip":"s18monitor1",
+
     "kubesim_nodes": [
         "s18sim1c",
         "s18sim1d"
