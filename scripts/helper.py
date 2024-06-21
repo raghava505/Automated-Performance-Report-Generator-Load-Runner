@@ -82,7 +82,6 @@ def execute_prometheus_query(stack_obj,start_timestamp,end_timestamp,query,hours
             PROMETHEUS = stack_obj.kube_prometheus_path
             print("pod level metric found.. using prometheous path : " , PROMETHEUS)
 
-    API_PATH = prom_api_path
     if not step_factor:
         step_factor=hours/10 if hours>10 else 1
     step=60*step_factor
@@ -97,7 +96,7 @@ def execute_prometheus_query(stack_obj,start_timestamp,end_timestamp,query,hours
     }
 
     try:
-        response = requests.get(PROMETHEUS + API_PATH, params=PARAMS)
+        response = requests.get(PROMETHEUS + prom_api_path, params=PARAMS)
         if response.status_code != 200:
             raise RuntimeError(f"API request failed with status code {response.status_code}")
         result = response.json()['data']['result']

@@ -1,13 +1,10 @@
 {
     "stack": "S2",
-    "clusters": 1,
-    "SU": 6,
+    "architecture": "1 X 6SU",
     "domain": "neptune",
-    "extension": "io",
-    "stack_url": "https://neptune.uptycs.io/",
+    "suffix": "uptycs.net",
     "trino_password": "24e3ed40-0ea8-4051-b8c5-00ea379e843a",
-    "elastic": "192.168.131.50",
-    "pgbadger_reports_mount": "opt/uptycs/etc/elk",
+    
     "event_rules_per_cust": {
         "enabled": 39,
         "triggered": 33
@@ -19,6 +16,9 @@
     "execute_kafka_topics_script_in":"s2c1pn1",
     "execute_trino_queries_in":"s2c1pn2",
 
+    "elastic": "192.168.131.50",
+    "pgbadger_reports_mount": "opt/uptycs/etc/elk",
+    
     "pnodes": [
         "s2c1pn1",
         "s2c1pn2",

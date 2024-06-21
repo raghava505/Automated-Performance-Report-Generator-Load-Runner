@@ -1,17 +1,17 @@
 {
     "stack": "S4",
-    "clusters": 2,
-    "SU": 6,
+    "architecture": "1 X 6SU",
     "domain": "mercury",
-    "extension":"net",
-    "stack_url": "https://mercury.uptycs.net/",
-    "elastic": "192.168.131.50",
-    "pgbadger_reports_mount":"opt/uptycs/etc/elk",
+    "suffix": "uptycs.net",
+    
     "event_rules_per_cust":{"enabled":39,"triggered":33},
     "alert_rules_per_cust":{"enabled":39,"triggered":33},
     
     "execute_kafka_topics_script_in":"s4c1pn1",
     "execute_trino_queries_in":"s4c1pn2",
+
+    "elastic": "192.168.131.50",
+    "pgbadger_reports_mount":"opt/uptycs/etc/elk",
 
     "pnodes": [
         "s4c1pn1",
