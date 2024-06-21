@@ -16,6 +16,9 @@
         "enabled": 39,
         "triggered": 33
     },
+    "execute_kafka_topics_script_in":"s2c1pn1",
+    "execute_trino_queries_in":"s2c1pn2",
+
     "pnodes": [
         "s2c1pn1",
         "s2c1pn2",

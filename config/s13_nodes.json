@@ -9,6 +9,8 @@
     "pgbadger_reports_mount":"data",
     "event_rules_per_cust":{"enabled":39,"triggered":33},
     "alert_rules_per_cust":{"enabled":39,"triggered":33},
+    "execute_kafka_topics_script_in":"s13pn1",
+    "execute_trino_queries_in":"s13pn2",
     "pnodes": [
         "s13pn1",
         "s13pn2",

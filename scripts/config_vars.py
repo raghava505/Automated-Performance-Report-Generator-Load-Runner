@@ -9,7 +9,7 @@ ssh_port = 22
 #ips
 perf_prod_dashboard = "192.168.146.69"
 
-#strings
+#int and strings
 prom_api_path = "/api/v1/query_range"
 prom_point_api_path = "/api/v1/query"
 abacus_username = 'abacus'  
@@ -17,6 +17,8 @@ abacus_password = 'abacus'
 mongo_connection_string = "mongodb://localhost:27017"
 api_loads_folder_path = "/home/abacus/apache-jmeter-5.6.2/bin/reports/"
 presto_loads_folder_path = "/home/abacus/benchto_reports/"
+
+#other types
 kube_metrics = ["container_memory_working_set_bytes","container_cpu_usage_seconds_total"]
 
 #dynamic
