@@ -113,7 +113,7 @@ def extract_ram_cores_storage_details(stack_obj,start_timestamp):
     df = df.reset_index().rename(columns={'index': 'host_name'})
     df=df.sort_values(by=["node_type","host_name"])
     print(df)
-    df.to_csv("stack.csv")
+    # df.to_csv("stack.csv")
 
     return {
                 "schema":{

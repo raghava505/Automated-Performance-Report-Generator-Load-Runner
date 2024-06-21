@@ -63,7 +63,7 @@ inner_background_color = "#191b1f"
 gridline_color = "#404144"
 gridline_width = 0.01
 
-fig_width=24
+fig_width=22
 character_width = 12.0                     #inversly prop to initial ncol
 initial_legend_fontsize=fig_width/1.90
 fontsize_decrease_rate_with_rows=fig_width/165
@@ -211,8 +211,8 @@ if __name__=="__main__":
     fs = GridFS(database)
 
     format_data = "%Y-%m-%d %H:%M"
-    start_time_str = "2024-05-01 22:14"
-    hours=132
+    start_time_str = "2024-06-19 22:14"
+    hours=10
 
     start_time = datetime.strptime(start_time_str, format_data)
     end_time = start_time + timedelta(hours=hours)
@@ -236,8 +236,8 @@ if __name__=="__main__":
     charts_obj = Charts(start_timestamp=start_timestamp,end_timestamp=end_timestamp,stack_obj=stack_obj,fs=fs,hours=hours)
     
     step_factor=hours/10 if hours>10 else 1
-    # complete_charts_data_dict,all_gridfs_fileids=charts_obj.capture_charts_and_save(load_cls.get_all_chart_queries(),step_factor=step_factor)
-    complete_charts_data_dict,all_gridfs_fileids=charts_obj.capture_charts_and_save({"live Charts":load_cls.get_other_chart_queries()},step_factor=step_factor)
+    complete_charts_data_dict,all_gridfs_fileids=charts_obj.capture_charts_and_save(load_cls.get_all_chart_queries(),step_factor=step_factor)
+    # complete_charts_data_dict,all_gridfs_fileids=charts_obj.capture_charts_and_save({"live Charts":load_cls.get_other_chart_queries()},step_factor=step_factor)
     print("Saved charts data successfully !")
     path = "/Users/masabathulararao/Documents/Loadtest/save-report-data-to-mongo/publish_practice/images"
     collection = database["Testing"]
