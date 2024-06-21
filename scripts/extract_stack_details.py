@@ -3,6 +3,7 @@ from helper import execute_point_prometheus_query
 import pandas as pd
 # from config_vars import *
 from helper import execute_command_in_node
+import concurrent.futures
 
 #returns a nested dictionary containing dictionaries for :
 # 1. ram capacity
@@ -14,15 +15,15 @@ from helper import execute_command_in_node
 # 6. pg partition
 # 7. data partition
 
-storage_commands = {'root_partition':"df -h | awk '$6 == \"/\" {print $2}'",
-                    'kafka' : "df -h | awk '$6 == \"/data/kafka\" {print $2}'",
-                    'spark' : "df -h | awk '$6 == \"/data/spark\" {print $2}'",
-                    'dn1' : "df -h | awk '$6 == \"/data/dn1\" {print $2}'",
-                    'dn2' : "df -h | awk '$6 == \"/data/dn2\" {print $2}'",
-                    'dn3' : "df -h | awk '$6 == \"/data/dn3\" {print $2}'",
-                    'pg' : "df -h | awk '$6 == \"/pg\" {print $2}'",
-                    'data' : "df -h | awk '$6 == \"/data\" {print $2}'",
-                    'data_prometheus' : "df -h | awk '$6 == \"/data/prometheus\" {print $2}'",
+storage_commands = {'root(/)':"df -h | awk '$6 == \"/\" {print $2}'",
+                    # '/data/kafka' : "df -h | awk '$6 == \"/data/kafka\" {print $2}'",
+                    '/data/spark' : "df -h | awk '$6 == \"/data/spark\" {print $2}'",
+                    '/data/dn1' : "df -h | awk '$6 == \"/data/dn1\" {print $2}'",
+                    '/data/dn2' : "df -h | awk '$6 == \"/data/dn2\" {print $2}'",
+                    '/data/dn3' : "df -h | awk '$6 == \"/data/dn3\" {print $2}'",
+                    '/pg' : "df -h | awk '$6 == \"/pg\" {print $2}'",
+                    '/data' : "df -h | awk '$6 == \"/data\" {print $2}'",
+                    '/data/prometheus' : "df -h | awk '$6 == \"/data/prometheus\" {print $2}'",
                     }
 
 def extract_ram_cores_storage_details(stack_obj,start_timestamp):
@@ -31,15 +32,16 @@ def extract_ram_cores_storage_details(stack_obj,start_timestamp):
     total_memory_capacity_query = "sum(uptycs_total_memory/(1024*1024)) by (node_type,host_name,cluster_id)"
     memory_result = execute_point_prometheus_query(stack_obj,start_timestamp,total_memory_capacity_query)
     for line in memory_result:
-        print(line)
+        # print(line)
         node_name = line["metric"]["host_name"]
-        final_result[node_name]['ram']=float(line["value"][1])
+        final_result[node_name]['node_type']=line["metric"]["node_type"]
         try:
             final_result[node_name]['cluster_id']=line["metric"]["cluster_id"]
         except Exception as e:
             print(e)
-        final_result[node_name]['node_type']=line["metric"]["node_type"]
-    
+        final_result[node_name]['ram(GB)']=round(float(line["value"][1]),2)
+        
+
     total_cpu_capacity_query = "sum(uptycs_loadavg_cpu_info) by (host_name,cpu_processor)"
     cpu_result = execute_point_prometheus_query(stack_obj,start_timestamp,total_cpu_capacity_query)
     for line in cpu_result:
@@ -49,19 +51,37 @@ def extract_ram_cores_storage_details(stack_obj,start_timestamp):
     kafka_disk_space_result=execute_point_prometheus_query(stack_obj,start_timestamp,f"sum(kafka_disk_volume_size/{1024**3}) by (host_name)")
     for line in kafka_disk_space_result:
         node_name = line["metric"]["host_name"]
-        final_result[node_name]['kafka_disk_space_configured_in_TB']=float(line["value"][1])
+        final_result[node_name]['/data/kafka(TB)']=round(float(line["value"][1]),2)
 
     hdfs_disk_space_result=execute_point_prometheus_query(stack_obj,start_timestamp,f"sort(sum(uptycs_hdfs_node_config_capacity/{(1024**4)}) by (hdfsdatanode))")
     for line in hdfs_disk_space_result:
         node_name = line["metric"]["hdfsdatanode"]
-        final_result[node_name]['hdfs_disk_space_configured_in_TB']=float(line["value"][1])
+        final_result[node_name]['hdfs(TB)']=round(float(line["value"][1]),2)
 
     nodes = list(final_result.keys())
-    print("NODES : ", nodes)
+    print("All nodes in the stack : ", nodes)
 
-    for node in nodes:
-        for command_name,command in storage_commands:
-            final_result[node][command_name] = execute_command_in_node(node,command)
+    # for node in nodes:
+    #     for command_name,command in storage_commands.items():
+    #         final_result[node][command_name] = execute_command_in_node(node,command)
+
+    def execute_commands_on_node(node):
+        results = {}
+        for command_name, command in storage_commands.items():
+            try:
+                results[command_name] = execute_command_in_node(node, command)
+            except Exception as e:
+                print(f"Unable to execute {command_name} command in {node}. " , e)
+        return node, results
+
+    # Use ThreadPoolExecutor to run the commands in parallel
+    with concurrent.futures.ThreadPoolExecutor(max_workers=10) as executor:
+        future_to_node = {executor.submit(execute_commands_on_node, node): node for node in nodes}
+        for future in concurrent.futures.as_completed(future_to_node):
+            node, results = future.result()
+            final_result[node].update(results)
+
+    # print("Final result: ", final_result)
 
 
     #Calculating total partition size
@@ -88,15 +108,20 @@ def extract_ram_cores_storage_details(stack_obj,start_timestamp):
     #         total_space_in_TB = total_space/(1024**4)
     #         final_result[node][partition]=total_space_in_TB
 
-
-
-    df = pd.DataFrame(final_result)
-    
+    df = pd.DataFrame(final_result)    
     df=df.T
     df = df.reset_index().rename(columns={'index': 'host_name'})
     df=df.sort_values(by=["node_type","host_name"])
     print(df)
     df.to_csv("stack.csv")
+
+    return {
+                "schema":{
+                    "merge_on_cols" : [],
+                    "compare_cols":[],
+                },
+                "table":df.to_dict(orient="records")
+            }
 
     
 
@@ -106,7 +131,7 @@ if __name__=='__main__':
     import pytz
     format_data = "%Y-%m-%d %H:%M"
     
-    start_time_str = "2024-04-01 00:00"
+    start_time_str = "2024-06-01 00:00"
     hours=60
 
     start_time = datetime.strptime(start_time_str, format_data)
@@ -126,5 +151,6 @@ if __name__=='__main__':
     end_utc_time = end_ist_time.astimezone(utc_timezone)
     end_utc_str = end_utc_time.strftime(format_data)
 
-    extract_ram_cores_storage_details(stack_configuration('longevity_nodes.json') , start_timestamp)
+    result=extract_ram_cores_storage_details(stack_configuration('s1_nodes.json') , start_timestamp)
+    print(result)
     

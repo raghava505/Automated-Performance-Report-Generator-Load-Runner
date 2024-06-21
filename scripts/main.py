@@ -31,6 +31,7 @@ from pg_badger import return_pgbadger_results,get_and_save_pgb_html
 from extract_and_preprocess_resource_utilizations import resource_usages
 from config_vars import *
 from load_params import Load_Params
+from extract_stack_details import extract_ram_cores_storage_details
 
 if __name__ == "__main__":
     variables , stack_obj,load_cls =create_input_form()
@@ -317,7 +318,8 @@ if __name__ == "__main__":
 
             final_data_to_save = {
                 "load_details":load_details,
-                "test_environment_details":test_env_json_details
+                "test_environment_details":test_env_json_details,
+                # "Test environment details": extract_ram_cores_storage_details(stack_obj,start_timestamp)
             }
             if overall_usage_dict:
                 final_data_to_save.update(overall_usage_dict)

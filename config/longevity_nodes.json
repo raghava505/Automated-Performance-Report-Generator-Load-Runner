@@ -16,6 +16,8 @@
         "enabled": 12,
         "triggered": 12
     },
+    "execute_kafka_topics_script_in":"long-c1pn1",
+    "execute_trino_queries_in":"long-c1pn2",
     "pnodes": [
         "long-c1pn1",
         "long-c1pn2",
