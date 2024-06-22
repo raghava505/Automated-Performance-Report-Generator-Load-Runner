@@ -465,10 +465,15 @@ class resource_usages:
 if __name__=='__main__':
     print("Testing active connections by app...")
     from settings import stack_configuration
-    start_time_str = "2024-05-21 01:34"
-    hours=12
+    
+    variables = {
+        "start_time_str_ist":"2024-01-26 13:25",
+        "load_duration_in_hrs":4,
+        "test_env_file_name":'s1_nodes.json'
+    }
+    stack_obj = stack_configuration(variables)
 
-    active_obj = resource_usages(stack_configuration('s1_nodes.json',start_time_str,hours))
+    active_obj = resource_usages(stack_obj)
 
     # total_result_for_querying = active_obj.collect_total_usages(for_report=False)
     total_result_for_report = active_obj.collect_total_usages(for_report=True)
@@ -479,8 +484,8 @@ if __name__=='__main__':
     collection = db['Testing'] 
 
     data_to_insert={}
-    data_to_insert["start_str_ist"] = start_time_str
-    data_to_insert["hours"] = hours
+    data_to_insert["start_str_ist"] = variables["start_time_str_ist"]
+    data_to_insert["hours"] = variables["load_duration_in_hrs"]
 
     data_to_insert["resource_utilization_for_report"] = total_result_for_report
     # data_to_insert["resource_utilization"] = total_result_for_querying

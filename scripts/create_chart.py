@@ -211,26 +211,25 @@ if __name__=="__main__":
     database = client["Osquery_LoadTests"]
     fs = GridFS(database)
 
-    start_time_str = "2024-06-19 22:14"
-    hours=10
+    variables = {
+        "start_time_str_ist":"2024-01-26 13:25",
+        "load_duration_in_hrs":4,
+        "test_env_file_name":'s1_nodes.json',
+        "build":"153105",
 
-    stack_obj=stack_configuration('s1_nodes.json',start_time_str,hours)
+    }
+    stack_obj = stack_configuration(variables)
 
     print("Fetching charts data ...")
     charts_obj = Charts(stack_obj=stack_obj,fs=fs)
     
-    step_factor=hours/10 if hours>10 else 1
+    step_factor=variables["load_duration_in_hrs"]/10 if variables["load_duration_in_hrs"]>10 else 1
     complete_charts_data_dict,all_gridfs_fileids=charts_obj.capture_charts_and_save(load_cls.get_all_chart_queries(),step_factor=step_factor)
     # complete_charts_data_dict,all_gridfs_fileids=charts_obj.capture_charts_and_save({"live Charts":load_cls.get_other_chart_queries()},step_factor=step_factor)
     print("Saved charts data successfully !")
     path = "/Users/masabathulararao/Documents/Loadtest/save-report-data-to-mongo/publish_practice/images"
     collection = database["Testing"]
     inserted_id = collection.insert_one({"charts":complete_charts_data_dict})    
-    variables={
-        "build":"153105",
-        "start_time_str_ist":start_time_str,
-        "load_duration_in_hrs":hours
-    }
     create_images_and_save(path,str(inserted_id.inserted_id),collection,fs,variables,stack_obj.end_time_str_ist,1,"Longevity","Multiple Customer Rule Engine, Control Plane, CloudQuery, KubeQuery and SelfManaged Load",step_factor)
 
     f3_at = time.perf_counter()

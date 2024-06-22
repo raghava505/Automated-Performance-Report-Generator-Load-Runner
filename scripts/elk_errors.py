@@ -4,10 +4,8 @@ from datetime import datetime
 import concurrent.futures
 
 class Elk_erros:
-    def __init__(self,stack_obj):
+    def __init__(self,stack_obj,elastic_ip):
         try:
-            elastic_ip=stack_obj.elastic_ip
-
             self.contents = ["ruleengine", "tls", "nginx", "metastoredb", "pgbouncer", "osqueryIngestion", "redis",
                              "spark", "data-archival", "compaction", "hdfsWrapper", "loginserver", "maintenance",
                              "postgresql", "cloudqueryConsumer", "ruleenginecc", "cloudcompliancemanager",

@@ -36,7 +36,7 @@ if __name__ == "__main__":
         print("Received NoneType objects, terminating the program ...")
         sys.exit()
     
-    #---------------------start time and endtime (timestamps) for prometheus queries-------------------
+    #---------------------logging and opening stack file-------------------
     s_at = time.perf_counter()
    
     with open(stack_obj.test_env_file_path , 'r') as file:
@@ -225,8 +225,9 @@ if __name__ == "__main__":
 
         #--------------------------------Elk Erros------------------------------------------------
         print("Fetching Elk Errors ...")
-        elk = Elk_erros(stack_obj=stack_obj)
-        elk_errors = elk.fetch_errors()
+        if "elastic" in test_env_json_details:
+            elk = Elk_erros(stack_obj=stack_obj,elastic_ip=test_env_json_details['elastic'])
+            elk_errors = elk.fetch_errors()
         
         #--------------------------------cpu and mem node-wise---------------------------------------
         print("Fetching resource usages data ...")
@@ -245,8 +246,9 @@ if __name__ == "__main__":
 
         #-------------------------Compaction Status----------------------------
         print("Fetching Compaction Status ...")
-        compaction = CompactionStatus(stack_obj=stack_obj)
-        compaction_status = compaction.execute_query()
+        if "elastic" in test_env_json_details:
+            compaction = CompactionStatus(stack_obj=stack_obj,elastic_ip=test_env_json_details['elastic'])
+            compaction_status = compaction.execute_query()
         
         #--------------------------------Capture charts data---------------------------------------
         try:

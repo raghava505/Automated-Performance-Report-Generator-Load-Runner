@@ -129,10 +129,14 @@ def extract_ram_cores_storage_details(stack_obj):
 if __name__=='__main__':
     from settings import stack_configuration
 
-    start_time_str = "2024-06-01 00:00"
-    hours=60
+    variables = {
+        "start_time_str_ist":"2024-01-26 13:25",
+        "load_duration_in_hrs":4,
+        "test_env_file_name":'s1_nodes.json'
+    }
+    stack_obj = stack_configuration(variables)
 
-    result=extract_ram_cores_storage_details(stack_configuration('s1_nodes.json',start_time_str,hours))
+    result=extract_ram_cores_storage_details(stack_obj)
 
     print(result)
     
