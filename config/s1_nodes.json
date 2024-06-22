@@ -3,11 +3,7 @@
     "architecture": "1 X 6SU",
     "domain": "jupiter",
     "suffix": "uptycs.net",
-    
-    "apiload_simulator_ip": "192.168.135.52",
-
     "monitoring_node_ip":"s1monitor",
-
     "event_rules_per_cust": {
         "enabled": 39,
         "triggered": 34
@@ -20,5 +16,7 @@
     "execute_trino_queries_in":"s1c1pn4",
 
     "elastic": "192.168.129.52",
-    "pgbadger_reports_mount":"elk"
+    "pgbadger_reports_mount":"elk",
+
+    "apiload_simulator_ip": "192.168.135.52"
 }

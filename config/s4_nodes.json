@@ -3,14 +3,17 @@
     "architecture": "1 X 6SU",
     "domain": "mercury",
     "suffix": "uptycs.net",
-    
+    "monitoring_node_ip":"s4mon",
     "event_rules_per_cust":{"enabled":39,"triggered":33},
     "alert_rules_per_cust":{"enabled":39,"triggered":33},
     
+
+
+
+
+
     "execute_kafka_topics_script_in":"s4c1pn1",
     "execute_trino_queries_in":"s4c1pn2",
-
-    "monitoring_node_ip":"s4mon",
 
     "elastic": "192.168.131.50",
     "pgbadger_reports_mount":"opt/uptycs/etc/elk"

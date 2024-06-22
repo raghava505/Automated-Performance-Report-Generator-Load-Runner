@@ -49,8 +49,8 @@ def execute_on_trino_middleware(key,target_node,query,conn_object,schema) -> dic
         return res
 
 class Load_Params:
-    def __init__(self, start_time, connection_object) -> None:
-        
+    def __init__(self, connection_object) -> None:
+        start_time=connection_object.start_time_UTC
         test_env_file_path=connection_object.test_env_file_path
         with open(test_env_file_path,"r") as file:
             data = json.load(file)

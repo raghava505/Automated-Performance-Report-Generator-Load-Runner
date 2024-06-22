@@ -3,7 +3,7 @@
     "architecture": "2 X 3SU",
     "domain": "milkyway",
     "suffix": "uptycs.net",
-
+    "monitoring_node_ip":"s12c2pn1",
     "event_rules_per_cust": {
         "enabled": 39,
         "triggered": 33
@@ -13,7 +13,6 @@
         "triggered": 33
     },
     "execute_kafka_topics_script_in":"s12c1pn1",
-    "execute_trino_queries_in":"s12c1pn2",
+    "execute_trino_queries_in":"s12c1pn2"
 
-    "monitoring_node_ip":"s12c2pn1"
 }

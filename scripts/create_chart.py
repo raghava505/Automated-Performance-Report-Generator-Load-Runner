@@ -69,7 +69,8 @@ initial_legend_fontsize=fig_width/1.90
 fontsize_decrease_rate_with_rows=fig_width/165
 ncol_increase_rate_with_rows=8000
 
-def create_images_and_save(path,doc_id,collection,fs,duration,variables,end_time_str,run,stack,test_title,step_factor):
+def create_images_and_save(path,doc_id,collection,fs,variables,end_time_str,run,stack,test_title,step_factor):
+    duration = variables['load_duration_in_hrs']
     print(f"Delete saved images data set to : {delete_image_data}")
     sns.set_style("darkgrid")
     sns.plotting_context("talk")
@@ -198,10 +199,10 @@ if __name__=="__main__":
     global delete_image_data
     delete_image_data=True
     import time,pymongo
-    from collections import defaultdict
+    # from collections import defaultdict
     from gridfs import GridFS
     from settings import stack_configuration
-    from datetime import datetime, timedelta
+    # from datetime import datetime, timedelta
     import pytz
     from capture_charts_data import Charts
     from parent_load_details import parent as load_cls
@@ -210,30 +211,13 @@ if __name__=="__main__":
     database = client["Osquery_LoadTests"]
     fs = GridFS(database)
 
-    format_data = "%Y-%m-%d %H:%M"
     start_time_str = "2024-06-19 22:14"
     hours=10
 
-    start_time = datetime.strptime(start_time_str, format_data)
-    end_time = start_time + timedelta(hours=hours)
-    end_time_str = end_time.strftime(format_data)
-
-    ist_timezone = pytz.timezone('Asia/Kolkata')
-    utc_timezone = pytz.utc
-
-    start_ist_time = ist_timezone.localize(datetime.strptime(start_time_str, '%Y-%m-%d %H:%M'))
-    start_timestamp = int(start_ist_time.timestamp())
-    start_utc_time = start_ist_time.astimezone(utc_timezone)
-    start_utc_str = start_utc_time.strftime(format_data)
-
-    end_ist_time = ist_timezone.localize(datetime.strptime(end_time_str, '%Y-%m-%d %H:%M'))
-    end_timestamp = int(end_ist_time.timestamp())
-    end_utc_time = end_ist_time.astimezone(utc_timezone)
-    end_utc_str = end_utc_time.strftime(format_data)
-    stack_obj=stack_configuration('longevity_nodes.json')
+    stack_obj=stack_configuration('s1_nodes.json',start_time_str,hours)
 
     print("Fetching charts data ...")
-    charts_obj = Charts(start_timestamp=start_timestamp,end_timestamp=end_timestamp,stack_obj=stack_obj,fs=fs,hours=hours)
+    charts_obj = Charts(stack_obj=stack_obj,fs=fs)
     
     step_factor=hours/10 if hours>10 else 1
     complete_charts_data_dict,all_gridfs_fileids=charts_obj.capture_charts_and_save(load_cls.get_all_chart_queries(),step_factor=step_factor)
@@ -247,7 +231,8 @@ if __name__=="__main__":
         "start_time_str_ist":start_time_str,
         "load_duration_in_hrs":hours
     }
-    create_images_and_save(path,str(inserted_id.inserted_id),collection,fs,hours,variables,end_time_str,1,"Longevity","Multiple Customer Rule Engine, Control Plane, CloudQuery, KubeQuery and SelfManaged Load",step_factor)
+    create_images_and_save(path,str(inserted_id.inserted_id),collection,fs,variables,stack_obj.end_time_str_ist,1,"Longevity","Multiple Customer Rule Engine, Control Plane, CloudQuery, KubeQuery and SelfManaged Load",step_factor)
+
     f3_at = time.perf_counter()
     print(f"Collecting the report data took : {round(f3_at - s_at,2)} seconds in total")
 else:

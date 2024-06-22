@@ -17,14 +17,15 @@ from helper import measure_time
 
 class Kube_Accuracy:
 
-    def __init__(self,start_timestamp,end_timestamp,stack_obj,variables):
+    def __init__(self,stack_obj):
+        self.load_start=stack_obj.start_time_UTC
+        self.load_end=stack_obj.end_time_UTC
+
         test_env_file_path=stack_obj.test_env_file_path
         with open(test_env_file_path,"r") as file:
             data = json.load(file)
         
-        self.load_start=start_timestamp
-        self.load_end=end_timestamp
-        self.upt_day="".join(str(start_timestamp.strftime("%Y-%m-%d")).split('-'))
+        self.upt_day="".join(str(self.load_start.strftime("%Y-%m-%d")).split('-'))
         self.port = 22
         self.username = "abacus"
         self.password  = "abacus"

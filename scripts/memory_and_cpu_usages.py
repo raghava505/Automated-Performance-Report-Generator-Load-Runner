@@ -9,11 +9,11 @@ memory_unit = "GB"
 cpu_unit = "cores"
 threshold = 0.03
 class MC_comparisions:
-    def __init__(self,stack_obj,start_timestamp,end_timestamp,hours,include_nodetypes):
-        self.curr_ist_start_time=start_timestamp
-        self.curr_ist_end_time=end_timestamp
+    def __init__(self,stack_obj,include_nodetypes):
+        self.curr_ist_start_time=stack_obj.start_timestamp
+        self.curr_ist_end_time=stack_obj.end_timestamp
         self.stack_obj=stack_obj
-        self.hours=hours
+        self.hours=stack_obj.hours
         self.include_nodetypes=include_nodetypes
 
         total_memory_capacity_query = "sum(uptycs_total_memory/(1024*1024)) by (node_type,host_name)"
@@ -47,7 +47,7 @@ class MC_comparisions:
         for query in queries:
             final[query] = {}
             print(f"-------processing {tag} for {query} (timestamp : {self.curr_ist_start_time} to {self.curr_ist_end_time})")
-            for res in execute_prometheus_query(self.stack_obj,self.curr_ist_start_time,self.curr_ist_end_time,queries[query],self.hours):
+            for res in execute_prometheus_query(self.stack_obj,queries[query]):
                 hostname = res['metric']['host_name'] 
                 avg = res["values"]["average"]
                 minimum = res["values"]["minimum"]
@@ -107,7 +107,7 @@ class MC_comparisions:
         for query in queries:
             final[query] = {}
             print(f"----------processing {tag} for {query} (timestamp : {self.curr_ist_start_time} to {self.curr_ist_end_time})")
-            for res in execute_prometheus_query(self.stack_obj,self.curr_ist_start_time,self.curr_ist_end_time,queries[query],self.hours):
+            for res in execute_prometheus_query(self.stack_obj,queries[query]):
                 container_name = res['metric']['container_name']
                 avg = res["values"]["average"]
                 if avg <= threshold:continue
@@ -120,7 +120,7 @@ class MC_comparisions:
         print(f"----------processing application level {tag} usages for (timestamp : {self.curr_ist_start_time} to {self.curr_ist_end_time})")
         for query in queries:
             print(f"processing {tag} usage for {query} application (timestamp : {self.curr_ist_start_time} to {self.curr_ist_end_time})")
-            result=execute_prometheus_query(self.stack_obj,self.curr_ist_start_time,self.curr_ist_end_time,queries[query],self.hours)
+            result=execute_prometheus_query(self.stack_obj,queries[query])
             if len(result)==0:
                 print(f"WARNING : No data found for : {query}, the query executed is : {queries[query]}")
                 continue
@@ -141,7 +141,7 @@ class MC_comparisions:
         print(f"----------processing pod level {tag} usages for (timestamp : {self.curr_ist_start_time} to {self.curr_ist_end_time})")
         for query in queries:
             print(f"processing {tag} usage for {query} pod (timestamp : {self.curr_ist_start_time} to {self.curr_ist_end_time})")
-            result=execute_prometheus_query(self.stack_obj,self.curr_ist_start_time,self.curr_ist_end_time,queries[query],self.hours)
+            result=execute_prometheus_query(self.stack_obj,queries[query])
             if len(result)==0:
                 print(f"WARNING : No data found for : {query}, the query executed is : {queries[query]}")
                 continue

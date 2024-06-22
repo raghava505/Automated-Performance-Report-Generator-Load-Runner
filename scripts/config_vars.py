@@ -23,7 +23,7 @@ kube_metrics = ["container_memory_working_set_bytes","container_cpu_usage_second
 
 #dynamic
 ROOT_PATH = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
-base_stack_config_path = f"{ROOT_PATH}/config"
+STACK_JSONS_PATH = f"{ROOT_PATH}/config"
 BASE_GRAPHS_PATH = os.path.join(os.path.dirname(ROOT_PATH),'graphs')
 BASE_HTML_PATH = os.path.join(os.path.dirname(ROOT_PATH),'htmls')
 BASE_PDFS_PATH = os.path.join(os.path.dirname(ROOT_PATH),'pdfs')

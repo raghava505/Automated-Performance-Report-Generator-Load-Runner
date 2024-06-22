@@ -6,7 +6,7 @@ from cloudquery.cloudquery_child_class import cloudquery_child
 from kubequery.kubequery_child_class import kubequery_child
 from combined_loads_setup import all_combined_child
 from collections import defaultdict
-from config_vars import base_stack_config_path
+from config_vars import STACK_JSONS_PATH
 
 bool_options=[False,True]
 load_type_options = {   
@@ -28,7 +28,7 @@ load_type_options = {
                                     }
                      }
 
-all_files = os.listdir(base_stack_config_path)
+all_files = os.listdir(STACK_JSONS_PATH)
 test_env_path_options = sorted([file for file in all_files if file.endswith('.json') and '_nodes' in file])
 
 def create_input_form():
@@ -131,7 +131,7 @@ def create_input_form():
 
     if user_input =='y':
         print("Continuing ...")
-        stack_obj = stack_configuration(test_env_file_name=details['test_env_file_name'])
+        stack_obj = stack_configuration(test_env_file_name=details['test_env_file_name'],start_time_str_ist=details["start_time_str_ist"],load_duration_in_hrs=details["load_duration_in_hrs"])
         return details,stack_obj,load_cls
     elif user_input =='n':
         print("OK! Enter the modified details ...")

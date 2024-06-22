@@ -1,11 +1,10 @@
 from elasticsearch import Elasticsearch
 import datetime
 from datetime import datetime
-import json
 import concurrent.futures
 
 class Elk_erros:
-    def __init__(self, start_timestamp, end_timestamp, stack_obj):
+    def __init__(self,stack_obj):
         try:
             elastic_ip=stack_obj.elastic_ip
 
@@ -17,9 +16,9 @@ class Elk_erros:
             self.elasticsearch_host = f"http://{elastic_ip}:9200"
             self.elastic_client = Elasticsearch(hosts=[self.elasticsearch_host], timeout=240)
 
-            dt_object = datetime.utcfromtimestamp(start_timestamp)
+            dt_object = datetime.utcfromtimestamp(stack_obj.start_timestamp)
             self.formatted_starttime = dt_object.strftime('%Y-%m-%dT%H:%M:%S.%fZ')
-            dt_object = datetime.utcfromtimestamp(end_timestamp)
+            dt_object = datetime.utcfromtimestamp(stack_obj.end_timestamp)
             self.formatted_endtime = dt_object.strftime('%Y-%m-%dT%H:%M:%S.%fZ')
 
             self.index_name = "uptycs-*"

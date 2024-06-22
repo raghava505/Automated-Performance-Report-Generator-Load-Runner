@@ -115,7 +115,9 @@ def http_query(config, query_str, url_ext):
     raise Exception('Unsuccessful http query 10 time in a row: %s' % query_str)
 
 class osq_accuracy:
-    def __init__(self,start_time_utc,end_time_utc,api_path,domain,endline,assets_per_cust,ext,trans,hours,input_file):
+    def __init__(self,stack_obj,api_path,domain,assets_per_cust,ext,trans,input_file):
+        start_time_utc=stack_obj.start_time_UTC
+        end_time_utc=stack_obj.end_time_UTC
         format_data = "%Y-%m-%d %H:%M"
         start_time = start_time_utc - timedelta(minutes=20)
         self.start_time = start_time.strftime(format_data)
@@ -123,11 +125,11 @@ class osq_accuracy:
         self.end_time = end_time.strftime(format_data)
         self.api_path=api_path
         self.domain=domain
-        self.endline=endline
+        self.hours=stack_obj.hours
+        self.endline=1800*self.hours
         self.assets_per_cust=assets_per_cust
         self.ext=ext
         self.trans=trans
-        self.hours=hours
         self.input_file=input_file
         self.upt_day="".join(str(start_time_utc.strftime("%Y-%m-%d")).split('-'))
         print(f"Start time string in utc : {self.start_time}")

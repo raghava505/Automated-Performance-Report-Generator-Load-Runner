@@ -149,7 +149,9 @@ def return_pgbadger_results(start_time_utc,end_time_utc,elastic_url,images_path)
     res=take_screenshots_and_save(links,images_path)
     return res
 
-def get_and_save_pgb_html(start_time_utc,end_time_utc,elastic_url,base_save_path,pgbadger_tail_path,pgbadger_reports_mount,check=False):
+def get_and_save_pgb_html(stack_obj,elastic_url,base_save_path,pgbadger_tail_path,pgbadger_reports_mount,check=False):
+    start_time_utc=stack_obj.start_time_UTC
+    end_time_utc=stack_obj.end_time_UTC
     format_data = "%Y-%m-%dT%H:%M"
     return_file_names={}
     start_time = start_time_utc + timedelta(hours=1)
