@@ -131,7 +131,7 @@ def create_input_form():
 
     if user_input =='y':
         print("Continuing ...")
-        stack_obj = stack_configuration(test_env_file_name=details['test_env_file_name'],start_time_str_ist=details["start_time_str_ist"],load_duration_in_hrs=details["load_duration_in_hrs"])
+        stack_obj = stack_configuration(details)
         return details,stack_obj,load_cls
     elif user_input =='n':
         print("OK! Enter the modified details ...")

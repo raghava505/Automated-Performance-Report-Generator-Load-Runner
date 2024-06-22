@@ -52,9 +52,13 @@ if __name__=='__main__':
     print("Testing active connections by app...")
     from settings import stack_configuration
     
-    start_time_str_ist = "2024-01-26 13:25"
-    load_duration_in_hrs=4
+    variables = {
+        "start_time_str_ist":"2024-01-26 13:25",
+        "load_duration_in_hrs":4,
+        "test_env_file_name":'s1_nodes.json'
+    }
+    stack_obj = stack_configuration(variables)
     
-    active_obj = Active_conn(stack_obj=stack_configuration('s1_nodes.json',start_time_str_ist,load_duration_in_hrs))
+    active_obj = Active_conn(stack_obj)
     result = active_obj.get_avg_active_conn()
     print(result)

@@ -4,9 +4,9 @@ from datetime import datetime
 
 
 class CompactionStatus:
-    def __init__(self,stack_obj):
+    def __init__(self,stack_obj,elastic_ip):
         try:            
-            self.elasticsearch_host = f"http://{stack_obj.elastic_ip}:9200"
+            self.elasticsearch_host = f"http://{elastic_ip}:9200"
             self.elastic_client = Elasticsearch(hosts=[self.elasticsearch_host], timeout=240)
 
             dt_object = datetime.utcfromtimestamp(stack_obj.start_timestamp)

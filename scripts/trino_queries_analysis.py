@@ -467,10 +467,14 @@ if __name__=='__main__':
     print("Testing trino queries analysis ...")
     from settings import stack_configuration
 
-    start_time_str_ist = "2024-06-22 00:00"
-    load_duration_in_hrs=24
+    variables = {
+        "start_time_str_ist":"2024-01-26 13:25",
+        "load_duration_in_hrs":4,
+        "test_env_file_name":'s1_nodes.json'
+    }
+    stack_obj = stack_configuration(variables)
     
-    calc = TRINO_ANALYSE(stack_obj=stack_configuration('s1_nodes.json',start_time_str_ist,load_duration_in_hrs))
+    calc = TRINO_ANALYSE(stack_obj)
     trino_queries = calc.fetch_trino_results()
     import pandas as pd
     from pymongo import MongoClient
