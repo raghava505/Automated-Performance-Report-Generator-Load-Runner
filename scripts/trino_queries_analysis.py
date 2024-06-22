@@ -9,9 +9,9 @@ pd.set_option('display.expand_frame_repr', False)
 from time_taken_by_all_queries import get_full_query,time_ranges
 
 class TRINO_ANALYSE:
-    def __init__(self,start_utc_str,end_utc_str,stack_obj):
-        self.start_utc_str=start_utc_str
-        self.end_utc_str=end_utc_str
+    def __init__(self,stack_obj):
+        self.start_utc_str=stack_obj.start_time_str_utc
+        self.end_utc_str=stack_obj.end_time_str_utc
         self.dnode = stack_obj.execute_trino_queries_in
 
     def get_trino_commands(self):
@@ -466,30 +466,11 @@ class TRINO_ANALYSE:
 if __name__=='__main__':
     print("Testing trino queries analysis ...")
     from settings import stack_configuration
-    from datetime import datetime, timedelta
-    import pytz
-    format_data = "%Y-%m-%d %H:%M"
 
-    start_time_str = "2024-04-05 00:00"
-    hours=168
-
-    start_time = datetime.strptime(start_time_str, format_data)
-    end_time = start_time + timedelta(hours=hours)
-    end_time_str = end_time.strftime(format_data)
-
-    ist_timezone = pytz.timezone('Asia/Kolkata')
-    utc_timezone = pytz.utc
-
-    start_ist_time = ist_timezone.localize(datetime.strptime(start_time_str, '%Y-%m-%d %H:%M'))
-    start_timestamp = int(start_ist_time.timestamp())
-    start_utc_time = start_ist_time.astimezone(utc_timezone)
-    start_utc_str = start_utc_time.strftime(format_data)
-
-    end_ist_time = ist_timezone.localize(datetime.strptime(end_time_str, '%Y-%m-%d %H:%M'))
-    end_timestamp = int(end_ist_time.timestamp())
-    end_utc_time = end_ist_time.astimezone(utc_timezone)
-    end_utc_str = end_utc_time.strftime(format_data)
-    calc = TRINO_ANALYSE(start_utc_str,end_utc_str,stack_obj=stack_configuration('s1_nodes.json'))
+    start_time_str_ist = "2024-06-22 00:00"
+    load_duration_in_hrs=24
+    
+    calc = TRINO_ANALYSE(stack_obj=stack_configuration('s1_nodes.json',start_time_str_ist,load_duration_in_hrs))
     trino_queries = calc.fetch_trino_results()
     import pandas as pd
     from pymongo import MongoClient

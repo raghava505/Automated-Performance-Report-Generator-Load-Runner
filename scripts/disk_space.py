@@ -2,9 +2,9 @@ import json
 from helper import execute_point_prometheus_query
 
 class DISK:
-    def __init__(self,start_timestamp,end_timestamp,stack_obj):
-        self.curr_ist_start_time=start_timestamp
-        self.curr_ist_end_time=end_timestamp
+    def __init__(self,stack_obj):
+        self.curr_ist_start_time=stack_obj.start_timestamp
+        self.curr_ist_end_time=stack_obj.end_timestamp
         self.stack_obj=stack_obj
 
         # self.kafka_total_space = {}

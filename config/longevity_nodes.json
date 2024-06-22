@@ -3,12 +3,7 @@
     "architecture": "2 X 6SU",
     "domain": "longevity",
     "suffix": "uptycs.net",
-    
-    "prestoload_simulator_ip": "192.168.145.94",
-    "apiload_simulator_ip":"192.168.145.94",
-
     "monitoring_node_ip":"long-monitor",
-    
     "event_rules_per_cust": {
         "enabled": 39,
         "triggered": 33
@@ -22,6 +17,9 @@
 
     "elastic": "192.168.148.52",
     "pgbadger_reports_mount": "data",
+
+    "apiload_simulator_ip":"192.168.145.94",
+    "prestoload_simulator_ip": "192.168.145.94",
 
     "kubesim_nodes": [
         "long-kube-sim1",

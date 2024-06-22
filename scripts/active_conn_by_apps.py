@@ -2,11 +2,8 @@ from helper import execute_prometheus_query
 import pandas as pd
 import numpy as np
 class Active_conn:
-    def __init__(self,stack_obj,start_timestamp,end_timestamp,hours):
-        self.start_timestamp=start_timestamp
-        self.end_timestamp=end_timestamp
+    def __init__(self,stack_obj):
         self.stack_obj=stack_obj
-        self.hours=hours
     
     def get_avg_active_conn(self):
         base_query="uptycs_pg_idle_active_connections_by_app{{state=\"active\",db=\"{}\",role=\"master\"}}"
@@ -14,7 +11,7 @@ class Active_conn:
         result_dict={}
         for db in dbs:
             query = base_query.format(db)
-            result =execute_prometheus_query(self.stack_obj,self.start_timestamp,self.end_timestamp,query,self.hours)
+            result =execute_prometheus_query(self.stack_obj,query)
             final=[]
             for app in result:
                 application_name = app["metric"]["application_name"]
@@ -51,32 +48,13 @@ class Active_conn:
         return result_dict
     
 
-# if __name__=='__main__':
-#     print("Testing active connections by app...")
-#     from settings import stack_configuration
-#     from datetime import datetime, timedelta
-#     import pytz
-#     format_data = "%Y-%m-%d %H:%M"
+if __name__=='__main__':
+    print("Testing active connections by app...")
+    from settings import stack_configuration
     
-#     start_time_str = "2024-01-26 13:25"
-#     hours=4
-
-#     start_time = datetime.strptime(start_time_str, format_data)
-#     end_time = start_time + timedelta(hours=hours)
-#     end_time_str = end_time.strftime(format_data)
-
-#     ist_timezone = pytz.timezone('Asia/Kolkata')
-#     utc_timezone = pytz.utc
-
-#     start_ist_time = ist_timezone.localize(datetime.strptime(start_time_str, '%Y-%m-%d %H:%M'))
-#     start_timestamp = int(start_ist_time.timestamp())
-#     start_utc_time = start_ist_time.astimezone(utc_timezone)
-#     start_utc_str = start_utc_time.strftime(format_data)
-
-#     end_ist_time = ist_timezone.localize(datetime.strptime(end_time_str, '%Y-%m-%d %H:%M'))
-#     end_timestamp = int(end_ist_time.timestamp())
-#     end_utc_time = end_ist_time.astimezone(utc_timezone)
-#     end_utc_str = end_utc_time.strftime(format_data)
-#     active_obj = Active_conn(stack_configuration('longevity_nodes.json') , start_timestamp,end_timestamp,hours)
-#     result = active_obj.get_avg_active_conn()
-#     print(result)
+    start_time_str_ist = "2024-01-26 13:25"
+    load_duration_in_hrs=4
+    
+    active_obj = Active_conn(stack_obj=stack_configuration('s1_nodes.json',start_time_str_ist,load_duration_in_hrs))
+    result = active_obj.get_avg_active_conn()
+    print(result)

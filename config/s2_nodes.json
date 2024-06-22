@@ -3,9 +3,7 @@
     "architecture": "1 X 6SU",
     "domain": "neptune",
     "suffix": "uptycs.net",
-
     "monitoring_node_ip":"s2monitor",
-
     "event_rules_per_cust": {
         "enabled": 39,
         "triggered": 33

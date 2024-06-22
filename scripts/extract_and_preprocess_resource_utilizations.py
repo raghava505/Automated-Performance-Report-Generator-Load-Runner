@@ -30,10 +30,10 @@ def get_exclude_filter(exclude_nodetypes):
 
 
 class resource_usages:
-    def __init__(self,stack_obj,start_timestamp,end_timestamp,hours,include_nodetypes=["process","data","pg","airflow","redis","ep","memgraph","cloudquery"]):
-        self.start_timestamp=start_timestamp
-        self.end_timestamp=end_timestamp
-        self.hours=hours
+    def __init__(self,stack_obj,include_nodetypes=["process","data","pg","airflow","redis","ep","memgraph","cloudquery"]):
+        self.start_timestamp=stack_obj.start_timestamp
+        self.end_timestamp=stack_obj.end_timestamp
+        self.hours=stack_obj.hours
         self.stack_obj=stack_obj
 
         total_memory_capacity_query = "sum(uptycs_total_memory/(1024*1024)) by (node_type,host_name)"
@@ -180,7 +180,7 @@ class resource_usages:
         print("****************************************************************************************************Capturing details for node-level memory")
         node_level_memory_query = f"sum(uptycs_memory_used{self.exclude_filter} /(1024*1024)) by (node_type,host_name)"
         node_level_final_memory_result=[]
-        node_level_memory_query_result=execute_prometheus_query(self.stack_obj,self.start_timestamp,self.end_timestamp,node_level_memory_query,self.hours)
+        node_level_memory_query_result=execute_prometheus_query(self.stack_obj,node_level_memory_query)
         for line in node_level_memory_query_result:
             node_level_final_memory_result.append({
                 "node_type":line["metric"]["node_type"],
@@ -196,7 +196,7 @@ class resource_usages:
         print("****************************************************************************************************Capturing details for app-level memory")
         application_level_memory_query = f'sum(uptycs_app_memory{self.exclude_filter}) by (node_type,host_name,app_name)'
         application_level_final_memory_result=[]
-        for line in execute_prometheus_query(self.stack_obj,self.start_timestamp,self.end_timestamp,application_level_memory_query,self.hours):
+        for line in execute_prometheus_query(self.stack_obj,application_level_memory_query):
             try:
                 current_host_ram=self.node_ram_capacity[line["metric"]["host_name"]]                
                 application_level_final_memory_result.append({
@@ -211,7 +211,7 @@ class resource_usages:
                 print(f'***************** ERROR: Couldnt find host {line["metric"]["host_name"]} in ram-capacity dictionary. Exception occured while calculating app memory usage for app:{line["metric"]["app_name"]}. {e}')   
 
         for app in exclude_applications:
-            for line in execute_prometheus_query(self.stack_obj,self.start_timestamp,self.end_timestamp,f'sum(uptycs_app_memory{{app_name=~"{app}"}}) by (node_type,host_name)',self.hours):
+            for line in execute_prometheus_query(self.stack_obj,f'sum(uptycs_app_memory{{app_name=~"{app}"}}) by (node_type,host_name)'):
                 if line["metric"]["node_type"] in self.exclude_nodetypes:continue
                 try:
                     current_host_ram=self.node_ram_capacity[line["metric"]["host_name"]]                
@@ -232,7 +232,7 @@ class resource_usages:
         print("****************************************************************************************************Capturing details for container-level memory")
         container_level_memory_query='sum(uptycs_docker_mem_used{}/(1024*1024*1024)) by (container_name,host_name)'.format(self.exclude_filter)
         container_level_final_memory_result=[]
-        for line in execute_prometheus_query(self.stack_obj,self.start_timestamp,self.end_timestamp,container_level_memory_query,self.hours):
+        for line in execute_prometheus_query(self.stack_obj,container_level_memory_query):
             try:
                 if self.host_name_type_mapping[line["metric"]["host_name"]] in self.exclude_nodetypes:continue
                 container_level_final_memory_result.append({
@@ -248,7 +248,7 @@ class resource_usages:
 
 
         for cont in exclude_containers:
-            for line in execute_prometheus_query(self.stack_obj,self.start_timestamp,self.end_timestamp,f'sum(uptycs_docker_mem_used{{container_name=~"{cont}"}}/(1024*1024*1024)) by (host_name)',self.hours):
+            for line in execute_prometheus_query(self.stack_obj,f'sum(uptycs_docker_mem_used{{container_name=~"{cont}"}}/(1024*1024*1024)) by (host_name)'):
                 try:
                     if self.host_name_type_mapping[line["metric"]["host_name"]] in self.exclude_nodetypes:continue
                     container_level_final_memory_result.append({
@@ -268,7 +268,7 @@ class resource_usages:
         print("****************************************************************************************************Capturing details for pod-level memory")
         pod_level_memory_query='sum(uptycs_kubernetes_memory_stats{pod=~".*deployment.*"}) by (node,pod)'
         unique_pod_names=set()
-        for line in execute_prometheus_query(self.stack_obj,self.start_timestamp,self.end_timestamp,pod_level_memory_query,self.hours):
+        for line in execute_prometheus_query(self.stack_obj,pod_level_memory_query):
             try:
                 if self.host_name_type_mapping[line["metric"]["node"]] in self.exclude_nodetypes:continue
                 pod_name = line["metric"]["pod"].split('-deployment-')[0]
@@ -282,7 +282,7 @@ class resource_usages:
 
         pod_mem_result=[]
         for pod in unique_pod_names:
-            for line in execute_prometheus_query(self.stack_obj,self.start_timestamp,self.end_timestamp,f'sum(uptycs_kubernetes_memory_stats{{pod=~"{pod}-deployment.*"}}) by (node_type,node,pod) / (1024*1024*1024)',self.hours):
+            for line in execute_prometheus_query(self.stack_obj,f'sum(uptycs_kubernetes_memory_stats{{pod=~"{pod}-deployment.*"}}) by (node_type,node,pod) / (1024*1024*1024)'):
                 try:
                     if line["metric"]["node_type"] in self.exclude_nodetypes:continue
                     pod_mem_result.append({
@@ -306,7 +306,7 @@ class resource_usages:
         print("****************************************************************************************************Capturing details for node-level cpu")
         node_level_cpu_query = f"sum(100-uptycs_idle_cpu{self.exclude_filter}) by (node_type,host_name)"
         node_level_final_cpu_result=[]
-        node_level_cpu_query_result=execute_prometheus_query(self.stack_obj,self.start_timestamp,self.end_timestamp,node_level_cpu_query,self.hours)
+        node_level_cpu_query_result=execute_prometheus_query(self.stack_obj,node_level_cpu_query)
         for line in node_level_cpu_query_result:
             try:
                 current_host_cores=self.node_cores_capacity[line["metric"]["host_name"]]             
@@ -326,7 +326,7 @@ class resource_usages:
         print("****************************************************************************************************Capturing details for app-level cpu")
         application_level_cpu_query = f'sum(uptycs_app_cpu{self.exclude_filter}) by (node_type,host_name,app_name)/100'
         application_level_final_cpu_result=[]
-        for line in execute_prometheus_query(self.stack_obj,self.start_timestamp,self.end_timestamp,application_level_cpu_query,self.hours):
+        for line in execute_prometheus_query(self.stack_obj,application_level_cpu_query):
             application_level_final_cpu_result.append({
                 "node_type":line["metric"]["node_type"],
                 "host_name":line["metric"]["host_name"],
@@ -337,7 +337,7 @@ class resource_usages:
             })
 
         for app in exclude_applications:
-            for line in execute_prometheus_query(self.stack_obj,self.start_timestamp,self.end_timestamp,f'sum(uptycs_app_cpu{{app_name=~"{app}"}}) by (node_type,host_name)/100',self.hours):
+            for line in execute_prometheus_query(self.stack_obj,f'sum(uptycs_app_cpu{{app_name=~"{app}"}}) by (node_type,host_name)/100'):
                 if line["metric"]["node_type"] in self.exclude_nodetypes:continue
                 application_level_final_cpu_result.append({
                     "node_type":line["metric"]["node_type"],
@@ -354,7 +354,7 @@ class resource_usages:
         print("****************************************************************************************************Capturing details for container-level cpu")
         container_level_cpu_query='sum(uptycs_docker_cpu_stats{}) by (container_name,host_name)/100'.format(self.exclude_filter)
         container_level_final_cpu_result=[]
-        for line in execute_prometheus_query(self.stack_obj,self.start_timestamp,self.end_timestamp,container_level_cpu_query,self.hours):
+        for line in execute_prometheus_query(self.stack_obj,container_level_cpu_query):
             try:
                 if self.host_name_type_mapping[line["metric"]["host_name"]] in self.exclude_nodetypes:continue
                 container_level_final_cpu_result.append({
@@ -370,7 +370,7 @@ class resource_usages:
 
 
         for cont in exclude_containers:
-            for line in execute_prometheus_query(self.stack_obj,self.start_timestamp,self.end_timestamp,f'sum(uptycs_docker_cpu_stats{{container_name=~"{cont}"}}) by (host_name)/100',self.hours):
+            for line in execute_prometheus_query(self.stack_obj,f'sum(uptycs_docker_cpu_stats{{container_name=~"{cont}"}}) by (host_name)/100'):
                 try:
                     if self.host_name_type_mapping[line["metric"]["host_name"]] in self.exclude_nodetypes:continue
                     container_level_final_cpu_result.append({
@@ -390,7 +390,7 @@ class resource_usages:
         print("****************************************************************************************************Capturing details for pod-level cpu")
         pod_cpu_result=[]
         for pod in self.unique_pod_names:
-            for line in execute_prometheus_query(self.stack_obj,self.start_timestamp,self.end_timestamp,f'sum(uptycs_kubernetes_cpu_stats{{pod=~"{pod}-deployment.*"}}) by (node_type,node,pod) / 100',self.hours):
+            for line in execute_prometheus_query(self.stack_obj,f'sum(uptycs_kubernetes_cpu_stats{{pod=~"{pod}-deployment.*"}}) by (node_type,node,pod) / 100'):
                 try:
                     if line["metric"]["node_type"] in self.exclude_nodetypes:continue
                     pod_cpu_result.append({
@@ -465,31 +465,11 @@ class resource_usages:
 if __name__=='__main__':
     print("Testing active connections by app...")
     from settings import stack_configuration
-    from datetime import datetime, timedelta
-    import pytz
-    format_data = "%Y-%m-%d %H:%M"
-    
     start_time_str = "2024-05-21 01:34"
     hours=12
 
-    start_time = datetime.strptime(start_time_str, format_data)
-    end_time = start_time + timedelta(hours=hours)
-    end_time_str = end_time.strftime(format_data)
+    active_obj = resource_usages(stack_configuration('s1_nodes.json',start_time_str,hours))
 
-    ist_timezone = pytz.timezone('Asia/Kolkata')
-    utc_timezone = pytz.utc
-
-    start_ist_time = ist_timezone.localize(datetime.strptime(start_time_str, '%Y-%m-%d %H:%M'))
-    start_timestamp = int(start_ist_time.timestamp())
-    start_utc_time = start_ist_time.astimezone(utc_timezone)
-    start_utc_str = start_utc_time.strftime(format_data)
-
-    end_ist_time = ist_timezone.localize(datetime.strptime(end_time_str, '%Y-%m-%d %H:%M'))
-    end_timestamp = int(end_ist_time.timestamp())
-    end_utc_time = end_ist_time.astimezone(utc_timezone)
-    end_utc_str = end_utc_time.strftime(format_data)
-
-    active_obj = resource_usages(stack_configuration('s1_nodes.json') , start_timestamp,end_timestamp,hours=hours)
     # total_result_for_querying = active_obj.collect_total_usages(for_report=False)
     total_result_for_report = active_obj.collect_total_usages(for_report=True)
 

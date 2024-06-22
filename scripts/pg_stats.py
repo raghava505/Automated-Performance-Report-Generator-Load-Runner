@@ -6,10 +6,10 @@ databases = ["configdb","statedb"]
 
 
 class PG_STATS:
-    def __init__(self,start_timestamp,end_timestamp,load_dur,stack_obj):
-        self.curr_ist_start_time=start_timestamp
-        self.curr_ist_end_time=end_timestamp
-        self.load_duration=load_dur
+    def __init__(self,stack_obj):
+        self.curr_ist_start_time=stack_obj.start_timestamp
+        self.curr_ist_end_time=stack_obj.end_timestamp
+        self.load_duration=self.hours
         self.PROMETHEUS = stack_obj.prometheus_path
         self.API_PATH = prom_api_path
         

@@ -77,19 +77,26 @@ def execute_point_prometheus_query(stack_obj,timestamp,query):
     except Exception as e:
         raise RuntimeError(f"An unexpected error occurred: {e}")
 
-def execute_prometheus_query(stack_obj,start_timestamp,end_timestamp,query,hours,preprocess=True,step_factor=None):
+def execute_prometheus_query(stack_obj,query,preprocess=True,step_factor=None,for_charts=None):
     PROMETHEUS = stack_obj.prometheus_path
     for metric in kube_metrics:
         if metric in query:
             PROMETHEUS = stack_obj.kube_prometheus_path
             print("pod level metric found.. using prometheous path : " , PROMETHEUS)
-
+    hours = stack_obj.hours
     if not step_factor:
         step_factor=hours/10 if hours>10 else 1
     step=60*step_factor
     points_per_min = 60/step
     points_per_hour = points_per_min*60
     estimated_points=(points_per_hour*hours) + 1
+
+    if for_charts:
+        start_timestamp = for_charts[0]
+        end_timestamp = for_charts[1]
+    else:
+        start_timestamp=stack_obj.start_timestamp
+        end_timestamp = stack_obj.end_timestamp
     PARAMS = {
         'query': query,
         'start': start_timestamp,

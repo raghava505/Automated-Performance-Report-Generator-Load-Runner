@@ -26,7 +26,8 @@ storage_commands = {'root(/)':"df -h | awk '$6 == \"/\" {print $2}'",
                     '/data/prometheus' : "df -h | awk '$6 == \"/data/prometheus\" {print $2}'",
                     }
 
-def extract_ram_cores_storage_details(stack_obj,start_timestamp):
+def extract_ram_cores_storage_details(stack_obj):
+    start_timestamp=stack_obj.start_timestamp
     final_result=defaultdict(lambda:{})
 
     total_memory_capacity_query = "sum(uptycs_total_memory/(1024*1024)) by (node_type,host_name,cluster_id)"
@@ -127,30 +128,11 @@ def extract_ram_cores_storage_details(stack_obj,start_timestamp):
 
 if __name__=='__main__':
     from settings import stack_configuration
-    from datetime import datetime, timedelta
-    import pytz
-    format_data = "%Y-%m-%d %H:%M"
-    
+
     start_time_str = "2024-06-01 00:00"
     hours=60
 
-    start_time = datetime.strptime(start_time_str, format_data)
-    end_time = start_time + timedelta(hours=hours)
-    end_time_str = end_time.strftime(format_data)
+    result=extract_ram_cores_storage_details(stack_configuration('s1_nodes.json',start_time_str,hours))
 
-    ist_timezone = pytz.timezone('Asia/Kolkata')
-    utc_timezone = pytz.utc
-
-    start_ist_time = ist_timezone.localize(datetime.strptime(start_time_str, '%Y-%m-%d %H:%M'))
-    start_timestamp = int(start_ist_time.timestamp())
-    start_utc_time = start_ist_time.astimezone(utc_timezone)
-    start_utc_str = start_utc_time.strftime(format_data)
-
-    end_ist_time = ist_timezone.localize(datetime.strptime(end_time_str, '%Y-%m-%d %H:%M'))
-    end_timestamp = int(end_ist_time.timestamp())
-    end_utc_time = end_ist_time.astimezone(utc_timezone)
-    end_utc_str = end_utc_time.strftime(format_data)
-
-    result=extract_ram_cores_storage_details(stack_configuration('s1_nodes.json') , start_timestamp)
     print(result)
     

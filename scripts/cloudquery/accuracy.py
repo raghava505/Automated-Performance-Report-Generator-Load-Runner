@@ -20,11 +20,12 @@ PROJECT_ROOT = Path(__file__).resolve().parent
 
 class ACCURACY:
 
-    def __init__(self,start_timestamp,end_timestamp,stack_obj,variables):
+    def __init__(self,stack_obj,variables):
+
         format_data = "%Y-%m-%d %H:%M"
-        start_time = start_timestamp - timedelta(minutes=10)
+        start_time = stack_obj.start_time_UTC - timedelta(minutes=10)
         self.load_start = start_time.strftime(format_data)
-        end_time = end_timestamp + timedelta(minutes=10)
+        end_time = stack_obj.end_time_UTC + timedelta(minutes=10)
         self.load_end = end_time.strftime(format_data)
 
         self.load_name = variables['load_name']
@@ -33,7 +34,7 @@ class ACCURACY:
         self.api_path=None
         self.total_counts = 'total_counts_'
 
-        self.upt_day="".join(str(start_timestamp.strftime("%Y-%m-%d")).split('-'))
+        self.upt_day="".join(str(stack_obj.start_time_UTC.strftime("%Y-%m-%d")).split('-'))
 
     def global_query(self,data,table):
         

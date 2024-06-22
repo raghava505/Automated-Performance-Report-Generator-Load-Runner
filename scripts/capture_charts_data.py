@@ -1,28 +1,28 @@
 from helper import execute_prometheus_query
 
 class Charts:
-    def __init__(self,stack_obj,start_timestamp,end_timestamp,fs,hours):
-        self.curr_ist_start_time=start_timestamp
-        self.curr_ist_end_time=end_timestamp
+    def __init__(self,stack_obj,fs):
+        self.curr_ist_start_time=stack_obj.start_timestamp
+        self.curr_ist_end_time=stack_obj.end_timestamp
+        self.hours=stack_obj.hours
         self.stack_obj=stack_obj
-        self.add_extra_time_for_charts_at_end_in_min=2*hours
-        self.add_extra_time_for_charts_at_start_in_min=2*hours
+        self.add_extra_time_for_charts_at_end_in_min=2*self.hours
+        self.add_extra_time_for_charts_at_start_in_min=2*self.hours
         self.fs=fs
-        self.hours=hours
 
     def extract_charts_data(self,queries,step_factor):
         final=dict()
         file_ids=[]
-        ste = self.curr_ist_start_time - (self.add_extra_time_for_charts_at_start_in_min * (60))
-        ete = self.curr_ist_end_time + (self.add_extra_time_for_charts_at_end_in_min * (60))
+        sts = self.curr_ist_start_time - (self.add_extra_time_for_charts_at_start_in_min * (60))
+        ets = self.curr_ist_end_time + (self.add_extra_time_for_charts_at_end_in_min * (60))
 
         for query in queries:
             main_query = queries[query][0]
-            result=execute_prometheus_query(self.stack_obj,ste,ete,main_query,self.hours,preprocess=False,step_factor=step_factor)
+            result=execute_prometheus_query(self.stack_obj,main_query,preprocess=False,step_factor=step_factor,for_charts=[sts,ets])
             legend_list = queries[query][1]
             try:unit = queries[query][2]
             except:unit=""
-            print(f"processing {query} chart data (timestamp : {ste} to {ete})")
+            print(f"processing {query} chart data (timestamp : {sts} to {ets})")
             for host in result:
                 file_id = self.fs.put(str(host["values"]).encode('utf-8'), filename=f'{query}.json')
                 host["values"] = file_id

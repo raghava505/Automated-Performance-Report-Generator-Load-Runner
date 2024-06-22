@@ -1,9 +1,9 @@
 import paramiko
 from config_vars import *
 class kafka_topics:
-    def __init__(self,stack_obj):
+    def __init__(self,host):
         self.local_script_path = f'{ROOT_PATH}/scripts/kafka_topics.py'
-        self.host = stack_obj.execute_kafka_topics_script_in
+        self.host = host
 
     def add_topics_to_report(self):
         ssh = paramiko.SSHClient()

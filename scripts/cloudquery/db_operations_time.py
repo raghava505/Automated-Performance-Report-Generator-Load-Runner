@@ -5,9 +5,8 @@ from config_vars import *
 
 
 class DB_OPERATIONS_TIME:
-    def __init__(self,start_timestamp,end_timestamp,stack_obj):
-        self.curr_ist_start_time=start_timestamp
-        self.curr_ist_end_time=end_timestamp
+    def __init__(self,stack_obj):
+        self.curr_ist_start_time=stack_obj.start_timestamp
         self.PROMETHEUS = stack_obj.prometheus_path
         self.API_PATH = prom_point_api_path
 
@@ -16,8 +15,6 @@ class DB_OPERATIONS_TIME:
         #self.query2 = "sort_desc(rate(curr_state_db_op_sec_sum{ job="cloudquery"}[5m])/rate(curr_state_db_op_sec_count{ job="cloudquery"}[5m])) > 0.1"
 
     def extract_data(self,query,timestamp):
-        final=dict()
-        final={}
         PARAMS = {
             'query': query,
             'time' : timestamp
@@ -26,8 +23,6 @@ class DB_OPERATIONS_TIME:
         print(f"Excecuting query : {query} at timestamp {timestamp} , Status code : {response.status_code}")
         if response.status_code != 200:print("ERROR : Request failed")
         result = response.json()['data']['result']
-        
-
         return result
     
         

@@ -1,9 +1,7 @@
 import sys
 import time
 import pymongo
-from datetime import datetime, timedelta
 import json
-from datetime import datetime
 from memory_and_cpu_usages import MC_comparisions
 from osquery.add_kafka_topics import kafka_topics
 from disk_space import DISK
@@ -20,7 +18,6 @@ from pg_stats import PG_STATS
 from cloudquery.db_operations_time import DB_OPERATIONS_TIME
 from cloudquery.events_count import EVE_COUNTS
 from cloudquery.sts_records import STS_RECORDS
-import pytz
 import os
 from create_chart import create_images_and_save
 from trino_queries_analysis import TRINO_ANALYSE
@@ -34,39 +31,14 @@ from extract_stack_details import extract_ram_cores_storage_details
 from helper import fetch_and_save_pdf,fetch_and_extract_csv
 
 if __name__ == "__main__":
-    variables , stack_obj,load_cls =create_input_form()
+    variables , stack_obj,load_cls = create_input_form()
     if not variables or not stack_obj : 
         print("Received NoneType objects, terminating the program ...")
         sys.exit()
     
     #---------------------start time and endtime (timestamps) for prometheus queries-------------------
     s_at = time.perf_counter()
-    format_data = "%Y-%m-%d %H:%M"
-    start_time = datetime.strptime(variables["start_time_str_ist"], format_data)
-    end_time = start_time + timedelta(hours=variables["load_duration_in_hrs"])
-
-    start_time_str = variables["start_time_str_ist"]
-    end_time_str = end_time.strftime(format_data)
-
-    ist_timezone = pytz.timezone('Asia/Kolkata')
-    utc_timezone = pytz.utc
-
-    start_ist_time = ist_timezone.localize(datetime.strptime(start_time_str, '%Y-%m-%d %H:%M'))
-    start_timestamp = int(start_ist_time.timestamp())
-    start_utc_time = start_ist_time.astimezone(utc_timezone)
-    start_utc_str = start_utc_time.strftime(format_data)
-
-    end_ist_time = ist_timezone.localize(datetime.strptime(end_time_str, '%Y-%m-%d %H:%M'))
-    end_timestamp = int(end_ist_time.timestamp())
-    end_utc_time = end_ist_time.astimezone(utc_timezone)
-    end_utc_str = end_utc_time.strftime(format_data)
-
-    print("------ starttime and endtime strings in IST are : ", start_time_str , end_time_str)
-    print("------ starttime and endtime datetime objects in IST are : ", start_ist_time , end_ist_time)
-    print("------ starttime and endtime strings in UTC are : ", start_utc_str , end_utc_str)
-    print("------ starttime and endtime datetime objects in UTC are : ", start_utc_time , end_utc_time)
-    print("------ starttime and endtime unix time stamps based on ist time are : ", start_timestamp , end_timestamp)
-    #-------------------------------------------------------------------------------------------------
+   
     with open(stack_obj.test_env_file_path , 'r') as file:
         test_env_json_details = json.load(file)
     skip_fetching_data=False
@@ -80,7 +52,7 @@ if __name__ == "__main__":
 
     documents_with_same_load_time_and_stack = collection.find({"load_details.sprint":variables['sprint'] ,"load_details.stack":stack , "load_details.load_start_time_ist":f"{variables['start_time_str_ist']}" , "load_details.load_duration_in_hrs":variables['load_duration_in_hrs']})
     if len(list(documents_with_same_load_time_and_stack)) > 0:
-        print(f"ERROR! A document with load time ({variables['start_time_str_ist']}) - ({end_time_str}) on {stack} for this sprint for {database_name}-{collection_name} load is already available.")
+        print(f"ERROR! A document with load time ({variables['start_time_str_ist']}) - ({stack_obj.end_time_str_ist}) on {stack} for this sprint for {database_name}-{collection_name} load is already available.")
         skip_fetching_data=True
     if skip_fetching_data == False:
         run=1
@@ -126,7 +98,7 @@ if __name__ == "__main__":
 
         # get necessary load parameters
         if variables["load_name"] in ["KubeQuery_SingleCustomer","SelfManaged_SingleCustomer","KubeQuery_and_SelfManaged_Combined"] or variables["load_type"] in ["all_loads_combined"]:
-            load_params = Load_Params(start_time=start_utc_time, connection_object=stack_obj)
+            load_params = Load_Params(connection_object=stack_obj)
             load_name = variables["load_name"]
             params = {
                 "KubeQuery_SelfManaged_Load_Details" : load_params.get_load_params(load_name=load_name)
@@ -135,7 +107,7 @@ if __name__ == "__main__":
 
         if 'elastic' in test_env_json_details and 'pgbadger_reports_mount' in test_env_json_details:
             print("\n\n------------------------------ \nChecking health of PGbadger ... \n\n")
-            status,link=get_and_save_pgb_html(start_utc_time,end_utc_time,test_env_json_details['elastic'],"curr_pgbad_html_path","pgbadger_tail_path",test_env_json_details['pgbadger_reports_mount'],check=True)
+            status,link=get_and_save_pgb_html(stack_obj,test_env_json_details['elastic'],"curr_pgbad_html_path","pgbadger_tail_path",test_env_json_details['pgbadger_reports_mount'],check=True)
             if not status:
                 print("PGBadger seems to be not working in your stack. Please try to generate a pgbadger report manually to check if working fine.")
                 print("Here is the sample report generated through automation just now : " , link)
@@ -158,19 +130,19 @@ if __name__ == "__main__":
         #-------------------------disk space--------------------------
         if variables["load_name"] != "ControlPlane":
             print("Performing disk space calculations ...")
-            calc = DISK(start_timestamp=start_timestamp,end_timestamp=end_timestamp,stack_obj=stack_obj)
+            calc = DISK(stack_obj=stack_obj)
             disk_space_usage_dict=calc.make_calculations()
         #--------------------------------- add kafka topics ---------------------------------------
         if variables["load_type"] in ["Osquery","osquery_cloudquery_combined","all_loads_combined"]:
             print("Fetching kafka topics ...")
-            kafka_obj = kafka_topics(stack_obj=stack_obj)
+            kafka_obj = kafka_topics(stack_obj.execute_kafka_topics_script_in)
             kafka_topics_list = kafka_obj.add_topics_to_report()
         #---------------No.of Active connections by application---------------
-        active_conn_obj = Active_conn(stack_obj,start_timestamp,end_timestamp,hours=variables["load_duration_in_hrs"])
+        active_conn_obj = Active_conn(stack_obj=stack_obj)
         active_conn_results = active_conn_obj.get_avg_active_conn()
         #-------------------------Trino Queries--------------------------
         print("Fetching Trino queries details ...")
-        trino_obj = TRINO_ANALYSE(start_utc_str,end_utc_str,stack_obj=stack_obj)
+        trino_obj = TRINO_ANALYSE(stack_obj=stack_obj)
         trino_queries_analyse_results = trino_obj.fetch_trino_results()
         #-------------------------Presto LOAD--------------------------
         if 'prestoload_simulator_ip' in test_env_json_details:
@@ -200,7 +172,7 @@ if __name__ == "__main__":
             print("Assets per customer value : ", assets_per_cust)
             print("Input file path : ", input_file_path)
             print("stack customers file path : ", api_path)
-            accuracy_obj= osq_accuracy(start_time_utc=start_utc_time,end_time_utc=end_utc_time,api_path=api_path,domain=domain,endline=1800*variables['load_duration_in_hrs'],assets_per_cust=assets_per_cust,ext=extension,trans=True,hours=variables['load_duration_in_hrs'],input_file=input_file_path)
+            accuracy_obj= osq_accuracy(stack_obj,api_path=api_path,domain=domain,assets_per_cust=assets_per_cust,ext=extension,trans=True,input_file=input_file_path)
             Osquery_table_accuracies = accuracy_obj.table_accuracy()
             print("Osquery_table_accuracies : ",Osquery_table_accuracies)
             if input_file != "inputFile6tab_12rec.log":
@@ -212,14 +184,14 @@ if __name__ == "__main__":
         #-------------------------Kubequery Accuracies----------------------------
         if variables["load_name"] in ["KubeQuery_SingleCustomer","KubeQuery_and_SelfManaged_Combined"] or variables["load_type"] in ["all_loads_combined"]:
             print("Calculating accuracies for KubeQuery ...")
-            accuracy = Kube_Accuracy(start_timestamp=start_utc_time,end_timestamp=end_utc_time,stack_obj=stack_obj,variables=variables)
+            accuracy = Kube_Accuracy(stack_obj=stack_obj)
             kubequery_accuracies = accuracy.accuracy_kubernetes()
             print(json.dumps(kubequery_accuracies, indent=2))
 
         #-------------------------SelfManaged Accuracies----------------------------
         if variables["load_name"] in ["SelfManaged_SingleCustomer","KubeQuery_and_SelfManaged_Combined"] or variables["load_type"] in ["all_loads_combined"]:
             print("Calculating accuracies for SelfManaged ...")
-            accuracy = SelfManaged_Accuracy(start_timestamp=start_utc_time,end_timestamp=end_utc_time,stack_obj=stack_obj,variables=variables)
+            accuracy = SelfManaged_Accuracy(stack_obj=stack_obj)
             selfmanaged_accuracies = accuracy.accuracy_selfmanaged()
             print(json.dumps(selfmanaged_accuracies, indent=2))
 
@@ -236,44 +208,44 @@ if __name__ == "__main__":
         #--------------------------------------STS Records-------------------------------------------
         # if variables["load_name"] == "AWS_MultiCustomer":
         #     print("Calculating STS Records ...")
-        #     calc = STS_RECORDS(start_timestamp=start_utc_time,end_timestamp=end_utc_time,stack_obj=stack_obj,variables=variables)
+        #     calc = STS_RECORDS(start_timestamp=stack_obj.start_time_UTC,end_timestamp=stack_obj.end_time_UTC,stack_obj=stack_obj,variables=variables)
         #     sts = calc.calc_stsrecords()
 
 
         #-----------------------------Processing Time for Db Operations------------------------------
         if variables["load_type"] in ["CloudQuery","osquery_cloudquery_combined","all_loads_combined"]:
             print("Processing time for Db Operations ...")
-            calc = DB_OPERATIONS_TIME(start_timestamp=start_timestamp,end_timestamp=end_timestamp,stack_obj=stack_obj)
+            calc = DB_OPERATIONS_TIME(stack_obj=stack_obj)
             db_op=calc.db_operations()
 
         #-------------------------------PG Stats Calculations -------------------------------------
         print("Calculating Postgress Tables Details ...")
-        pgtable = PG_STATS(start_timestamp,end_timestamp,variables["load_duration_in_hrs"],stack_obj)
+        pgtable = PG_STATS(stack_obj=stack_obj)
         pg_stats = pgtable.process_output()
 
         #--------------------------------Elk Erros------------------------------------------------
         print("Fetching Elk Errors ...")
-        elk = Elk_erros(start_timestamp=start_timestamp,end_timestamp=end_timestamp,stack_obj=stack_obj)
+        elk = Elk_erros(stack_obj=stack_obj)
         elk_errors = elk.fetch_errors()
         
         #--------------------------------cpu and mem node-wise---------------------------------------
         print("Fetching resource usages data ...")
-        comp = MC_comparisions(start_timestamp=start_timestamp,end_timestamp=end_timestamp,stack_obj=stack_obj,hours=variables["load_duration_in_hrs"],include_nodetypes=load_cls.hostname_types)
+        comp = MC_comparisions(stack_obj=stack_obj,include_nodetypes=load_cls.hostname_types)
         mem_cpu_usages_dict,overall_usage_dict=comp.make_comparisions(load_cls.common_app_names,load_cls.common_pod_names)
         
         #--------------------------------complete resource extraction---------------------------------------
-        resource_obj=resource_usages(stack_obj,start_timestamp,end_timestamp,hours=variables["load_duration_in_hrs"],include_nodetypes=load_cls.hostname_types)
+        resource_obj=resource_usages(stack_obj,include_nodetypes=load_cls.hostname_types)
         complete_resource_details=resource_obj.get_complete_result()
 
         #-------------------------Cloudquery Accuracies----------------------------
         if variables["load_type"] in ["CloudQuery","osquery_cloudquery_combined","all_loads_combined"]:
             print("Calculating accuracies for cloudquery ...")
-            accu= ACCURACY(start_timestamp=start_utc_time,end_timestamp=end_utc_time,stack_obj=stack_obj,variables=variables)
+            accu= ACCURACY(stack_obj=stack_obj,variables=variables)
             cloudquery_accuracies = accu.calculate_accuracy()
 
         #-------------------------Compaction Status----------------------------
         print("Fetching Compaction Status ...")
-        compaction = CompactionStatus(start_timestamp=start_timestamp,end_timestamp=end_timestamp,stack_obj=stack_obj)
+        compaction = CompactionStatus(stack_obj=stack_obj)
         compaction_status = compaction.execute_query()
         
         #--------------------------------Capture charts data---------------------------------------
@@ -282,7 +254,7 @@ if __name__ == "__main__":
             step_factor=hours/10 if hours>10 else 1
             fs = GridFS(db)
             print("Fetching charts data ...")
-            charts_obj = Charts(start_timestamp=start_timestamp,end_timestamp=end_timestamp,stack_obj=stack_obj,fs=fs,hours=variables['load_duration_in_hrs'])
+            charts_obj = Charts(stack_obj=stack_obj,fs=fs)
             complete_charts_data_dict,all_gridfs_fileids=charts_obj.capture_charts_and_save(load_cls.get_all_chart_queries(),step_factor=step_factor)
             print("Saved charts data successfully !")
             #--------------------------------take screenshots---------------------------------------
@@ -297,13 +269,13 @@ if __name__ == "__main__":
                 "architecture":test_env_json_details["architecture"],
                 "sprint": variables['sprint'],
                 "build": variables['build'],
-                "load_name":f"{variables['load_name']}",
-                "load_type":f"{variables['load_type']}",
+                "load_name":variables['load_name'],
+                "load_type":variables['load_type'],
                 "load_duration_in_hrs":variables['load_duration_in_hrs'],
-                "load_start_time_utc" : f"{start_utc_str}",
-                "load_end_time_utc" : f"{end_utc_str}",
-                "load_start_time_ist" : f"{variables['start_time_str_ist']}",
-                "load_end_time_ist" : f"{end_time_str}",
+                "load_start_time_utc" : stack_obj.start_time_str_utc,
+                "load_end_time_utc" : stack_obj.end_time_str_utc,
+                "load_start_time_ist" : variables['start_time_str_ist'],
+                "load_end_time_ist" : stack_obj.end_time_str_ist,
                 "run":run,
                 }
             try:
@@ -323,7 +295,7 @@ if __name__ == "__main__":
             final_data_to_save = {
                 "load_details":load_details,
                 # "test_environment_details":test_env_json_details,
-                "Test environment details": extract_ram_cores_storage_details(stack_obj,start_timestamp)
+                "Test environment details": extract_ram_cores_storage_details(stack_obj)
             }
             if overall_usage_dict:
                 final_data_to_save.update(overall_usage_dict)
@@ -386,7 +358,7 @@ if __name__ == "__main__":
                     test_title = "Test title : "+str(load_cls.get_load_specific_details(variables['load_name'])['test_title'])
                 except:
                     test_title=""
-                create_images_and_save(graphs_path,inserted_id,collection,fs,variables["load_duration_in_hrs"],variables=variables,end_time_str=end_time_str,run=run,stack=stack,test_title=test_title,step_factor=step_factor)
+                create_images_and_save(graphs_path,inserted_id,collection,fs,variables=variables,end_time_str=stack_obj.end_time_str_ist,run=run,stack=stack,test_title=test_title,step_factor=step_factor)
                 print("Done!")
             except Exception as e:
                 print(f"Error while generating graphs into {graphs_path} : {str(e)}")
@@ -398,7 +370,7 @@ if __name__ == "__main__":
             #     category_name="PG Badger Charts"
             #     pg_badger_images_path = os.path.join(graphs_path,category_name)
             #     os.makedirs(pg_badger_images_path,exist_ok=True)
-            #     pg_badger_result = return_pgbadger_results(start_utc_time,end_utc_time,test_env_json_details['elastic'],pg_badger_images_path)
+            #     pg_badger_result = return_pgbadger_results(stack_obj.start_time_UTC,stack_obj.end_time_UTC,test_env_json_details['elastic'],pg_badger_images_path)
             #     collection.update_one({"_id": ObjectId(inserted_id)}, {"$set": {f"charts.{category_name}": pg_badger_result}})
             # except Exception as e:
             #     print(f"ERROR occured while processing pg badger details : {e}")
@@ -409,7 +381,7 @@ if __name__ == "__main__":
                 curr_pgbad_html_path=f"{BASE_HTML_PATH}/{pgbadger_tail_path}"
                 print(f'Saving the html page to {curr_pgbad_html_path}')
                 os.makedirs(curr_pgbad_html_path,exist_ok=True)
-                pgbadger_links,extracted_tables=get_and_save_pgb_html(start_utc_time,end_utc_time,test_env_json_details['elastic'],curr_pgbad_html_path,pgbadger_tail_path,test_env_json_details['pgbadger_reports_mount'])
+                pgbadger_links,extracted_tables=get_and_save_pgb_html(stack_obj,test_env_json_details['elastic'],curr_pgbad_html_path,pgbadger_tail_path,test_env_json_details['pgbadger_reports_mount'])
                 collection.update_one({"_id": ObjectId(inserted_id)}, {"$set": {f"Pgbadger downloaded report links": pgbadger_links}})
                 if extracted_tables!={}:
                     print("Empty extracted tables dictionary found !")
