@@ -3,14 +3,13 @@ from datetime import datetime,timedelta
 import pytz
 from config_vars import *
 import logging
-import datetime
 
 class stack_configuration:
     def __init__(self,variables):
 
         start_time_str_ist = variables["start_time_str_ist"]
         self.hours=variables["load_duration_in_hrs"]
-        self.test_env_file_path = f"{STACK_JSONS_PATH}/{variables["test_env_file_name"]}"
+        self.test_env_file_path = f'{STACK_JSONS_PATH}/{variables["test_env_file_name"]}'
 
         with open(self.test_env_file_path , 'r') as file:
             stack_details = json.load(file)
@@ -39,31 +38,30 @@ class stack_configuration:
         self.end_timestamp = int(end_time_IST.timestamp())
         self.end_time_str_utc = self.end_time_UTC.strftime(format_data)
 
-
-        print("------ starttime and endtime strings in IST are : ", start_time_str_ist , self.end_time_str_ist)
-        print("------ starttime and endtime datetime objects in IST are : ", start_time_IST , end_time_IST)
-        print("------ starttime and endtime strings in UTC are : ", self.start_time_str_utc , self.end_time_str_utc)
-        print("------ starttime and endtime datetime objects in UTC are : ", self.start_time_UTC , self.end_time_UTC)
-        print("------ starttime and endtime unix time stamps based on ist time are : ", self.start_timestamp , self.end_timestamp)
-
-
-        current_time = datetime.datetime.now()
+        current_time = datetime.now()
         formatted_time = current_time.strftime("%Y-%m-%d %H:%M:%S")
         try:
-            log_file_name = f"{variables["load_name"]}_{variables["build"]}_{stack_details["stack"]}_{formatted_time}.log"
+            log_file_name = f'{variables["load_name"]}_{variables["build"]}_{stack_details["stack"]}_{formatted_time}.log'
         except Exception as e:
             log_file_name = f"{formatted_time}.log"
         logging.basicConfig(
-            level=logging.DEBUG,  # Set the logging level (DEBUG, INFO, WARNING, ERROR, CRITICAL)
+            level=logging.INFO,  # Set the logging level (DEBUG, INFO, WARNING, ERROR, CRITICAL)
             format='%(asctime)s - %(levelname)s - %(message)s',
             filename=log_file_name,  # Log messages to a file (optional)
             filemode='w'  # Overwrite the log file each time (use 'a' for appending)
         )
 
         console_handler = logging.StreamHandler()
-        console_handler.setLevel(logging.DEBUG)
+        console_handler.setLevel(logging.INFO)
         formatter = logging.Formatter('%(levelname)s - %(message)s')
         console_handler.setFormatter(formatter)
         logging.getLogger('').addHandler(console_handler)
 
         self.log = logging
+
+        self.log.info(f" starttime and endtime strings in IST are : {start_time_str_ist }, {self.end_time_str_ist}")
+        self.log.info(f" starttime and endtime datetime objects in IST are : {start_time_IST} , {end_time_IST}")
+        self.log.info(f" starttime and endtime strings in UTC are : {self.start_time_str_utc} , {self.end_time_str_utc}")
+        self.log.info(f" starttime and endtime datetime objects in UTC are : {self.start_time_UTC} , {self.end_time_UTC}")
+        self.log.info(f" starttime and endtime unix time stamps based on ist time are : {self.start_timestamp} , {self.end_timestamp}")
+        self.log.info(f" user inputs : {json.dumps(variables, indent=4)}")

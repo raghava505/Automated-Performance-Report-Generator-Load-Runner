@@ -52,7 +52,7 @@ if __name__ == "__main__":
 
     documents_with_same_load_time_and_stack = collection.find({"load_details.sprint":variables['sprint'] ,"load_details.stack":stack , "load_details.load_start_time_ist":f"{variables['start_time_str_ist']}" , "load_details.load_duration_in_hrs":variables['load_duration_in_hrs']})
     if len(list(documents_with_same_load_time_and_stack)) > 0:
-        print(f"ERROR! A document with load time ({variables['start_time_str_ist']}) - ({stack_obj.end_time_str_ist}) on {stack} for this sprint for {database_name}-{collection_name} load is already available.")
+        stack_obj.log.error(f"A document with load time ({variables['start_time_str_ist']}) - ({stack_obj.end_time_str_ist}) on {stack} for this sprint for {database_name}-{collection_name} load is already available.")
         skip_fetching_data=True
     if skip_fetching_data == False:
         run=1
@@ -62,7 +62,7 @@ if __name__ == "__main__":
             for document in documents_with_same_sprint :
                 max_run = max(document['load_details']['run'] , max_run)
             run=max_run+1
-            print(f"you have already saved the details for this load in this sprint, setting run value to {run}")
+            stack_obj.log.warning(f"you have already saved the details for this load in this sprint, setting run value to {run}")
 
         #all result variables
         realtime_query_results=None
@@ -103,23 +103,22 @@ if __name__ == "__main__":
             params = {
                 "KubeQuery_SelfManaged_Load_Details" : load_params.get_load_params(load_name=load_name)
             }
-            print(json.dumps(params, indent=4))
+            stack_obj.log.info(f"kube load params : {json.dumps(params, indent=4)}")
 
         if 'elastic' in test_env_json_details and 'pgbadger_reports_mount' in test_env_json_details:
-            print("\n\n------------------------------ \nChecking health of PGbadger ... \n\n")
+            stack_obj.log.info("\n\n------------------------------ \nChecking health of PGbadger ... \n\n")
             status,link=get_and_save_pgb_html(stack_obj,test_env_json_details['elastic'],"curr_pgbad_html_path","pgbadger_tail_path",test_env_json_details['pgbadger_reports_mount'],check=True)
             if not status:
-                print("PGBadger seems to be not working in your stack. Please try to generate a pgbadger report manually to check if working fine.")
-                print("Here is the sample report generated through automation just now : " , link)
+                stack_obj.log.error("PGBadger seems to be not working in your stack. Please try to generate a pgbadger report manually to check if working fine.")
+                stack_obj.log.info(f"Here is the sample report generated through automation just now : {link}")
                 user_decision = input("Continue without pgbadger details in the report? (y/n) : ")
                 if user_decision == "y":
                     pass
                 else:
-                    print("Terminating program ...")
+                    stack_obj.log.info("Terminating program ...")
                     sys.exit()
             else:
-                print("\nCHECK PASSED : PGbadger is in good condition !")
-                print("--------------------------------------\n")
+                stack_obj.log.info("\nCHECK PASSED : PGbadger is in good condition \n -------------------------- !")
 
 
         #-------------------------real time query test details--------------------------
@@ -129,35 +128,35 @@ if __name__ == "__main__":
         #     realtime_query_results=realtime_query()
         #-------------------------disk space--------------------------
         if variables["load_name"] != "ControlPlane":
-            print("Performing disk space calculations ...")
+            stack_obj.log.info("------------------------------ Calculating disk space usages ...")
             calc = DISK(stack_obj=stack_obj)
             disk_space_usage_dict=calc.make_calculations()
         #--------------------------------- add kafka topics ---------------------------------------
         if variables["load_type"] in ["Osquery","osquery_cloudquery_combined","all_loads_combined"]:
-            print("Fetching kafka topics ...")
+            stack_obj.log.info("------------------------------ Fetching kafka topics ...")
             kafka_obj = kafka_topics(stack_obj.execute_kafka_topics_script_in)
             kafka_topics_list = kafka_obj.add_topics_to_report()
         #---------------No.of Active connections by application---------------
+        stack_obj.log.info("------------------------------ Fetching active connection details ...")
         active_conn_obj = Active_conn(stack_obj=stack_obj)
         active_conn_results = active_conn_obj.get_avg_active_conn()
         #-------------------------Trino Queries--------------------------
-        print("Fetching Trino queries details ...")
+        stack_obj.log.info("------------------------------ Performing trino queries analysis ...")
         trino_obj = TRINO_ANALYSE(stack_obj=stack_obj)
         trino_queries_analyse_results = trino_obj.fetch_trino_results()
         #-------------------------Presto LOAD--------------------------
         if 'prestoload_simulator_ip' in test_env_json_details:
-            print(f"Looking for presto load csv files in {test_env_json_details['prestoload_simulator_ip']}")
+            stack_obj.log.info(f"------------------------------ Looking for presto load csv files in {test_env_json_details['prestoload_simulator_ip']}")
             stack_starttime_string=str(stack).lower() + "-" + str(variables["start_time_str_ist"])
             # api_load_csv_path = os.path.join(api_loads_folder_path , stack_starttime_string+".csv")
             benchto_load_csv_path=os.path.join(presto_loads_folder_path, stack_starttime_string, "benchto.csv")
             benchto_load_pdf_path=os.path.join(presto_loads_folder_path , stack_starttime_string, "Benchto.pdf")
             # print("CSV file path for API/Jmeter load : " , api_load_csv_path)
             # api_load_result_dict = fetch_and_extract_csv(api_load_csv_path,test_env_json_details['prestoload_simulator_ip'])
-            print("CSV file path for Presto/benchto load : " , benchto_load_csv_path)
+            stack_obj.log.info(f"CSV file path for Presto/benchto load : {benchto_load_csv_path}")
             presto_load_result_dict = fetch_and_extract_csv(benchto_load_csv_path,test_env_json_details['prestoload_simulator_ip'])
-
         else:
-            print(f"Skipping API load details because 'prestoload_simulator_ip' is not present in stack json file")
+            stack_obj.log.warning(f"------------------------------ Skipping API load details because 'prestoload_simulator_ip' is not present in stack json file")
 
         #-------------------------Osquery Table Accuracies----------------------------
         if variables["load_type"] in ["Osquery","osquery_cloudquery_combined","all_loads_combined"] and variables["load_name"] != "ControlPlane":
@@ -165,43 +164,42 @@ if __name__ == "__main__":
             input_file = load_cls.get_load_specific_details(variables['load_name'])["RuleEngine and ControlPlane Load Details"]['input_file']
             alert_rules_triggered_per_cust=test_env_json_details['alert_rules_per_cust']['triggered']
             event_rules_triggered_per_cust=test_env_json_details['event_rules_per_cust']['triggered']
-            print("Calculating Table accuracies for Osquery Load...")
+            stack_obj.log.info(f"------------------------------ Calculating Table accuracies for Osquery Load ...")
             api_path = os.path.join(os.path.dirname(os.path.realpath(__file__)),f"osquery/api_keys/{domain}.json")
             input_file_path = os.path.join(os.path.dirname(os.path.realpath(__file__)),f"osquery/testinputfiles/{input_file}")
-            print("Printing osquery accuracy calculation details : ")
-            print("Assets per customer value : ", assets_per_cust)
-            print("Input file path : ", input_file_path)
-            print("stack customers file path : ", api_path)
+            stack_obj.log.info(f"Assets per customer value : {assets_per_cust}")
+            stack_obj.log.info(f"Input file path : {input_file_path}")
+            stack_obj.log.info(f"stack customers file path : {api_path}")
             accuracy_obj= osq_accuracy(stack_obj,api_path=api_path,domain=domain,assets_per_cust=assets_per_cust,ext=extension,trans=True,input_file=input_file_path)
             Osquery_table_accuracies = accuracy_obj.table_accuracy()
-            print("Osquery_table_accuracies : ",Osquery_table_accuracies)
+            stack_obj.log.info(f"Osquery_table_accuracies : {json.dumps(Osquery_table_accuracies,indent=4)}")
             if input_file != "inputFile6tab_12rec.log":
-                print("Calculating Events accuracies for Osquery Load ...")
+                stack_obj.log.info("------------------------------ Calculating Events/Alerts accuracies for Osquery Load ...")
                 Osquery_event_accuracies = accuracy_obj.events_accuracy(alert_rules_triggered_per_cust,event_rules_triggered_per_cust)
-                print("Osquery_event_accuracies : ",Osquery_event_accuracies)
+                stack_obj.log.info(f"Osquery_event_accuracies : {json.dumps(Osquery_event_accuracies,indent=4)}")
         
 
         #-------------------------Kubequery Accuracies----------------------------
         if variables["load_name"] in ["KubeQuery_SingleCustomer","KubeQuery_and_SelfManaged_Combined"] or variables["load_type"] in ["all_loads_combined"]:
-            print("Calculating accuracies for KubeQuery ...")
+            stack_obj.log.info("------------------------------ Calculating accuracies for KubeQuery Load ...")
             accuracy = Kube_Accuracy(stack_obj=stack_obj)
             kubequery_accuracies = accuracy.accuracy_kubernetes()
-            print(json.dumps(kubequery_accuracies, indent=2))
+            stack_obj.log.info(json.dumps(kubequery_accuracies, indent=2))
 
         #-------------------------SelfManaged Accuracies----------------------------
         if variables["load_name"] in ["SelfManaged_SingleCustomer","KubeQuery_and_SelfManaged_Combined"] or variables["load_type"] in ["all_loads_combined"]:
-            print("Calculating accuracies for SelfManaged ...")
+            stack_obj.log.info("------------------------------ Calculating accuracies for SelfManaged Load ...")
             accuracy = SelfManaged_Accuracy(stack_obj=stack_obj)
             selfmanaged_accuracies = accuracy.accuracy_selfmanaged()
-            print(json.dumps(selfmanaged_accuracies, indent=2))
+            stack_obj.log.info(json.dumps(selfmanaged_accuracies, indent=2))
 
         #-------------------------Azure Load Accuracies----------------------------
         if variables["load_name"] == "Azure_MultiCustomer" or variables["load_type"] in ["all_loads_combined"]:
-            print("Calculating accuracies for Azure Load ...")
+            stack_obj.log.info("------------------------------ Calculating accuracies for Azure Load ...")
         
         #--------------------------------------Events Counts--------------------------------------
         if variables["load_type"] in ["CloudQuery","osquery_cloudquery_combined","all_loads_combined"]:
-            print("Calculating the counts of various events during the load ...")
+            stack_obj.log.info("------------------------------ Calculating the counts of various events during the load ...")
             calc = EVE_COUNTS(variables=variables)
             evecount = calc.get_events_count()
 
@@ -214,39 +212,40 @@ if __name__ == "__main__":
 
         #-----------------------------Processing Time for Db Operations------------------------------
         if variables["load_type"] in ["CloudQuery","osquery_cloudquery_combined","all_loads_combined"]:
-            print("Processing time for Db Operations ...")
+            stack_obj.log.info("------------------------------ Processing time for Db Operations ...")
             calc = DB_OPERATIONS_TIME(stack_obj=stack_obj)
             db_op=calc.db_operations()
 
         #-------------------------------PG Stats Calculations -------------------------------------
-        print("Calculating Postgress Tables Details ...")
+        stack_obj.log.info("------------------------------ Calculating Postgress Tables Details ...")
         pgtable = PG_STATS(stack_obj=stack_obj)
         pg_stats = pgtable.process_output()
 
         #--------------------------------Elk Erros------------------------------------------------
-        print("Fetching Elk Errors ...")
         if "elastic" in test_env_json_details:
+            stack_obj.log.info("------------------------------ Fetching Elk Errors ...")
             elk = Elk_erros(stack_obj=stack_obj,elastic_ip=test_env_json_details['elastic'])
             elk_errors = elk.fetch_errors()
         
         #--------------------------------cpu and mem node-wise---------------------------------------
-        print("Fetching resource usages data ...")
+        stack_obj.log.info("------------------------------ Calculating resource utilizations ...")
         comp = MC_comparisions(stack_obj=stack_obj,include_nodetypes=load_cls.hostname_types)
         mem_cpu_usages_dict,overall_usage_dict=comp.make_comparisions(load_cls.common_app_names,load_cls.common_pod_names)
         
         #--------------------------------complete resource extraction---------------------------------------
+        stack_obj.log.info("------------------------------ [NEW] Calculating complete resource utilizations ...")
         resource_obj=resource_usages(stack_obj,include_nodetypes=load_cls.hostname_types)
         complete_resource_details=resource_obj.get_complete_result()
 
         #-------------------------Cloudquery Accuracies----------------------------
         if variables["load_type"] in ["CloudQuery","osquery_cloudquery_combined","all_loads_combined"]:
-            print("Calculating accuracies for cloudquery ...")
+            stack_obj.log.info("------------------------------ Calculating accuracies for cloudquery Load...")
             accu= ACCURACY(stack_obj=stack_obj,variables=variables)
             cloudquery_accuracies = accu.calculate_accuracy()
 
         #-------------------------Compaction Status----------------------------
-        print("Fetching Compaction Status ...")
         if "elastic" in test_env_json_details:
+            stack_obj.log.info("------------------------------ Fetching Compaction Status details...")
             compaction = CompactionStatus(stack_obj=stack_obj,elastic_ip=test_env_json_details['elastic'])
             compaction_status = compaction.execute_query()
         
@@ -255,16 +254,17 @@ if __name__ == "__main__":
             hours=variables["load_duration_in_hrs"]
             step_factor=hours/10 if hours>10 else 1
             fs = GridFS(db)
-            print("Fetching charts data ...")
+            stack_obj.log.info("------------------------------ Fetching charts data ...")
             charts_obj = Charts(stack_obj=stack_obj,fs=fs)
             complete_charts_data_dict,all_gridfs_fileids=charts_obj.capture_charts_and_save(load_cls.get_all_chart_queries(),step_factor=step_factor)
-            print("Saved charts data successfully !")
+            stack_obj.log.info("charts data saved successfully !")
+        
             #--------------------------------take screenshots---------------------------------------
             # print("Capturing compaction status screenshots  ...")
             # cp_obj = take_screenshots(start_time=start_time,end_time=end_time,fs=fs,elk_url=test_env_json_details["elk_url"])
             # compaction_status_image=cp_obj.get_compaction_status()
             #-------------------------- Saving the json data to mongo -------------------------
-            print("Saving data to mongoDB ...")
+            stack_obj.log.info("------------------------------ Saving data to mongoDB ...")
             load_details =  {
                 "stack":stack,
                 "stack_url":str(test_env_json_details["domain"])+"."+str(test_env_json_details["suffix"]),
@@ -283,7 +283,7 @@ if __name__ == "__main__":
             try:
                 load_details.update(load_cls.get_load_specific_details(variables['load_name']))
             except:
-                print(f"WARNING : Load specific details for {variables['load_name']} in {load_cls} is not found!")
+                stack_obj.log.warning(f"Load specific details for {variables['load_name']} in {load_cls} is not found!")
 
             try:
                 if params:
@@ -292,7 +292,7 @@ if __name__ == "__main__":
                     else:
                         load_details.update(params)
             except Exception as err:
-                print(f"ERR : load_details.update(params) => {err}")
+                stack_obj.log.error(f"load_details.update(params) => {err}")
 
             final_data_to_save = {
                 "load_details":load_details,
@@ -349,21 +349,21 @@ if __name__ == "__main__":
             # all_gridfs_referenced_ids=all_gridfs_fileids[:]
             # final_data_to_save.update({"all_gridfs_referenced_ids":all_gridfs_referenced_ids})
             inserted_id = collection.insert_one(final_data_to_save).inserted_id
-            print(f"Document pushed to mongo successfully into database:{database_name}, collection:{collection_name} with id {inserted_id}")
+            stack_obj.log.info(f"Document pushed to mongo successfully into database:{database_name}, collection:{collection_name} with id {inserted_id}")
             
             graphs_path=f"{BASE_GRAPHS_PATH}/{database_name}/{collection_name}/{inserted_id}"
             os.makedirs(graphs_path,exist_ok=True)
             #---------------CREATING GRAPHS-----------------
             try:
-                print("Generating graphs from the saved data ...")
+                stack_obj.log.info("------------------------------ Generating graphs from the saved charts data ...")
                 try:
                     test_title = "Test title : "+str(load_cls.get_load_specific_details(variables['load_name'])['test_title'])
                 except:
                     test_title=""
                 create_images_and_save(graphs_path,inserted_id,collection,fs,variables=variables,end_time_str=stack_obj.end_time_str_ist,run=run,stack=stack,test_title=test_title,step_factor=step_factor)
-                print("Done!")
+                stack_obj.log.info("Done!")
             except Exception as e:
-                print(f"Error while generating graphs into {graphs_path} : {str(e)}")
+                stack_obj.log.error(f"Error while generating graphs into {graphs_path} : {str(e)}")
 
             # ----------------CREATING PG BADGER GRAPHS--------------
             # try:
@@ -378,39 +378,39 @@ if __name__ == "__main__":
             #     print(f"ERROR occured while processing pg badger details : {e}")
 
             try:
-                print("Capturing details from PG Badger ... ")
+                stack_obj.log.info("------------------------------ Generating PGBadger reports ...")
                 pgbadger_tail_path=f"{database_name}/{collection_name}/{inserted_id}/pgbadger_reports"
                 curr_pgbad_html_path=f"{BASE_HTML_PATH}/{pgbadger_tail_path}"
-                print(f'Saving the html page to {curr_pgbad_html_path}')
+                stack_obj.log.info(f'Saving the html page to {curr_pgbad_html_path}')
                 os.makedirs(curr_pgbad_html_path,exist_ok=True)
                 pgbadger_links,extracted_tables=get_and_save_pgb_html(stack_obj,test_env_json_details['elastic'],curr_pgbad_html_path,pgbadger_tail_path,test_env_json_details['pgbadger_reports_mount'])
                 collection.update_one({"_id": ObjectId(inserted_id)}, {"$set": {f"Pgbadger downloaded report links": pgbadger_links}})
                 if extracted_tables!={}:
-                    print("Empty extracted tables dictionary found !")
+                    stack_obj.log.info("Empty extracted tables dictionary found !")
                     collection.update_one({"_id": ObjectId(inserted_id)}, {"$set": {f"Postgres Queries Analysis": extracted_tables}})
 
             except Exception as e:
-                print(f"ERROR occured while processing pg badger details : {e}")
+                stack_obj.log.error(f"error occured while processing pg badger reports : {e}")
 
             #---------------FETCHING PDFS-----------------
             try:
                 if presto_load_result_dict:
-                    print(f"Fetching presto load charts pdf from {test_env_json_details['prestoload_simulator_ip']}:{benchto_load_csv_path}")
+                    stack_obj.log.info(f"------------------------------ Fetching presto load charts pdf from {test_env_json_details['prestoload_simulator_ip']}:{benchto_load_csv_path}")
                     presto_load_local_pdf_path=f"{BASE_PDFS_PATH}/{database_name}/{collection_name}/{inserted_id}/Presto Load Charts pdf.pdf"
-                    print(f'Saving the presto load pdf to {presto_load_local_pdf_path}')
+                    stack_obj.log.info(f'Saving the presto load pdf to {presto_load_local_pdf_path}')
                     os.makedirs(os.path.dirname(presto_load_local_pdf_path),exist_ok=True)
                     fetch_and_save_pdf(benchto_load_pdf_path,test_env_json_details['prestoload_simulator_ip'],presto_load_local_pdf_path)
             except Exception as e:
-                print(f"Error while fetching pdfs : {str(e)}")
+                stack_obj.log.error(f"error while fetching pdfs : {str(e)}")
 
         except Exception as e:
-            print(f"ERROR : Failed to insert document into database {database_name}, collection:{collection_name} , {str(e)}")
-            print("Deleting stored chart data ...")
+            stack_obj.log.error(f"Failed to insert document into database {database_name}, collection:{collection_name} , {str(e)}")
+            stack_obj.log.info("------------------------------ Deleting stored chart data ...")
             for file_id in all_gridfs_fileids:
-                print("deleting ", file_id)
+                stack_obj.log.info("deleting ", file_id)
                 fs.delete(file_id=file_id)
         finally:
             f3_at = time.perf_counter()
-            print(f"Collecting the report data took : {round(f3_at - s_at,2)} seconds in total")
+            stack_obj.log.info(f"------------------------------ Collecting the report data took : {round(f3_at - s_at,2)} seconds in total")
             client.close()
     
