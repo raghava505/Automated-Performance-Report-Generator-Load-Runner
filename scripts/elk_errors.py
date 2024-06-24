@@ -5,6 +5,7 @@ import concurrent.futures
 
 class Elk_erros:
     def __init__(self,stack_obj,elastic_ip):
+        self.stack_obj = stack_obj
         try:
             self.contents = ["ruleengine", "tls", "nginx", "metastoredb", "pgbouncer", "osqueryIngestion", "redis",
                              "spark", "data-archival", "compaction", "hdfsWrapper", "loginserver", "maintenance",
@@ -21,7 +22,7 @@ class Elk_erros:
 
             self.index_name = "uptycs-*"
         except Exception as e:
-            print(f"An error occurred during initialization: {e}")
+            self.stack_obj.log.error(f"An error occurred during initialization: {e}")
 
     def body(self, log_type):
         try:
@@ -53,19 +54,19 @@ class Elk_erros:
             }
             return [body_error]
         except Exception as e:
-            print(f"An ERROR occurred while constructing the body: {e}")
+            self.stack_obj.log.error(f"An ERROR occurred while constructing the body: {e}")
             return []
 
     def elk_batch(self, log_type):
         try:
             body_array = self.body(log_type)
-            print(f"Fetching elk errors for log_type: {log_type}...")
+            self.stack_obj.log.info(f"Fetching elk errors for log_type: {log_type}...")
             result_error = self.elastic_client.search(index=self.index_name, body=body_array[0], size=0)
             error_buckets = result_error["aggregations"]["categories"]["buckets"]
-            print(f"Completed fetching errors for log_type: {log_type}")
+            self.stack_obj.log.info(f"Completed fetching errors for log_type: {log_type}")
             return log_type, error_buckets
         except Exception as e:
-            print(f"An ERROR occurred during fetching elk errors for log_type {log_type}: {e}")
+            self.stack_obj.log.error(f"An ERROR occurred during fetching elk errors for log_type {log_type}: {e}")
             return log_type, []
 
     def fetch_errors(self):
@@ -84,12 +85,12 @@ class Elk_erros:
                             save_dict.append({"Error Message": error_message, "Count": count})
                         result_dict[log_type] = save_dict
                     except Exception as e:
-                        print(f"An error occurred while processing result for log_type {log_type}: {e}")
+                        self.stack_obj.log.error(f"An error occurred while processing result for log_type {log_type}: {e}")
 
-            print(result_dict)
+            self.stack_obj.log.info(result_dict)
             return result_dict
         except Exception as e:
-            print(f"An error occurred during fetch_errors: {e}")
+            self.stack_obj.log.error(f"An error occurred during fetch_errors: {e}")
             return {}
 
 

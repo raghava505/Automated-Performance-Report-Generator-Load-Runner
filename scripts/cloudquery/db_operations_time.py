@@ -20,8 +20,8 @@ class DB_OPERATIONS_TIME:
             'time' : timestamp
         }
         response = requests.get(self.PROMETHEUS + self.API_PATH, params=PARAMS)
-        print(f"Excecuting query : {query} at timestamp {timestamp} , Status code : {response.status_code}")
-        if response.status_code != 200:print("ERROR : Request failed")
+        self.stack_obj.log.info(f"Excecuting query : {query} at timestamp {timestamp} , Status code : {response.status_code}")
+        if response.status_code != 200:self.stack_obj.log.error("ERROR : Request failed")
         result = response.json()['data']['result']
         return result
     
@@ -33,7 +33,7 @@ class DB_OPERATIONS_TIME:
             le_value = item['metric']['le']
             value = int(item['value'][1])
             save_dict[str(item['metric'])] = value
-        print(save_dict)
+        self.stack_obj.log.info(save_dict)
         return save_dict
     
     

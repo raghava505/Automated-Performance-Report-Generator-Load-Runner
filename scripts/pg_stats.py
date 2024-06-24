@@ -12,6 +12,7 @@ class PG_STATS:
         self.load_duration=stack_obj.hours
         self.PROMETHEUS = stack_obj.prometheus_path
         self.API_PATH = prom_api_path
+        self.stack_obj=stack_obj
         
     def get_data(self,db):
         query = f'uptycs_pg_stats{{db=~"{db}"}}'
@@ -22,8 +23,8 @@ class PG_STATS:
             'step': self.load_duration * 3600              
         }
         response = requests.get(self.PROMETHEUS + self.API_PATH, params=params)
-        print(f"-------processing PG STATS for {query} (timestamp : {self.curr_ist_start_time} to {self.curr_ist_end_time}), Status code : {response.status_code}")
-        if response.status_code != 200:print("ERROR : Request failed")
+        self.stack_obj.log.info(f"-------processing PG STATS for {query} (timestamp : {self.curr_ist_start_time} to {self.curr_ist_end_time}), Status code : {response.status_code}")
+        if response.status_code != 200:self.stack_obj.log.error(f"Request failed status code {response.status_code}")
         result = response.json()['data']['result']
 
         return result

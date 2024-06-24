@@ -18,6 +18,7 @@ from helper import measure_time
 class Kube_Accuracy:
 
     def __init__(self,stack_obj):
+        self.stack_obj=stack_obj
         self.load_start=stack_obj.start_time_UTC
         self.load_end=stack_obj.end_time_UTC
 
@@ -84,7 +85,7 @@ class Kube_Accuracy:
                 errors = stderr.read().decode('utf-8')
                 
                 if output == "":
-                    print("Please check the existence your Kubesim{}.log file in /home/abacus/kubequerysim/accuracy".format(port))
+                    self.stack_obj.log.error("Please check the existence your Kubesim{}.log file in /home/abacus/kubequerysim/accuracy".format(port))
                     continue
                 # print(output)
                 # sys.exit()
@@ -121,8 +122,8 @@ class Kube_Accuracy:
 
         self.cvddata = {key: self.cvddata[key] * asset_count for key in self.cvddata}
         self.cvddata = {key_mapping[key]: value for key, value in self.cvddata.items()}
-        print(json.dumps(self.kube_data, indent=4)) 
-        print(json.dumps(self.cvddata, indent=4))
+        self.stack_obj.log.info(json.dumps(self.kube_data, indent=4)) 
+        self.stack_obj.log.info(json.dumps(self.cvddata, indent=4))
         self.expected_data = {**self.kube_data, **self.cvddata}
         #print(self.expected_data)
 

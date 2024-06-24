@@ -69,9 +69,9 @@ initial_legend_fontsize=fig_width/1.90
 fontsize_decrease_rate_with_rows=fig_width/165
 ncol_increase_rate_with_rows=8000
 
-def create_images_and_save(path,doc_id,collection,fs,variables,end_time_str,run,stack,test_title,step_factor):
+def create_images_and_save(path,doc_id,collection,fs,variables,end_time_str,run,stack,test_title,step_factor,stack_obj):
     duration = variables['load_duration_in_hrs']
-    print(f"Delete saved images data set to : {delete_image_data}")
+    stack_obj.log.info(f"Delete saved images data set to : {delete_image_data}")
     sns.set_style("darkgrid")
     sns.plotting_context("talk")
     sns.set(rc={"text.color": text_color})
@@ -85,7 +85,7 @@ def create_images_and_save(path,doc_id,collection,fs,variables,end_time_str,run,
     for category in charts_data:
         os.makedirs(f"{path}/{category}" , exist_ok=True)
         for title in charts_data[category]:
-            print(f"Generating graph for : {title}")
+            stack_obj.log.info(f"Generating graph for : {title}")
             total_charts+=1
             plt.figure(figsize=(fig_width, fig_width*8/16))
             try:
@@ -139,10 +139,10 @@ def create_images_and_save(path,doc_id,collection,fs,variables,end_time_str,run,
                 plt.title(f"Build and run : {variables['build']} , run{run}\nStack : {stack}",fontsize=fig_width/2.18,y=1,loc="right")
                 plt.title("\n"+str(title),fontsize=fig_width/1.48,pad=fig_width/0.9,y=1)
                 if num_lines == 0:
-                    print(f"ERROR : Unable to find data for chart {title} : 0 lines found" )
+                    stack_obj.log.error(f"Unable to find data for chart {title} : 0 lines found" )
                     continue
                 if sum(list_of_legend_lengths) == 0:
-                    print(f"WARNING : No legend text found for the chart {title} , sum_legends_length is 0")
+                    stack_obj.log.warning(f"No legend text found for the chart {title} , sum_legends_length is 0")
                 else:
                     std=np.std(list_of_legend_lengths)
                     mean=np.mean(list_of_legend_lengths)
@@ -189,11 +189,11 @@ def create_images_and_save(path,doc_id,collection,fs,variables,end_time_str,run,
                 plt.gcf().set_facecolor(outer_background_color)
                 plt.savefig(f"{path}/{category}/{file_name}.png", bbox_inches='tight', pad_inches=0.1,format='webp')
             except Exception as e:
-                print(f"Error while generating graph for {title} : {str(e)}")
+                stack_obj.log.error(f"Error while generating graph for {title} : {str(e)}")
             finally:
                 plt.close()
 
-    print("Total number of charts generated : " , total_charts)
+    stack_obj.log.info(f"Total number of charts generated : {total_charts}")
 
 if __name__=="__main__":
     global delete_image_data

@@ -39,7 +39,7 @@ def extract_ram_cores_storage_details(stack_obj):
         try:
             final_result[node_name]['cluster_id']=line["metric"]["cluster_id"]
         except Exception as e:
-            print(e)
+            stack_obj.log.error(e)
         final_result[node_name]['ram(GB)']=round(float(line["value"][1]),2)
         
 
@@ -60,7 +60,7 @@ def extract_ram_cores_storage_details(stack_obj):
         final_result[node_name]['hdfs(TB)']=round(float(line["value"][1]),2)
 
     nodes = list(final_result.keys())
-    print("All nodes in the stack : ", nodes)
+    stack_obj.log.info(f"All nodes in the stack : {nodes}")
 
     # for node in nodes:
     #     for command_name,command in storage_commands.items():
@@ -70,9 +70,9 @@ def extract_ram_cores_storage_details(stack_obj):
         results = {}
         for command_name, command in storage_commands.items():
             try:
-                results[command_name] = execute_command_in_node(node, command)
+                results[command_name] = execute_command_in_node(node, command,stack_obj)
             except Exception as e:
-                print(f"Unable to execute {command_name} command in {node}. " , e)
+                stack_obj.log.error(f"Unable to execute {command_name} command in {node}. error : {e}")
         return node, results
 
     # Use ThreadPoolExecutor to run the commands in parallel
@@ -113,7 +113,7 @@ def extract_ram_cores_storage_details(stack_obj):
     df=df.T
     df = df.reset_index().rename(columns={'index': 'host_name'})
     df=df.sort_values(by=["node_type","host_name"])
-    print(df)
+    stack_obj.log.info(f"\n {df}")
     # df.to_csv("stack.csv")
 
     return {

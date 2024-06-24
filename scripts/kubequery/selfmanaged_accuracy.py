@@ -15,6 +15,7 @@ from config_vars import *
 class SelfManaged_Accuracy:
 
     def __init__(self,stack_obj):
+        self.stack_obj=stack_obj
         self.load_start=stack_obj.start_time_UTC
         self.load_end=stack_obj.end_time_UTC
 
@@ -83,7 +84,7 @@ class SelfManaged_Accuracy:
         self.vsidata = {key: self.vsidata[key] * asset_count for key in self.vsidata}
         self.expected_data = {key_mapping[key]: value for key, value in self.vsidata.items()}
             #print(self.cvddata)
-        print(json.dumps(self.expected_data, indent=4))
+        self.stack_obj.log.info(json.dumps(self.expected_data, indent=4))
 
     def accuracy_selfmanaged(self):
         self.expected_records()

@@ -22,16 +22,16 @@ class Active_conn:
             df = pd.DataFrame(final)
             # new_row={"application":"TOTAL","minimum":df["minimum"].sum() , "maximum":df["maximum"].sum(),"average":df["average"].sum()}
             # df = df._append(new_row, ignore_index=True)
-            print(f"Printing details for active connections by app for {db} on master : ")
-            print(df)
+            self.stack_obj.log.info(f"Printing details for active connections by app for {db} on master : ")
+            self.stack_obj.log.info(f"\n {df}")
             if df.empty: 
-                print("Empty dataframe found.. skipping to save this key to mongo")
+                self.stack_obj.log.info("Empty dataframe found.. skipping to save this key to mongo")
                 continue
 
             numeric_cols = df.select_dtypes(include=[np.number]).columns
             non_numeric_cols = df.select_dtypes(exclude=[np.number]).columns
-            print("Numeric columns : " , numeric_cols)
-            print("Non-Numeric columns : " , non_numeric_cols)
+            self.stack_obj.log.info(f"Numeric columns : {numeric_cols}")
+            self.stack_obj.log.info(f"Non-Numeric columns : {non_numeric_cols}")
 
             fill_values = {}
             fill_values.update({col: 0 for col in numeric_cols})
@@ -48,17 +48,17 @@ class Active_conn:
         return result_dict
     
 
-if __name__=='__main__':
-    print("Testing active connections by app...")
-    from settings import stack_configuration
+# if __name__=='__main__':
+#     print("Testing active connections by app...")
+#     from settings import stack_configuration
     
-    variables = {
-        "start_time_str_ist":"2024-01-26 13:25",
-        "load_duration_in_hrs":4,
-        "test_env_file_name":'s1_nodes.json'
-    }
-    stack_obj = stack_configuration(variables)
+#     variables = {
+#         "start_time_str_ist":"2024-01-26 13:25",
+#         "load_duration_in_hrs":4,
+#         "test_env_file_name":'s1_nodes.json'
+#     }
+#     stack_obj = stack_configuration(variables)
     
-    active_obj = Active_conn(stack_obj)
-    result = active_obj.get_avg_active_conn()
-    print(result)
+#     active_obj = Active_conn(stack_obj)
+#     result = active_obj.get_avg_active_conn()
+#     print(result)

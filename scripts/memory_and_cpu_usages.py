@@ -36,9 +36,9 @@ class MC_comparisions:
             self.node_cores_capacity[node_name] = cpu_capacity
         
         self.all_node_types=list(self.all_node_types_mapping.keys())
-        print("All nodetypes found are : " , self.all_node_types)
-        print("Memory capacity : \n" , json.dumps(self.node_ram_capacity,indent=4))
-        print("CPU capacity : \n" , json.dumps(self.node_cores_capacity,indent=4))
+        self.stack_obj.log.info(f"All nodetypes found are : {self.all_node_types}")
+        self.stack_obj.log.info(f"Memory capacity : \n {json.dumps(self.node_ram_capacity,indent=4)}")
+        self.stack_obj.log.info(f"CPU capacity : \n {json.dumps(self.node_cores_capacity,indent=4)}")
 
     def extract_data(self,queries,tag,unit):
         final=dict()
@@ -46,7 +46,7 @@ class MC_comparisions:
 
         for query in queries:
             final[query] = {}
-            print(f"-------processing {tag} for {query} (timestamp : {self.curr_ist_start_time} to {self.curr_ist_end_time})")
+            self.stack_obj.log.info(f"-------processing {tag} for {query} (timestamp : {self.curr_ist_start_time} to {self.curr_ist_end_time})")
             for res in execute_prometheus_query(self.stack_obj,queries[query]):
                 hostname = res['metric']['host_name'] 
                 avg = res["values"]["average"]
@@ -63,7 +63,7 @@ class MC_comparisions:
                             'maximum':maximum * float(current_host_ram) / 100
                         }
                     except Exception as e:
-                        print(f"*****************ERROR: Coudn't find host {hostname} in ram-capacity dictionary. Exception occured while calculating app memory usage for query:{query}. {e}")
+                        self.stack_obj.log.error(f"Coudn't find host {hostname} in ram-capacity dictionary. Exception occured while calculating app memory usage for query:{query}. {e}")
 
                 else:
                     if query == HOST:
@@ -75,7 +75,7 @@ class MC_comparisions:
                                 'maximum':maximum * float(current_host_cores) / 100
                             }
                         except Exception as e:
-                            print(f"*****************ERROR: Coudn't find host {hostname} in cores-capacity dictionary. Exception occured while calculating app cpu usage for query:{query}. {e}")
+                            self.stack_obj.log.error(f"Coudn't find host {hostname} in cores-capacity dictionary. Exception occured while calculating app cpu usage for query:{query}. {e}")
 
                     else:
                         final[query][hostname][unit]={
@@ -87,7 +87,7 @@ class MC_comparisions:
         #calculate overall pnodes,dnodes,pgnodes usage
         new_data = final[HOST]
         for node_type in self.include_nodetypes:
-            print(f"Calculating overall {tag} usages for node-type : {node_type}")
+            self.stack_obj.log.info(f"Calculating overall {tag} usages for node-type : {node_type}")
             new_sum=0
             flag=0
             for node in self.all_node_types_mapping[node_type]:
@@ -95,18 +95,18 @@ class MC_comparisions:
                 try:
                     new_sum+=new_data[node][unit]["average"]
                 except KeyError as e:
-                    print(f"ERROR : key {node} not found in : {new_data}")
+                    self.stack_obj.log.error(f"key {node} not found in : {new_data}")
                     raise RuntimeError(f"ERROR : key {node} is present in {node_type} but not found in host groups from prometheus: {new_data}")
             if flag==1:
                 return_overall[node_type] = {f"{unit}":new_sum}
-            print(f"{node_type} : {new_sum} {unit}")
+            self.stack_obj.log.info(f"{node_type} : {new_sum} {unit}")
         return final,return_overall
 
     def extract_container_data(self,queries,tag,unit):
         final=dict()
         for query in queries:
             final[query] = {}
-            print(f"----------processing {tag} for {query} (timestamp : {self.curr_ist_start_time} to {self.curr_ist_end_time})")
+            self.stack_obj.log.info(f"----------processing {tag} for {query} (timestamp : {self.curr_ist_start_time} to {self.curr_ist_end_time})")
             for res in execute_prometheus_query(self.stack_obj,queries[query]):
                 container_name = res['metric']['container_name']
                 avg = res["values"]["average"]
@@ -117,12 +117,12 @@ class MC_comparisions:
         return final 
     def extract_app_data(self,queries,tag,unit):
         final=dict()
-        print(f"----------processing application level {tag} usages for (timestamp : {self.curr_ist_start_time} to {self.curr_ist_end_time})")
+        self.stack_obj.log.info(f"----------processing application level {tag} usages for (timestamp : {self.curr_ist_start_time} to {self.curr_ist_end_time})")
         for query in queries:
-            print(f"processing {tag} usage for {query} application (timestamp : {self.curr_ist_start_time} to {self.curr_ist_end_time})")
+            self.stack_obj.log.info(f"processing {tag} usage for {query} application (timestamp : {self.curr_ist_start_time} to {self.curr_ist_end_time})")
             result=execute_prometheus_query(self.stack_obj,queries[query])
             if len(result)==0:
-                print(f"WARNING : No data found for : {query}, the query executed is : {queries[query]}")
+                self.stack_obj.log.warning(f"No data found for : {query}, the query executed is : {queries[query]}")
                 continue
             avg = result[0]["values"]["average"]
             minimum = result[0]["values"]["minimum"]
@@ -138,12 +138,12 @@ class MC_comparisions:
     
     def extract_pod_data(self,queries,tag,unit):
         final=dict()
-        print(f"----------processing pod level {tag} usages for (timestamp : {self.curr_ist_start_time} to {self.curr_ist_end_time})")
+        self.stack_obj.log.info(f"----------processing pod level {tag} usages for (timestamp : {self.curr_ist_start_time} to {self.curr_ist_end_time})")
         for query in queries:
-            print(f"processing {tag} usage for {query} pod (timestamp : {self.curr_ist_start_time} to {self.curr_ist_end_time})")
+            self.stack_obj.log.info(f"processing {tag} usage for {query} pod (timestamp : {self.curr_ist_start_time} to {self.curr_ist_end_time})")
             result=execute_prometheus_query(self.stack_obj,queries[query])
             if len(result)==0:
-                print(f"WARNING : No data found for : {query}, the query executed is : {queries[query]}")
+                self.stack_obj.log.warning(f"No data found for : {query}, the query executed is : {queries[query]}")
                 continue
             avg = result[0]["values"]["average"]
             minimum = result[0]["values"]["minimum"]
@@ -156,7 +156,7 @@ class MC_comparisions:
         return final 
 
     def make_comparisions(self,app_names,pod_names):
-        print("All usage queries to be executed are : ")
+        self.stack_obj.log.info("All usage queries to be executed are : ")
 
         memory_queries = {f"{HOST}" : 'avg((uptycs_memory_used/uptycs_total_memory) * 100)  by (host_name)',}
         memory_queries.update(dict([(app,f"{key}(uptycs_app_memory{{app_name=~'{app}'}}) by (host_name)") for key,app_list in app_names.items() for app in app_list]))

@@ -2,7 +2,7 @@ from bs4 import BeautifulSoup
 import pandas as pd
 import re
 
-def convert_to_seconds(string):
+def convert_to_seconds(string,stack_obj):
     pattern = r'\d+[a-zA-Z]+'
     substrings = re.findall(pattern, string)
     if substrings:
@@ -20,7 +20,7 @@ def convert_to_seconds(string):
             elif 'm' in i:
                 minutes = int(i[:-1])
             else:
-                print(f"Unknown pattern found  in {string} : {i}")
+                stack_obj.log.error(f"Unknown pattern found  in {string} : {i}")
                 return -1
         total_seconds = (days * 86400) + (hours * 3600) + (minutes * 60) + seconds + (millisec / 1000)
         return round(total_seconds,2)
@@ -166,14 +166,14 @@ def fill_null(df):
         df[col]=series
     return df
 
-def scrape_func(path,db):
+def scrape_func(path,db,stack_obj):
     with open(path, 'r') as f:
         html_content = f.read()
     soup = BeautifulSoup(html_content, 'html.parser')
     total_result={}
     all_tables = get_pgbadger_tables_schema()
     for heading,value in all_tables.items():
-        print(f"************************** {heading} : {db} **************************")
+        stack_obj.log.info(f"************************** {heading} : {db} **************************")
         try:
             div_element = soup.find('div', id=value["html_id"])
             table_element = div_element.find('table')
@@ -184,7 +184,7 @@ def scrape_func(path,db):
             # Extract table headers
             headers = [header.text.strip() for header in table_element.find_all('th')]
             if not headers:
-                print(f"Skipping table without headers")
+                stack_obj.log.info(f"Skipping table without headers")
                 continue
 
             # Extract table rows
@@ -194,7 +194,7 @@ def scrape_func(path,db):
                 if len(row_data) == len(headers):  # Check if number of columns matches headers
                     rows.append(row_data)
                 else:
-                    print(f"Number of columns not mathcing number of headers for {heading}")
+                    stack_obj.log.warning(f"Number of columns not mathcing number of headers for {heading}")
 
             if rows:
                 df = pd.DataFrame(rows, columns=headers)
@@ -203,7 +203,7 @@ def scrape_func(path,db):
                 for column in df.columns:
                     if "dont_convert_to_seconds_cols" in value:
                         if column not in value["dont_convert_to_seconds_cols"]:
-                            df[column]=df[column].apply(convert_to_seconds)
+                            df[column]=df[column].apply(convert_to_seconds,stack_obj)
                 for col,typ in value["type_cast"].items():
                     df[col] = df[col].apply(lambda x: int(x.replace(',', '')))
                     df[col] = df[col].astype(typ)
@@ -212,23 +212,23 @@ def scrape_func(path,db):
                     try:
                         df["Avg Duration"] = round(df["Duration"]/df["Count"],2)
                     except Exception as e:
-                        print(f"Error while calculating avg duration for {heading}:{db}. {e}")
-                        print(df)
+                        stack_obj.log.error(f"Error while calculating avg duration for {heading}:{db}. {e}")
+                        stack_obj.log.info(f"\n {df}")
                         df["Avg Duration"] = round(df["Duration"]/1,2)
                 try:
                     df=df.sort_values(by=value["sort_by"],ascending=False)
                     df=df.head(value["limit"])
                 except Exception as e:
-                    print(f"sort and limit params not found for {heading}:{db}")
-                print(df)
+                    stack_obj.log.error(f"sort and limit params not found for {heading}:{db}")
+                stack_obj.log.info(f"\n {df}")
                 total_result[db+" : "+heading] = {
                     "schema":value["schema"],
                     "table":df.to_dict(orient="records")
                 }
             else:
-                print(f"No valid rows found in table {heading}")
+                stack_obj.log.warning(f"No valid rows found in table {heading}")
         except Exception as e:
-            print("Error : " ,e)
+            stack_obj.log.error("Error : " ,e)
     return total_result
 
 if __name__=="__main__":

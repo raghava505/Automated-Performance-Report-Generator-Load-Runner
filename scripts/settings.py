@@ -44,10 +44,11 @@ class stack_configuration:
             log_file_name = f'{variables["load_name"]}_{variables["build"]}_{stack_details["stack"]}_{formatted_time}.log'
         except Exception as e:
             log_file_name = f"{formatted_time}.log"
+        os.makedirs(BASE_LOGS_PATH,exist_ok=True)
         logging.basicConfig(
             level=logging.INFO,  # Set the logging level (DEBUG, INFO, WARNING, ERROR, CRITICAL)
             format='%(asctime)s - %(levelname)s - %(message)s',
-            filename=log_file_name,  # Log messages to a file (optional)
+            filename=f"{BASE_LOGS_PATH}/{log_file_name}",  # Log messages to a file (optional)
             filemode='w'  # Overwrite the log file each time (use 'a' for appending)
         )
 

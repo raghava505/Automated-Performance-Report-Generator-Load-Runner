@@ -22,7 +22,7 @@ class Charts:
             legend_list = queries[query][1]
             try:unit = queries[query][2]
             except:unit=""
-            print(f"processing {query} chart data (timestamp : {sts} to {ets})")
+            self.stack_obj.log.info(f"processing {query} chart data (timestamp : {sts} to {ets})")
             for host in result:
                 file_id = self.fs.put(str(host["values"]).encode('utf-8'), filename=f'{query}.json')
                 host["values"] = file_id
@@ -31,16 +31,16 @@ class Charts:
                     if len(legend_list)>0:
                         legend_text=str(host['metric'][legend_list[0]])
                     else:
-                        print("Empty legend list found")
+                        self.stack_obj.log.warning("Empty legend list found")
                         legend_text=""
                 except:
-                    print(f"Warning : Key '{legend_list[0]}' not present in '{host['metric']}'. please check the provided legend attribute")
+                    self.stack_obj.log.warning(f"Key '{legend_list[0]}' not present in '{host['metric']}'. please check the provided legend attribute")
                     legend_text=""
                 for key in legend_list[1:]:
                     try:
                         legend_text += f"-{host['metric'][key]}"
                     except:
-                        print(f"Warning : Key '{key}' not present in {host['metric']}. please check the provided legend attribute")
+                        self.stack_obj.log.warning(f"Key '{key}' not present in {host['metric']}. please check the provided legend attribute")
                 host["legend"]=legend_text
                 host["unit"]=unit
             final[query] = result
@@ -51,7 +51,7 @@ class Charts:
         all_gridfs_fileids = []
         final_dict={}
         for key,value in all_chart_queries.items():
-            print(f"----------------------Processing {key} queries----------------------")
+            self.stack_obj.log.info(f"----------------------Processing {key} queries----------------------")
             final_dict[key],file_ids = self.extract_charts_data(value,step_factor)
             all_gridfs_fileids.extend(file_ids)
         return final_dict,all_gridfs_fileids

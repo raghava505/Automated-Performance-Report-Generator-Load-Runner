@@ -36,24 +36,24 @@ class DISK:
         return final 
     
     def calculate_disk_usage(self,TYPE):
-        print(f"-------processing {TYPE} disk space calculation------")
+        self.stack_obj.log.info(f"-------processing {TYPE} disk space calculation------")
         if TYPE == 'hdfs':
             total_space = self.extract_data(self.get_hdfs_total_space_query,self.curr_ist_start_time,'hdfsdatanode')
             remaining_space_before_load = self.extract_data(self.remaining_hdfs_space_query,self.curr_ist_start_time,'hdfsdatanode')
             remaining_space_after_load = self.extract_data(self.remaining_hdfs_space_query,self.curr_ist_end_time,'hdfsdatanode')
             nodes = [node for node in remaining_space_before_load]
-            print("remaining before load " , remaining_space_before_load)
-            print("remaining after load " , remaining_space_after_load)
+            self.stack_obj.log.info(f"remaining before load {remaining_space_before_load}")
+            self.stack_obj.log.info(f"remaining after load {remaining_space_after_load}")
         elif TYPE=="kafka":
             total_space=self.extract_data(self.get_kafka_total_space,self.curr_ist_start_time,'host_name')
             used_space_before_load = self.extract_data(self.kafka_disk_used_percentage,self.curr_ist_start_time,'host_name')
             used_space_after_load = self.extract_data(self.kafka_disk_used_percentage,self.curr_ist_end_time,'host_name')
-            print("used_space_before_load : ", used_space_before_load)
-            print("used_space_after_load : ", used_space_after_load)
+            self.stack_obj.log.info(f"used_space_before_load : {used_space_before_load}")
+            self.stack_obj.log.info(f"used_space_after_load : {used_space_after_load}")
             nodes = [node for node in used_space_before_load]
-        print(f"Total {TYPE} space configured: ")
-        print(json.dumps(total_space, indent=4))
-        print(f"nodes : {nodes}")
+        self.stack_obj.log.info(f"Total {TYPE} space configured: ")
+        self.stack_obj.log.info(json.dumps(total_space, indent=4))
+        self.stack_obj.log.info(f"nodes : {nodes}")
         save_dict={}
         bytes_in_a_tb=(1024**4)
         bytes_in_a_gb=(1024**3)
@@ -73,26 +73,26 @@ class DISK:
                 used_space=(percentage_used_after_load-percentage_used_before_load)*total*(1024/100)
                 save_dict[node] = {f"{TYPE}_total_space_configured_in_tb" : total , f"{TYPE}_disk_used_percentage_before_load" :percentage_used_before_load,f"{TYPE}_disk_used_percentage_after_load":percentage_used_after_load,f"{TYPE} used_space_during_load_in_gb":used_space}
             except Exception as e:
-                print(f"error calculating {TYPE} usage for node {node}")
-        print("Final dictionary to save : " , )
-        print(json.dumps(save_dict, indent=4))
+                self.stack_obj.log.error(f"error calculating {TYPE} usage for node {node}")
+        self.stack_obj.log.info("Final dictionary to save : " , )
+        self.stack_obj.log.info(json.dumps(save_dict, indent=4))
         return TYPE,save_dict
 
     def pg_disk_calc(self,TYPE):
-        print(f"------processing {TYPE} disk space calculation------")
+        self.stack_obj.log.info(f"------processing {TYPE} disk space calculation------")
         save_dict={}
         pg_used_before_load_in_bytes = self.extract_data(self.pg_partition_used_in_bytes,self.curr_ist_start_time,'host_name')
         pg_used_after_load_in_bytes = self.extract_data(self.pg_partition_used_in_bytes,self.curr_ist_end_time,'host_name')
         data_used_before_load_in_bytes = self.extract_data(self.data_partition_used_in_bytes,self.curr_ist_start_time,'host_name')
         data_used_after_load_in_bytes = self.extract_data(self.data_partition_used_in_bytes,self.curr_ist_end_time,'host_name')
         nodes = [node for node in pg_used_before_load_in_bytes]
-        print(nodes)
+        self.stack_obj.log.info(nodes)
         bytes_in_a_gb=(1024**3)
         for node in nodes:
             total_pg_partition_disk_used = (pg_used_after_load_in_bytes[node]-pg_used_before_load_in_bytes[node])/bytes_in_a_gb
             total_data_partition_disk_used = (data_used_after_load_in_bytes[node]-data_used_before_load_in_bytes[node])/bytes_in_a_gb
-            print(f"for node {node}, pg_used_after_load_in_bytes : {pg_used_after_load_in_bytes[node]} , pg_used_before_load_in_bytes : {pg_used_before_load_in_bytes[node]}")
-            print(f"for node {node}, data_used_after_load_in_bytes : {data_used_after_load_in_bytes[node]} , data_used_before_load_in_bytes : {data_used_before_load_in_bytes[node]}")
+            self.stack_obj.log.info(f"for node {node}, pg_used_after_load_in_bytes : {pg_used_after_load_in_bytes[node]} , pg_used_before_load_in_bytes : {pg_used_before_load_in_bytes[node]}")
+            self.stack_obj.log.info(f"for node {node}, data_used_after_load_in_bytes : {data_used_after_load_in_bytes[node]} , data_used_before_load_in_bytes : {data_used_before_load_in_bytes[node]}")
             save_dict[node] = {
                 "/pg (used before load in GB)":pg_used_before_load_in_bytes[node]/bytes_in_a_gb,
                 "/pg (used after load in GB)":pg_used_after_load_in_bytes[node]/bytes_in_a_gb,
@@ -101,14 +101,14 @@ class DISK:
                 "/data (used before load in GB)":data_used_before_load_in_bytes[node]/bytes_in_a_gb,
                 "/data (used after load in GB)":data_used_after_load_in_bytes[node]/bytes_in_a_gb,
                 "/data (used in GB) (After -  Before)" : total_data_partition_disk_used}
-        print("Final dictionary to save : " , )
-        print(json.dumps(save_dict, indent=4))
+        self.stack_obj.log.info("Final dictionary to save : " , )
+        self.stack_obj.log.info(json.dumps(save_dict, indent=4))
         return TYPE,save_dict
 
     def save(self,_ ,current_build_data):
         TYPE ,save_dict=_
         if save_dict == {}:
-            print(f"Disk space usage for {TYPE} is empty ... Not saving this key into mongo")
+            self.stack_obj.log.warning(f"Disk space usage for {TYPE} is empty ... Not saving this key into mongo")
         else:
             current_build_data[f"{TYPE}_disk_used_space"] = save_dict
         return current_build_data
