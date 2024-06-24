@@ -11,7 +11,7 @@ raghava_env/*
 raghava_venv/*
 .DS_Store
 scripts/osquery/testinputfiles/*
-logs/*
+logs/
 scripts/logs/*
 scripts/api_load.csv
 scripts/use_osquery_accuracy.py
