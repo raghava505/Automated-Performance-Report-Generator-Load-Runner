@@ -4,7 +4,8 @@ import socket
 from concurrent.futures import ThreadPoolExecutor
 
 class EVE_COUNTS:
-    def __init__(self, variables):
+    def __init__(self, variables,stack_obj):
+        self.stack_obj=stack_obj
         self.simulators1 = ["s4simhost1a","s4simhost1c", "s4simhost1d", "s4simhost2a","s4simhost2b","s4simhost2c", "s4simhost2d", "s4simhost3a","s4simhost3b", "s4simhost3c"]
         self.simulators2 = ["long-aws-sim1", "long-aws-sim2"]
         self.simulators3 = ["long-gcp-sim1", "long-gcp-sim2"]
@@ -39,7 +40,7 @@ class EVE_COUNTS:
 
             return int(result)
         except (paramiko.SSHException, socket.timeout) as e:
-            print(f"Error connecting to {host}: {e}")
+            self.stack_obj.log.error(f"Error connecting to {host}: {e}")
             return 0
     def analyze_logs(self, simulator, pattern, pattern2, pattern3):
         events_pattern = f'cd {self.remote_logs_path} && tail -10 "$(ls -trh | tail -1)" | awk \'{pattern}\''
@@ -49,7 +50,7 @@ class EVE_COUNTS:
         total_sum = self.run_remote_command(simulator, events_pattern)
         total_sum2 = self.run_remote_command(simulator, modified_events_pattern)
         total_sum3 = self.run_remote_command(simulator, inventory_pattern)
-        print(total_sum,total_sum3,total_sum2,simulator)
+        self.stack_obj.log.info(total_sum,total_sum3,total_sum2,simulator)
         return total_sum, total_sum2, total_sum3
 
     @staticmethod
@@ -142,5 +143,5 @@ class EVE_COUNTS:
             "Ratio (inventory:events)": f"1:{math.ceil(self.total_sum2 / self.total_sum3)}"
             }
 
-        print(save_dict)
+        self.stack_obj.log.info(save_dict)
         return save_dict

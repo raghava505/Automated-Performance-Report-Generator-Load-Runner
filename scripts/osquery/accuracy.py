@@ -8,7 +8,7 @@ import jwt
 from urllib3.exceptions import InsecureRequestWarning 
 requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
 
-def get_results(url, job_id, headers):
+def get_results(url, job_id, headers,stack_obj):
     job_url = '%s/%s' % (url, job_id)
     resp = requests.get(job_url, headers=headers, verify=False)
     status_data = json.loads(resp.content)
@@ -29,10 +29,10 @@ def get_results(url, job_id, headers):
                 requests.delete(job_url, headers=headers, verify=False)
                 return data
             else:
-                print('Error fetching results: ', results.content)
+                stack_obj.log.error('Error fetching results: ', results.content)
                 break
         elif status_data['error'] is not None:
-            print('Error occurred in query job: ', str(status_data))
+            stack_obj.log.error('Error occurred in query job: ', str(status_data))
             requests.delete(job_url, headers=headers, verify=False)
             return
         else:
@@ -43,8 +43,8 @@ def get_results(url, job_id, headers):
             #print(resp.content)
             time.sleep(1)
             continue
-    print('queryJob failed execute')
-    print('Query job failed: ', str(status_data))
+    stack_obj.log.error('queryJob failed execute')
+    stack_obj.log.error('Query job failed: ', str(status_data))
 
 def generate_headers(key, secret):
     header={}
@@ -62,7 +62,7 @@ def generate_headers(key, secret):
     header['Content-type']="application/json"
     return header
 
-def send_query(api_conf, query_str, url_ext):
+def send_query(api_conf, query_str, url_ext,stack_obj):
     query_type = 'global'
     #data = json.load(open(api_conf))
     data=api_conf
@@ -83,20 +83,20 @@ def send_query(api_conf, query_str, url_ext):
     resp = requests.post(url, headers=headers,
                          data=json_payload, verify=False)
     if resp.ok:
-        return get_results(url, json.loads(resp.content)['id'], headers)
+        return get_results(url, json.loads(resp.content)['id'], headers,stack_obj)
     else:
         #print(resp.content)
         return
 
-def http_query(config, query_str, url_ext):
+def http_query(config, query_str, url_ext,stack_obj):
     attempts = 0
     while attempts < 10:
         try:
             #print("query is "+ query_str)
-            resp_json = send_query(config, query_str, url_ext)
+            resp_json = send_query(config, query_str, url_ext,stack_obj)
             if resp_json and 'queryStats' in resp_json:
                 queryStats=resp_json["queryStats"]
-            print(resp_json)
+            stack_obj.log.info(resp_json)
             record=0
             if resp_json and 'items' in resp_json:
                 res = resp_json['items']
@@ -106,10 +106,10 @@ def http_query(config, query_str, url_ext):
                     resp_json[counter] = item['rowData']
                     counter += 1
                     record=item['rowData']["_col0"]
-            print(query_str)
+            stack_obj.log.info(query_str)
             return record
         except Exception as e:
-           print('Unsuccessful global query: ',e)
+           stack_obj.log.error('Unsuccessful global query: ',e)
            attempts += 1
            time.sleep(30)
     raise Exception('Unsuccessful http query 10 time in a row: %s' % query_str)
@@ -131,10 +131,12 @@ class osq_accuracy:
         self.ext=ext
         self.trans=trans
         self.input_file=input_file
+        self.stack_obj=stack_obj
+
         self.upt_day="".join(str(start_time_utc.strftime("%Y-%m-%d")).split('-'))
-        print(f"Start time string in utc : {self.start_time}")
-        print(f"End time string in utc : {self.end_time}")
-        print(f"upt day : {self.upt_day}")
+        self.stack_obj.log.info(f"Start time string in utc : {self.start_time}")
+        self.stack_obj.log.info(f"End time string in utc : {self.end_time}")
+        self.stack_obj.log.info(f"upt day : {self.upt_day}")
     def api_keys(self):
         with open(self.api_path,'r') as c:
             api_config=json.load(c)
@@ -287,16 +289,16 @@ class osq_accuracy:
                         else:
                             output_log[table_details['name']]=1
                 line_no=line_no+1
-            print(f"calculated expected for tables from {count} messages in  {line_no} lines ")
+            self.stack_obj.log.info(f"calculated expected for tables from {count} messages in  {line_no} lines ")
         return output_log
     def run_table_accuracy(self,query,table,accuracy,expected,api):
-        actual=http_query(api, query,self.ext)
+        actual=http_query(api, query,self.ext,self.stack_obj)
         expect=expected[table]*(self.assets_per_cust)
         accuracy[table]={"actual":actual,"expected":expect,"accuracy":round((actual/expect)*100,2)}
     def table_accuracy(self,cust=0):
         api_config=self.api_keys()
         expected_tables=self.get_expected_tables(self.endline)
-        print(expected_tables)
+        self.stack_obj.log.info(expected_tables)
         if cust==0:
             api=api_config[self.domain]
         else:
@@ -309,7 +311,7 @@ class osq_accuracy:
         tables=["processes","process_open_files","load_average","interface_details","dns_lookup_events","process_open_sockets","process_file_events","process_events","socket_events","sensitive_scan_events"]
         for table in tables:
             query="select count(*) from {} where upt_day>={} and upt_time >= timestamp '{}' and upt_time < timestamp '{}'".format(table,self.upt_day,self.start_time,self.end_time)
-            print(f"Executing query : {query}")
+            self.stack_obj.log.info(f"Executing query : {query}")
             t1=threading.Thread(target=self.run_table_accuracy,args=(query,table,accuracy,expected_tables,api))
             t1.start()
             thread_list.append(t1)
@@ -331,22 +333,22 @@ class osq_accuracy:
                 if expect>events_triggered*self.hours*100000:
                     expect=events_triggered*self.hours*100000
                 query="select count(*) from {} where upt_day>= {} and created_at >= timestamp '{}' and created_at < timestamp '{}' and code like '%-builder-added%'".format(table,self.upt_day,self.start_time,self.end_time)
-                print(f"Executing query : {query}")
-                actual = http_query(api, query,self.ext)
-                print(actual)
+                self.stack_obj.log.info(f"Executing query : {query}")
+                actual = http_query(api, query,self.ext,self.stack_obj)
+                self.stack_obj.log.info(actual)
             elif table=="upt_detections":
                 expect=0
                 query="select count(*) from {} where  created_at >= timestamp '{}' and created_at < timestamp '{}'".format(table,self.start_time,self.end_time)
-                print(f"Executing query : {query}")
-                actual = http_query(api, query,self.ext)
-                print(actual)
+                self.stack_obj.log.info(f"Executing query : {query}")
+                actual = http_query(api, query,self.ext,self.stack_obj)
+                self.stack_obj.log.info(actual)
             else:
                 utc_days=self.get_utc_days_involved()
                 expect=alerts_triggered*1000*(utc_days+1)
                 query="select count(*) from {} where  created_at >= timestamp '{}' and created_at < timestamp '{}' and code like '%-builder-added%'".format(table,self.start_time,self.end_time)
-                print(f"Executing query : {query}")
-                actual = http_query(api, query, self.ext)
-                print(actual)
+                self.stack_obj.log.info(f"Executing query : {query}")
+                actual = http_query(api, query, self.ext,self.stack_obj)
+                self.stack_obj.log.info(actual)
             if table=="upt_detections":
                 accuracy[table]={"actual":actual,"expected":expect,"accuracy":0}
             else:

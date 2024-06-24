@@ -5,6 +5,7 @@ from datetime import datetime
 
 class CompactionStatus:
     def __init__(self,stack_obj,elastic_ip):
+        self.stack_obj = stack_obj
         try:            
             self.elasticsearch_host = f"http://{elastic_ip}:9200"
             self.elastic_client = Elasticsearch(hosts=[self.elasticsearch_host], timeout=240)
@@ -16,7 +17,7 @@ class CompactionStatus:
 
             self.index_name = "uptycs-*"
         except Exception as e:
-            print(f"An error occurred during initialization: {e}")
+             self.stack_obj.log.error(f"An error occurred during initialization: {e}")
 
     def build_query(self):
         try:
@@ -91,7 +92,7 @@ class CompactionStatus:
 
             return query_body
         except Exception as e:
-            print(f"An error occurred while constructing the query: {e}")
+             self.stack_obj.log.error(f"An error occurred while constructing the query: {e}")
 
     def execute_query(self):
         try:
@@ -110,12 +111,12 @@ class CompactionStatus:
                 files_ready_for_archival = bucket.get('Files Ready for Archival', {}).get('value', 0)
                 files_compacted = bucket.get('Files Compacted', {}).get('value', 0)
 
-                print(f"Compaction Status for the Date: {date_part}")
-                print(f"Files Archived: {files_archived}")
-                print(f"Files Skipped: {files_skipped}")
-                print(f"Files Ingested: {files_ingested}")
-                print(f"Files Ready for Archival: {files_ready_for_archival}")
-                print(f"Files Compacted: {files_compacted}")
+                self.stack_obj.log.info(f"Compaction Status for the Date: {date_part}")
+                self.stack_obj.log.info(f"Files Archived: {files_archived}")
+                self.stack_obj.log.info(f"Files Skipped: {files_skipped}")
+                self.stack_obj.log.info(f"Files Ingested: {files_ingested}")
+                self.stack_obj.log.info(f"Files Ready for Archival: {files_ready_for_archival}")
+                self.stack_obj.log.info(f"Files Compacted: {files_compacted}")
                 print()
 
                 result_dict[date_part]["Files Archived"] = files_archived
@@ -126,7 +127,7 @@ class CompactionStatus:
 
                 return result_dict
         except Exception as e:
-            print(f"An error occurred while executing the query: {e}")
+            self.stack_obj.log.error(f"An error occurred while executing the query: {e}")
 
 # # Example usage:
 # if __name__ == "__main__":

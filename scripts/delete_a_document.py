@@ -2,7 +2,7 @@ import pymongo
 # from gridfs import GridFS
 from bson.objectid import ObjectId
 import shutil,os
-from config_vars import ROOT_PATH,mongo_connection_string
+from config_vars import *
 
 print("Enter the details to delete a docoment : ")
 database_name=input("Enter the database name : ")
@@ -28,11 +28,8 @@ if decision == "y":
         #     fs.delete(file_id=file_id)
             
         result = collection.delete_one({'_id': ObjectId(document_id)})
-        BASE_GRAPHS_PATH = os.path.join(os.path.dirname(ROOT_PATH),'graphs')
         graphs_path=f"{BASE_GRAPHS_PATH}/{database_name}/{collection_name}/{document_id}"
-        BASE_PDFS_PATH = os.path.join(os.path.dirname(ROOT_PATH),'pdfs')
         pdfs_path=f"{BASE_PDFS_PATH}/{database_name}/{collection_name}/{document_id}"
-        BASE_HTMLS_PATH = os.path.join(os.path.dirname(ROOT_PATH),'htmls')
         htmls_path=f"{BASE_HTMLS_PATH}/{database_name}/{collection_name}/{document_id}"
         try:
             shutil.rmtree(graphs_path)

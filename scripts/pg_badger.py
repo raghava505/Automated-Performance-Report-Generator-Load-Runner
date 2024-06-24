@@ -19,7 +19,7 @@ current_time = datetime.now()
 current_time = current_time.strftime("%Y-%m-%d_%H:%M:%S")
 print("Formatted current time:", current_time)
 
-def get_links(elastic_url,start_time_ist_str, end_time_ist_str,pgbadger_reports_mount,check):
+def get_links(elastic_url,start_time_ist_str, end_time_ist_str,pgbadger_reports_mount,check,stack_obj):
     url = f"http://{elastic_url}:5602/ondemand"
 
     resp = requests.get(url, verify=False)
@@ -33,7 +33,7 @@ def get_links(elastic_url,start_time_ist_str, end_time_ist_str,pgbadger_reports_
             start_end_string=f"{current_time}_{start_time_ist_str.replace('T','_')}_to_{end_time_ist_str.replace('T','_')}"
             report_name=f"{start_end_string}_{db}"
             # report_name=f"sprint_{db}"
-            print(report_name)
+            stack_obj.log.info(report_name)
             form_data={
                     "start": start_time_ist_str,
                     "end": end_time_ist_str,
@@ -41,16 +41,16 @@ def get_links(elastic_url,start_time_ist_str, end_time_ist_str,pgbadger_reports_
                     "database": db
                     }
             response = requests.post(url, data=form_data, verify=False)
-            print
+
             if response.status_code == 200:
                 sleep(10)
                 report_link=f'http://{elastic_url}:5602/reports/view?file=/{pgbadger_reports_mount}/ondemand_reports/{report_name}/postgres.html'
-                print(report_link)   
+                stack_obj.log.info(report_link)   
                 return_links[db]=report_link
             else:
-                print(f"Error generating report for db {db}: {response.status_code}")
+                stack_obj.log.error(f"Error generating report for db {db}: {response.status_code}")
     else:
-        print(f"Error accessing the page: {resp.status_code}")
+        stack_obj.log.error(f"Error accessing the page: {resp.status_code}")
     return return_links
 
 
@@ -159,27 +159,27 @@ def get_and_save_pgb_html(stack_obj,elastic_url,base_save_path,pgbadger_tail_pat
     end_time = end_time_utc + timedelta(hours=1)
     end_time = end_time.strftime(format_data)
     extracted_tables={}
-    print("Converted start time UTC string is : " , start_time)
-    print("Converted end time UTC string is : " , end_time)
-    links=get_links(elastic_url , start_time, end_time,pgbadger_reports_mount,check)
+    stack_obj.log.info(f"Converted start time UTC string is : {start_time}")
+    stack_obj.log.info(f"Converted end time UTC string is : {end_time}")
+    links=get_links(elastic_url , start_time, end_time,pgbadger_reports_mount,check,stack_obj)
     for db,link in links.items():
-        print("Processing pgbadger report for database : "  , db)
+        stack_obj.log.info(f"Processing pgbadger report for database : {db}")
         save_path = os.path.join(base_save_path,f"pgbadger_report_{db}.html")
-        status=save_html_page(link,save_path,check)
+        status=save_html_page(link,save_path,check,stack_obj)
         if not status:
             if check :
-                print(f"ERROR : Could not save pgbadger html page for database {db}.")
+                stack_obj.log.error(f"Could not save pgbadger html page for database {db}.")
                 return False,link
-            print("Saving this webpage failed, hence saving the direct link of pgbadger UI !")
+            stack_obj.log.error("Saving this webpage failed, hence saving the direct link of pgbadger UI !")
             return_file_names[db] = link
         
         if status:
             if check:return True,"nothing"
-            scraped_res = scrape_func(save_path,db)
+            scraped_res = scrape_func(save_path,db,stack_obj)
             if scraped_res!={}:
                 extracted_tables.update(scraped_res)
             return_file_names[db] = os.path.join(f"http://{perf_prod_dashboard}:{pgbadger_report_port}",pgbadger_tail_path,f"pgbadger_report_{db}.html")
-    print("Returning pgbadger links dict : ", return_file_names)
+    stack_obj.log.info(f"Returning pgbadger links dict : {return_file_names}")
     return return_file_names,extracted_tables
 
    

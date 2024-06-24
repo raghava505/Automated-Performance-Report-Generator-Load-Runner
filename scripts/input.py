@@ -78,7 +78,8 @@ def create_input_form():
                 input_value=str(input(f"Enter : {' '.join(str(key).split('_')).title()}  (example: {value}) (NOTE : Press enter if None) : ").strip())
             else:
                 input_value=str(input(f"Enter : {' '.join(str(key).split('_')).title()}  (example: {value}) : ").strip())
-        
+            input_value=str(input_value).strip()
+            
         elif Type==bool:
             helper_text=''
             for i,val in enumerate(bool_options):

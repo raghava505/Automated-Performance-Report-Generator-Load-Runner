@@ -13,6 +13,7 @@ class TRINO_ANALYSE:
         self.start_utc_str=stack_obj.start_time_str_utc
         self.end_utc_str=stack_obj.end_time_str_utc
         self.dnode = stack_obj.execute_trino_queries_in
+        self.stack_obj = stack_obj
 
     def get_trino_commands(self):
         limit=20
@@ -427,16 +428,16 @@ class TRINO_ANALYSE:
             columns=value['columns']
             schema = value["schema"]
             query = raw_command.replace("<start_utc_str>",self.start_utc_str).replace( "<end_utc_str>", self.end_utc_str)
-            print(f"\n************************** {heading} ************************ :\n {query}")
-            output= execute_trino_query(self.dnode,query)
+            self.stack_obj.log.info(f"\n************************** {heading} ************************ :\n {query}")
+            output= execute_trino_query(self.dnode,query,self.stack_obj)
             # if not output or output.strip()=="":
             #     raise RuntimeError(f"ERROR : command output is empty. Check if trino @ {self.dnode} is in good state. Terminating program ...")
             stringio = StringIO(output)
             df = pd.read_csv(stringio, header=None, names=columns)
             numeric_cols = df.select_dtypes(include=[np.number]).columns
             non_numeric_cols = df.select_dtypes(exclude=[np.number]).columns
-            print("Numeric columns : " , numeric_cols)
-            print("Non-Numeric columns : " , non_numeric_cols)
+            self.stack_obj.log.info(f"Numeric columns : {numeric_cols}")
+            self.stack_obj.log.info(f"Non-Numeric columns : {non_numeric_cols}")
 
             fill_values = {}
             fill_values.update({col: 0 for col in numeric_cols})
@@ -450,7 +451,7 @@ class TRINO_ANALYSE:
             # df = df._append(new_row, ignore_index=True)
             if df.empty: continue
             df = df.head(168)
-            print(df)
+            self.stack_obj.log.info(f"\n {df}")
             try:
                 df["query_operation"] = df["query_operation"].astype(str)
             except:

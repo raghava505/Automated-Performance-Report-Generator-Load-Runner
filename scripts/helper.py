@@ -19,9 +19,9 @@ def measure_time(func):
         return result
     return wrapper
 
-def execute_command_in_node(node,command):
+def execute_command_in_node(node,command,stack_obj):
     try:
-        print(f"Executing the command in node : {node}")
+        stack_obj.log.info(f"Executing the command in node : {node}")
         client = paramiko.SSHClient()
         client.load_system_host_keys() 
         client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
@@ -31,45 +31,47 @@ def execute_command_in_node(node,command):
             out = stdout.read().decode('utf-8').strip()
             errors = stderr.read().decode('utf-8')
             if errors:
-                print("Errors:")
-                print(errors)
+                stack_obj.log.error("Errors:")
+                stack_obj.log.info(errors)
             return out
                 
         except Exception as e:
+            stack_obj.log.exception(e)
             raise RuntimeError(f"ERROR : Unable to connect to {node} , {e}") from e
         finally:
             client.close()
     except socket.gaierror as e:
+        stack_obj.log.exception(e)
         raise RuntimeError(f"ERROR : Unable to connect to {node} , {e}") from e
 
-def execute_trino_query(node,query,schema="system"):
+def execute_trino_query(node,query,stack_obj,schema="system"):
     trino_command = f"sudo -u monkey docker exec trino-monitoring /opt/uptycs/cloud/utilities/trino-cli.sh --user uptycs --password prestossl --catalog uptycs --schema upt_{schema} --execute  \"{query}\""
-    return execute_command_in_node(node,trino_command)
+    return execute_command_in_node(node,trino_command,stack_obj)
 
-def execute_configdb_query(node,query):
+def execute_configdb_query(node,query,stack_obj):
     configdb_command = f'sudo docker exec postgres-configdb bash -c "PGPASSWORD=pguptycs psql -U postgres configdb -c \\"{query}\\""'
-    print(configdb_command)
-    return execute_command_in_node(node,configdb_command)
+    stack_obj.log.info(configdb_command)
+    return execute_command_in_node(node,configdb_command,stack_obj)
 
 def execute_point_prometheus_query(stack_obj,timestamp,query): 
     PROMETHEUS = stack_obj.prometheus_path
     for metric in kube_metrics:
         if metric in query:
             PROMETHEUS = stack_obj.kube_prometheus_path 
-            print("pod level metric found.. using prometheous path : " , PROMETHEUS)
+            stack_obj.log.info("pod level metric found.. using prometheous path : " , PROMETHEUS)
   
     PARAMS = {
         'query': query,
         'time' : timestamp
     }
-    print(f"Executing {query} at {stack_obj.monitoring_ip} at a single timestamp {timestamp}...")
+    stack_obj.log.info(f"Executing {query} at {stack_obj.monitoring_ip} at a single timestamp {timestamp}...")
     try:
         response = requests.get(PROMETHEUS + prom_point_api_path, params=PARAMS)
         if response.status_code != 200:
             raise RuntimeError(f"API request failed with status code {response.status_code}")
         result = response.json()['data']['result']
         if len(result)==0:
-            print(f"WARNING : No data found for : {query}")
+            stack_obj.log.warning(f"WARNING : No data found for : {query}")
         return result
 
     except requests.RequestException as e:
@@ -82,7 +84,7 @@ def execute_prometheus_query(stack_obj,query,preprocess=True,step_factor=None,fo
     for metric in kube_metrics:
         if metric in query:
             PROMETHEUS = stack_obj.kube_prometheus_path
-            print("pod level metric found.. using prometheous path : " , PROMETHEUS)
+            stack_obj.log.info("pod level metric found.. using prometheous path : " , PROMETHEUS)
     hours = stack_obj.hours
     if not step_factor:
         step_factor=hours/10 if hours>10 else 1
@@ -110,7 +112,7 @@ def execute_prometheus_query(stack_obj,query,preprocess=True,step_factor=None,fo
             raise RuntimeError(f"API request failed with status code {response.status_code}")
         result = response.json()['data']['result']
         if len(result)==0:
-            print(f"WARNING : No data found for : {query}")
+            stack_obj.log.warning(f"No data found for : {query}")
 
         if preprocess==True:
             for line in result:
@@ -217,7 +219,7 @@ def execute_prometheus_query(stack_obj,query,preprocess=True,step_factor=None,fo
 #     with open(nodes_file_path,'w') as file:
 #         json.dump(data,file,indent=4)
 
-def save_html_page(url,file_path,check):
+def save_html_page(url,file_path,check,stack_obj):
     response = requests.get(url)
     if response.status_code == 200:
         if check: return True
@@ -225,15 +227,15 @@ def save_html_page(url,file_path,check):
         with open(file_path, "wb") as file:
             file.write(page_content)
 
-        print(f"Webpage {url} saved successfully to {file_path}")
+        stack_obj.log.info(f"Webpage {url} saved successfully to {file_path}")
         return True
     else:
-        print("Failed to download webpage")
+        stack_obj.log.error("Failed to download webpage")
         return False
     
 
 
-def fetch_and_extract_csv(remote_csv_path,reports_node_ip):
+def fetch_and_extract_csv(remote_csv_path,reports_node_ip,stack_obj):
     if remote_csv_path == None or remote_csv_path == "":
         return None
     
@@ -247,21 +249,21 @@ def fetch_and_extract_csv(remote_csv_path,reports_node_ip):
             transport.connect(username=abacus_username, password=abacus_password)
             sftp = paramiko.SFTPClient.from_transport(transport)
             sftp.get(remote_csv_path, local_csv_path)
-            print(f"Fetched csv file successfully: {remote_csv_path}")
+            stack_obj.log.info(f"Fetched csv file successfully: {remote_csv_path}")
             sftp.close()
 
         df = pd.read_csv(local_csv_path)
         load_dict = df.to_dict(orient='records')
         # print("Printing API Load data")
         # print(api_load_dict)
-        print("Extracting csv file...")
+        stack_obj.log.info("Extracting csv file...")
         return load_dict 
     
     except Exception as e:
-        print(e)
+        stack_obj.log.error(e)
         return None
 
-def fetch_and_save_pdf(remote_pdf_path,reports_node_ip , local_pdf_path):
+def fetch_and_save_pdf(remote_pdf_path,reports_node_ip , local_pdf_path,stack_obj):
     if remote_pdf_path == None or remote_pdf_path == "":
         return None
     
@@ -274,8 +276,8 @@ def fetch_and_save_pdf(remote_pdf_path,reports_node_ip , local_pdf_path):
             transport.connect(username=abacus_username, password=abacus_password)
             sftp = paramiko.SFTPClient.from_transport(transport)
             sftp.get(remote_pdf_path, local_pdf_path)
-            print(f"Fetched PDF file successfully: {remote_pdf_path}")
+            stack_obj.log.info(f"Fetched PDF file successfully: {remote_pdf_path}")
             sftp.close()
     
     except Exception as e:
-        print("Error while fetching the pdf : " ,e)
+        stack_obj.log.error(f"Error while fetching the pdf : {e}")

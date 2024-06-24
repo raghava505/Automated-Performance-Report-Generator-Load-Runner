@@ -21,7 +21,7 @@ PROJECT_ROOT = Path(__file__).resolve().parent
 class ACCURACY:
 
     def __init__(self,stack_obj,variables):
-
+        self.stack_obj=stack_obj
         format_data = "%Y-%m-%d %H:%M"
         start_time = stack_obj.start_time_UTC - timedelta(minutes=10)
         self.load_start = start_time.strftime(format_data)
@@ -38,7 +38,7 @@ class ACCURACY:
 
     def global_query(self,data,table):
         
-        print(f"Fetching records for table: {table} from customer: {data['customerId']}")
+        self.stack_obj.log.info(f"Fetching records for table: {table} from customer: {data['customerId']}")
         stack_keys = open_js_safely(self.api_path)
         mglobal_query_api = query_api.format(data['domain'],data['domainSuffix'],data['customerId'])
         pl=payload["query"].format(table,self.upt_day,self.load_start,self.load_end)
@@ -50,15 +50,15 @@ class ACCURACY:
 
         if output2['status']=="FINISHED":
             response=get_api(data,n_result_api)
-            print(response['items'][0]['rowData']['_col0'])
+            self.stack_obj.log.info(response['items'][0]['rowData']['_col0'])
         else:
             while output2['status'] not in ['FINISHED', 'ERROR']:
                 time.sleep(5)
                 n_api=mglobal_query_api+'/'+job_id
                 output2=get_api(data,n_api)
             if output2['status'] == 'ERROR':
-                print('global query failed' )
-                print(f"An ERROR occurred: {output2['error']['detail']['message']}")
+                self.stack_obj.log.error('global query failed' )
+                self.stack_obj.log.error(f"An ERROR occurred: {output2['error']['detail']['message']}")
             else :
                 response=get_api(data,n_result_api)
                 return response
@@ -68,7 +68,7 @@ class ACCURACY:
         
         for filename in os.listdir(json_directory):
             if filename.endswith(".json"):
-                print(os.path.join(json_directory, filename))
+                self.stack_obj.log.info(os.path.join(json_directory, filename))
                 with open(os.path.join(json_directory, filename), "r") as file1:
                     data = json.load(file1)
                 
@@ -104,7 +104,7 @@ class ACCURACY:
         accuracy_true = round(((actual_true_count +1) / (expected_true_count+1)) * 100, 2)
         accuracy_false= round(((actual_false_count+1) / (expected_false_count+1)) * 100, 2)
         data[table] = {"Actual inserted records":actual_true_count, "Actual deleted records": actual_false_count, "Expected inserted records":expected_true_count, "Expected deleted records": expected_false_count,  "Accuracy for inserted records": accuracy_true, "Accuracy for deleted records":accuracy_false}
-        print(data[table])
+        self.stack_obj.log.info(data[table])
 
     def multi_accuracy(self, data, file):
         manager = multiprocessing.Manager()
@@ -151,7 +151,7 @@ class ACCURACY:
         }
 
         result_dict.update(table_result_dict)
-        print(table_result_dict)
+        self.stack_obj.log.info(table_result_dict)
 
     def multi_tables_accuracy(self, file):
         expected_data = {}
@@ -163,9 +163,9 @@ class ACCURACY:
     def calculate_accuracy(self):
         save_dict={}
         obj = LOGScriptRunner()
-        print(self.load_name)
+        self.stack_obj.log.info(self.load_name)
         if(self.load_name=="AWS_MultiCustomer" or self.load_name == "GCP_MultiCustomer"):
-            print(1)
+            self.stack_obj.log.info(1)
             obj.get_log(obj.simulators1,self.load_name)
             self.api_path=api_path_multi_mercury
             self.total_counts = getattr(configs, f'total_counts_{self.load_name.split("_")[0]}', None)
@@ -174,7 +174,7 @@ class ACCURACY:
             save_dict[self.load_name.split("_")[0]]=self.multi_tables_accuracy(file)
 
         elif(self.load_name == "Azure_MultiCustomer"):
-            print("Azure_MultiCustomer")
+            self.stack_obj.log.info("Azure_MultiCustomer")
             obj.get_log(obj.azure_s18sims,self.load_name)
             self.api_path=api_path_multi_virgo
             self.total_counts = getattr(configs, f'total_counts_Azure', None)
@@ -183,7 +183,7 @@ class ACCURACY:
             save_dict["Azure"]=self.multi_tables_accuracy(file)
 
         elif(self.load_name == "AWS_SingleCustomer"):
-            print(2)
+            self.stack_obj.log.info(2)
             obj.get_log(obj.simulators1,self.load_name)
             self.api_path=api_path_single_mercury
             self.total_counts = getattr(configs, f'total_counts_AWS', None)
@@ -192,7 +192,7 @@ class ACCURACY:
             save_dict["AWS"]=self.multi_tables_accuracy(file)
         
         elif(self.load_type == 'osquery_cloudquery_combined'):
-            print(3)
+            self.stack_obj.log.info(3)
             obj.get_log(obj.simulators2,"AWS_MultiCustomer")
             self.api_path=api_path_multi_longevity
             self.total_counts = getattr(configs, f'total_counts_AWS', None)
@@ -205,7 +205,7 @@ class ACCURACY:
             save_dict["GCP"]=self.multi_tables_accuracy(file)
 
         elif(self.load_type == 'all_loads_combined'):
-            print(3)
+            self.stack_obj.log.info(3)
             obj.get_log(obj.simulators2,"AWS_MultiCustomer")
             self.api_path=api_path_multi_longevity
             self.total_counts = getattr(configs, f'total_counts_AWS', None)

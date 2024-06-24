@@ -36,7 +36,7 @@ def execute_on_trino_middleware(key,target_node,query,conn_object,schema) -> dic
     # print(f"Executing for {key}")
     # command = f"sudo -u monkey TRINO_PASSWORD=prestossl /opt/uptycs/cloud/utilities/trino-cli --insecure --server https://localhost:5665 --schema upt_{schema} --user uptycs --catalog uptycs --password --truststore-password sslpassphrase --truststore-path /opt/uptycs/etc/presto/presto.jks --execute \"{query}\""
     try:
-        value = execute_trino_query(node=target_node,query=query,schema=schema)
+        value = execute_trino_query(node=target_node,query=query,stack_obj=conn_object,schema=schema)
         # print(value)
         
         value = value.replace('"', ' ')
