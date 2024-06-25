@@ -114,6 +114,9 @@ def extract_ram_cores_storage_details(stack_obj):
     df = df.reset_index().rename(columns={'index': 'host_name'})
     df=df.sort_values(by=["node_type","host_name"])
     stack_obj.log.info(f"\n {df}")
+    df=df.fillna("")
+    print(df)
+    print(df.dtypes)
     # df.to_csv("stack.csv")
 
     return {
@@ -130,7 +133,7 @@ if __name__=='__main__':
     from settings import stack_configuration
 
     variables = {
-        "start_time_str_ist":"2024-01-26 13:25",
+        "start_time_str_ist":"2024-06-24 00:00",
         "load_duration_in_hrs":4,
         "test_env_file_name":'s1_nodes.json'
     }
@@ -138,5 +141,5 @@ if __name__=='__main__':
 
     result=extract_ram_cores_storage_details(stack_obj)
 
-    print(result)
+    # print(result)
     
