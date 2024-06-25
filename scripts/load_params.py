@@ -45,7 +45,7 @@ def execute_on_trino_middleware(key,target_node,query,conn_object,schema) -> dic
         
         return res
     except Exception as err:
-        print(f"ERR: load_params execute_on_trino_middleware {key} => {err}")
+        conn_object.log.error(f"ERR: load_params execute_on_trino_middleware {key} => {err}")
         return res
 
 class Load_Params:
