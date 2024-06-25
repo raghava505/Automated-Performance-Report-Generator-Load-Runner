@@ -25,7 +25,7 @@ class kafka_topics:
             exit_status = stdout.channel.recv_exit_status()
             output = stdout.read().decode()
             output_list = [line for line in output.split('\n') if line.strip()]
-            self.stack_obj.log.info("Kafka topics found are : " , output_list)
+            self.stack_obj.log.info(f"Kafka topics found are : {output_list}")
         except Exception as e:
             self.stack_obj.log.error(f"Error while fetching kafka topics : {str(e)}")
             return []
