@@ -134,7 +134,7 @@ if __name__ == "__main__":
             #-------------------------real time query test details--------------------------
             if domain=="longevity" and variables["load_type"] in ["all_loads_combined"]: 
                 from realtimequery_tests.real_time_query import realtime_query
-                print(f"Performing realtime query test on stack '{stack}' ...")
+                stack_obj.log.info(f"Performing realtime query test on stack '{stack}' ...")
                 realtime_query_results=realtime_query()
                 final_data_to_save.update({"Realtimequery test results":realtime_query_results})
             #-------------------------disk space--------------------------
