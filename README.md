@@ -19,7 +19,7 @@ Then you can publish your report from this UI : http://192.168.146.69:5050
 
 1. Create "<your_stack_name>_nodes.json" file inside "stacks" folder if not present 
 ```
-vi /stack/<your_stack_name>_nodes.json
+vi /stacks/<your_stack_name>_nodes.json
 ```
 2. Make sure all your stack host IP Addresses are mapped in ```/etc/hosts``` in perf-prod-dashboard Node
 
