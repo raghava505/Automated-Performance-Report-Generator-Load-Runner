@@ -15,7 +15,7 @@ import concurrent.futures
 # 6. pg partition
 # 7. data partition
 
-storage_commands = {'root(/)':"df -h | awk '$6 == \"/\" {print $2}'",
+storage_commands = {'root':"df -h | awk '$6 == \"/\" {print $2}'",
                     # '/data/kafka' : "df -h | awk '$6 == \"/data/kafka\" {print $2}'",
                     '/data/spark' : "df -h | awk '$6 == \"/data/spark\" {print $2}'",
                     '/data/dn1' : "df -h | awk '$6 == \"/data/dn1\" {print $2}'",
@@ -35,29 +35,29 @@ def extract_ram_cores_storage_details(stack_obj):
     for line in memory_result:
         # print(line)
         node_name = line["metric"]["host_name"]
-        final_result[node_name]['node_type']=line["metric"]["node_type"]
+        final_result[node_name]['nodetype']=line["metric"]["node_type"]
         try:
-            final_result[node_name]['cluster_id']=line["metric"]["cluster_id"]
+            final_result[node_name]['clst']=line["metric"]["cluster_id"]
         except Exception as e:
             stack_obj.log.error(e)
-        final_result[node_name]['ram(GB)']=round(float(line["value"][1]),2)
+        final_result[node_name]['ram(GB)']=round(float(line["value"][1]),1)
         
 
     total_cpu_capacity_query = "sum(uptycs_loadavg_cpu_info) by (host_name,cpu_processor)"
     cpu_result = execute_point_prometheus_query(stack_obj,start_timestamp,total_cpu_capacity_query)
     for line in cpu_result:
         node_name = line["metric"]["host_name"]
-        final_result[node_name]['cores']=float(line["metric"]["cpu_processor"]) + 1 
+        final_result[node_name]['cores']=int(line["metric"]["cpu_processor"]) + 1 
 
     kafka_disk_space_result=execute_point_prometheus_query(stack_obj,start_timestamp,f"sum(kafka_disk_volume_size/{1024**3}) by (host_name)")
     for line in kafka_disk_space_result:
         node_name = line["metric"]["host_name"]
         final_result[node_name]['/data/kafka(TB)']=round(float(line["value"][1]),2)
 
-    hdfs_disk_space_result=execute_point_prometheus_query(stack_obj,start_timestamp,f"sort(sum(uptycs_hdfs_node_config_capacity/{(1024**4)}) by (hdfsdatanode))")
-    for line in hdfs_disk_space_result:
-        node_name = line["metric"]["hdfsdatanode"]
-        final_result[node_name]['hdfs(TB)']=round(float(line["value"][1]),2)
+    # hdfs_disk_space_result=execute_point_prometheus_query(stack_obj,start_timestamp,f"sort(sum(uptycs_hdfs_node_config_capacity/{(1024**4)}) by (hdfsdatanode))")
+    # for line in hdfs_disk_space_result:
+    #     node_name = line["metric"]["hdfsdatanode"]
+    #     final_result[node_name]['hdfs(TB)']=round(float(line["value"][1]),2)
 
     nodes = list(final_result.keys())
     stack_obj.log.info(f"All nodes in the stack : {nodes}")
@@ -111,8 +111,8 @@ def extract_ram_cores_storage_details(stack_obj):
 
     df = pd.DataFrame(final_result)    
     df=df.T
-    df = df.reset_index().rename(columns={'index': 'host_name'})
-    df=df.sort_values(by=["node_type","host_name"])
+    df = df.reset_index().rename(columns={'index': 'hostname'})
+    df=df.sort_values(by=["nodetype","hostname"])
     df=df.fillna("")
     df = df.astype(str)
     stack_obj.log.info(f"\n {df}")
