@@ -1,30 +1,30 @@
 import os
 #ports
-api_report_port = 8001
-pgbadger_report_port = 8000
-prometheus_port = 9090
-kube_prometheus_port = 31090
-ssh_port = 22
+API_REPORT_PORT = 8001
+PGBADGER_REPORT_PORT = 8000
+PROMETHEUS_PORT = 9090
+KUBE_PROMETHEUS_PORT = 31090
+SSH_PORT = 22
 
 #ips
-perf_prod_dashboard = "192.168.146.69"
+PERF_PROD_DASHBOARD = "192.168.146.69"
 
 #int and strings
-prom_api_path = "/api/v1/query_range"
-prom_point_api_path = "/api/v1/query"
-abacus_username = 'abacus'  
-abacus_password = 'abacus' 
-mongo_connection_string = "mongodb://localhost:27017"
+PROM_API_PATH = "/api/v1/query_range"
+PROM_POINT_API_PATH = "/api/v1/query"
+ABACUS_USERNAME = 'abacus'  
+ABACUS_PASSWORD = 'abacus' 
+MONGO_CONNECTION_STRING = "mongodb://localhost:27017"
 # api_loads_folder_path = "/home/abacus/apache-jmeter-5.6.2/bin/reports/"
-presto_loads_folder_path = "/home/abacus/benchto_reports/"
-api_loads_folder_path_temp = "/home/abacus/apache-jmeter-5.6.2/bin/reports/"
+PRESTO_LOADS_FOLDER_PATH = "/home/abacus/benchto_reports/"
+API_LOADS_FOLDER_PATH_TEMP = "/home/abacus/apache-jmeter-5.6.2/bin/reports/"
 
 #other types
-kube_metrics = ["container_memory_working_set_bytes","container_cpu_usage_seconds_total"]
+KUBE_METRICS = ["container_memory_working_set_bytes","container_cpu_usage_seconds_total"]
 
 #dynamic
 ROOT_PATH = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
-STACK_JSONS_PATH = f"{ROOT_PATH}/stacks"
+STACK_JSONS_PATH = os.path.join(ROOT_PATH,'stacks')
 BASE_GRAPHS_PATH = os.path.join(os.path.dirname(ROOT_PATH),'graphs')
 BASE_HTMLS_PATH = os.path.join(os.path.dirname(ROOT_PATH),'htmls')
 BASE_PDFS_PATH = os.path.join(os.path.dirname(ROOT_PATH),'pdfs')

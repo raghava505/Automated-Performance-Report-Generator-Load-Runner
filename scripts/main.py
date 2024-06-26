@@ -53,7 +53,7 @@ if __name__ == "__main__":
         extension = str(test_env_json_details['suffix']).split('.')[1]
         
         #---------------------Check for previous runs------------------------------------
-        client = pymongo.MongoClient(mongo_connection_string)
+        client = pymongo.MongoClient(MONGO_CONNECTION_STRING)
         database_name = variables['load_type']+"_LoadTests"
         collection_name = variables["load_name"]
         db=client[database_name]
@@ -162,8 +162,8 @@ if __name__ == "__main__":
             if 'prestoload_simulator_ip' in test_env_json_details:
                 stack_obj.log.info(f"------------------------------ Looking for presto load csv files in {test_env_json_details['prestoload_simulator_ip']}")
                 stack_starttime_string=str(stack).lower() + "-" + str(start_time_str_ist)
-                benchto_load_csv_path=os.path.join(presto_loads_folder_path, stack_starttime_string, "benchto.csv")
-                benchto_load_pdf_path=os.path.join(presto_loads_folder_path , stack_starttime_string, "Benchto.pdf")
+                benchto_load_csv_path=os.path.join(PRESTO_LOADS_FOLDER_PATH, stack_starttime_string, "benchto.csv")
+                benchto_load_pdf_path=os.path.join(PRESTO_LOADS_FOLDER_PATH , stack_starttime_string, "Benchto.pdf")
                 stack_obj.log.info(f"CSV file path for Presto/benchto load : {benchto_load_csv_path}")
                 presto_load_result_dict = fetch_and_extract_csv(benchto_load_csv_path,test_env_json_details['prestoload_simulator_ip'],stack_obj)
                 if presto_load_result_dict:final_data_to_save.update({"Presto Load details":presto_load_result_dict})
@@ -173,7 +173,7 @@ if __name__ == "__main__":
             if 'apiload_simulator_ip' in test_env_json_details:
                 stack_obj.log.info(f"------------------------------ Looking for api load (old way) csv files in {test_env_json_details['apiload_simulator_ip']}")
                 stack_starttime_string=str(stack).lower() + "-" + str(start_time_str_ist)
-                api_load_csv_path = os.path.join(api_loads_folder_path_temp , stack_starttime_string+".csv")
+                api_load_csv_path = os.path.join(API_LOADS_FOLDER_PATH_TEMP , stack_starttime_string+".csv")
                 stack_obj.log.info(f"CSV file path for API/Jmeter load : {api_load_csv_path}")
                 api_load_result_dict = fetch_and_extract_csv(api_load_csv_path,test_env_json_details['apiload_simulator_ip'],stack_obj)
                 if api_load_result_dict:final_data_to_save.update({"API Load details":api_load_result_dict})
@@ -271,7 +271,7 @@ if __name__ == "__main__":
             if complete_resource_details:final_data_to_save.update(complete_resource_details)
             #------------------------------- (NEW) API load report link--------------------------------------------------
             if apiload_remote_directory_name and 'apiload_simulator_ip' in test_env_json_details and apiload_remote_directory_name!="":
-                final_data_to_save.update({"Api load report link":os.path.join(f"http://{test_env_json_details['apiload_simulator_ip']}:{api_report_port}",apiload_remote_directory_name,f"index.html")})
+                final_data_to_save.update({"Api load report link":os.path.join(f"http://{test_env_json_details['apiload_simulator_ip']}:{API_REPORT_PORT}",apiload_remote_directory_name,f"index.html")})
             #------------------------------- observations --------------------------------------------------
             final_data_to_save.update({"observations":load_cls.get_dictionary_of_observations()})
             #--------------------------------Capture charts data---------------------------------------

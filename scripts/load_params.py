@@ -63,9 +63,9 @@ class Load_Params:
         self.conn_object = connection_object
         self.start_time = start_time
         self.upt_day="".join(str(start_time.strftime("%Y-%m-%d")).split('-'))
-        self.conn_object.ssh_port = 22
-        self.conn_object.abacus_username = "abacus"
-        self.conn_object.abacus_password = "abacus"
+        self.conn_object.SSH_PORT = 22
+        self.conn_object.ABACUS_USERNAME = "abacus"
+        self.conn_object.ABACUS_PASSWORD = "abacus"
         self.target_node = self.conn_object.execute_trino_queries_in
         
         

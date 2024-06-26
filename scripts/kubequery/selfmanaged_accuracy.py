@@ -24,8 +24,8 @@ class SelfManaged_Accuracy:
             data = json.load(file)
         
         self.upt_day="".join(str(self.load_start.strftime("%Y-%m-%d")).split('-'))
-        self.username = abacus_username
-        self.password  = abacus_password
+        self.username = ABACUS_USERNAME
+        self.password  = ABACUS_PASSWORD
         self.target_host = stack_obj.execute_trino_queries_in
         self.cloud_domain = data["domain"]
         if self.cloud_domain ==  "longevity":
@@ -63,7 +63,7 @@ class SelfManaged_Accuracy:
         for node in self.simnodes:
             ssh_client = paramiko.SSHClient()
             ssh_client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-            ssh_client.connect(node, ssh_port, self.username, self.password)
+            ssh_client.connect(node, SSH_PORT, self.username, self.password)
             
             for port in ports: 
                 command = "cd /home/abacus/vsi_selfmanaged && cat osx_log{}.out | grep statistic".format(port)

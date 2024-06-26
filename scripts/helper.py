@@ -26,7 +26,7 @@ def execute_command_in_node(node,command,stack_obj):
         client.load_system_host_keys() 
         client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
         try:
-            client.connect(node, ssh_port, abacus_username, abacus_password)
+            client.connect(node, SSH_PORT, ABACUS_USERNAME, ABACUS_PASSWORD)
             stdin, stdout, stderr = client.exec_command(command)
             out = stdout.read().decode('utf-8').strip()
             errors = stderr.read().decode('utf-8')
@@ -55,7 +55,7 @@ def execute_configdb_query(node,query,stack_obj):
 
 def execute_point_prometheus_query(stack_obj,timestamp,query): 
     PROMETHEUS = stack_obj.prometheus_path
-    for metric in kube_metrics:
+    for metric in KUBE_METRICS:
         if metric in query:
             PROMETHEUS = stack_obj.kube_prometheus_path 
             stack_obj.log.info("pod level metric found.. using prometheous path : " , PROMETHEUS)
@@ -66,7 +66,7 @@ def execute_point_prometheus_query(stack_obj,timestamp,query):
     }
     stack_obj.log.info(f"Executing {query} at {stack_obj.monitoring_ip} at a single timestamp {timestamp}...")
     try:
-        response = requests.get(PROMETHEUS + prom_point_api_path, params=PARAMS)
+        response = requests.get(PROMETHEUS + PROM_POINT_API_PATH, params=PARAMS)
         if response.status_code != 200:
             raise RuntimeError(f"API request failed with status code {response.status_code}")
         result = response.json()['data']['result']
@@ -81,7 +81,7 @@ def execute_point_prometheus_query(stack_obj,timestamp,query):
 
 def execute_prometheus_query(stack_obj,query,preprocess=True,step_factor=None,for_charts=None):
     PROMETHEUS = stack_obj.prometheus_path
-    for metric in kube_metrics:
+    for metric in KUBE_METRICS:
         if metric in query:
             PROMETHEUS = stack_obj.kube_prometheus_path
             stack_obj.log.info("pod level metric found.. using prometheous path : " , PROMETHEUS)
@@ -107,7 +107,7 @@ def execute_prometheus_query(stack_obj,query,preprocess=True,step_factor=None,fo
     }
 
     try:
-        response = requests.get(PROMETHEUS + prom_api_path, params=PARAMS)
+        response = requests.get(PROMETHEUS + PROM_API_PATH, params=PARAMS)
         if response.status_code != 200:
             raise RuntimeError(f"API request failed with status code {response.status_code}")
         result = response.json()['data']['result']
@@ -143,7 +143,7 @@ def execute_prometheus_query(stack_obj,query,preprocess=True,step_factor=None,fo
 #             client.load_system_host_keys() 
 #             client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
 #             try:
-#                 client.connect(hostname, ssh_port, abacus_username, abacus_password)
+#                 client.connect(hostname, SSH_PORT, ABACUS_USERNAME, ABACUS_PASSWORD)
 #                 commands = {"ram" : "free -g | awk '/Mem:/ {print $2}'" , "cores":"lscpu | awk '/^CPU\(s\):/ {print $2}'"}
 #                 for label,command in commands.items():
 #                     stdin, stdout, stderr = client.exec_command(command)
@@ -246,7 +246,7 @@ def fetch_and_extract_csv(remote_csv_path,reports_node_ip,stack_obj):
     try:
         # Use SCP to copy the file from the remote host to the local machine
         with paramiko.Transport((reports_node_ip, 22)) as transport:
-            transport.connect(username=abacus_username, password=abacus_password)
+            transport.connect(username=ABACUS_USERNAME, password=ABACUS_PASSWORD)
             sftp = paramiko.SFTPClient.from_transport(transport)
             sftp.get(remote_csv_path, local_csv_path)
             stack_obj.log.info(f"Fetched csv file successfully: {remote_csv_path}")
@@ -273,7 +273,7 @@ def fetch_and_save_pdf(remote_pdf_path,reports_node_ip , local_pdf_path,stack_ob
     try:
         # Use SCP to copy the file from the remote host to the local machine
         with paramiko.Transport((reports_node_ip, 22)) as transport:
-            transport.connect(username=abacus_username, password=abacus_password)
+            transport.connect(username=ABACUS_USERNAME, password=ABACUS_PASSWORD)
             sftp = paramiko.SFTPClient.from_transport(transport)
             sftp.get(remote_pdf_path, local_pdf_path)
             stack_obj.log.info(f"Fetched PDF file successfully: {remote_pdf_path}")

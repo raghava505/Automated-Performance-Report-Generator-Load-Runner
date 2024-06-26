@@ -11,7 +11,7 @@ class kafka_topics:
         ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
         try:
             self.stack_obj.log.info(f"Executing kafka topics script in host {self.host}")
-            ssh.connect(self.host, ssh_port, abacus_username, abacus_password)
+            ssh.connect(self.host, SSH_PORT, ABACUS_USERNAME, ABACUS_PASSWORD)
             sftp = ssh.open_sftp()
             # remote_script_path = f'{self.remote_directory}/get_kafka_topics.py'
             remote_script_path="get_kafka_topics.py"

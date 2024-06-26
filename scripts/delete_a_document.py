@@ -12,7 +12,7 @@ document_id=input("Enter the document ID : ")
 decision = input("This will delete a document in the database. Are you sure you want to proceed? (y/n) ")
 
 if decision == "y":
-    client = pymongo.MongoClient(mongo_connection_string)
+    client = pymongo.MongoClient(MONGO_CONNECTION_STRING)
     db=client[database_name]
     collection = db[collection_name]
     document=collection.find_one({'_id': ObjectId(document_id)})
