@@ -168,8 +168,17 @@ if __name__ == "__main__":
                 presto_load_result_dict = fetch_and_extract_csv(benchto_load_csv_path,test_env_json_details['prestoload_simulator_ip'],stack_obj)
                 final_data_to_save.update({"Presto Load details":presto_load_result_dict})
             else:
-                stack_obj.log.warning(f"------------------------------ Skipping API load details because 'prestoload_simulator_ip' is not present in stack json file")
-
+                stack_obj.log.warning(f"------------------------------ Skipping presto load details because 'prestoload_simulator_ip' is not present in stack json file")
+            #-------------------------(OLD) API load--------------------------
+            if 'apiload_simulator_ip' in test_env_json_details:
+                stack_obj.log.info(f"------------------------------ Looking for api load (old way) csv files in {test_env_json_details['apiload_simulator_ip']}")
+                stack_starttime_string=str(stack).lower() + "-" + str(start_time_str_ist)
+                api_load_csv_path = os.path.join(api_loads_folder_path_temp , stack_starttime_string+".csv")
+                stack_obj.log.info(f"CSV file path for API/Jmeter load : {api_load_csv_path}")
+                api_load_result_dict = fetch_and_extract_csv(api_load_csv_path,test_env_json_details['apiload_simulator_ip'])
+                final_data_to_save.update({"API Load details":api_load_result_dict})
+            else:
+                stack_obj.log.warning(f"------------------------------ Skipping (old) API load details because 'apiload_simulator_ip' is not present in stack json file")
             #-------------------------Osquery Table Accuracies----------------------------
             if variables["load_type"] in ["Osquery","osquery_cloudquery_combined","all_loads_combined"] and variables["load_name"] != "ControlPlane":
                 assets_per_cust=int(load_cls.get_load_specific_details(variables['load_name'])["RuleEngine and ControlPlane Load Details"]['assets_per_cust'])
@@ -260,7 +269,7 @@ if __name__ == "__main__":
             resource_obj=resource_usages(stack_obj,include_nodetypes=load_cls.hostname_types)
             complete_resource_details=resource_obj.get_complete_result()
             final_data_to_save.update(complete_resource_details)
-            #------------------------------- API load report link--------------------------------------------------
+            #------------------------------- (NEW) API load report link--------------------------------------------------
             if apiload_remote_directory_name and 'apiload_simulator_ip' in test_env_json_details and apiload_remote_directory_name!="":
                 final_data_to_save.update({"Api load report link":os.path.join(f"http://{test_env_json_details['apiload_simulator_ip']}:{api_report_port}",apiload_remote_directory_name,f"index.html")})
             #------------------------------- observations --------------------------------------------------
