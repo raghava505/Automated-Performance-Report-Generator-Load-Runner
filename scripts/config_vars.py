@@ -17,6 +17,7 @@ abacus_password = 'abacus'
 mongo_connection_string = "mongodb://localhost:27017"
 # api_loads_folder_path = "/home/abacus/apache-jmeter-5.6.2/bin/reports/"
 presto_loads_folder_path = "/home/abacus/benchto_reports/"
+api_loads_folder_path_temp = "/home/abacus/apache-jmeter-5.6.2/bin/reports/"
 
 #other types
 kube_metrics = ["container_memory_working_set_bytes","container_cpu_usage_seconds_total"]
