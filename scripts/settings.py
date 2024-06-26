@@ -15,8 +15,8 @@ class stack_configuration:
             stack_details = json.load(file)
             
         self.monitoring_ip=  stack_details["monitoring_node_ip"]
-        self.prometheus_path = f"http://{self.monitoring_ip}:{prometheus_port}"
-        self.kube_prometheus_path = f"http://{self.monitoring_ip}:{kube_prometheus_port}"
+        self.prometheus_path = f"http://{self.monitoring_ip}:{PROMETHEUS_PORT}"
+        self.kube_prometheus_path = f"http://{self.monitoring_ip}:{KUBE_PROMETHEUS_PORT}"
 
         self.execute_kafka_topics_script_in = stack_details["execute_kafka_topics_script_in"]      
         self.execute_trino_queries_in = stack_details["execute_trino_queries_in"]

@@ -76,7 +76,7 @@ def extract_ram_cores_storage_details(stack_obj):
         return node, results
 
     # Use ThreadPoolExecutor to run the commands in parallel
-    with concurrent.futures.ThreadPoolExecutor(max_workers=10) as executor:
+    with concurrent.futures.ThreadPoolExecutor(max_workers=20) as executor:
         future_to_node = {executor.submit(execute_commands_on_node, node): node for node in nodes}
         for future in concurrent.futures.as_completed(future_to_node):
             node, results = future.result()

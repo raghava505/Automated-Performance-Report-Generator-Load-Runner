@@ -8,7 +8,7 @@ class DB_OPERATIONS_TIME:
     def __init__(self,stack_obj):
         self.curr_ist_start_time=stack_obj.start_timestamp
         self.PROMETHEUS = stack_obj.prometheus_path
-        self.API_PATH = prom_point_api_path
+        self.API_PATH = PROM_POINT_API_PATH
 
                 
         self.query = "sort_desc(sum(curr_state_db_op_sec_bucket) by(le))"

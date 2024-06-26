@@ -11,7 +11,7 @@ class PG_STATS:
         self.curr_ist_end_time=stack_obj.end_timestamp
         self.load_duration=stack_obj.hours
         self.PROMETHEUS = stack_obj.prometheus_path
-        self.API_PATH = prom_api_path
+        self.API_PATH = PROM_API_PATH
         self.stack_obj=stack_obj
         
     def get_data(self,db):
