@@ -41,7 +41,7 @@ class stack_configuration:
         current_time = datetime.now()
         formatted_time = current_time.strftime("%Y-%m-%d %H:%M:%S")
         try:
-            log_file_name = f'{variables["load_name"]}_{variables["build"]}_{stack_details["stack"]}_{formatted_time}.log'
+            log_file_name = f'{variables["load_type"]}_{variables["load_name"]}_{variables["build"]}_{stack_details["stack"]}_{formatted_time}.log'
         except Exception as e:
             log_file_name = f"{formatted_time}.log"
         os.makedirs(BASE_LOGS_PATH,exist_ok=True)
