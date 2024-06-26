@@ -175,7 +175,7 @@ if __name__ == "__main__":
                 stack_starttime_string=str(stack).lower() + "-" + str(start_time_str_ist)
                 api_load_csv_path = os.path.join(api_loads_folder_path_temp , stack_starttime_string+".csv")
                 stack_obj.log.info(f"CSV file path for API/Jmeter load : {api_load_csv_path}")
-                api_load_result_dict = fetch_and_extract_csv(api_load_csv_path,test_env_json_details['apiload_simulator_ip'])
+                api_load_result_dict = fetch_and_extract_csv(api_load_csv_path,test_env_json_details['apiload_simulator_ip'],stack_obj)
                 final_data_to_save.update({"API Load details":api_load_result_dict})
             else:
                 stack_obj.log.warning(f"------------------------------ Skipping (old) API load details because 'apiload_simulator_ip' is not present in stack json file")
