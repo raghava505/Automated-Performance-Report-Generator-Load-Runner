@@ -133,4 +133,19 @@ class CompactionStatus:
 # if __name__ == "__main__":
 #     obj = CompactionStatus()
 #     result = obj.execute_query()
-
+            
+if __name__ == "__main__":
+    from settings import stack_configuration
+    import json
+    variables = {
+        "start_time_str_ist":"2024-06-26 00:25",
+        "load_duration_in_hrs":14,
+        "test_env_file_name":'s1_nodes.json'
+    }
+    stack_obj = stack_configuration(variables)    
+    stack_obj.log.info("******* Fetching Compaction Status details...")
+    with open(stack_obj.test_env_file_path , 'r') as file:
+        test_env_json_details = json.load(file)
+    compaction = CompactionStatus(stack_obj=stack_obj,elastic_ip=test_env_json_details['elastic'])
+    compaction_status = compaction.execute_query()
+    print(compaction_status)
