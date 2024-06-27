@@ -8,7 +8,7 @@ cpu_tag = "CPU"
 memory_unit = "GB"
 cpu_unit = "cores"
 threshold = 0.03
-class MC_comparisions:
+class mem_cpu_usage_class:
     def __init__(self,stack_obj,include_nodetypes):
         self.curr_ist_start_time=stack_obj.start_timestamp
         self.curr_ist_end_time=stack_obj.end_timestamp

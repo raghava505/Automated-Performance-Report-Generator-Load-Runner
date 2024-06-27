@@ -3,7 +3,7 @@ import math
 import socket
 from concurrent.futures import ThreadPoolExecutor
 
-class EVE_COUNTS:
+class events_count_class:
     def __init__(self, variables,stack_obj):
         self.stack_obj=stack_obj
         self.simulators1 = ["s4simhost1a","s4simhost1c", "s4simhost1d", "s4simhost2a","s4simhost2b","s4simhost2c", "s4simhost2d", "s4simhost3a","s4simhost3b", "s4simhost3c"]

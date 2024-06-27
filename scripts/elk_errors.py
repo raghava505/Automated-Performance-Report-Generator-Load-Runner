@@ -3,7 +3,7 @@ import datetime
 from datetime import datetime
 import concurrent.futures
 
-class Elk_erros:
+class elk_errors_class:
     def __init__(self,stack_obj,elastic_ip):
         self.stack_obj = stack_obj
         try:

@@ -1,7 +1,7 @@
 import pymongo
 # from gridfs import GridFS
 from bson.objectid import ObjectId
-import shutil,os
+import shutil
 from config_vars import *
 
 print("Enter the details to delete a docoment : ")

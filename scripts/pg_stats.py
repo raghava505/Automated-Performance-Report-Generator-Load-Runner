@@ -5,7 +5,7 @@ databases = ["configdb","statedb"]
 
 
 
-class PG_STATS:
+class pg_stats_class:
     def __init__(self,stack_obj):
         self.curr_ist_start_time=stack_obj.start_timestamp
         self.curr_ist_end_time=stack_obj.end_timestamp
@@ -83,5 +83,5 @@ class PG_STATS:
         return table_dict
 
 # from settings import stack_configuration
-# cls  = PG_STATS(1702926000,1702947600,6,stack_configuration("longevity_nodes.json"))
+# cls  = pg_stats_class(1702926000,1702947600,6,stack_configuration("longevity_nodes.json"))
 # print("FINAL O/P : " ,cls.process_output())
