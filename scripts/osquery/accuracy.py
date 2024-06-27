@@ -170,10 +170,11 @@ class osq_accuracy:
                     for table_details in lines["data"]:
                         #print(table_details)
                         if table_details['name'] == 'process_events':
-                            index1 = table_details['columns']['auid']
-                            index2 = table_details['columns']['uid']
+                            # index1 = table_details['columns']['auid']
+                            # index2 = table_details['columns']['uid']
                             #rows = table_details['rows']
-                            if index1 == '0' or index2 == '0':
+                            # if index1 == '0' or index2 == '0':
+                            if ("auid" in table_details['columns'] and table_details['columns']['auid'] == '0') or ( 'uid' in table_details['columns'] and table_details['columns']['uid'] == '0'):
                                 process_events['process_events-builder-added'] += increment
                             if '/bin/sh' in table_details['columns']['path']:
                                 if '/bin/mysql' in table_details['columns']['ancestor_list']:
@@ -190,7 +191,8 @@ class osq_accuracy:
                                 process_events['process_events_4-builder-added'] += increment
                             if table_details['columns']['exe_name'] == 'wmic.exe':
                                 process_events['process_events_7-builder-added'] += increment
-                            if table_details['columns']['version_info'] == "Net Command":
+                            # if table_details['columns']['version_info'] == "Net Command":
+                            if "version_info" in table_details['columns'] and table_details['columns']['version_info'] == "Net Command":
                                 process_events['process_events_8-builder-added'] += increment
                             if 'rmmod' in table_details['columns']['cmdline']:
                                 process_events['process_events_9-builder-added'] += increment
