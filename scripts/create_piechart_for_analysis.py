@@ -275,9 +275,9 @@ def analysis_main(mem_main_dict,mem_prev_dict,cpu_main_dict,cpu_prev_dict):
     except Exception as e:
         print(f"error occured while generating piecharts/dataframe for CPU usages : {e}")
 
-        # memory_combined_df.to_csv("memory_combined_df.csv")  
-        # cpu_combined_df.to_csv("cpu_combined_df.csv")    
-        app_cont_pod_order = ["application","container","pod"]
+    # memory_combined_df.to_csv("memory_combined_df.csv")  
+    # cpu_combined_df.to_csv("cpu_combined_df.csv")    
+    app_cont_pod_order = ["application","container","pod"]
     try:
         stitched_memory={}
         for nodetype,images in memory_images.items():
