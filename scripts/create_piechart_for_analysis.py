@@ -266,45 +266,60 @@ def generate_piecharts(mem_or_cpu,main_dict,prev_dict):
     return images,total_combined_df
 
 
-def analysis_main(mem_main_dict,mem_prev_dict,cpu_main_dict,cpu_prev_dict,load_details_text=""):
-    memory_images,memory_combined_df = generate_piecharts("memory",mem_main_dict,mem_prev_dict)
-    cpu_images,cpu_combined_df = generate_piecharts("cpu",cpu_main_dict,cpu_prev_dict)
-    # memory_combined_df.to_csv("memory_combined_df.csv")  
-    # cpu_combined_df.to_csv("cpu_combined_df.csv")    
-    app_cont_pod_order = ["application","container","pod"]
+def analysis_main(mem_main_dict,mem_prev_dict,cpu_main_dict,cpu_prev_dict):
+    try:memory_images,memory_combined_df = generate_piecharts("memory",mem_main_dict,mem_prev_dict)
+    except Exception as e:
+        print(f"error occured while generating piecharts/dataframe for memory usages : {e}")
 
-    stitched_memory={}
-    for nodetype,images in memory_images.items():
-        images_to_stitch = []
-        for app_cont_pod in app_cont_pod_order:
-            try:
-                images_to_stitch.append(images[app_cont_pod])
-            except:
-                images_to_stitch.append(get_piechart(nodetype,pd.DataFrame({}),"memory",app_cont_pod)[0])
-        stitched_image = stitch_images_vertically(images_to_stitch,nodetype,"Memory")
-        stitched_memory[nodetype]=stitched_image
-        # path = f"/Users/masabathulararao/Documents/Loadtest/save-report-data-to-mongo/scripts/csv/{nodetype}_memory.png"
-        # stitched_image.save(path)
+    try:cpu_images,cpu_combined_df = generate_piecharts("cpu",cpu_main_dict,cpu_prev_dict)
+    except Exception as e:
+        print(f"error occured while generating piecharts/dataframe for CPU usages : {e}")
 
-    stitched_cpu={}
-    for nodetype,images in cpu_images.items():
-        images_to_stitch = []
-        for app_cont_pod in app_cont_pod_order:
-            try:
-                images_to_stitch.append(images[app_cont_pod])
-            except:
-                images_to_stitch.append(get_piechart(nodetype,pd.DataFrame({}),"cpu",app_cont_pod)[0])
-        stitched_image = stitch_images_vertically(images_to_stitch,nodetype,"CPU")
-        stitched_cpu[nodetype]=stitched_image
-        # path = f"/Users/masabathulararao/Documents/Loadtest/save-report-data-to-mongo/scripts/csv/{nodetype}_cpu.png"
-        # stitched_image.save(path)
+        # memory_combined_df.to_csv("memory_combined_df.csv")  
+        # cpu_combined_df.to_csv("cpu_combined_df.csv")    
+        app_cont_pod_order = ["application","container","pod"]
+    try:
+        stitched_memory={}
+        for nodetype,images in memory_images.items():
+            images_to_stitch = []
+            for app_cont_pod in app_cont_pod_order:
+                try:
+                    images_to_stitch.append(images[app_cont_pod])
+                except:
+                    images_to_stitch.append(get_piechart(nodetype,pd.DataFrame({}),"memory",app_cont_pod)[0])
+            stitched_image = stitch_images_vertically(images_to_stitch,nodetype,"Memory")
+            stitched_memory[nodetype]=stitched_image
+            # path = f"/Users/masabathulararao/Documents/Loadtest/save-report-data-to-mongo/scripts/csv/{nodetype}_memory.png"
+            # stitched_image.save(path)
+    except Exception as e:
+        print(f"error occured while vertical stitching memory piecharts : {e}")
 
-    final_images={}
-    for node_type in stitched_memory.keys():
-        print(node_type)
-        vertical_stitched_image = stitch_images_horizontally([stitched_memory[node_type] , stitched_cpu[node_type]])
-        # path = f"/Users/masabathulararao/Documents/Loadtest/save-report-data-to-mongo/scripts/csv/{node_type}.png"
-        # vertical_stitched_image.save(path)
-        final_images[node_type] =vertical_stitched_image
-        # vertical_stitched_image.show()
-    return final_images,memory_combined_df,cpu_combined_df
+    try:
+        stitched_cpu={}
+        for nodetype,images in cpu_images.items():
+            images_to_stitch = []
+            for app_cont_pod in app_cont_pod_order:
+                try:
+                    images_to_stitch.append(images[app_cont_pod])
+                except:
+                    images_to_stitch.append(get_piechart(nodetype,pd.DataFrame({}),"cpu",app_cont_pod)[0])
+            stitched_image = stitch_images_vertically(images_to_stitch,nodetype,"CPU")
+            stitched_cpu[nodetype]=stitched_image
+            # path = f"/Users/masabathulararao/Documents/Loadtest/save-report-data-to-mongo/scripts/csv/{nodetype}_cpu.png"
+            # stitched_image.save(path)
+    except Exception as e:
+        print(f"error occured while vertical stitching memory piecharts : {e}")
+
+    try:
+        final_images={}
+        for node_type in stitched_memory.keys():
+            print(node_type)
+            vertical_stitched_image = stitch_images_horizontally([stitched_memory[node_type] , stitched_cpu[node_type]])
+            # path = f"/Users/masabathulararao/Documents/Loadtest/save-report-data-to-mongo/scripts/csv/{node_type}.png"
+            # vertical_stitched_image.save(path)
+            final_images[node_type] =vertical_stitched_image
+            # vertical_stitched_image.show()
+        return final_images,memory_combined_df,cpu_combined_df
+    except Exception as e:
+        print(f"error occured while horizotal stitching both memory and CPU images : {e}")
+        return None, None, None
