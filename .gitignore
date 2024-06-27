@@ -14,7 +14,6 @@ scripts/osquery/testinputfiles/
 logs/
 scripts/logs/
 scripts/api_load.csv
-scripts/use_osquery_accuracy.py
 scripts/pymongo_testing.py
 scripts/realtimequery_tests/__pycache__
 scripts/realtimequery_tests/logs
