@@ -15,7 +15,7 @@
     "execute_kafka_topics_script_in":"long-c1pn1",
     "execute_trino_queries_in":"long-c1pn2",
 
-    "elastic": "192.168.148.52",
+    "elastic_node_ip": "192.168.148.52",
     "pgbadger_reports_mount": "data",
 
     "apiload_simulator_ip":"192.168.145.94",

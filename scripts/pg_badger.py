@@ -13,14 +13,14 @@ import os
 import pytz
 from helper import save_html_page
 from scrape_pgbadger_tables import scrape_func
-from config_vars import PGBADGER_REPORT_PORT,PERF_PROD_DASHBOARD
+from config_vars import PGBADGER_REPORT_PORT,PERF_PROD_DASHBOARD, PGBADGER_PORT
 
 current_time = datetime.now()
 current_time = current_time.strftime("%Y-%m-%d_%H:%M:%S")
 print("Formatted current time:", current_time)
 
 def get_links(elastic_url,start_time_ist_str, end_time_ist_str,pgbadger_reports_mount,check,stack_obj):
-    url = f"http://{elastic_url}:5602/ondemand"
+    url = f"http://{elastic_url}:{PGBADGER_PORT}/ondemand"
 
     resp = requests.get(url, verify=False)
     return_links={}
@@ -44,7 +44,7 @@ def get_links(elastic_url,start_time_ist_str, end_time_ist_str,pgbadger_reports_
 
             if response.status_code == 200:
                 sleep(10)
-                report_link=f'http://{elastic_url}:5602/reports/view?file=/{pgbadger_reports_mount}/ondemand_reports/{report_name}/postgres.html'
+                report_link=f'http://{elastic_url}:{PGBADGER_PORT}/reports/view?file=/{pgbadger_reports_mount}/ondemand_reports/{report_name}/postgres.html'
                 stack_obj.log.info(report_link)   
                 return_links[db]=report_link
             else:

@@ -2,6 +2,7 @@ from elasticsearch import Elasticsearch
 import datetime
 from datetime import datetime
 import concurrent.futures
+from config_vars import ELASTICSEARCH_PORT
 
 class elk_errors_class:
     def __init__(self,stack_obj,elastic_ip):
@@ -12,7 +13,7 @@ class elk_errors_class:
                              "postgresql", "cloudqueryConsumer", "ruleenginecc", "cloudcompliancemanager",
                              "cloudGraphSynchronizer", "dbsyncscheduler"]
 
-            self.elasticsearch_host = f"http://{elastic_ip}:9200"
+            self.elasticsearch_host = f"http://{elastic_ip}:{ELASTICSEARCH_PORT}"
             self.elastic_client = Elasticsearch(hosts=[self.elasticsearch_host], timeout=240)
 
             dt_object = datetime.utcfromtimestamp(stack_obj.start_timestamp)
