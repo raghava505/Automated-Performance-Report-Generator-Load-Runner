@@ -195,11 +195,11 @@ if __name__ == "__main__":
                 Osquery_table_accuracies = osq_accuracy_obj.table_accuracy()
                 stack_obj.log.info(f"Osquery_table_accuracies : {json.dumps(Osquery_table_accuracies,indent=4)}")
                 if Osquery_table_accuracies:final_data_to_save.update({"Osquery Table Accuracies":Osquery_table_accuracies})
-                if input_file != "inputFile6tab_12rec.log":
-                    stack_obj.log.info("******* Calculating Events/Alerts accuracies for Osquery Load ...")
-                    Osquery_event_accuracies = osq_accuracy_obj.events_accuracy(alert_rules_triggered_per_cust,event_rules_triggered_per_cust)
-                    stack_obj.log.info(f"Osquery_event_accuracies : {json.dumps(Osquery_event_accuracies,indent=4)}")
-                    if Osquery_event_accuracies:final_data_to_save.update({"Osquery Event Accuracies":Osquery_event_accuracies})
+                # if input_file != "inputFile6tab_12rec.log":
+                stack_obj.log.info("******* Calculating Events/Alerts accuracies for Osquery Load ...")
+                Osquery_event_accuracies = osq_accuracy_obj.events_accuracy(alert_rules_triggered_per_cust,event_rules_triggered_per_cust)
+                stack_obj.log.info(f"Osquery_event_accuracies : {json.dumps(Osquery_event_accuracies,indent=4)}")
+                if Osquery_event_accuracies:final_data_to_save.update({"Osquery Event Accuracies":Osquery_event_accuracies})
             #-------------------------Kubequery Accuracies----------------------------
             if variables["load_name"] in ["KubeQuery_SingleCustomer","KubeQuery_and_SelfManaged_Combined"] or variables["load_type"] in ["all_loads_combined"]:
                 stack_obj.log.info("******* Calculating accuracies for KubeQuery Load ...")
