@@ -15,7 +15,7 @@
     "execute_kafka_topics_script_in":"s13pn1",
     "execute_trino_queries_in":"s13pn2",
 
-    "elastic": "192.168.140.73",
+    "elastic_node_ip": "192.168.140.73",
     "pgbadger_reports_mount":"data",
     
     "kubesim_nodes": [

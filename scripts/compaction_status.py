@@ -1,11 +1,12 @@
 from elasticsearch import Elasticsearch
 from datetime import datetime
+from config_vars import ELASTICSEARCH_PORT
 
 class CompactionStatus:
     def __init__(self, stack_obj, elastic_ip):
         self.stack_obj = stack_obj
         try:
-            self.elasticsearch_host = f"http://{elastic_ip}:9200"
+            self.elasticsearch_host = f"http://{elastic_ip}:{ELASTICSEARCH_PORT}"
             self.elastic_client = Elasticsearch(hosts=[self.elasticsearch_host], request_timeout=240)
 
             dt_object = datetime.utcfromtimestamp(stack_obj.start_timestamp)
@@ -142,6 +143,6 @@ if __name__ == "__main__":
     stack_obj.log.info("******* Fetching Compaction Status details...")
     with open(stack_obj.test_env_file_path, 'r') as file:
         test_env_json_details = json.load(file)
-    compaction = CompactionStatus(stack_obj=stack_obj, elastic_ip=test_env_json_details['elastic'])
+    compaction = CompactionStatus(stack_obj=stack_obj, elastic_ip=test_env_json_details['elastic_node_ip'])
     compaction_status = compaction.execute_query()
     print(compaction_status)

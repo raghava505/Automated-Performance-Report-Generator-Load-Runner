@@ -73,9 +73,9 @@ if __name__ == "__main__":
                 run=max_run+1
                 stack_obj.log.warning(f"you have already saved the details for this load in this sprint, setting run value to {run}")
 
-            if 'elastic' in test_env_json_details and 'pgbadger_reports_mount' in test_env_json_details:
+            if 'elastic_node_ip' in test_env_json_details and 'pgbadger_reports_mount' in test_env_json_details:
                 stack_obj.log.info("\n\n****** \nChecking health of PGbadger ... \n\n")
-                status,link=get_and_save_pgb_html(stack_obj,test_env_json_details['elastic'],"curr_pgbad_html_path","pgbadger_tail_path",test_env_json_details['pgbadger_reports_mount'],check=True)
+                status,link=get_and_save_pgb_html(stack_obj,test_env_json_details['elastic_node_ip'],"curr_pgbad_html_path","pgbadger_tail_path",test_env_json_details['pgbadger_reports_mount'],check=True)
                 if not status:
                     stack_obj.log.error("PGBadger seems to be not working in your stack. Please try to generate a pgbadger report manually to check if working fine.")
                     stack_obj.log.info(f"Here is the sample report generated through automation just now : {link}")
@@ -241,16 +241,16 @@ if __name__ == "__main__":
                 calc = DB_OPERATIONS_TIME(stack_obj=stack_obj)
                 db_op=calc.db_operations()
                 if db_op:final_data_to_save.update({"Cloudquery Db Operations Processing Time":db_op})
-            #--------------------------------Elk Erros------------------------------------------------
-            if "elastic" in test_env_json_details:
+            #--------------------------------Elk Errors------------------------------------------------
+            if "elastic_node_ip" in test_env_json_details:
                 stack_obj.log.info("******* Fetching Elk Errors ...")
-                elk = elk_errors_class(stack_obj=stack_obj,elastic_ip=test_env_json_details['elastic'])
+                elk = elk_errors_class(stack_obj=stack_obj,elastic_ip=test_env_json_details['elastic_node_ip'])
                 elk_errors = elk.fetch_errors()
                 if elk_errors:final_data_to_save.update({"ELK Errors":elk_errors})
             #-------------------------Compaction Status----------------------------
-            if "elastic" in test_env_json_details:
+            if "elastic_node_ip" in test_env_json_details:
                 stack_obj.log.info("******* Fetching Compaction Status details...")
-                compaction = CompactionStatus(stack_obj=stack_obj,elastic_ip=test_env_json_details['elastic'])
+                compaction = CompactionStatus(stack_obj=stack_obj,elastic_ip=test_env_json_details['elastic_node_ip'])
                 compaction_status = compaction.execute_query()
                 if compaction_status:final_data_to_save.update({"Compaction Status":compaction_status})
             #-------------------------------PG Stats Calculations -------------------------------------
@@ -311,7 +311,7 @@ if __name__ == "__main__":
                 #     category_name="PG Badger Charts"
                 #     pg_badger_images_path = os.path.join(graphs_path,category_name)
                 #     os.makedirs(pg_badger_images_path,exist_ok=True)
-                #     pg_badger_result = return_pgbadger_results(stack_obj.start_time_UTC,stack_obj.end_time_UTC,test_env_json_details['elastic'],pg_badger_images_path)
+                #     pg_badger_result = return_pgbadger_results(stack_obj.start_time_UTC,stack_obj.end_time_UTC,test_env_json_details['elastic_node_ip'],pg_badger_images_path)
                 #     collection.update_one({"_id": ObjectId(inserted_id)}, {"$set": {f"charts.{category_name}": pg_badger_result}})
                 # except Exception as e:
                 #     print(f"ERROR occured while processing pg badger details : {e}")
@@ -322,7 +322,7 @@ if __name__ == "__main__":
                     curr_pgbad_html_path=f"{BASE_HTMLS_PATH}/{pgbadger_tail_path}"
                     stack_obj.log.info(f'Saving the html page to {curr_pgbad_html_path}')
                     os.makedirs(curr_pgbad_html_path,exist_ok=True)
-                    pgbadger_links,extracted_tables=get_and_save_pgb_html(stack_obj,test_env_json_details['elastic'],curr_pgbad_html_path,pgbadger_tail_path,test_env_json_details['pgbadger_reports_mount'])
+                    pgbadger_links,extracted_tables=get_and_save_pgb_html(stack_obj,test_env_json_details['elastic_node_ip'],curr_pgbad_html_path,pgbadger_tail_path,test_env_json_details['pgbadger_reports_mount'])
                     collection.update_one({"_id": ObjectId(inserted_id)}, {"$set": {f"Pgbadger downloaded report links": pgbadger_links}})
                     if extracted_tables!={}:
                         stack_obj.log.info("Empty extracted tables dictionary found !")
