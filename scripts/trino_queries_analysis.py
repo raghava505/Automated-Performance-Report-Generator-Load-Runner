@@ -8,7 +8,7 @@ pd.set_option('display.expand_frame_repr', False)
 #configdb_command = "PGPASSWORD=pguptycs psql -h {} -U uptycs -p 5432 -d configdb -c \"select read_password from customer_database where database_name='upt_{}';\"".format(remote_host,self.stack_details['domain'])
 from time_taken_by_all_queries import get_full_query,time_ranges
 
-class TRINO_ANALYSE:
+class trino_queries_class:
     def __init__(self,stack_obj):
         self.start_utc_str=stack_obj.start_time_str_utc
         self.end_utc_str=stack_obj.end_time_str_utc
@@ -475,7 +475,7 @@ if __name__=='__main__':
     }
     stack_obj = stack_configuration(variables)
     
-    calc = TRINO_ANALYSE(stack_obj)
+    calc = trino_queries_class(stack_obj)
     trino_queries = calc.fetch_trino_results()
     import pandas as pd
     from pymongo import MongoClient

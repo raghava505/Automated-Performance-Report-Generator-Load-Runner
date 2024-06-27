@@ -29,7 +29,7 @@ def get_exclude_filter(exclude_nodetypes,stack_obj):
     return exclude_filter
 
 
-class resource_usages:
+class complete_resource_usages:
     def __init__(self,stack_obj,include_nodetypes=["process","data","pg","airflow","redis","ep","memgraph","cloudquery"]):
         self.start_timestamp=stack_obj.start_timestamp
         self.end_timestamp=stack_obj.end_timestamp
@@ -473,7 +473,7 @@ if __name__=='__main__':
     }
     stack_obj = stack_configuration(variables)
 
-    active_obj = resource_usages(stack_obj)
+    active_obj = complete_resource_usages(stack_obj)
 
     # total_result_for_querying = active_obj.collect_total_usages(for_report=False)
     total_result_for_report = active_obj.collect_total_usages(for_report=True)

@@ -2,32 +2,32 @@ import sys
 import time
 import pymongo
 import json
-from memory_and_cpu_usages import MC_comparisions
-from add_kafka_topics import kafka_topics
-from disk_space import DISK
-from input import create_input_form
-from capture_charts_data import Charts
 from gridfs import GridFS
-from elk_errors import Elk_erros
-from cloudquery.accuracy import ACCURACY
-from compaction_status import CompactionStatus
+from bson import ObjectId
+
+from config_vars import *
+from input import create_input_form
+from extract_stack_details import extract_ram_cores_storage_details
+from load_params import Load_Params
+from add_kafka_topics import kafka_topics
+from disk_space import diskspace_usage_class
+from trino_queries_analysis import trino_queries_class
+from active_conn_by_apps import num_active_conn_class
 from osquery.accuracy import osq_accuracy
 from kubequery.kube_accuracy import Kube_Accuracy
 from kubequery.selfmanaged_accuracy import SelfManaged_Accuracy
-from pg_stats import PG_STATS
+from cloudquery.accuracy import cloud_accuracy
+from pg_stats import pg_stats_class
 from cloudquery.db_operations_time import DB_OPERATIONS_TIME
-from cloudquery.events_count import EVE_COUNTS
+from cloudquery.events_count import events_count_class
 from cloudquery.sts_records import STS_RECORDS
-import os
+from elk_errors import elk_errors_class
+from compaction_status import CompactionStatus
+from memory_and_cpu_usages import mem_cpu_usage_class
+from extract_and_preprocess_resource_utilizations import complete_resource_usages
+from capture_charts_data import Charts
 from create_chart import create_images_and_save
-from trino_queries_analysis import TRINO_ANALYSE
-from active_conn_by_apps import Active_conn
-from bson import ObjectId
 from pg_badger import return_pgbadger_results,get_and_save_pgb_html
-from extract_and_preprocess_resource_utilizations import resource_usages
-from config_vars import *
-from load_params import Load_Params
-from extract_stack_details import extract_ram_cores_storage_details
 from helper import fetch_and_save_pdf,fetch_and_extract_csv
 
 if __name__ == "__main__":
@@ -140,7 +140,7 @@ if __name__ == "__main__":
             #-------------------------disk space--------------------------
             if variables["load_name"] != "ControlPlane":
                 stack_obj.log.info("******* Calculating disk space usages ...")
-                calc = DISK(stack_obj=stack_obj)
+                calc = diskspace_usage_class(stack_obj=stack_obj)
                 disk_space_usage_dict=calc.make_calculations()
                 if disk_space_usage_dict:final_data_to_save.update({"disk_space_usages":disk_space_usage_dict})
             #--------------------------------- add kafka topics ---------------------------------------
@@ -150,12 +150,12 @@ if __name__ == "__main__":
             if kafka_topics_list:final_data_to_save.update({"kafka_topics":kafka_topics_list})
             #---------------No.of Active connections by application---------------
             stack_obj.log.info("******* Fetching active connection details ...")
-            active_conn_obj = Active_conn(stack_obj=stack_obj)
+            active_conn_obj = num_active_conn_class(stack_obj=stack_obj)
             active_conn_results = active_conn_obj.get_avg_active_conn()
             if active_conn_results:final_data_to_save.update({"Number of active connections group by application on master":active_conn_results})
             #-------------------------Trino Queries--------------------------
             stack_obj.log.info("******* Performing trino queries analysis ...")
-            trino_obj = TRINO_ANALYSE(stack_obj=stack_obj)
+            trino_obj = trino_queries_class(stack_obj=stack_obj)
             trino_queries_analyse_results = trino_obj.fetch_trino_results()
             if trino_queries_analyse_results:final_data_to_save.update({"Trino Queries Analysis":trino_queries_analyse_results})
             #-------------------------Presto LOAD--------------------------
@@ -191,34 +191,34 @@ if __name__ == "__main__":
                 stack_obj.log.info(f"Assets per customer value : {assets_per_cust}")
                 stack_obj.log.info(f"Input file path : {input_file_path}")
                 stack_obj.log.info(f"stack customers file path : {api_path}")
-                accuracy_obj= osq_accuracy(stack_obj,api_path=api_path,domain=domain,assets_per_cust=assets_per_cust,ext=extension,trans=True,input_file=input_file_path)
-                Osquery_table_accuracies = accuracy_obj.table_accuracy()
+                osq_accuracy_obj= osq_accuracy(stack_obj,api_path=api_path,domain=domain,assets_per_cust=assets_per_cust,ext=extension,trans=True,input_file=input_file_path)
+                Osquery_table_accuracies = osq_accuracy_obj.table_accuracy()
                 stack_obj.log.info(f"Osquery_table_accuracies : {json.dumps(Osquery_table_accuracies,indent=4)}")
                 if Osquery_table_accuracies:final_data_to_save.update({"Osquery Table Accuracies":Osquery_table_accuracies})
                 if input_file != "inputFile6tab_12rec.log":
                     stack_obj.log.info("******* Calculating Events/Alerts accuracies for Osquery Load ...")
-                    Osquery_event_accuracies = accuracy_obj.events_accuracy(alert_rules_triggered_per_cust,event_rules_triggered_per_cust)
+                    Osquery_event_accuracies = osq_accuracy_obj.events_accuracy(alert_rules_triggered_per_cust,event_rules_triggered_per_cust)
                     stack_obj.log.info(f"Osquery_event_accuracies : {json.dumps(Osquery_event_accuracies,indent=4)}")
                     if Osquery_event_accuracies:final_data_to_save.update({"Osquery Event Accuracies":Osquery_event_accuracies})
             #-------------------------Kubequery Accuracies----------------------------
             if variables["load_name"] in ["KubeQuery_SingleCustomer","KubeQuery_and_SelfManaged_Combined"] or variables["load_type"] in ["all_loads_combined"]:
                 stack_obj.log.info("******* Calculating accuracies for KubeQuery Load ...")
-                accuracy = Kube_Accuracy(stack_obj=stack_obj)
-                kubequery_accuracies = accuracy.accuracy_kubernetes()
+                kube_accuracy_obj = Kube_Accuracy(stack_obj=stack_obj)
+                kubequery_accuracies = kube_accuracy_obj.accuracy_kubernetes()
                 stack_obj.log.info(json.dumps(kubequery_accuracies, indent=2))
                 if kubequery_accuracies:final_data_to_save.update({"Kubequery Table Accuracies":kubequery_accuracies})
             #-------------------------SelfManaged Accuracies----------------------------
             if variables["load_name"] in ["SelfManaged_SingleCustomer","KubeQuery_and_SelfManaged_Combined"] or variables["load_type"] in ["all_loads_combined"]:
                 stack_obj.log.info("******* Calculating accuracies for SelfManaged Load ...")
-                accuracy = SelfManaged_Accuracy(stack_obj=stack_obj)
-                selfmanaged_accuracies = accuracy.accuracy_selfmanaged()
+                selfmanaged_accuracy_obj = SelfManaged_Accuracy(stack_obj=stack_obj)
+                selfmanaged_accuracies = selfmanaged_accuracy_obj.accuracy_selfmanaged()
                 stack_obj.log.info(json.dumps(selfmanaged_accuracies, indent=2))
                 if selfmanaged_accuracies:final_data_to_save.update({"Selfmanaged Table Accuracies":selfmanaged_accuracies})
             #-------------------------Cloudquery Accuracies----------------------------
             if variables["load_type"] in ["CloudQuery","osquery_cloudquery_combined","all_loads_combined"]:
                 stack_obj.log.info("******* Calculating accuracies for cloudquery Load...")
-                accu= ACCURACY(stack_obj=stack_obj,variables=variables)
-                cloudquery_accuracies = accu.calculate_accuracy()
+                cloud_accuracy_obj= cloud_accuracy(stack_obj=stack_obj,variables=variables)
+                cloudquery_accuracies = cloud_accuracy_obj.calculate_accuracy()
                 if cloudquery_accuracies:final_data_to_save.update({"Cloudquery Table Accuracies":cloudquery_accuracies})
             #-------------------------Azure Load Accuracies----------------------------
             if variables["load_name"] == "Azure_MultiCustomer" or variables["load_type"] in ["all_loads_combined"]:
@@ -226,7 +226,7 @@ if __name__ == "__main__":
             #--------------------------------------Events Counts--------------------------------------
             if variables["load_type"] in ["CloudQuery","osquery_cloudquery_combined","all_loads_combined"]:
                 stack_obj.log.info("******* Calculating the counts of various events during the load ...")
-                calc = EVE_COUNTS(variables=variables,stack_obj=stack_obj)
+                calc = events_count_class(variables=variables,stack_obj=stack_obj)
                 evecount = calc.get_events_count()
                 if evecount:final_data_to_save.update({"Cloudquery Event Counts":evecount})
             #--------------------------------------STS Records-------------------------------------------
@@ -244,7 +244,7 @@ if __name__ == "__main__":
             #--------------------------------Elk Erros------------------------------------------------
             if "elastic" in test_env_json_details:
                 stack_obj.log.info("******* Fetching Elk Errors ...")
-                elk = Elk_erros(stack_obj=stack_obj,elastic_ip=test_env_json_details['elastic'])
+                elk = elk_errors_class(stack_obj=stack_obj,elastic_ip=test_env_json_details['elastic'])
                 elk_errors = elk.fetch_errors()
                 if elk_errors:final_data_to_save.update({"ELK Errors":elk_errors})
             #-------------------------Compaction Status----------------------------
@@ -255,18 +255,18 @@ if __name__ == "__main__":
                 if compaction_status:final_data_to_save.update({"Compaction Status":compaction_status})
             #-------------------------------PG Stats Calculations -------------------------------------
             stack_obj.log.info("******* Calculating Postgress Tables Details ...")
-            pgtable = PG_STATS(stack_obj=stack_obj)
+            pgtable = pg_stats_class(stack_obj=stack_obj)
             pg_stats = pgtable.process_output()
             if pg_stats:final_data_to_save.update({"PG Stats":pg_stats})
             #--------------------------------cpu and mem node-wise---------------------------------------
             stack_obj.log.info("******* Calculating resource utilizations ...")
-            comp = MC_comparisions(stack_obj=stack_obj,include_nodetypes=load_cls.hostname_types)
+            comp = mem_cpu_usage_class(stack_obj=stack_obj,include_nodetypes=load_cls.hostname_types)
             mem_cpu_usages_dict,overall_usage_dict=comp.make_comparisions(load_cls.common_app_names,load_cls.common_pod_names)
             if overall_usage_dict:final_data_to_save.update(overall_usage_dict)
             if mem_cpu_usages_dict:final_data_to_save.update(mem_cpu_usages_dict)
             #--------------------------------complete resource extraction---------------------------------------
             stack_obj.log.info("******* [NEW] Calculating complete resource utilizations ...")
-            resource_obj=resource_usages(stack_obj,include_nodetypes=load_cls.hostname_types)
+            resource_obj=complete_resource_usages(stack_obj,include_nodetypes=load_cls.hostname_types)
             complete_resource_details=resource_obj.get_complete_result()
             if complete_resource_details:final_data_to_save.update(complete_resource_details)
             #------------------------------- (NEW) API load report link--------------------------------------------------

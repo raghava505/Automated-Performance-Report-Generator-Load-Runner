@@ -18,7 +18,7 @@ import concurrent
 
 PROJECT_ROOT = Path(__file__).resolve().parent
 
-class ACCURACY:
+class cloud_accuracy:
 
     def __init__(self,stack_obj,variables):
         self.stack_obj=stack_obj

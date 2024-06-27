@@ -1,7 +1,7 @@
 from helper import execute_prometheus_query
 import pandas as pd
 import numpy as np
-class Active_conn:
+class num_active_conn_class:
     def __init__(self,stack_obj):
         self.stack_obj=stack_obj
     
@@ -59,6 +59,6 @@ class Active_conn:
 #     }
 #     stack_obj = stack_configuration(variables)
     
-#     active_obj = Active_conn(stack_obj)
+#     active_obj = num_active_conn_class(stack_obj)
 #     result = active_obj.get_avg_active_conn()
 #     print(result)
