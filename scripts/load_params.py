@@ -30,13 +30,13 @@ configurations = {
 }
 
 
-def execute_on_trino_middleware(key,target_node,query,conn_object,schema) -> dict:
+def execute_on_trino_middleware(key,target_node,query,stack_obj,domain) -> dict:
     res = {}
     res[key] = ""
     # print(f"Executing for {key}")
-    # command = f"sudo -u monkey TRINO_PASSWORD=prestossl /opt/uptycs/cloud/utilities/trino-cli --insecure --server https://localhost:5665 --schema upt_{schema} --user uptycs --catalog uptycs --password --truststore-password sslpassphrase --truststore-path /opt/uptycs/etc/presto/presto.jks --execute \"{query}\""
+    # command = f"sudo -u monkey TRINO_PASSWORD=prestossl /opt/uptycs/cloud/utilities/trino-cli --insecure --server https://localhost:5665 --domain upt_{domain} --user uptycs --catalog uptycs --password --truststore-password sslpassphrase --truststore-path /opt/uptycs/etc/presto/presto.jks --execute \"{query}\""
     try:
-        value = execute_trino_query(node=target_node,query=query,stack_obj=conn_object,schema=schema)
+        value = execute_trino_query(node=target_node,query=query,stack_obj=stack_obj,domain=domain)
         # print(value)
         
         value = value.replace('"', ' ')
@@ -45,28 +45,21 @@ def execute_on_trino_middleware(key,target_node,query,conn_object,schema) -> dic
         
         return res
     except Exception as err:
-        conn_object.log.error(f"ERR: load_params execute_on_trino_middleware {key} => {err}")
+        stack_obj.log.error(f"error occured in load_params execute_on_trino_middleware {key} => {err}")
         return res
 
 class Load_Params:
-    def __init__(self, connection_object) -> None:
-        start_time=connection_object.start_time_UTC
-        test_env_file_path=connection_object.test_env_file_path
-        with open(test_env_file_path,"r") as file:
-            data = json.load(file)
-        
-        self.schema = data["domain"]
-        if self.schema ==  "longevity":
-            self.schema = "longevity1"
-        del data
-        
-        self.conn_object = connection_object
-        self.start_time = start_time
+    def __init__(self, stack_obj,domain) -> None:
+        start_time=stack_obj.start_time_UTC
+
+        if domain ==  "longevity":
+            self.domain = "longevity1"
+        else:
+            self.domain = domain
+
+        self.stack_obj = stack_obj
         self.upt_day="".join(str(start_time.strftime("%Y-%m-%d")).split('-'))
-        self.conn_object.SSH_PORT = 22
-        self.conn_object.ABACUS_USERNAME = "abacus"
-        self.conn_object.ABACUS_PASSWORD = "abacus"
-        self.target_node = self.conn_object.execute_trino_queries_in
+        self.target_node = self.stack_obj.execute_trino_queries_in
         
         
     @measure_time
@@ -89,16 +82,16 @@ class Load_Params:
             if "KubeQuery" in load_name:
                 for key, value in configurations["k8s_params_upt"].items():
                     query = f"select count(*) from {value.table_name} where {value.column} like '{value.match_pattern}';"
-                    futures.append(executor.submit(execute_on_trino_middleware,key,self.target_node,query,self.conn_object,self.schema))
+                    futures.append(executor.submit(execute_on_trino_middleware,key,self.target_node,query,self.stack_obj,self.domain))
             
                 for key, value in configurations["k8s_params"].items():
                     query = f"select count(*) from {value.table_name} where upt_day>={self.upt_day} and {value.condition};"
-                    futures.append(executor.submit(execute_on_trino_middleware,key,self.target_node,query,self.conn_object,self.schema))
+                    futures.append(executor.submit(execute_on_trino_middleware,key,self.target_node,query,self.stack_obj,self.domain))
                     
             if "SelfManaged" in load_name:
                 for key, value in configurations["sm_params_upt"].items():
                     query = f"select count(*) from {value.table_name}  where {value.column} like '{value.match_pattern}';"
-                    futures.append(executor.submit(execute_on_trino_middleware,key,self.target_node,query,self.conn_object,self.schema))
+                    futures.append(executor.submit(execute_on_trino_middleware,key,self.target_node,query,self.stack_obj,self.domain))
             
             for future in cf.as_completed(futures):
                 result = future.result()
