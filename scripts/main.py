@@ -110,7 +110,7 @@ if __name__ == "__main__":
 
             # get necessary load parameters
             if variables["load_name"] in ["KubeQuery_SingleCustomer","SelfManaged_SingleCustomer","KubeQuery_and_SelfManaged_Combined"] or variables["load_type"] in ["all_loads_combined"]:
-                load_params = Load_Params(connection_object=stack_obj)
+                load_params = Load_Params(stack_obj=stack_obj,domain=domain)
                 load_name = variables["load_name"]
                 params = {
                     "KubeQuery_SelfManaged_Load_Details" : load_params.get_load_params(load_name=load_name)
