@@ -9,7 +9,7 @@ from fabric import Connection
 from datetime import datetime, timedelta
 from pathlib import Path
 from helper import measure_time
-
+import pandas as pd
 
 # PROJECT_ROOT = Path(__file__).resolve().parent
 # CONFIG_PATH = "./config"
@@ -138,6 +138,17 @@ class Kube_Accuracy:
                 "Accuracy" : round(((self.actual_data[t]+1)/(self.expected_data[t]+1))*100 , 2)
             }
         #print(self.accuracy)
-        return self.accuracy
+        df = pd.DataFrame(self.accuracy)
+        df=df.T
+        df = df.reset_index().rename(columns={'index': 'table'})
+        self.stack_obj.log.info(df)
+        return_dict ={
+                "schema":{
+                    "merge_on_cols" : [],
+                    "compare_cols":[]
+                },
+                "table":df.to_dict(orient="records")
+            }
+        return return_dict
     
 
