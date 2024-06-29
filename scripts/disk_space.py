@@ -1,6 +1,6 @@
 import json
 from helper import execute_point_prometheus_query
-
+import pandas as pd
 class diskspace_usage_class:
     def __init__(self,stack_obj):
         self.curr_ist_start_time=stack_obj.start_timestamp
@@ -71,12 +71,23 @@ class diskspace_usage_class:
                     percentage_used_before_load=used_space_before_load[node]
                     percentage_used_after_load=used_space_after_load[node]
                 used_space=(percentage_used_after_load-percentage_used_before_load)*total*(1024/100)
-                save_dict[node] = {f"{TYPE}_total_space_configured_in_tb" : total , f"{TYPE}_disk_used_percentage_before_load" :percentage_used_before_load,f"{TYPE}_disk_used_percentage_after_load":percentage_used_after_load,f"{TYPE} used_space_during_load_in_gb":used_space}
+                save_dict[node] = {f"{TYPE}_total_space_configured(TB)" : total , f"{TYPE}_disk_used_percentage_before_load" :percentage_used_before_load,f"{TYPE}_disk_used_percentage_after_load":percentage_used_after_load,f"{TYPE} used_space_during_load(GB)":used_space}
             except Exception as e:
                 self.stack_obj.log.error(f"error calculating {TYPE} usage for node {node}")
-        self.stack_obj.log.info("Final dictionary to save : " , )
-        self.stack_obj.log.info(json.dumps(save_dict, indent=4))
-        return TYPE,save_dict
+        df = pd.DataFrame(save_dict)
+        df=df.T
+        df = df.reset_index().rename(columns={'index': 'node'})
+        self.stack_obj.log.info(df)
+        return_dict ={
+                "schema":{
+                    "merge_on_cols" : [],
+                    "compare_cols":[]
+                },
+                "table":df.to_dict(orient="records")
+            }
+        # self.stack_obj.log.info("Final dictionary to save : " , )
+        # self.stack_obj.log.info(json.dumps(return_dict, indent=4))
+        return TYPE,return_dict
 
     def pg_disk_calc(self,TYPE):
         self.stack_obj.log.info(f"------processing {TYPE} disk space calculation------")
@@ -94,16 +105,27 @@ class diskspace_usage_class:
             self.stack_obj.log.info(f"for node {node}, pg_used_after_load_in_bytes : {pg_used_after_load_in_bytes[node]} , pg_used_before_load_in_bytes : {pg_used_before_load_in_bytes[node]}")
             self.stack_obj.log.info(f"for node {node}, data_used_after_load_in_bytes : {data_used_after_load_in_bytes[node]} , data_used_before_load_in_bytes : {data_used_before_load_in_bytes[node]}")
             save_dict[node] = {
-                "/pg (used before load in GB)":pg_used_before_load_in_bytes[node]/bytes_in_a_gb,
-                "/pg (used after load in GB)":pg_used_after_load_in_bytes[node]/bytes_in_a_gb,
+                "/pg used before load(GB)":pg_used_before_load_in_bytes[node]/bytes_in_a_gb,
+                "/pg used after load(GB)":pg_used_after_load_in_bytes[node]/bytes_in_a_gb,
                 "/pg (used in GB) (After -  Before)" : total_pg_partition_disk_used,
 
-                "/data (used before load in GB)":data_used_before_load_in_bytes[node]/bytes_in_a_gb,
-                "/data (used after load in GB)":data_used_after_load_in_bytes[node]/bytes_in_a_gb,
+                "/data used before load(GB)":data_used_before_load_in_bytes[node]/bytes_in_a_gb,
+                "/data used after load(GB)":data_used_after_load_in_bytes[node]/bytes_in_a_gb,
                 "/data (used in GB) (After -  Before)" : total_data_partition_disk_used}
-        self.stack_obj.log.info("Final dictionary to save : " , )
-        self.stack_obj.log.info(json.dumps(save_dict, indent=4))
-        return TYPE,save_dict
+        df = pd.DataFrame(save_dict)
+        df=df.T
+        df = df.reset_index().rename(columns={'index': 'node'})
+        self.stack_obj.log.info(df)
+        return_dict ={
+                "schema":{
+                    "merge_on_cols" : [],
+                    "compare_cols":[]
+                },
+                "table":df.to_dict(orient="records")
+            }
+        # self.stack_obj.log.info("Final dictionary to save : " , )
+        # self.stack_obj.log.info(json.dumps(save_dict, indent=4))
+        return TYPE,return_dict
 
     def save(self,_ ,current_build_data):
         TYPE ,save_dict=_
@@ -120,3 +142,24 @@ class diskspace_usage_class:
         current_build_data=self.save(self.pg_disk_calc('pg'),current_build_data)
         return current_build_data
     
+if __name__ == "__main__":
+    from settings import stack_configuration
+
+    variables = {
+        "start_time_str_ist":"2024-06-26 13:25",
+        "load_duration_in_hrs":4,
+        "test_env_file_name":'s1_nodes.json'
+    }
+    stack_obj = stack_configuration(variables)
+    calc = diskspace_usage_class(stack_obj=stack_obj)
+    disk_space_usage_dict=calc.make_calculations()
+
+
+    from pymongo import MongoClient
+
+    # Create a sample DataFrame
+    client = MongoClient('mongodb://localhost:27017/')
+    db = client['Osquery_LoadTests']  # Replace 'your_database_name' with your actual database name
+    collection = db['Testing']  # Replace 'your_collection_name' with your actual collection name
+
+    collection.insert_one({"disk_space_usags":disk_space_usage_dict})
