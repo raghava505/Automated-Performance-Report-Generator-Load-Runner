@@ -6,6 +6,7 @@ import threading
 import re
 import jwt
 from urllib3.exceptions import InsecureRequestWarning 
+import pandas as pd
 requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
 
 def get_results(url, job_id, headers,stack_obj):
@@ -319,7 +320,18 @@ class osq_accuracy:
             thread_list.append(t1)
         for thread1 in thread_list:
             thread1.join()
-        return accuracy
+        df = pd.DataFrame(accuracy)
+        df=df.T
+        df = df.reset_index().rename(columns={'index': 'table'})
+        self.stack_obj.log.info(df)
+        return_dict ={
+                "schema":{
+                    "merge_on_cols" : [],
+                    "compare_cols":[]
+                },
+                "table":df.to_dict(orient="records")
+            }
+        return return_dict
     def events_accuracy(self,alerts_triggered,events_triggered,cust=0):
         api_config=self.api_keys()
         if cust==0:
@@ -355,5 +367,16 @@ class osq_accuracy:
                 accuracy[table]={"actual":actual,"expected":expect,"accuracy":0}
             else:
                 accuracy[table]={"actual":actual,"expected":expect,"accuracy":round((actual/expect)*100,2)}
-        return accuracy
+        df = pd.DataFrame(accuracy)
+        df=df.T
+        df = df.reset_index().rename(columns={'index': 'table'})
+        self.stack_obj.log.info(df)
+        return_dict ={
+                "schema":{
+                    "merge_on_cols" : [],
+                    "compare_cols":[]
+                },
+                "table":df.to_dict(orient="records")
+            }
+        return return_dict
         
