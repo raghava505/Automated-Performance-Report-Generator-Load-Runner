@@ -157,7 +157,18 @@ class cloud_accuracy:
         expected_data = {}
         self.expected()
         expected_data = self.multi_accuracy(expected_data, file)
-        return expected_data
+        df = pd.DataFrame(expected_data)
+        df=df.T
+        df = df.reset_index().rename(columns={'index': 'table'})
+        self.stack_obj.log.info(df)
+        return_dict ={
+                "schema":{
+                    "merge_on_cols" : [],
+                    "compare_cols":[]
+                },
+                "table":df.to_dict(orient="records")
+            }
+        return return_dict
         
 
     def calculate_accuracy(self):
