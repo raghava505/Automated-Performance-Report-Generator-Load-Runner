@@ -1,6 +1,7 @@
 from elasticsearch import Elasticsearch
 from datetime import datetime
 from config_vars import ELASTICSEARCH_PORT
+import pandas as pd
 
 class CompactionStatus:
     def __init__(self, stack_obj, elastic_ip):
@@ -125,8 +126,18 @@ class CompactionStatus:
                 result_dict[date_part]["Files Ingested"] = files_ingested
                 result_dict[date_part]["Files Ready for Archival"] = files_ready_for_archival
                 result_dict[date_part]["Files Compacted"] = files_compacted
-
-            return result_dict
+            df = pd.DataFrame(result_dict)
+            df=df.T
+            df = df.reset_index().rename(columns={'index': 'date'})
+            self.stack_obj.log.info(df)
+            return_dict ={
+                    "schema":{
+                        "merge_on_cols" : [],
+                        "compare_cols":[]
+                    },
+                    "table":df.to_dict(orient="records")
+                }
+            return return_dict
         except Exception as e:
             self.stack_obj.log.error(f"An error occurred while executing the query: {e}")
 
@@ -137,7 +148,7 @@ if __name__ == "__main__":
     variables = {
         "start_time_str_ist":"2024-06-26 00:25",
         "load_duration_in_hrs":14,
-        "test_env_file_name":'s1_nodes.json'
+        "test_env_file_name":'longevity_nodes.json'
     }
     stack_obj = stack_configuration(variables)
     stack_obj.log.info("******* Fetching Compaction Status details...")

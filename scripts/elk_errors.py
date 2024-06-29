@@ -3,6 +3,7 @@ import datetime
 from datetime import datetime
 import concurrent.futures
 from config_vars import ELASTICSEARCH_PORT
+import pandas as pd
 
 class elk_errors_class:
     def __init__(self,stack_obj,elastic_ip):
@@ -84,7 +85,16 @@ class elk_errors_class:
                             error_message = item.get('key', 'Unknown Error')
                             count = item.get('doc_count', 0)
                             save_dict.append({"Error Message": error_message, "Count": count})
-                        result_dict[log_type] = save_dict
+                        df = pd.DataFrame(save_dict)
+                        self.stack_obj.log.info(df)
+                        return_dict ={
+                                "schema":{
+                                    "merge_on_cols" : ["Error Message"],
+                                    "compare_cols":["Count"]
+                                },
+                                "table":df.to_dict(orient="records")
+                            }
+                        result_dict[log_type] = return_dict
                     except Exception as e:
                         self.stack_obj.log.error(f"An error occurred while processing result for log_type {log_type}: {e}")
 
