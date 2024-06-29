@@ -10,7 +10,7 @@ from datetime import timedelta
 from pathlib import Path
 from helper import measure_time
 from config_vars import *
-
+import pandas as pd
 
 class SelfManaged_Accuracy:
 
@@ -96,6 +96,17 @@ class SelfManaged_Accuracy:
                 "Accuracy" : round(((self.actual_data[t]+1)/(self.expected_data[t]+1))*100 , 2)
             }
         #print(self.accuracy)
-        return self.accuracy
+        df = pd.DataFrame(self.accuracy)
+        df=df.T
+        df = df.reset_index().rename(columns={'index': 'table'})
+        self.stack_obj.log.info(df)
+        return_dict ={
+                "schema":{
+                    "merge_on_cols" : [],
+                    "compare_cols":[]
+                },
+                "table":df.to_dict(orient="records")
+            }
+        return return_dict
    
 
