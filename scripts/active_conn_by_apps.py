@@ -39,13 +39,15 @@ class num_active_conn_class:
 
             df = df.fillna(fill_values)
             result_dict[db] = {
+                "format":"table","collapse":True,
                 "schema":{
                     "merge_on_cols" : ["application"],
                     "compare_cols":["avg"]
                 },
-                "table":df.to_dict(orient="records")
+                "data":df.to_dict(orient="records")
             }
-        return result_dict
+        if result_dict == {}:return None
+        return {"format":"nested_table","schema":{},"data":result_dict}
     
 
 # if __name__=='__main__':

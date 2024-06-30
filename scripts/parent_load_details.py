@@ -1,6 +1,6 @@
 import copy
 from collections import defaultdict
-
+import pandas as pd
 class parent:
     @classmethod
     @property
@@ -215,7 +215,31 @@ class parent:
     
     
     @classmethod
-    def get_dictionary_of_observations(cls):
+    def get_observations(cls):
         observations_dict=dict([(observation,{"Status":"" , "Comments":""}) for observation in cls.list_of_observations_to_make])
-        return observations_dict
+        df = pd.DataFrame(observations_dict)    
+        df=df.T
+        df = df.reset_index().rename(columns={'index': 'observation'})
+        return {    "format":"table","collapse":False,
+                    "schema":{
+                        "merge_on_cols" : [],
+                        "compare_cols":[],
+                        "page":"Summary"
+                    },
+                    "data":df.to_dict(orient="records")
+                }    
     
+    @classmethod
+    def get_bugs_raised(cls):
+        observations_dict=dict([("Ex : https://uptycsjira.atlassian.net/browse/<ticket_id>",{"Comments":""})])
+        df = pd.DataFrame(observations_dict)    
+        df=df.T
+        df = df.reset_index().rename(columns={'index': 'Ticket'})
+        return {"format":"table","collapse":False,
+                "schema":{
+                    "merge_on_cols" : [],
+                    "compare_cols":[],
+                    "page":"Summary"
+                    },
+                "data":df.to_dict(orient="records")
+                }    

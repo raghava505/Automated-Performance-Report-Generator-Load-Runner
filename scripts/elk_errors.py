@@ -88,18 +88,20 @@ class elk_errors_class:
                         df = pd.DataFrame(save_dict)
                         self.stack_obj.log.info(df)
                         return_dict ={
+                                "format":"table","collapse":True,
                                 "schema":{
                                     "merge_on_cols" : ["Error Message"],
                                     "compare_cols":["Count"]
                                 },
-                                "table":df.to_dict(orient="records")
+                                "data":df.to_dict(orient="records")
                             }
                         result_dict[log_type] = return_dict
                     except Exception as e:
                         self.stack_obj.log.error(f"An error occurred while processing result for log_type {log_type}: {e}")
 
             self.stack_obj.log.info(result_dict)
-            return result_dict
+            if result_dict == {}:return None
+            return {"format":"nested_table","schema":{},"data":result_dict}
         except Exception as e:
             self.stack_obj.log.error(f"An error occurred during fetch_errors: {e}")
             return {}

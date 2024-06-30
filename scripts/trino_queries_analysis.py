@@ -458,11 +458,13 @@ class trino_queries_class:
                 pass
             # df.to_csv("152_"+heading+".csv")
             save_dict[heading] = {
+                "format":"table","collapse":True,
                 "schema":schema,
-                "table":df.to_dict(orient="records")
+                "data":df.to_dict(orient="records")
             }
 
-        return save_dict
+        if save_dict == {}:return None
+        return {"format":"nested_table","schema":{"page":"Trino Queries Analysis"},"data":save_dict}
     
 if __name__=='__main__':
     print("Testing trino queries analysis ...")

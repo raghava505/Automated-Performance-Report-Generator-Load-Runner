@@ -118,12 +118,13 @@ def extract_ram_cores_storage_details(stack_obj):
     stack_obj.log.info(f"\n {df}")
     # df.to_csv("stack.csv")
 
-    return {
+    return {    "format":"table","collapse":True,
                 "schema":{
                     "merge_on_cols" : [],
                     "compare_cols":[],
+                    "page":"Summary"
                 },
-                "table":df.to_dict(orient="records")
+                "data":df.to_dict(orient="records")
             }
 
     

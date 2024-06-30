@@ -59,17 +59,17 @@ if __name__ == "__main__":
         db=client[database_name]
         collection = db[collection_name]
 
-        documents_with_same_load_time_and_stack = collection.find({"load_details.sprint":sprint ,"load_details.stack":stack , "load_details.load_start_time_ist":f"{start_time_str_ist}" , "load_details.load_duration_in_hrs":hours})
+        documents_with_same_load_time_and_stack = collection.find({"load_details.data.sprint":sprint ,"load_details.data.stack":stack , "load_details.data.load_start_time_ist":f"{start_time_str_ist}" , "load_details.data.load_duration_in_hrs":hours})
         if len(list(documents_with_same_load_time_and_stack)) > 0:
             stack_obj.log.error(f"A document with load time ({start_time_str_ist}) - ({stack_obj.end_time_str_ist}) on {stack} for this sprint for {database_name}-{collection_name} load is already available.")
             skip_fetching_data=True
         if skip_fetching_data == False:
             run=1
-            documents_with_same_sprint = list(collection.find({"load_details.sprint":sprint}))
+            documents_with_same_sprint = list(collection.find({"load_details.data.sprint":sprint}))
             if len(documents_with_same_sprint)>0:
                 max_run = 0
                 for document in documents_with_same_sprint :
-                    max_run = max(document['load_details']['run'] , max_run)
+                    max_run = max(document['load_details']['data']['run'] , max_run)
                 run=max_run+1
                 stack_obj.log.warning(f"you have already saved the details for this load in this sprint, setting run value to {run}")
 
@@ -127,8 +127,10 @@ if __name__ == "__main__":
                     stack_obj.log.error(f"load_details.update(params) => {err}")
             
             final_data_to_save = {
-                "load_details":load_details,
-                "Test environment details": extract_ram_cores_storage_details(stack_obj)
+                "load_details":{"format":"mapping","schema":{"page":"Summary"},"data":load_details},
+                "Test environment details": extract_ram_cores_storage_details(stack_obj),
+                "observations":load_cls.get_observations(),
+                "Bugs raised":load_cls.get_bugs_raised()
             }
 
             #-------------------------real time query test details--------------------------
@@ -148,37 +150,32 @@ if __name__ == "__main__":
             kafka_obj = kafka_topics(stack_obj)
             kafka_topics_list = kafka_obj.add_topics_to_report()
             if kafka_topics_list:final_data_to_save.update({"kafka_topics":kafka_topics_list})
-            #---------------No.of Active connections by application---------------
-            stack_obj.log.info("******* Fetching active connection details ...")
-            active_conn_obj = num_active_conn_class(stack_obj=stack_obj)
-            active_conn_results = active_conn_obj.get_avg_active_conn()
-            if active_conn_results:final_data_to_save.update({"Number of active connections group by application on master":active_conn_results})
-            #-------------------------Trino Queries--------------------------
-            stack_obj.log.info("******* Performing trino queries analysis ...")
-            trino_obj = trino_queries_class(stack_obj=stack_obj)
-            trino_queries_analyse_results = trino_obj.fetch_trino_results()
-            if trino_queries_analyse_results:final_data_to_save.update({"Trino Queries Analysis":trino_queries_analyse_results})
+            #------------------------------- (NEW) API load report link--------------------------------------------------
+            if apiload_remote_directory_name and 'apiload_simulator_ip' in test_env_json_details and apiload_remote_directory_name!="":
+                api_load_report_link=os.path.join(f"http://{test_env_json_details['apiload_simulator_ip']}:{API_REPORT_PORT}",apiload_remote_directory_name,f"index.html")
+                final_data_to_save.update({"Api load report link":{"format":"mapping","schema":{},"data":{"link":api_load_report_link}}})
+            
             #-------------------------Presto LOAD--------------------------
-            if 'prestoload_simulator_ip' in test_env_json_details:
-                stack_obj.log.info(f"------------------------------ Looking for presto load csv files in {test_env_json_details['prestoload_simulator_ip']}")
-                stack_starttime_string=str(stack).lower() + "-" + str(start_time_str_ist)
-                benchto_load_csv_path=os.path.join(PRESTO_LOADS_FOLDER_PATH, stack_starttime_string, "benchto.csv")
-                benchto_load_pdf_path=os.path.join(PRESTO_LOADS_FOLDER_PATH , stack_starttime_string, "Benchto.pdf")
-                stack_obj.log.info(f"CSV file path for Presto/benchto load : {benchto_load_csv_path}")
-                presto_load_result_dict = fetch_and_extract_csv(benchto_load_csv_path,test_env_json_details['prestoload_simulator_ip'],stack_obj)
-                if presto_load_result_dict:final_data_to_save.update({"Presto Load details":presto_load_result_dict})
-            else:
-                stack_obj.log.warning(f"------------------------------ Skipping presto load details because 'prestoload_simulator_ip' is not present in stack json file")
+            # if 'prestoload_simulator_ip' in test_env_json_details:
+            #     stack_obj.log.info(f"------------------------------ Looking for presto load csv files in {test_env_json_details['prestoload_simulator_ip']}")
+            #     stack_starttime_string=str(stack).lower() + "-" + str(start_time_str_ist)
+            #     benchto_load_csv_path=os.path.join(PRESTO_LOADS_FOLDER_PATH, stack_starttime_string, "benchto.csv")
+            #     benchto_load_pdf_path=os.path.join(PRESTO_LOADS_FOLDER_PATH , stack_starttime_string, "Benchto.pdf")
+            #     stack_obj.log.info(f"CSV file path for Presto/benchto load : {benchto_load_csv_path}")
+            #     presto_load_result_dict = fetch_and_extract_csv(benchto_load_csv_path,test_env_json_details['prestoload_simulator_ip'],stack_obj)
+            #     if presto_load_result_dict:final_data_to_save.update({"Presto Load details":presto_load_result_dict})
+            # else:
+            #     stack_obj.log.warning(f"------------------------------ Skipping presto load details because 'prestoload_simulator_ip' is not present in stack json file")
             #-------------------------(OLD) API load--------------------------
-            if 'apiload_simulator_ip' in test_env_json_details:
-                stack_obj.log.info(f"------------------------------ Looking for api load (old way) csv files in {test_env_json_details['apiload_simulator_ip']}")
-                stack_starttime_string=str(stack).lower() + "-" + str(start_time_str_ist)
-                api_load_csv_path = os.path.join(API_LOADS_FOLDER_PATH_TEMP , stack_starttime_string+".csv")
-                stack_obj.log.info(f"CSV file path for API/Jmeter load : {api_load_csv_path}")
-                api_load_result_dict = fetch_and_extract_csv(api_load_csv_path,test_env_json_details['apiload_simulator_ip'],stack_obj)
-                if api_load_result_dict:final_data_to_save.update({"API Load details":api_load_result_dict})
-            else:
-                stack_obj.log.warning(f"------------------------------ Skipping (old) API load details because 'apiload_simulator_ip' is not present in stack json file")
+            # if 'apiload_simulator_ip' in test_env_json_details:
+            #     stack_obj.log.info(f"------------------------------ Looking for api load (old way) csv files in {test_env_json_details['apiload_simulator_ip']}")
+            #     stack_starttime_string=str(stack).lower() + "-" + str(start_time_str_ist)
+            #     api_load_csv_path = os.path.join(API_LOADS_FOLDER_PATH_TEMP , stack_starttime_string+".csv")
+            #     stack_obj.log.info(f"CSV file path for API/Jmeter load : {api_load_csv_path}")
+            #     api_load_result_dict = fetch_and_extract_csv(api_load_csv_path,test_env_json_details['apiload_simulator_ip'],stack_obj)
+            #     if api_load_result_dict:final_data_to_save.update({"API Load details":api_load_result_dict})
+            # else:
+            #     stack_obj.log.warning(f"------------------------------ Skipping (old) API load details because 'apiload_simulator_ip' is not present in stack json file")
             #-------------------------Osquery Table Accuracies----------------------------
             if variables["load_type"] in ["Osquery","osquery_cloudquery_combined","all_loads_combined"] and variables["load_name"] != "ControlPlane":
                 assets_per_cust=int(load_cls.get_load_specific_details(variables['load_name'])["RuleEngine and ControlPlane Load Details"]['assets_per_cust'])
@@ -219,10 +216,10 @@ if __name__ == "__main__":
                 stack_obj.log.info("******* Calculating accuracies for cloudquery Load...")
                 cloud_accuracy_obj= cloud_accuracy(stack_obj=stack_obj,variables=variables)
                 cloudquery_accuracies = cloud_accuracy_obj.calculate_accuracy()
-                if cloudquery_accuracies:final_data_to_save.update({"Cloudquery Table Accuracies":cloudquery_accuracies})
+                if cloudquery_accuracies:final_data_to_save.update({"Cloudquery Table Accuracies":{"format":"nested_table","schema":{},"data":cloudquery_accuracies}})
             #-------------------------Azure Load Accuracies----------------------------
-            if variables["load_name"] == "Azure_MultiCustomer" or variables["load_type"] in ["all_loads_combined"]:
-                stack_obj.log.info("******* Calculating accuracies for Azure Load ...")
+            # if variables["load_name"] == "Azure_MultiCustomer" or variables["load_type"] in ["all_loads_combined"]:
+            #     stack_obj.log.info("******* Calculating accuracies for Azure Load ...")
             #--------------------------------------Events Counts--------------------------------------
             if variables["load_type"] in ["CloudQuery","osquery_cloudquery_combined","all_loads_combined"]:
                 stack_obj.log.info("******* Calculating the counts of various events during the load ...")
@@ -241,6 +238,17 @@ if __name__ == "__main__":
                 calc = DB_OPERATIONS_TIME(stack_obj=stack_obj)
                 db_op=calc.db_operations()
                 if db_op:final_data_to_save.update({"Cloudquery Db Operations Processing Time":db_op})
+            #---------------No.of Active connections by application---------------
+            stack_obj.log.info("******* Fetching active connection details ...")
+            active_conn_obj = num_active_conn_class(stack_obj=stack_obj)
+            active_conn_results = active_conn_obj.get_avg_active_conn()
+            if active_conn_results:final_data_to_save.update({"Number of active connections group by application on master":active_conn_results})
+            
+            #-------------------------------PG Stats Calculations -------------------------------------
+            stack_obj.log.info("******* Calculating Postgress Tables Details ...")
+            pgtable = pg_stats_class(stack_obj=stack_obj)
+            pg_stats = pgtable.process_output()
+            if pg_stats:final_data_to_save.update({"PG Stats":pg_stats})
             #--------------------------------Elk Errors------------------------------------------------
             if "elastic_node_ip" in test_env_json_details:
                 stack_obj.log.info("******* Fetching Elk Errors ...")
@@ -253,27 +261,23 @@ if __name__ == "__main__":
                 compaction = CompactionStatus(stack_obj=stack_obj,elastic_ip=test_env_json_details['elastic_node_ip'])
                 compaction_status = compaction.execute_query()
                 if compaction_status:final_data_to_save.update({"Compaction Status":compaction_status})
-            #-------------------------------PG Stats Calculations -------------------------------------
-            stack_obj.log.info("******* Calculating Postgress Tables Details ...")
-            pgtable = pg_stats_class(stack_obj=stack_obj)
-            pg_stats = pgtable.process_output()
-            if pg_stats:final_data_to_save.update({"PG Stats":pg_stats})
+            #-------------------------Trino Queries--------------------------
+            stack_obj.log.info("******* Performing trino queries analysis ...")
+            trino_obj = trino_queries_class(stack_obj=stack_obj)
+            trino_queries_analyse_results = trino_obj.fetch_trino_results()
+            if trino_queries_analyse_results:final_data_to_save.update({"Trino Queries Analysis":trino_queries_analyse_results})
             #--------------------------------cpu and mem node-wise---------------------------------------
-            stack_obj.log.info("******* Calculating resource utilizations ...")
-            comp = mem_cpu_usage_class(stack_obj=stack_obj,include_nodetypes=load_cls.hostname_types)
-            mem_cpu_usages_dict,overall_usage_dict=comp.make_comparisions(load_cls.common_app_names,load_cls.common_pod_names)
-            if overall_usage_dict:final_data_to_save.update(overall_usage_dict)
-            if mem_cpu_usages_dict:final_data_to_save.update(mem_cpu_usages_dict)
+            # stack_obj.log.info("******* Calculating resource utilizations ...")
+            # comp = mem_cpu_usage_class(stack_obj=stack_obj,include_nodetypes=load_cls.hostname_types)
+            # mem_cpu_usages_dict,overall_usage_dict=comp.make_comparisions(load_cls.common_app_names,load_cls.common_pod_names)
+            # if overall_usage_dict:final_data_to_save.update(overall_usage_dict)
+            # if mem_cpu_usages_dict:final_data_to_save.update(mem_cpu_usages_dict)
             #--------------------------------complete resource extraction---------------------------------------
             stack_obj.log.info("******* [NEW] Calculating complete resource utilizations ...")
             resource_obj=complete_resource_usages(stack_obj,include_nodetypes=load_cls.hostname_types)
             complete_resource_details=resource_obj.get_complete_result()
             if complete_resource_details:final_data_to_save.update(complete_resource_details)
-            #------------------------------- (NEW) API load report link--------------------------------------------------
-            if apiload_remote_directory_name and 'apiload_simulator_ip' in test_env_json_details and apiload_remote_directory_name!="":
-                final_data_to_save.update({"Api load report link":os.path.join(f"http://{test_env_json_details['apiload_simulator_ip']}:{API_REPORT_PORT}",apiload_remote_directory_name,f"index.html")})
-            #------------------------------- observations --------------------------------------------------
-            final_data_to_save.update({"observations":load_cls.get_dictionary_of_observations()})
+           
             #--------------------------------Capture charts data---------------------------------------
             try:
                 step_factor=hours/10 if hours>10 else 1
@@ -282,7 +286,7 @@ if __name__ == "__main__":
                 charts_obj = Charts(stack_obj=stack_obj,fs=fs)
                 complete_charts_data_dict,all_gridfs_fileids=charts_obj.capture_charts_and_save(load_cls.get_all_chart_queries(),step_factor=step_factor)
                 stack_obj.log.info("charts data fetched successfully !")
-                if complete_charts_data_dict:final_data_to_save.update({"charts":complete_charts_data_dict})
+                if complete_charts_data_dict:final_data_to_save.update({"charts":{"format":"charts","schema":{"base_graphs_path":BASE_GRAPHS_PATH,"page":"Charts"},"data":complete_charts_data_dict}})
 
                 # final_data_to_save.update({"all_gridfs_referenced_ids":all_gridfs_fileids})
                 
@@ -323,7 +327,8 @@ if __name__ == "__main__":
                     stack_obj.log.info(f'Saving the html page to {curr_pgbad_html_path}')
                     os.makedirs(curr_pgbad_html_path,exist_ok=True)
                     pgbadger_links,extracted_tables=get_and_save_pgb_html(stack_obj,test_env_json_details['elastic_node_ip'],curr_pgbad_html_path,pgbadger_tail_path,test_env_json_details['pgbadger_reports_mount'])
-                    collection.update_one({"_id": ObjectId(inserted_id)}, {"$set": {f"Pgbadger downloaded report links": pgbadger_links}})
+                    if pgbadger_links != {} : collection.update_one({"_id": ObjectId(inserted_id)}, {"$set": {f"Pgbadger downloaded report links": {"format":"mapping","schema":{},"data":pgbadger_links}}})
+                    
                     if extracted_tables!={}:
                         stack_obj.log.info("Empty extracted tables dictionary found !")
                         collection.update_one({"_id": ObjectId(inserted_id)}, {"$set": {f"Postgres Queries Analysis": extracted_tables}})
@@ -332,15 +337,15 @@ if __name__ == "__main__":
                     stack_obj.log.error(f"error occured while processing pg badger reports : {e}")
 
                 #---------------FETCHING PDFS-----------------
-                try:
-                    if presto_load_result_dict:
-                        stack_obj.log.info(f"------------------------------ Fetching presto load charts pdf from {test_env_json_details['prestoload_simulator_ip']}:{benchto_load_csv_path}")
-                        presto_load_local_pdf_path=f"{BASE_PDFS_PATH}/{database_name}/{collection_name}/{inserted_id}/Presto Load Charts pdf.pdf"
-                        stack_obj.log.info(f'Saving the presto load pdf to {presto_load_local_pdf_path}')
-                        os.makedirs(os.path.dirname(presto_load_local_pdf_path),exist_ok=True)
-                        fetch_and_save_pdf(benchto_load_pdf_path,test_env_json_details['prestoload_simulator_ip'],presto_load_local_pdf_path,stack_obj)
-                except Exception as e:
-                    stack_obj.log.error(f"error while fetching pdfs : {str(e)}")
+                # try:
+                #     if presto_load_result_dict:
+                #         stack_obj.log.info(f"------------------------------ Fetching presto load charts pdf from {test_env_json_details['prestoload_simulator_ip']}:{benchto_load_csv_path}")
+                #         presto_load_local_pdf_path=f"{BASE_PDFS_PATH}/{database_name}/{collection_name}/{inserted_id}/Presto Load Charts pdf.pdf"
+                #         stack_obj.log.info(f'Saving the presto load pdf to {presto_load_local_pdf_path}')
+                #         os.makedirs(os.path.dirname(presto_load_local_pdf_path),exist_ok=True)
+                #         fetch_and_save_pdf(benchto_load_pdf_path,test_env_json_details['prestoload_simulator_ip'],presto_load_local_pdf_path,stack_obj)
+                # except Exception as e:
+                #     stack_obj.log.error(f"error while fetching pdfs : {str(e)}")
 
             except Exception as e:
                 stack_obj.log.error(f"Failed to insert document into database {database_name}, collection:{collection_name} , {str(e)}")

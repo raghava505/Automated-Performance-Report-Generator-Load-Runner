@@ -38,13 +38,13 @@ class pg_stats_class:
                 curr_result=defaultdict(lambda:{})
                 query = f'uptycs_pg_stats{{db=~"{db}", stat=~"{stat}"}}'
 
-                results_before_load = execute_point_prometheus_query(stack_obj,self.start_timestamp,query)
+                results_before_load = execute_point_prometheus_query(self.stack_obj,self.start_timestamp,query)
                 for line in results_before_load:
                     table_name = line['metric']['table_name']
                     start_value = int(line['value'][1])
                     curr_result[table_name]["before"]=start_value#={"startTableSize":start_value}
 
-                results_after_load = execute_point_prometheus_query(stack_obj,self.end_timestamp,query)
+                results_after_load = execute_point_prometheus_query(self.stack_obj,self.end_timestamp,query)
                 for line in results_after_load:
                     table_name = line['metric']['table_name']
                     end_value = int(line['value'][1])
@@ -64,11 +64,12 @@ class pg_stats_class:
                         print(f"empty dataframe found for  db {db} and stat {stat}")
                         continue
                     final_result[f"{db}_{stat}"] = {
+                        "format":"table","collapse":True,
                         "schema":{
                             "merge_on_cols" : ["table_name"],
                             "compare_cols":["after-before"]
                         },
-                        "table":df.to_dict(orient="records")
+                        "data":df.to_dict(orient="records")
                     }
                 except Exception as e:
                     print(f"error while finding delta for pgstats : for db {db} and stat {stat}  : {e}")
@@ -122,8 +123,8 @@ class pg_stats_class:
             # }
             
             # final_result.update(obj)
-        
-        return final_result
+        if final_result == {}:return None
+        return {"format":"nested_table","schema":{},"data":final_result}
 
 if __name__ == "__main__":
     from settings import stack_configuration
