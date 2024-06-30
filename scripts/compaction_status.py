@@ -127,15 +127,17 @@ class CompactionStatus:
                 result_dict[date_part]["Files Ready for Archival"] = files_ready_for_archival
                 result_dict[date_part]["Files Compacted"] = files_compacted
             df = pd.DataFrame(result_dict)
+            if df.empty : return None
             df=df.T
             df = df.reset_index().rename(columns={'index': 'date'})
             self.stack_obj.log.info(df)
             return_dict ={
+                    "format":"table","collapse":True,
                     "schema":{
                         "merge_on_cols" : [],
                         "compare_cols":[]
                     },
-                    "table":df.to_dict(orient="records")
+                    "data":df.to_dict(orient="records")
                 }
             return return_dict
         except Exception as e:

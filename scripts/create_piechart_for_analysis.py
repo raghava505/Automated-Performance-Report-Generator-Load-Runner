@@ -221,11 +221,11 @@ def generate_piecharts(mem_or_cpu,main_dict,prev_dict):
             continue
         app_cont_pod = key.split('_')[2]
         for nodetype,schema in value.items():
-            current_df = pd.DataFrame(schema["table"])
+            current_df = pd.DataFrame(schema["data"])
             if current_df.empty:continue
             print(f"Analysing {app_cont_pod} level {mem_or_cpu} usage for {nodetype} nodetype ...")
             try:
-                previous_df = pd.DataFrame(prev_dict[key][nodetype]["table"])
+                previous_df = pd.DataFrame(prev_dict[key][nodetype]["data"])
                 merged_df = compare_dfs(current_df,previous_df,merge_on=["node_type",app_cont_pod])
                 merged_df[app_cont_pod] = merged_df[app_cont_pod].apply(compress)
             except Exception as e:
@@ -262,7 +262,7 @@ def generate_piecharts(mem_or_cpu,main_dict,prev_dict):
             total_combined_dict[ndtype]["Top 5 contributors to decrease"]=string
     total_combined_df = pd.DataFrame(total_combined_dict)
     total_combined_df=total_combined_df.T
-    total_combined_df=total_combined_df.reset_index().rename(columns={'index': 'nodetype'})
+    total_combined_df=total_combined_df.reset_index().rename(columns={'index': 'node_type'})
     return images,total_combined_df
 
 

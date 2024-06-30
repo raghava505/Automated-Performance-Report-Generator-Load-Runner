@@ -79,11 +79,12 @@ class diskspace_usage_class:
         df = df.reset_index().rename(columns={'index': 'node'})
         self.stack_obj.log.info(df)
         return_dict ={
+                "format":"table","collapse":True,
                 "schema":{
                     "merge_on_cols" : [],
                     "compare_cols":[]
                 },
-                "table":df.to_dict(orient="records")
+                "data":df.to_dict(orient="records")
             }
         # self.stack_obj.log.info("Final dictionary to save : " , )
         # self.stack_obj.log.info(json.dumps(return_dict, indent=4))
@@ -117,11 +118,12 @@ class diskspace_usage_class:
         df = df.reset_index().rename(columns={'index': 'node'})
         self.stack_obj.log.info(df)
         return_dict ={
+                "format":"table","collapse":True,
                 "schema":{
                     "merge_on_cols" : [],
                     "compare_cols":[]
                 },
-                "table":df.to_dict(orient="records")
+                "data":df.to_dict(orient="records")
             }
         # self.stack_obj.log.info("Final dictionary to save : " , )
         # self.stack_obj.log.info(json.dumps(save_dict, indent=4))
@@ -140,7 +142,10 @@ class diskspace_usage_class:
         current_build_data=self.save(self.calculate_disk_usage('kafka'),current_build_data)
         current_build_data=self.save(self.calculate_disk_usage('hdfs'),current_build_data)
         current_build_data=self.save(self.pg_disk_calc('pg'),current_build_data)
-        return current_build_data
+        if current_build_data=={}:return None
+        return {"format":"nested_table",
+                "schema":{},
+                "data":current_build_data}
     
 if __name__ == "__main__":
     from settings import stack_configuration

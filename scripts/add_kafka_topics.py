@@ -26,9 +26,14 @@ class kafka_topics:
             output = stdout.read().decode()
             output_list = [line for line in output.split('\n') if line.strip()]
             self.stack_obj.log.info(f"Kafka topics found are : {output_list}")
+            ssh.close()
+            
+            return {"format":"list",
+                        "schema":{},
+                        "data":output_list
+                        }
+            
         except Exception as e:
             self.stack_obj.log.error(f"Error while fetching kafka topics : {str(e)}")
-            return []
-        finally:
             ssh.close()
-            return output_list
+            return None

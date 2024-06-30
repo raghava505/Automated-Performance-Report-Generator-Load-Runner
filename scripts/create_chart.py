@@ -80,7 +80,7 @@ def create_images_and_save(path,doc_id,collection,fs,variables,end_time_str,run,
     sns.set_style({"grid.linewidth": gridline_width})
     cursor=collection.find_one({"_id" : ObjectId(doc_id)})
     total_charts=0
-    charts_data=cursor["charts"]
+    charts_data=cursor["charts"]["data"]
     complete_time_set=set()
     for category in charts_data:
         os.makedirs(f"{path}/{category}" , exist_ok=True)

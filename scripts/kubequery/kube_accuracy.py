@@ -140,14 +140,19 @@ class Kube_Accuracy:
         #print(self.accuracy)
         df = pd.DataFrame(self.accuracy)
         df=df.T
+        if df.empty : 
+            self.stack_obj.log.warning("empty dataframe found for osquery table accuracies")
+            self.stack_obj.log.info(df)
+            return None
         df = df.reset_index().rename(columns={'index': 'table'})
         self.stack_obj.log.info(df)
         return_dict ={
+                "format":"table","collapse":True,
                 "schema":{
                     "merge_on_cols" : [],
                     "compare_cols":[]
                 },
-                "table":df.to_dict(orient="records")
+                "data":df.to_dict(orient="records")
             }
         return return_dict
     

@@ -322,14 +322,19 @@ class osq_accuracy:
             thread1.join()
         df = pd.DataFrame(accuracy)
         df=df.T
+        if df.empty : 
+            self.stack_obj.log.info(df)
+            self.stack_obj.log.warning("empty dataframe found for osquery table accuracies")
+            return None
         df = df.reset_index().rename(columns={'index': 'table'})
         self.stack_obj.log.info(df)
         return_dict ={
+                "format":"table","collapse":True,
                 "schema":{
                     "merge_on_cols" : [],
                     "compare_cols":[]
                 },
-                "table":df.to_dict(orient="records")
+                "data":df.to_dict(orient="records")
             }
         return return_dict
     def events_accuracy(self,alerts_triggered,events_triggered,cust=0):
@@ -369,14 +374,19 @@ class osq_accuracy:
                 accuracy[table]={"actual":actual,"expected":expect,"accuracy":round((actual/expect)*100,2)}
         df = pd.DataFrame(accuracy)
         df=df.T
+        if df.empty : 
+            self.stack_obj.log.info(df)
+            self.stack_obj.log.warning("empty dataframe found for osquery table accuracies")
+            return None
         df = df.reset_index().rename(columns={'index': 'table'})
         self.stack_obj.log.info(df)
         return_dict ={
+                "format":"table","collapse":True,
                 "schema":{
                     "merge_on_cols" : [],
                     "compare_cols":[]
                 },
-                "table":df.to_dict(orient="records")
+                "data":df.to_dict(orient="records")
             }
         return return_dict
         

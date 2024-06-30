@@ -98,12 +98,13 @@ class complete_resource_usages:
         grouped_df=df.groupby([col1,col2])[cols_to_aggregate].sum()       
         if for_report and single_level_for_report:
             all_dfs_dict={
+                "format":"table","collapse":True,
                 "schema":{
                     "merge_on_cols" : [col1,col2],
                     "compare_cols":cols_to_compare,
                     "display_exact_table":display_exact_table
                 },
-                "table":[]
+                "data":[]
             }
         else:all_dfs_dict={}
 
@@ -114,15 +115,16 @@ class complete_resource_usages:
             if for_report:
                 group_df = group_df.reset_index()
                 if single_level_for_report:
-                    all_dfs_dict["table"].extend(group_df.to_dict(orient="records"))
+                    all_dfs_dict["data"].extend(group_df.to_dict(orient="records"))
                 else:
                     all_dfs_dict[index] = {
+                                "format":"table","collapse":True,
                                 "schema":{
                                     "merge_on_cols" : [col1,col2],
                                     "compare_cols":cols_to_compare,
                                     "display_exact_table":False
                                 },
-                                "table":group_df.to_dict(orient="records")
+                                "data":group_df.to_dict(orient="records")
                     }
             else:
                 group_df = group_df.reset_index(level=col1,drop=True)
@@ -140,12 +142,13 @@ class complete_resource_usages:
         self.stack_obj.log.info(f"\n {df}")
         if for_report:
             return {
+                "format":"table","collapse":True,
                 "schema":{
                     "merge_on_cols" : [col],
                     "compare_cols":cols_to_compare,
                     "display_exact_table":False
                 },
-                "table":df.reset_index().to_dict(orient="records")
+                "data":df.reset_index().to_dict(orient="records")
             }
         else:
             return df.to_dict(orient="index")
@@ -409,57 +412,84 @@ class complete_resource_usages:
         return result
     
     def collect_total_usages(self,for_report):
+        # {"format":"nested_table","schema":{},"data":}
+
+        # defaultdict(dict, self.collect_total_memory_usages(for_report))
+        # {"format":"nested_table","schema":{},"data":defaultdict(dict, self.collect_total_memory_usages(for_report))}
+
+        # {"format":"nested_table","schema":{},"data":defaultdict(dict, self.collect_total_cpu_usages(for_report))}
         return_dict = {
-            "memory_usages" : defaultdict(dict, self.collect_total_memory_usages(for_report)),
-            "cpu_usages" : defaultdict(dict, self.collect_total_cpu_usages(for_report))
+            "memory_usages" : {"format":"nested_table","schema":{"page":"Resource Utilizations"},"data":defaultdict(dict, self.collect_total_memory_usages(for_report))},
+            "cpu_usages" : {"format":"nested_table","schema":{"page":"Resource Utilizations"},"data":defaultdict(dict, self.collect_total_cpu_usages(for_report))}
         }
-        nodetype_and_application_level_memory_usage=return_dict["memory_usages"]["nodetype_and_application_level_usages"]
-        del return_dict["memory_usages"]["nodetype_and_application_level_usages"]
-        nodetype_and_container_level_memory_usage=return_dict["memory_usages"]["nodetype_and_container_level_usages"]
-        del return_dict["memory_usages"]["nodetype_and_container_level_usages"]
-        nodetype_and_pod_level_memory_usage=return_dict["memory_usages"]["nodetype_and_pod_level_usages"]
-        del return_dict["memory_usages"]["nodetype_and_pod_level_usages"]
-        # for nodetype in exclude_nodetypes:
-        #     try:del nodetype_and_container_level_memory_usage[nodetype]
-        #     except:pass
-        #     try:del nodetype_and_application_level_memory_usage[nodetype]
-        #     except:pass
 
-        return_dict.update({"memory_usages_analysis" : {
-            "nodetype_and_application_level_memory_usages":nodetype_and_application_level_memory_usage,
-            "nodetype_and_container_level_memory_usages":nodetype_and_container_level_memory_usage,
-            "nodetype_and_pod_level_memory_usages":nodetype_and_pod_level_memory_usage
+        nodetype_level_memory_usage=return_dict["memory_usages"]["data"]["nodetype_level_usages"]
+        nodetype_level_memory_usage["schema"]["page"] = "Summary"
+        del return_dict["memory_usages"]["data"]["nodetype_level_usages"]
 
-        }})
+        nodetype_level_cpu_usage=return_dict["cpu_usages"]["data"]["nodetype_level_usages"]
+        nodetype_level_cpu_usage["schema"]["page"] = "Summary"
+        del return_dict["cpu_usages"]["data"]["nodetype_level_usages"]
+       
+        return_dict.update({"Overall Memory usage by each nodetype (GB)":nodetype_level_memory_usage,
+                            "Overall CPU usage by each nodetype (cores)":nodetype_level_cpu_usage,
+                            })
 
-        nodetype_and_application_level_cpu_usage=return_dict["cpu_usages"]["nodetype_and_application_level_usages"]
-        del return_dict["cpu_usages"]["nodetype_and_application_level_usages"]
-        nodetype_and_container_level_cpu_usage=return_dict["cpu_usages"]["nodetype_and_container_level_usages"]
-        del return_dict["cpu_usages"]["nodetype_and_container_level_usages"]
-        nodetype_and_pod_level_cpu_usage=return_dict["cpu_usages"]["nodetype_and_pod_level_usages"]
-        del return_dict["cpu_usages"]["nodetype_and_pod_level_usages"]
-        # for nodetype in exclude_nodetypes:
-        #     try:del nodetype_and_container_level_cpu_usage[nodetype]
-        #     except:pass
-        #     try:del nodetype_and_application_level_cpu_usage[nodetype]
-        #     except:pass
+        nodetype_and_application_level_memory_usage=return_dict["memory_usages"]["data"]["nodetype_and_application_level_usages"]
+        del return_dict["memory_usages"]["data"]["nodetype_and_application_level_usages"]
+        nodetype_and_container_level_memory_usage=return_dict["memory_usages"]["data"]["nodetype_and_container_level_usages"]
+        del return_dict["memory_usages"]["data"]["nodetype_and_container_level_usages"]
+        nodetype_and_pod_level_memory_usage=return_dict["memory_usages"]["data"]["nodetype_and_pod_level_usages"]
+        del return_dict["memory_usages"]["data"]["nodetype_and_pod_level_usages"]
 
-        return_dict.update({"cpu_usages_analysis" : {
-            "nodetype_and_application_level_cpu_usages":nodetype_and_application_level_cpu_usage,
-            "nodetype_and_container_level_cpu_usages":nodetype_and_container_level_cpu_usage,
-            "nodetype_and_pod_level_cpu_usages":nodetype_and_pod_level_cpu_usage
+        nodetype_and_application_level_cpu_usage=return_dict["cpu_usages"]["data"]["nodetype_and_application_level_usages"]
+        del return_dict["cpu_usages"]["data"]["nodetype_and_application_level_usages"]
+        nodetype_and_container_level_cpu_usage=return_dict["cpu_usages"]["data"]["nodetype_and_container_level_usages"]
+        del return_dict["cpu_usages"]["data"]["nodetype_and_container_level_usages"]
+        nodetype_and_pod_level_cpu_usage=return_dict["cpu_usages"]["data"]["nodetype_and_pod_level_usages"]
+        del return_dict["cpu_usages"]["data"]["nodetype_and_pod_level_usages"]
 
-        }})
+        return_dict.update({
+                            "resource_usages_analysis" :{
+                                "format":"analysis",
+                                "schema":{"page":"Summary"},
+                                "data": {
+                                            "memory_usages_analysis":{
+                                                "nodetype_and_application_level_memory_usages":nodetype_and_application_level_memory_usage,
+                                                "nodetype_and_container_level_memory_usages":nodetype_and_container_level_memory_usage,
+                                                "nodetype_and_pod_level_memory_usages":nodetype_and_pod_level_memory_usage
+                                            },
+                                            "cpu_usage_analysis":{
+                                                "nodetype_and_application_level_cpu_usages":nodetype_and_application_level_cpu_usage,
+                                                "nodetype_and_container_level_cpu_usages":nodetype_and_container_level_cpu_usage,
+                                                "nodetype_and_pod_level_cpu_usages":nodetype_and_pod_level_cpu_usage
+                                            }
+                                        }
+                                },
+
+                            # "cpu_usages_analysis" :
+                            #     {"format":"analysis",
+                            #     "schema":{"page":"Summary"},
+                            #     "data":  {
+                            #         "nodetype_and_application_level_cpu_usages":nodetype_and_application_level_cpu_usage,
+                            #         "nodetype_and_container_level_cpu_usages":nodetype_and_container_level_cpu_usage,
+                            #         "nodetype_and_pod_level_cpu_usages":nodetype_and_pod_level_cpu_usage
+                            #     }}
+                        })
 
         return return_dict
     
     def get_complete_result(self):
         total_result_for_report=self.collect_total_usages(for_report=True)
         # total_result_for_querying=self.collect_total_usages(for_report=False)
-        return {
-            "resource_utilization_for_report":total_result_for_report,
-            # "resource_utilization_for_querying":total_result_for_querying
-        }
+        return total_result_for_report
+        # {
+        #     "resource_utilization_for_report":{ "format":"nested_table",
+        #                                         "schema":{},
+        #                                         "data":total_result_for_report
+        #                                         }
+        #     # "resource_utilization_for_querying":total_result_for_querying
+        # }
 
 
 if __name__=='__main__':
