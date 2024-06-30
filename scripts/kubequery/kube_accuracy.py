@@ -141,7 +141,7 @@ class Kube_Accuracy:
         df = pd.DataFrame(self.accuracy)
         df=df.T
         if df.empty : 
-            self.stack_obj.log.warning("empty dataframe found for osquery table accuracies")
+            self.stack_obj.log.warning("empty dataframe found for kubequery accuracies")
             self.stack_obj.log.info(df)
             return None
         df = df.reset_index().rename(columns={'index': 'table'})

@@ -144,4 +144,9 @@ class events_count_class:
             }
 
         self.stack_obj.log.info(save_dict)
-        return save_dict
+        if save_dict=={}:return None
+        return {"format":"mapping",
+                "collapse":False,
+                "schema":{},
+                "data":save_dict}
+        # return save_dict

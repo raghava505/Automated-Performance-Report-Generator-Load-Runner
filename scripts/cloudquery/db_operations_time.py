@@ -1,6 +1,6 @@
 import requests
 import json
-
+import pandas as pd
 from config_vars import *
 
 
@@ -34,6 +34,21 @@ class DB_OPERATIONS_TIME:
             value = int(item['value'][1])
             save_dict[str(item['metric'])] = value
         self.stack_obj.log.info(save_dict)
-        return save_dict
+        df = pd.DataFrame({"time":save_dict.keys() , "value":save_dict.values()})
+        if df.empty : 
+            self.stack_obj.log.info(df)
+            self.stack_obj.log.warning("empty dataframe found for db operations")
+            return None
+        return_dict ={
+                "format":"table",
+                "collapse":True,
+                "schema":{
+                    "merge_on_cols" : ["time"],
+                    "compare_cols":["value"]
+                },
+                "data":df.to_dict(orient="records")
+            }
+        return return_dict
+        # return save_dict
     
     
