@@ -9,8 +9,6 @@ from collections import defaultdict
 
 class perf_load_report_publish:
     def __init__(self,dbname,coll_name,sprint_runs_list,parent_page_title, report_title, email_address, api_key, space, url):
-        self.dbname = dbname
-        self.coll_name=coll_name
         client = MongoClient(MONGO_CONNECTION_STRING)
         self.database = client[dbname] 
         self.collection = self.database[coll_name]
@@ -20,10 +18,12 @@ class perf_load_report_publish:
         self.main_result=self.collection.find_one({"load_details.data.sprint":self.main_sprint , "load_details.data.run":self.main_run})
         self.all_keys = list(self.main_result.keys())
         self.all_keys.remove('_id')
-        self.main_build = self.main_result["load_details"]["data"]["build"]
-        self.id = str(self.main_result["_id"])
         print(f"All keys found in main document are : \n {self.all_keys}")
+
         self.confluence_page_mappings={}
+        self.main_build = self.main_result["load_details"]["data"]["build"]
+        id = str(self.main_result["_id"])
+        self.graphs_path = os.path.join(dbname,coll_name,id)
         self.parent_page_title=parent_page_title
         self.report_title=report_title
         self.email_address=email_address
@@ -82,18 +82,17 @@ class perf_load_report_publish:
         elif val < 0: return f"{abs(val)} ⬇️"
         elif val == 0: return 0
         else :
-            print(f"WARNING : Unexpected value found : {val}")
+            # print(f"WARNING : Unexpected value found : {val}")
             return val
         
     def compare_dfs(self,compare_col,merged_df,builds,merge_on_cols):
-        cols = merged_df.columns
-        if compare_col not in cols:return None
+        if compare_col not in merged_df.columns:return None
         main_col_name = f"{compare_col}_{self.main_build}_run{self.main_run}"
         merged_df.rename(columns={compare_col: main_col_name}, inplace=True)
         cols_order = [f"{compare_col}_{build}" for build in reversed(builds)] 
-        if len(cols_order)==0:return None
+        if not cols_order:return None
         cols_order = merge_on_cols+cols_order+[main_col_name]
-        final_df = merged_df[cols_order]
+        final_df = merged_df.loc[:, cols_order]
         final_df["Absolute"] = round(final_df[cols_order[-1]]-final_df[cols_order[-2]],2)
         final_df["Relative %"] = np.where(final_df[cols_order[-2]] != 0,
                                           round((final_df[cols_order[-1]]-final_df[cols_order[-2]])*100/final_df[cols_order[-2]],2),
@@ -108,64 +107,66 @@ class perf_load_report_publish:
         heading=heading.capitalize()
         return heading
 
+    def add_standard_table(self,table_dictionary,key_name,curr_page_obj,parent_key=None):
+        schema = table_dictionary["schema"]
+        merge_on_cols = schema["merge_on_cols"]
+        compare_cols = schema["compare_cols"]
+        try:display_exact_table = schema["display_exact_table"]
+        except:display_exact_table=True
+        try:collapse = table_dictionary["collapse"]
+        except:collapse=True
+        data=table_dictionary["data"]
+        main_df = pd.DataFrame(data)
+        if main_df.empty : return main_df
+
+        heading_size = 3 if parent_key else 2
+
+        if len(self.sprint_runs_list) > 0 and len(merge_on_cols) > 0 and len(compare_cols) > 0:
+            merged_df, builds = self.merge_dfs(merge_on_cols,key_name,parent_key_name = parent_key)
+            # if no comparison tables, show the exact table
+            if display_exact_table or len(builds) == 0: curr_page_obj.add_table_from_dataframe(f"<h{heading_size}>{self.captilise_heading(key_name)}</h{heading_size}>", main_df, collapse=collapse)
+            else: curr_page_obj.add_text(f"<h{heading_size}>{self.captilise_heading(key_name)}</h{heading_size}>")
+
+            for compare_col in compare_cols:
+                returned_df = self.compare_dfs(compare_col,merged_df,builds,merge_on_cols)
+                if returned_df is not None and not returned_df.empty :curr_page_obj.add_table_from_dataframe(f"<h{heading_size+1}>Comparison on {self.captilise_heading(compare_col)}</h{heading_size+1}>", returned_df.copy(), collapse=collapse, red_green_column_list=["Absolute","Relative %"])
+            main_df = returned_df.copy()
+        else:
+            curr_page_obj.add_table_from_dataframe(f"<h{heading_size}>{self.captilise_heading(key_name)}</h{heading_size}>", main_df, collapse=collapse)
+        if main_df.empty : return main_df
+        return main_df
+
+
     def extract_all_variables(self):
         self.create_page(self.parent_page_title, self.report_title)
         for key_name in self.all_keys:
             key_format = self.main_result[key_name]["format"]
+            # if key_format != "analysis":continue
             schema = self.main_result[key_name]["schema"]
             data = self.main_result[key_name]["data"]
-            try:collapse = self.main_result[key_name]["collapse"]
-            except Exception as e:
-                print(f"error finding cllapse var : {e}")
-                collapse=True
+
             if "page" in schema : page = schema["page"]
             else : page = "Overview"
-            if page in self.confluence_page_mappings:
-                curr_page_obj = self.confluence_page_mappings[page]
+
+            if page in self.confluence_page_mappings: curr_page_obj = self.confluence_page_mappings[page]
             else:
                 curr_page_obj = self.create_page(self.report_title, f"{page}-{report_title}")
                 self.confluence_page_mappings[page]=curr_page_obj
+            
             if key_format == "table":
-                merge_on_cols = schema["merge_on_cols"]
-                compare_cols = schema["compare_cols"]
-                
-                # try:display_exact_table = schema["display_exact_table"]
-                # except:display_exact_table=True
-
-                main_df = pd.DataFrame(data)
-                if main_df.empty : continue
-                curr_page_obj.add_table_from_dataframe(f"<h2>{self.captilise_heading(key_name)}</h2>", main_df, collapse=collapse)
-                if len(self.sprint_runs_list) > 0 and len(merge_on_cols) > 0 and len(compare_cols) > 0:
-                    merged_df, builds = self.merge_dfs(merge_on_cols,key_name,parent_key_name = None)
-                    for compare_col in compare_cols:
-                        returned_df = self.compare_dfs(compare_col,merged_df,builds,merge_on_cols)
-                        main_df = returned_df.copy()
-                        if returned_df is not None and not returned_df.empty :curr_page_obj.add_table_from_dataframe(f"<h3>comparison on {self.captilise_heading(compare_col)}</h3>", returned_df, collapse=collapse, red_green_column_list=["Absolute","Relative %"])
-                if "Overall Memory" in key_name:
-                    self.overall_memory_df = main_df
-                if "Overall CPU" in key_name:
-                    self.overall_cpu_df = main_df
+                main_df = self.add_standard_table(self.main_result[key_name],key_name,curr_page_obj)
+                if main_df.empty: continue
+                             
+                # if "Overall Memory" in key_name:
+                #     self.overall_memory_df = main_df
+                # if "Overall CPU" in key_name:
+                #     self.overall_cpu_df = main_df
            
             elif key_format == "nested_table":
                 curr_page_obj.add_text(f"<h2>{self.captilise_heading(key_name)}</h2>")
                 for nested_key_name in data.keys():
-                    key_format = self.main_result[key_name]["data"][nested_key_name]["format"]
-                    schema = self.main_result[key_name]["data"][nested_key_name]["schema"]
-                    data = self.main_result[key_name]["data"][nested_key_name]["data"]
-                    if key_format != "table":print(f"WARNING check the nested key format for this key. current key format is : {key_format}")
-                    if key_format == "table":
-                        merge_on_cols = schema["merge_on_cols"]
-                        compare_cols = schema["compare_cols"]
-                        # try:display_exact_table = schema["display_exact_table"]
-                        # except:display_exact_table=True
-                        main_df = pd.DataFrame(data)
-                        if main_df.empty : continue
-                        curr_page_obj.add_table_from_dataframe(f"<h3>{self.captilise_heading(nested_key_name)}</h3>", main_df, collapse=collapse)
-                        if len(self.sprint_runs_list) > 0 and len(merge_on_cols) > 0 and len(compare_cols) > 0:
-                            merged_df, builds = self.merge_dfs(merge_on_cols,nested_key_name,parent_key_name = key_name)
-                            for compare_col in compare_cols:
-                                returned_df = self.compare_dfs(compare_col,merged_df,builds,merge_on_cols)
-                                if returned_df is not None and not returned_df.empty :curr_page_obj.add_table_from_dataframe(f"<h4>comparison on {self.captilise_heading(compare_col)}</h4>", returned_df, collapse=collapse,red_green_column_list=["Absolute","Relative %"])
+                    main_df = self.add_standard_table(self.main_result[key_name]["data"][nested_key_name],nested_key_name,curr_page_obj,parent_key=key_name)
+                    if main_df.empty: continue
 
             elif key_format == "mapping":
                 curr_page_obj.add_text(f"<h2>{self.captilise_heading(key_name)}</h2>")
@@ -194,7 +195,7 @@ class perf_load_report_publish:
                     continue
                 prev_list = set(prev_data[key_name]["data"])
                 if curr_list == prev_list:
-                    curr_page_obj.add_text(f'<p><span style="color: green;">No new topics added</span></p>')
+                    curr_page_obj.add_text(f'<p><span style="color: green;">No new topics added/deleted </span></p>')
                     continue
                 newly_added = curr_list - prev_list
                 deleted = prev_list - curr_list
@@ -220,20 +221,19 @@ class perf_load_report_publish:
                     file_path = f"{BASE_ANALYSIS_PIECHARTS_PATH}/{piechart_name}.png"
                     temp_images[piechart_name].save(file_path)
                     final_images[piechart_name].append(file_path)
-                memory_combined_df = pd.merge(self.overall_memory_df,memory_combined_df,on=["node_type"], how='outer')
-                cpu_combined_df = pd.merge(self.overall_cpu_df,cpu_combined_df,on=["node_type"], how='outer')
-                curr_page_obj.add_text(f"<h2>Overall Resource Utilizations</h2>")
-                curr_page_obj.add_table_from_dataframe(f'<h2>{self.captilise_heading("memory_usages_analysis")}</h2>', memory_combined_df, collapse=False,red_green_column_list=["Absolute","Relative %"])
-                curr_page_obj.add_table_from_dataframe(f'<h2>{self.captilise_heading("cpu_usage_analysis")}</h2>', cpu_combined_df, collapse=False,red_green_column_list=["Absolute","Relative %"])
+                # memory_combined_df = pd.merge(self.overall_memory_df,memory_combined_df,on=["node_type"], how='outer')
+                # cpu_combined_df = pd.merge(self.overall_cpu_df,cpu_combined_df,on=["node_type"], how='outer')
+                curr_page_obj.add_text(f"<h2>Contributers to Resource Usage increase/decrease</h2>")
+                curr_page_obj.add_table_from_dataframe(f'<h3>{self.captilise_heading("memory_usages_analysis")}</h3>', memory_combined_df.copy(), collapse=False,red_green_column_list=list(memory_combined_df.columns))
+                curr_page_obj.add_table_from_dataframe(f'<h3>{self.captilise_heading("cpu_usage_analysis")}</h3>', cpu_combined_df.copy(), collapse=False,red_green_column_list=list(cpu_combined_df.columns))
                 curr_page_obj.attach_saved_charts(final_images,main_heading="Complete Analysis piecharts for resource utilizations")
-
             elif key_format == "charts":
-                base_graphs_path=os.path.join(schema["base_graphs_path"],self.dbname,self.coll_name,self.id)
+                base_graphs_path=os.path.join(schema["base_graphs_path"],self.graphs_path)
                 charts_paths_dict={}
                 for main_heading,inside_charts in data.items():
-                    charts_paths_dict[main_heading] = [f'{os.path.join(base_graphs_path,main_heading,f"{str(file_name).replace("/","-")}.png")}' for file_name in list(inside_charts.keys())]
+                    charts_paths_dict[main_heading] = [f'{os.path.join(base_graphs_path,main_heading,str(file_name).replace("/","-")+".png")}' for file_name in list(inside_charts.keys())]
                 curr_page_obj.attach_saved_charts(charts_paths_dict)
-        curr_page_obj.update_and_publish()
+            curr_page_obj.update_and_publish()
 
 if __name__=='__main__':
     url='https://uptycsjira.atlassian.net'
@@ -241,7 +241,7 @@ if __name__=='__main__':
     api_key = "ATATT3xFfGF02rG4e5JQzZZ_mVdAkwKKGnjRLYIupWToEGxZm8X-r5dUrAzSAdzGi5FPXMIn_IacnJjOwORsOQV7noObZmkdHqsaHHIzw4pTVyid2Jh3rVmLjM8iw5_hmaK7rFWSMz1JBpQq44vGV1FJs7P-89zijob43kBuxHzfFJJxl5IlM0w=7CE826E3"
     space = '~71202040c8bf45840d41c598c0efad54382c7b'
     parent_page_title = 'PUBLISH TEST'
-    report_title = "TEST 26"
+    report_title = "TEST 38"
 
     obj = perf_load_report_publish("Osquery_LoadTests","MultiCustomer",[(100,4),(100,3),(100,2)],parent_page_title, report_title, email_address, api_key, space, url)
     # result = obj.get_key_result(100,1,"Trino Queries Analysis.data.Total time taken by each dag")
