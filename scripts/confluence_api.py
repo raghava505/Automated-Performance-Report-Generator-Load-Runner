@@ -105,9 +105,9 @@ class publish_to_confluence:
     
     def get_red_green_text(self,text):
         text = str(text.split('/')[1]).strip()
-        if str(text).endswith("⬇️"):
+        if "⬇️" in str(text):
             return f'<span style="color: green;">{text}</span>'
-        elif str(text).endswith("⬆️"):
+        elif "⬆️" in str(text):
             return f'<span style="color: red;">{text}</span>'
         else:return text
 
