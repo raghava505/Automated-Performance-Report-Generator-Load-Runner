@@ -243,7 +243,7 @@ if __name__=='__main__':
     parent_page_title = 'PUBLISH TEST'
     report_title = "TEST 38"
 
-    obj = perf_load_report_publish("Osquery_LoadTests","MultiCustomer",[(100,4),(100,3),(100,2)],parent_page_title, report_title, email_address, api_key, space, url)
+    obj = perf_load_report_publish("Osquery_LoadTests_New","MultiCustomer",[(100,4),(100,3),(100,2)],parent_page_title, report_title, email_address, api_key, space, url)
     if "new_format" not in obj.all_keys:
         print("ERROR : We are not dealing with new format mongo document")
     else:
