@@ -42,12 +42,6 @@ def create_input_form():
             "build": "155007",
             "apiload_remote_directory_name":"jupiter_50_2024-06-11_15-38-03"
             }
-    
-    # These three lines are for Debugging Purposes :)
-    # print("DEBUG: EARLY RETURN IN INPUT.PY")
-    # load_cls = load_type_options[details["load_type"]]['class']
-    # stack_obj = stack_configuration(test_env_file_name=details['test_env_file_name'])
-    # return details,stack_obj,load_cls
 
     print("Please enter the following load details ...")
     for key,value in details.items():

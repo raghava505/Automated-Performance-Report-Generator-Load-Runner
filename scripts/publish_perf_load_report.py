@@ -36,7 +36,7 @@ class perf_load_report_publish:
         result=self.collection.find_one({"load_details.data.sprint":sprint , "load_details.data.run":run},filter)
         return result
     
-    def create_page(self,parent_page_title, report_title):
+    def create_report_page(self,parent_page_title, report_title):
         obj = publish_to_confluence(parent_page_title, report_title, self.email_address, self.api_key, self.space, self.url)
         flag, err = obj.create_page()
         if flag == False:
@@ -138,7 +138,7 @@ class perf_load_report_publish:
 
 
     def extract_all_variables(self):
-        self.create_page(self.parent_page_title, self.report_title)
+        self.create_report_page(self.parent_page_title, self.report_title)
         for key_name in self.all_keys:
             key_format = self.main_result[key_name]["format"]
             # if key_format != "analysis":continue
@@ -150,7 +150,7 @@ class perf_load_report_publish:
 
             if page in self.confluence_page_mappings: curr_page_obj = self.confluence_page_mappings[page]
             else:
-                curr_page_obj = self.create_page(self.report_title, f"{page}-{report_title}")
+                curr_page_obj = self.create_report_page(self.report_title, f"{page}-{report_title}")
                 self.confluence_page_mappings[page]=curr_page_obj
             
             if key_format == "table":
@@ -244,7 +244,12 @@ if __name__=='__main__':
     report_title = "TEST 38"
 
     obj = perf_load_report_publish("Osquery_LoadTests","MultiCustomer",[(100,4),(100,3),(100,2)],parent_page_title, report_title, email_address, api_key, space, url)
+    if "new_format" not in obj.all_keys:
+        print("ERROR : We are not dealing with new format mongo document")
+    else:
+        obj.all_keys.remove('new_format')
+        obj.extract_all_variables()
     # result = obj.get_key_result(100,1,"Trino Queries Analysis.data.Total time taken by each dag")
     # print(result)
-    obj.extract_all_variables()
+    
     

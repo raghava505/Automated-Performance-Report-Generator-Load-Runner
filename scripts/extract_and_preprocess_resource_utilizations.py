@@ -412,12 +412,6 @@ class complete_resource_usages:
         return result
     
     def collect_total_usages(self,for_report):
-        # {"format":"nested_table","schema":{},"data":}
-
-        # defaultdict(dict, self.collect_total_memory_usages(for_report))
-        # {"format":"nested_table","schema":{},"data":defaultdict(dict, self.collect_total_memory_usages(for_report))}
-
-        # {"format":"nested_table","schema":{},"data":defaultdict(dict, self.collect_total_cpu_usages(for_report))}
         return_dict = {
             "memory_usages" : {"format":"nested_table","schema":{"page":"Resource Utilizations"},"data":defaultdict(dict, self.collect_total_memory_usages(for_report))},
             "cpu_usages" : {"format":"nested_table","schema":{"page":"Resource Utilizations"},"data":defaultdict(dict, self.collect_total_cpu_usages(for_report))}
@@ -466,15 +460,6 @@ class complete_resource_usages:
                                             }
                                         }
                                 },
-
-                            # "cpu_usages_analysis" :
-                            #     {"format":"analysis",
-                            #     "schema":{"page":"Summary"},
-                            #     "data":  {
-                            #         "nodetype_and_application_level_cpu_usages":nodetype_and_application_level_cpu_usage,
-                            #         "nodetype_and_container_level_cpu_usages":nodetype_and_container_level_cpu_usage,
-                            #         "nodetype_and_pod_level_cpu_usages":nodetype_and_pod_level_cpu_usage
-                            #     }}
                         })
 
         return return_dict
@@ -483,13 +468,6 @@ class complete_resource_usages:
         total_result_for_report=self.collect_total_usages(for_report=True)
         # total_result_for_querying=self.collect_total_usages(for_report=False)
         return total_result_for_report
-        # {
-        #     "resource_utilization_for_report":{ "format":"nested_table",
-        #                                         "schema":{},
-        #                                         "data":total_result_for_report
-        #                                         }
-        #     # "resource_utilization_for_querying":total_result_for_querying
-        # }
 
 
 if __name__=='__main__':

@@ -130,7 +130,8 @@ if __name__ == "__main__":
                 "load_details":{"format":"mapping","schema":{"page":"Summary"},"data":load_details},
                 "Test environment details": extract_ram_cores_storage_details(stack_obj),
                 "observations":load_cls.get_observations(),
-                "Bugs raised":load_cls.get_bugs_raised()
+                "Bugs raised":load_cls.get_bugs_raised(),
+                "new_format":True
             }
 
             #-------------------------real time query test details--------------------------
