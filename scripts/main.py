@@ -54,7 +54,7 @@ if __name__ == "__main__":
         
         #---------------------Check for previous runs------------------------------------
         client = pymongo.MongoClient(MONGO_CONNECTION_STRING)
-        database_name = variables['load_type']+"_LoadTests"
+        database_name = variables['load_type']+"_LoadTests_New"
         collection_name = variables["load_name"]
         db=client[database_name]
         collection = db[collection_name]
