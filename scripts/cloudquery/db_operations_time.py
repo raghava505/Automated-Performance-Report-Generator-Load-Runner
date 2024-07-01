@@ -9,7 +9,7 @@ class DB_OPERATIONS_TIME:
         self.curr_ist_start_time=stack_obj.start_timestamp
         self.PROMETHEUS = stack_obj.prometheus_path
         self.API_PATH = PROM_POINT_API_PATH
-
+        self.stack_obj = stack_obj
                 
         self.query = "sort_desc(sum(curr_state_db_op_sec_bucket) by(le))"
         #self.query2 = "sort_desc(rate(curr_state_db_op_sec_sum{ job="cloudquery"}[5m])/rate(curr_state_db_op_sec_count{ job="cloudquery"}[5m])) > 0.1"
