@@ -254,8 +254,6 @@ def fetch_and_extract_csv(remote_csv_path,reports_node_ip,stack_obj):
 
         df = pd.read_csv(local_csv_path)
         load_dict = df.to_dict(orient='records')
-        # print("Printing API Load data")
-        # print(api_load_dict)
         stack_obj.log.info("Extracting csv file...")
         return load_dict 
     

@@ -14,7 +14,6 @@ sns.set(rc={"text.color": text_color})
 kwargs={'startangle':270, 
         'wedgeprops': {'edgecolor': outer_background_color, 'linewidth': 2.5},  # Set edge width
         'textprops': {'fontsize': 23,'fontweight': 'bold'},  # Increase font size of labels
-        # 'colors' : ['#196F3D','#21618C','#7B241C','#7D6608','#4A148C','#6E2C00','#880E4F',"#330066","#7D4D00"],
         'rotatelabels':False,
         'labeldistance':1.01,
         'pctdistance':0.78,

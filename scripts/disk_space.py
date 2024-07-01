@@ -7,16 +7,6 @@ class diskspace_usage_class:
         self.curr_ist_end_time=stack_obj.end_timestamp
         self.stack_obj=stack_obj
 
-        # self.kafka_total_space = {}
-        # for pnode in self.stack_details['pnodes']:
-        #     capacity = self.stack_details[pnode]['storage']['kafka']
-        #     if str(capacity).endswith('T'):
-        #         self.kafka_total_space[pnode] = float(str(capacity)[:-1]) * 1e+12
-        #         self.kafka_total_space[pnode+'v'] = float(str(capacity)[:-1]) * 1e+12
-        #     elif str(capacity).endswith('G'):
-        #         self.kafka_total_space[pnode] = float(str(capacity)[:-1]) * 1e+9
-        #         self.kafka_total_space[pnode+'v'] = float(str(capacity)[:-1]) * 1e+9
-
         self.get_hdfs_total_space_query=f"sort(sum(uptycs_hdfs_node_config_capacity{{cluster_id=~'clst1'}}) by (hdfsdatanode))"
         self.remaining_hdfs_space_query=f"sort(uptycs_hdfs_node_remaining_capacity{{cluster_id=~'clst1'}})"
 
@@ -86,8 +76,6 @@ class diskspace_usage_class:
                 },
                 "data":df.to_dict(orient="records")
             }
-        # self.stack_obj.log.info("Final dictionary to save : " , )
-        # self.stack_obj.log.info(json.dumps(return_dict, indent=4))
         return TYPE,return_dict
 
     def pg_disk_calc(self,TYPE):
@@ -125,8 +113,6 @@ class diskspace_usage_class:
                 },
                 "data":df.to_dict(orient="records")
             }
-        # self.stack_obj.log.info("Final dictionary to save : " , )
-        # self.stack_obj.log.info(json.dumps(save_dict, indent=4))
         return TYPE,return_dict
 
     def save(self,_ ,current_build_data):

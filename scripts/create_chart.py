@@ -57,7 +57,6 @@ def eliminate_long_breaks_for_area_plot(old_x,old_y,step_factor):
 offset_ist_minutes = 330  # 5 hours and 30 minutes offset in minutes
 
 outer_background_color="#191b1f"
-# text_color="#ccccdc"
 text_color="#EAEAEA"
 inner_background_color = "#191b1f"
 gridline_color = "#404144"
@@ -199,10 +198,8 @@ if __name__=="__main__":
     global delete_image_data
     delete_image_data=True
     import time,pymongo
-    # from collections import defaultdict
     from gridfs import GridFS
     from settings import stack_configuration
-    # from datetime import datetime, timedelta
     import pytz
     from capture_charts_data import Charts
     from parent_load_details import parent as load_cls
