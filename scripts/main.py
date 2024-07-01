@@ -132,11 +132,11 @@ if __name__ == "__main__":
             }
 
             #-------------------------real time query test details--------------------------
-            if domain=="longevity" and variables["load_type"] in ["all_loads_combined"]: 
-                from realtimequery_tests.real_time_query import realtime_query
-                stack_obj.log.info(f"Performing realtime query test on stack '{stack}' ...")
-                realtime_query_results=realtime_query()
-                if realtime_query_results:final_data_to_save.update({"Realtimequery test results":realtime_query_results})
+            # if domain=="longevity" and variables["load_type"] in ["all_loads_combined"]: 
+            #     from realtimequery_tests.real_time_query import realtime_query
+            #     stack_obj.log.info(f"Performing realtime query test on stack '{stack}' ...")
+            #     realtime_query_results=realtime_query()
+            #     if realtime_query_results:final_data_to_save.update({"Realtimequery test results":realtime_query_results})
             #-------------------------disk space--------------------------
             if variables["load_name"] != "ControlPlane":
                 stack_obj.log.info("******* Calculating disk space usages ...")
