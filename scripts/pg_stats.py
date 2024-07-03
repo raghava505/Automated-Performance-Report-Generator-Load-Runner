@@ -47,7 +47,8 @@ class pg_stats_class:
                         "format":"table","collapse":True,
                         "schema":{
                             "merge_on_cols" : ["table_name"],
-                            "compare_cols":["after-before"]
+                            "compare_cols":["after-before"],
+                            "display_exact_table":False
                         },
                         "data":df.to_dict(orient="records")
                     }

@@ -421,10 +421,12 @@ class complete_resource_usages:
 
         nodetype_level_memory_usage=return_dict["memory_usages"]["data"]["nodetype_level_usages"]
         nodetype_level_memory_usage["schema"]["page"] = "Summary"
+        nodetype_level_memory_usage["collapse"] = False
         del return_dict["memory_usages"]["data"]["nodetype_level_usages"]
 
         nodetype_level_cpu_usage=return_dict["cpu_usages"]["data"]["nodetype_level_usages"]
         nodetype_level_cpu_usage["schema"]["page"] = "Summary"
+        nodetype_level_cpu_usage["collapse"] = False
         del return_dict["cpu_usages"]["data"]["nodetype_level_usages"]
        
         return_dict.update({"Overall Memory usage by each nodetype (GB)":nodetype_level_memory_usage,
