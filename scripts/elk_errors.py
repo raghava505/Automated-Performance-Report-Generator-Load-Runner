@@ -86,7 +86,7 @@ class elk_errors_class:
                             count = item.get('doc_count', 0)
                             save_dict.append({"Error Message": error_message, "Count": count})
                         df = pd.DataFrame(save_dict)
-                        self.stack_obj.log.info(df)
+                        self.stack_obj.log.info("\n",df)
                         return_dict ={
                                 "format":"table","collapse":True,
                                 "schema":{

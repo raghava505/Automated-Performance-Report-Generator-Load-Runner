@@ -99,11 +99,11 @@ class SelfManaged_Accuracy:
         df = pd.DataFrame(self.accuracy)
         df=df.T
         if df.empty : 
-            self.stack_obj.log.info(df)
+            self.stack_obj.log.info("\n",df)
             self.stack_obj.log.warning("empty dataframe found for selfmanaged accuracies")
             return None
         df = df.reset_index().rename(columns={'index': 'table'})
-        self.stack_obj.log.info(df)
+        self.stack_obj.log.info("\n",df)
         return_dict ={
                 "format":"table","collapse":True,
                 "schema":{
