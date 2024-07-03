@@ -160,11 +160,11 @@ class cloud_accuracy:
         df = pd.DataFrame(expected_data)
         df=df.T
         if df.empty : 
-            self.stack_obj.log.info("\n",df)
-            self.stack_obj.log.warning("empty dataframe found for cloudquery table accuracies")
+            print("\n",df)
+            print(f"WARNING : empty dataframe found for cloudquery table accuracies in {file}")
             return None
         df = df.reset_index().rename(columns={'index': 'table'})
-        self.stack_obj.log.info("\n",df)
+        print("\n",df)
         return_dict ={
                 "format":"table","collapse":True,
                 "schema":{
