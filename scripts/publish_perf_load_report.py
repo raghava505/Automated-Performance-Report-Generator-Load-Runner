@@ -85,6 +85,20 @@ class perf_load_report_publish:
             # print(f"WARNING : Unexpected value found : {val}")
             return val
         
+    def preprocess_df(self,final_df):
+        numeric_cols = final_df.select_dtypes(include=[np.number]).columns
+        non_numeric_cols = final_df.select_dtypes(exclude=[np.number]).columns
+           
+        fill_values = {}
+        fill_values.update({col: 0 for col in numeric_cols})
+        fill_values.update({col: "NaN" for col in non_numeric_cols})
+        final_df = final_df.fillna(fill_values)
+        
+        new_sum_row=dict([(int_col,final_df[int_col].sum()) for int_col in numeric_cols])
+        new_sum_row.update(dict([(str_col,"SUM") for str_col in non_numeric_cols]))
+        final_df = final_df._append(new_sum_row, ignore_index=True)
+        return final_df        
+        
     def compare_dfs(self,compare_col,merged_df,builds,merge_on_cols):
         if compare_col not in merged_df.columns:return None
         main_col_name = f"{compare_col}_{self.main_build}_run{self.main_run}"
@@ -93,6 +107,7 @@ class perf_load_report_publish:
         if not cols_order:return None
         cols_order = merge_on_cols+cols_order+[main_col_name]
         final_df = merged_df.loc[:, cols_order]
+        final_df = self.preprocess_df(final_df)
         final_df["Absolute"] = round(final_df[cols_order[-1]]-final_df[cols_order[-2]],2)
         final_df["Relative %"] = np.where(final_df[cols_order[-2]] != 0,
                                           round((final_df[cols_order[-1]]-final_df[cols_order[-2]])*100/final_df[cols_order[-2]],2),
@@ -119,12 +134,16 @@ class perf_load_report_publish:
         main_df = pd.DataFrame(data)
         if main_df.empty : return main_df
 
+        copy_main_df = main_df.copy()
+        if "ccurac" not in key_name and "ugs raised" not in key_name and "servations" not in key_name : 
+            copy_main_df = self.preprocess_df(copy_main_df)
+
         heading_size = 3 if parent_key else 2
 
         if len(self.sprint_runs_list) > 0 and len(merge_on_cols) > 0 and len(compare_cols) > 0:
             merged_df, builds = self.merge_dfs(merge_on_cols,key_name,parent_key_name = parent_key)
             # if no comparison tables, show the exact table
-            if display_exact_table or len(builds) == 0: curr_page_obj.add_table_from_dataframe(f"<h{heading_size}>{self.captilise_heading(key_name)}</h{heading_size}>", main_df, collapse=collapse)
+            if display_exact_table or len(builds) == 0: curr_page_obj.add_table_from_dataframe(f"<h{heading_size}>{self.captilise_heading(key_name)}</h{heading_size}>", copy_main_df, collapse=collapse)
             else: curr_page_obj.add_text(f"<h{heading_size}>{self.captilise_heading(key_name)}</h{heading_size}>")
 
             for compare_col in compare_cols:
@@ -132,7 +151,7 @@ class perf_load_report_publish:
                 if returned_df is not None and not returned_df.empty :curr_page_obj.add_table_from_dataframe(f"<h{heading_size+1}>Comparison on {self.captilise_heading(compare_col)}</h{heading_size+1}>", returned_df.copy(), collapse=collapse, red_green_column_list=["Absolute","Relative %"])
             main_df = returned_df.copy()
         else:
-            curr_page_obj.add_table_from_dataframe(f"<h{heading_size}>{self.captilise_heading(key_name)}</h{heading_size}>", main_df, collapse=collapse)
+            curr_page_obj.add_table_from_dataframe(f"<h{heading_size}>{self.captilise_heading(key_name)}</h{heading_size}>", copy_main_df, collapse=collapse)
         if main_df.empty : return main_df
         return main_df
 
@@ -241,7 +260,7 @@ if __name__=='__main__':
     api_key = "ATATT3xFfGF02rG4e5JQzZZ_mVdAkwKKGnjRLYIupWToEGxZm8X-r5dUrAzSAdzGi5FPXMIn_IacnJjOwORsOQV7noObZmkdHqsaHHIzw4pTVyid2Jh3rVmLjM8iw5_hmaK7rFWSMz1JBpQq44vGV1FJs7P-89zijob43kBuxHzfFJJxl5IlM0w=7CE826E3"
     space = '~71202040c8bf45840d41c598c0efad54382c7b'
     parent_page_title = 'PUBLISH TEST'
-    report_title = "TEST 38"
+    report_title = "TEST 4"
 
     obj = perf_load_report_publish("Osquery_LoadTests_New","MultiCustomer",[(158,1),(157,1)],parent_page_title, report_title, email_address, api_key, space, url)
     if "new_format" not in obj.all_keys:
