@@ -112,6 +112,7 @@ class complete_resource_usages:
             group_df = group_df[group_df[average_column_name] >= usage_threshold]
             # if group_df.empty:continue
             if group_df.empty:continue
+            group_df = group_df.round(2)
             if for_report:
                 group_df = group_df.reset_index()
                 if single_level_for_report:
@@ -138,6 +139,7 @@ class complete_resource_usages:
         self.stack_obj.log.info(f"************************* Group by single column called with parameters col:{col}, for_report:{for_report}, df_shape:{df.shape}")
         df=df.groupby(col)[cols_to_aggregate].sum()
         df = df[df[average_column_name] >= usage_threshold]
+        df = df.round(2)
         # print(self.sum_and_sort_cols(df.copy()))
         self.stack_obj.log.info(f"\n {df}")
         if for_report:

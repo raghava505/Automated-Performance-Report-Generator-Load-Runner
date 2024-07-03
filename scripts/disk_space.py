@@ -66,6 +66,7 @@ class diskspace_usage_class:
                 self.stack_obj.log.error(f"error calculating {TYPE} usage for node {node}")
         df = pd.DataFrame(save_dict)
         df=df.T
+        df = df.round(2)
         df = df.reset_index().rename(columns={'index': 'node'})
         self.stack_obj.log.info(df)
         return_dict ={
@@ -103,6 +104,7 @@ class diskspace_usage_class:
                 "/data (used in GB) (After -  Before)" : total_data_partition_disk_used}
         df = pd.DataFrame(save_dict)
         df=df.T
+        df = df.round(2)
         df = df.reset_index().rename(columns={'index': 'node'})
         self.stack_obj.log.info(df)
         return_dict ={
