@@ -135,7 +135,7 @@ class perf_load_report_publish:
         if main_df.empty : return main_df
 
         copy_main_df = main_df.copy()
-        if "ccurac" not in key_name and "ugs raised" not in key_name and "servations" not in key_name : 
+        if "ccurac" not in key_name and "ugs raised" not in key_name and "servations" not in key_name and "environment details" not in key_name: 
             copy_main_df = self.preprocess_df(copy_main_df)
 
         heading_size = 3 if parent_key else 2
@@ -260,9 +260,9 @@ if __name__=='__main__':
     api_key = "ATATT3xFfGF02rG4e5JQzZZ_mVdAkwKKGnjRLYIupWToEGxZm8X-r5dUrAzSAdzGi5FPXMIn_IacnJjOwORsOQV7noObZmkdHqsaHHIzw4pTVyid2Jh3rVmLjM8iw5_hmaK7rFWSMz1JBpQq44vGV1FJs7P-89zijob43kBuxHzfFJJxl5IlM0w=7CE826E3"
     space = '~71202040c8bf45840d41c598c0efad54382c7b'
     parent_page_title = 'PUBLISH TEST'
-    report_title = "TEST 4"
+    report_title = "S1 MultiCustomer and controlplane load report 2024-07-03"
 
-    obj = perf_load_report_publish("Osquery_LoadTests_New","MultiCustomer",[(158,1),(157,1)],parent_page_title, report_title, email_address, api_key, space, url)
+    obj = perf_load_report_publish("Osquery_LoadTests_New","MultiCustomer",[(158,2),(157,1)],parent_page_title, report_title, email_address, api_key, space, url)
     if "new_format" not in obj.all_keys:
         print("ERROR : We are not dealing with new format mongo document")
     else:
