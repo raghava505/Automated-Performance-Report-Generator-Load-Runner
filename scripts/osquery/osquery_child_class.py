@@ -13,7 +13,7 @@ class osquery_child(parent):
                     "assets_per_cust":"100",
                     "records_sent_per_hour_per_customer": "6.48 million", #"5.44 million", 
                     "records_sent_per_hour" : "648 million", # "653 million", 
-                    "input_file": "inputFile6tab_12rec.log",
+                    "input_file": "rhel7-6tab_12rec.log",
                     "events_table_name": "dns_lookup_events, socket_events, process_events, process_file_events"
                 }
             },
