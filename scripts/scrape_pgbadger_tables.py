@@ -201,9 +201,10 @@ def scrape_func(path,db,stack_obj):
                 if df.empty : continue
                 df = fill_null(df)
                 for column in df.columns:
-                    if "dont_convert_to_seconds_cols" in value:
-                        if column not in value["dont_convert_to_seconds_cols"]:
-                            df[column]=df[column].apply(convert_to_seconds,stack_obj)
+                    if "dont_convert_to_seconds_cols" in value and column in value["dont_convert_to_seconds_cols"]: continue
+                    
+                    else:
+                        df[column]=df[column].apply(convert_to_seconds,args=(stack_obj,))
                 for col,typ in value["type_cast"].items():
                     df[col] = df[col].apply(lambda x: int(x.replace(',', '')))
                     df[col] = df[col].astype(typ)
@@ -232,6 +233,14 @@ def scrape_func(path,db,stack_obj):
     return total_result
 
 if __name__=="__main__":
+    from settings import stack_configuration
+    
+    variables = {
+        "start_time_str_ist":"2024-08-17 22:13",
+        "load_duration_in_hrs":10,
+        "test_env_file_name":'s1_nodes.json'
+    }
+    stack_obj = stack_configuration(variables)
     path = "/Users/masabathulararao/Documents/Loadtest/pgbadger_im/pgbadger_report_configdb.html"
-    scrape_func(path,"configdb")
+    scrape_func(path,"configdb",stack_obj)
     
