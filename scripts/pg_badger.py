@@ -185,27 +185,22 @@ def get_and_save_pgb_html(stack_obj,elastic_url,base_save_path,pgbadger_tail_pat
    
 
 if __name__=="__main__":
-    start_time_ist_str="2024-05-17 10:00"
-    end_time_ist_str="2024-05-17 15:00"
     elastic_url="192.168.129.52"
 
     BASE_PGBADGER_IMAGES_PATH = os.path.join("/Users/masabathulararao/Documents/Loadtest",'pgbadger_im')
     os.makedirs(BASE_PGBADGER_IMAGES_PATH,exist_ok=True)
+    from settings import stack_configuration
+    
+    variables = {
+        "start_time_str_ist":"2024-08-17 22:13",
+        "load_duration_in_hrs":10,
+        "test_env_file_name":'s1_nodes.json'
+    }
+    stack_obj = stack_configuration(variables)
 
-    ist_timezone = pytz.timezone('Asia/Kolkata')
-    utc_timezone = pytz.utc
+    pgbadger_links,extracted_tables= get_and_save_pgb_html(stack_obj,elastic_url,BASE_PGBADGER_IMAGES_PATH,"custom_path/sample","data")
 
-    format_data = "%Y-%m-%d %H:%M"
-    start_ist_time = ist_timezone.localize(datetime.strptime(start_time_ist_str, format_data))
-    end_ist_time = ist_timezone.localize(datetime.strptime(end_time_ist_str, format_data))
-
-    start_utc_time = start_ist_time.astimezone(utc_timezone)
-    end_utc_time = end_ist_time.astimezone(utc_timezone)
-
-    # res = return_pgbadger_results(start_utc_time,end_utc_time,elastic_url,BASE_PGBADGER_IMAGES_PATH)
-    res,extracted_tables= get_and_save_pgb_html(start_utc_time,end_utc_time,elastic_url,BASE_PGBADGER_IMAGES_PATH,"custom_path/sample","sample_ip","elk")
-
-    print(res)
+    print(pgbadger_links)
     from pymongo import MongoClient
     # Create a sample DataFrame
     client = MongoClient('mongodb://localhost:27017/')
