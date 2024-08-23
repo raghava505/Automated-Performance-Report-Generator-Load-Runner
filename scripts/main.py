@@ -223,11 +223,11 @@ if __name__ == "__main__":
             # if variables["load_name"] == "Azure_MultiCustomer" or variables["load_type"] in ["all_loads_combined"]:
             #     stack_obj.log.info("******* Calculating accuracies for Azure Load ...")
             #--------------------------------------Events Counts--------------------------------------
-            if variables["load_type"] in ["CloudQuery","osquery_cloudquery_combined","all_loads_combined"]:
-                stack_obj.log.info("******* Calculating the counts of various events during the load ...")
-                calc = events_count_class(variables=variables,stack_obj=stack_obj)
-                evecount = calc.get_events_count()
-                if evecount:final_data_to_save.update({"Cloudquery Event Counts":evecount})
+            # if variables["load_type"] in ["CloudQuery","osquery_cloudquery_combined","all_loads_combined"]:
+            #     stack_obj.log.info("******* Calculating the counts of various events during the load ...")
+            #     calc = events_count_class(variables=variables,stack_obj=stack_obj)
+            #     evecount = calc.get_events_count()
+            #     if evecount:final_data_to_save.update({"Cloudquery Event Counts":evecount})
             #--------------------------------------STS Records-------------------------------------------
             # if variables["load_name"] == "AWS_MultiCustomer":
             #     print("Calculating STS Records ...")
