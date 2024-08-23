@@ -142,10 +142,10 @@ class Kube_Accuracy:
         df=df.T
         if df.empty : 
             self.stack_obj.log.warning("empty dataframe found for kubequery accuracies")
-            self.stack_obj.log.info("\n",df)
+            self.stack_obj.log.info("\n%s",df)
             return None
         df = df.reset_index().rename(columns={'index': 'table'})
-        self.stack_obj.log.info("\n",df)
+        self.stack_obj.log.info("\n%s",df)
         return_dict ={
                 "format":"table","collapse":True,
                 "schema":{

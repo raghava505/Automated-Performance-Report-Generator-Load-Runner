@@ -1,10 +1,13 @@
-import matplotlib.pyplot as plt
+import matplotlib
+# import matplotlib.pyplot as plt
 import seaborn as sns
 import pandas as pd
 from PIL import Image
 import io
 from collections import defaultdict
 from PIL import Image, ImageOps, ImageDraw
+matplotlib.use('Agg')
+plt = matplotlib.pyplot
 
 # sns.set_theme(palette="dark", font="arial")
 outer_background_color="#191b1f"

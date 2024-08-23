@@ -130,7 +130,7 @@ class CompactionStatus:
             if df.empty : return None
             df=df.T
             df = df.reset_index().rename(columns={'index': 'date'})
-            self.stack_obj.log.info("\n",df)
+            self.stack_obj.log.info("\n%s",df)
             return_dict ={
                     "format":"table","collapse":True,
                     "schema":{

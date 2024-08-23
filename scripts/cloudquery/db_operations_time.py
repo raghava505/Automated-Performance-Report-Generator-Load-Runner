@@ -36,7 +36,7 @@ class DB_OPERATIONS_TIME:
         self.stack_obj.log.info(save_dict)
         df = pd.DataFrame({"time":save_dict.keys() , "value":save_dict.values()})
         if df.empty : 
-            self.stack_obj.log.info("\n",df)
+            self.stack_obj.log.info("\n%s",df)
             self.stack_obj.log.warning("empty dataframe found for db operations")
             return None
         return_dict ={

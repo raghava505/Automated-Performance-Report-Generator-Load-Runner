@@ -68,7 +68,7 @@ class diskspace_usage_class:
         df=df.T
         df = df.round(2)
         df = df.reset_index().rename(columns={'index': 'node'})
-        self.stack_obj.log.info("\n",df)
+        self.stack_obj.log.info("\n%s",df)
         return_dict ={
                 "format":"table","collapse":True,
                 "schema":{
@@ -106,7 +106,7 @@ class diskspace_usage_class:
         df=df.T
         df = df.round(2)
         df = df.reset_index().rename(columns={'index': 'node'})
-        self.stack_obj.log.info("\n",df)
+        self.stack_obj.log.info("\n%s",df)
         return_dict ={
                 "format":"table","collapse":True,
                 "schema":{
