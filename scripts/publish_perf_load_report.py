@@ -169,7 +169,7 @@ class perf_load_report_publish:
 
             if page in self.confluence_page_mappings: curr_page_obj = self.confluence_page_mappings[page]
             else:
-                curr_page_obj = self.create_report_page(self.report_title, f"{page}-{report_title}")
+                curr_page_obj = self.create_report_page(self.report_title, f"{page}-{self.report_title}")
                 self.confluence_page_mappings[page]=curr_page_obj
             
             if key_format == "table":
@@ -260,7 +260,7 @@ if __name__=='__main__':
     api_key = "ATATT3xFfGF02rG4e5JQzZZ_mVdAkwKKGnjRLYIupWToEGxZm8X-r5dUrAzSAdzGi5FPXMIn_IacnJjOwORsOQV7noObZmkdHqsaHHIzw4pTVyid2Jh3rVmLjM8iw5_hmaK7rFWSMz1JBpQq44vGV1FJs7P-89zijob43kBuxHzfFJJxl5IlM0w=7CE826E3"
     space = '~71202040c8bf45840d41c598c0efad54382c7b'
     parent_page_title = 'PUBLISH TEST'
-    report_title = "S1 MultiCustomer and controlplane load report 2024-07-03"
+    report_title = "S1 MultiCustomer and controlplane load report 2024-07-03 TEST 4"
 
     obj = perf_load_report_publish("Osquery_LoadTests_New","MultiCustomer",[(158,2),(157,1)],parent_page_title, report_title, email_address, api_key, space, url)
     if "new_format" not in obj.all_keys:
