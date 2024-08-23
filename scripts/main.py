@@ -74,7 +74,7 @@ if __name__ == "__main__":
                 stack_obj.log.warning(f"you have already saved the details for this load in this sprint, setting run value to {run}")
 
             if 'elastic_node_ip' in test_env_json_details and 'pgbadger_reports_mount' in test_env_json_details:
-                stack_obj.log.info("\n%s\n****** \nChecking health of PGbadger ... \n\n")
+                stack_obj.log.info("\n****** \nChecking health of PGbadger ... \n\n")
                 status,link=get_and_save_pgb_html(stack_obj,test_env_json_details['elastic_node_ip'],"curr_pgbad_html_path","pgbadger_tail_path",test_env_json_details['pgbadger_reports_mount'],check=True)
                 if not status:
                     stack_obj.log.error("PGBadger seems to be not working in your stack. Please try to generate a pgbadger report manually to check if working fine.")
@@ -86,7 +86,7 @@ if __name__ == "__main__":
                         stack_obj.log.info("Terminating program ...")
                         sys.exit()
                 else:
-                    stack_obj.log.info("\n%sCHECK PASSED : PGbadger is in good condition \n ****** !")
+                    stack_obj.log.info("\nCHECK PASSED : PGbadger is in good condition \n ****** !")
             
             load_details =  {
                 "stack":stack,
@@ -213,12 +213,12 @@ if __name__ == "__main__":
                 stack_obj.log.info(json.dumps(selfmanaged_accuracies, indent=2))
                 if selfmanaged_accuracies:final_data_to_save.update({"Selfmanaged Table Accuracies":selfmanaged_accuracies})
             #-------------------------Cloudquery Accuracies----------------------------
-            if variables["load_type"] in ["CloudQuery","osquery_cloudquery_combined","all_loads_combined"]:
-                stack_obj.log.info("******* Calculating accuracies for cloudquery Load...")
-                cloud_accuracy_obj= cloud_accuracy(stack_obj=stack_obj,variables=variables)
-                cloudquery_accuracies = cloud_accuracy_obj.calculate_accuracy()
-                stack_obj.log.info(json.dumps(cloudquery_accuracies, indent=2))
-                if cloudquery_accuracies:final_data_to_save.update({"Cloudquery Table Accuracies":{"format":"nested_table","schema":{},"data":cloudquery_accuracies}})
+            # if variables["load_type"] in ["CloudQuery","osquery_cloudquery_combined","all_loads_combined"]:
+            #     stack_obj.log.info("******* Calculating accuracies for cloudquery Load...")
+            #     cloud_accuracy_obj= cloud_accuracy(stack_obj=stack_obj,variables=variables)
+            #     cloudquery_accuracies = cloud_accuracy_obj.calculate_accuracy()
+            #     stack_obj.log.info(json.dumps(cloudquery_accuracies, indent=2))
+            #     if cloudquery_accuracies:final_data_to_save.update({"Cloudquery Table Accuracies":{"format":"nested_table","schema":{},"data":cloudquery_accuracies}})
             #-------------------------Azure Load Accuracies----------------------------
             # if variables["load_name"] == "Azure_MultiCustomer" or variables["load_type"] in ["all_loads_combined"]:
             #     stack_obj.log.info("******* Calculating accuracies for Azure Load ...")
