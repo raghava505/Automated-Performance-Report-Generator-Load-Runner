@@ -30,14 +30,19 @@ def process():
     email_address = "masabathularao@uptycs.com"
     api_key = "ATATT3xFfGF02rG4e5JQzZZ_mVdAkwKKGnjRLYIupWToEGxZm8X-r5dUrAzSAdzGi5FPXMIn_IacnJjOwORsOQV7noObZmkdHqsaHHIzw4pTVyid2Jh3rVmLjM8iw5_hmaK7rFWSMz1JBpQq44vGV1FJs7P-89zijob43kBuxHzfFJJxl5IlM0w=7CE826E3"
     space = '~71202040c8bf45840d41c598c0efad54382c7b'
-    parent_page_title = 'PUBLISH TEST'
-    report_title = "S1 MultiCustomer and controlplane load report 2024-07-03 TEST 3"
 
 
+    parent_page_title = 'Performance Load Reports'
+    report_title = "S1 SingleCustomer Load report 2024-08-23 1"
 
-    # Instantiate the object
-    obj = perf_load_report_publish("Osquery_LoadTests_New", "MultiCustomer", [(158,2),(157,1)], parent_page_title, report_title, email_address, api_key, space, url)
+    # list_of_sprint_runs_to_show_or_compare = [(158,2),(157,1)]
+    list_of_sprint_runs_to_show_or_compare = [(160,2) , (160,1)]
+    database_name = "Osquery_LoadTests_New"
+    collection_name = "SingleCustomer"
     
+
+
+    obj = perf_load_report_publish(database_name, collection_name, list_of_sprint_runs_to_show_or_compare, parent_page_title, report_title, email_address, api_key, space, url)
     if "new_format" not in obj.all_keys:
         return jsonify({"status": "ERROR", "message": "We are not dealing with new format mongo document"})
     else:
