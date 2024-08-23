@@ -202,26 +202,30 @@ class perf_load_report_publish:
             elif key_format == "list":
                 curr_list = set(data)
                 if len(curr_list) !=0 :
+                    curr_list_to_string = ", ".join(list(map(str,curr_list)))
                     curr_page_obj.add_text(f"<h2>{self.captilise_heading(key_name)}</h2>")
-                if len(self.sprint_runs_list) == 0 :
-                    print("Previous sprint not found ... ")
-                    curr_page_obj.add_text(f"<p>{curr_list}<p>")
-                    continue
-                prev_sprint,prev_run = self.sprint_runs_list[0][0],self.sprint_runs_list[0][1]
-                prev_data=self.get_key_result(prev_sprint,prev_run,key_name)
-                if not prev_data:
-                    print(f"WARNING : Previous data for {key_name} is not found")
-                    continue
-                prev_list = set(prev_data[key_name]["data"])
-                if curr_list == prev_list:
-                    curr_page_obj.add_text(f'<p><span style="color: green;">No new topics added/deleted </span></p>')
-                    continue
-                newly_added = curr_list - prev_list
-                deleted = prev_list - curr_list
-                if len(newly_added)>0:
-                    curr_page_obj.add_text(f'<p><span style="color: blue;">{len(newly_added)} newly added topics found : {newly_added}</span></p>')
-                if len(deleted)>0:
-                    curr_page_obj.add_text(f'<p><span style="color: blue;">{len(deleted)} topics are deleted : {deleted}</span></p>')
+                    if len(self.sprint_runs_list) == 0 :
+                        print("Previous sprint not found ... ")
+                        curr_page_obj.add_text(f'<p><span style="color: black;">{curr_list_to_string} </span></p>')
+
+                    else:
+                        prev_sprint,prev_run = self.sprint_runs_list[0][0],self.sprint_runs_list[0][1]
+                        prev_data=self.get_key_result(prev_sprint,prev_run,key_name)
+                        if not prev_data:
+                            print(f"WARNING : Previous sprint data for {key_name} is not found")
+                            curr_page_obj.add_text(f'<p><span style="color: black;">{curr_list_to_string} </span></p>')
+                        else:
+                            print("Previous sprint data found")
+                            prev_list = set(prev_data[key_name]["data"])
+                            if curr_list == prev_list:
+                                curr_page_obj.add_text(f'<p><span style="color: green;">No new topics added/deleted </span></p>')
+                            else:
+                                newly_added = curr_list - prev_list
+                                deleted = prev_list - curr_list
+                                if len(newly_added)>0:
+                                    curr_page_obj.add_text(f'<p><span style="color: blue;">{len(newly_added)} newly added topics found : {newly_added}</span></p>')
+                                if len(deleted)>0:
+                                    curr_page_obj.add_text(f'<p><span style="color: blue;">{len(deleted)} topics are deleted : {deleted}</span></p>')
             
             elif key_format == "analysis":
                 if len(self.sprint_runs_list) == 0:
@@ -260,9 +264,16 @@ if __name__=='__main__':
     api_key = "ATATT3xFfGF02rG4e5JQzZZ_mVdAkwKKGnjRLYIupWToEGxZm8X-r5dUrAzSAdzGi5FPXMIn_IacnJjOwORsOQV7noObZmkdHqsaHHIzw4pTVyid2Jh3rVmLjM8iw5_hmaK7rFWSMz1JBpQq44vGV1FJs7P-89zijob43kBuxHzfFJJxl5IlM0w=7CE826E3"
     space = '~71202040c8bf45840d41c598c0efad54382c7b'
     parent_page_title = 'PUBLISH TEST'
-    report_title = "S1 MultiCustomer and controlplane load report 2024-07-03 TEST 4"
+    report_title = "S1 SingleCustomer Load report 2024-08-23 13"
 
-    obj = perf_load_report_publish("Osquery_LoadTests_New","MultiCustomer",[(158,2),(157,1)],parent_page_title, report_title, email_address, api_key, space, url)
+    # list_of_sprint_runs_to_show_or_compare = [(158,2),(157,1)]
+    list_of_sprint_runs_to_show_or_compare = [(160,1)]
+    database_name = "Osquery_LoadTests_New"
+    collection_name = "SingleCustomer"
+    
+
+
+    obj = perf_load_report_publish(database_name, collection_name, list_of_sprint_runs_to_show_or_compare, parent_page_title, report_title, email_address, api_key, space, url)
     if "new_format" not in obj.all_keys:
         print("ERROR : We are not dealing with new format mongo document")
     else:
