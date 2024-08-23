@@ -26,11 +26,7 @@ def process():
     # parent_page_title = request.form['parent_page_title']
     # report_title = request.form['report_title']
 
-    url='https://uptycsjira.atlassian.net'
-    email_address = "masabathularao@uptycs.com"
-    api_key = "ATATT3xFfGF02rG4e5JQzZZ_mVdAkwKKGnjRLYIupWToEGxZm8X-r5dUrAzSAdzGi5FPXMIn_IacnJjOwORsOQV7noObZmkdHqsaHHIzw4pTVyid2Jh3rVmLjM8iw5_hmaK7rFWSMz1JBpQq44vGV1FJs7P-89zijob43kBuxHzfFJJxl5IlM0w=7CE826E3"
-    space = '~71202040c8bf45840d41c598c0efad54382c7b'
-
+   
 
     parent_page_title = 'Performance Load Reports'
     report_title = "S1 SingleCustomer Load report 2024-08-23 1"
