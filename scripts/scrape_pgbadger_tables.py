@@ -232,7 +232,7 @@ def scrape_func(path,db,stack_obj):
         except Exception as e:
             stack_obj.log.error("Error : " ,e)
     return {"format":"nested_table",
-            "schema":{{"page":"Postgres Queries Analysis"}},
+            "schema":{"page":"Postgres Queries Analysis"},
             "data":total_result
             }   
 
@@ -240,8 +240,8 @@ if __name__=="__main__":
     from settings import stack_configuration
     
     variables = {
-        "start_time_str_ist":"2024-08-17 22:13",
-        "load_duration_in_hrs":10,
+        "start_time_str_ist":"2024-08-23 22:13",
+        "load_duration_in_hrs":1,
         "test_env_file_name":'s1_nodes.json'
     }
     stack_obj = stack_configuration(variables)

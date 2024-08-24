@@ -40,11 +40,11 @@ class perf_load_report_publish:
         obj = publish_to_confluence(parent_page_title, report_title, self.email_address, self.api_key, self.space, self.url)
         flag, err = obj.create_page()
         if flag == False:
-            print(f"error while create confluence page : {err}")
-            return None
+            print(f"error while creating confluence page : {err}")
+            return None,err
         else:
             print(f"Created new confluence page : {report_title}")
-            return obj
+            return obj,err
         
 
     def merge_dfs(self,merge_on_cols,key_name,parent_key_name):
@@ -157,7 +157,9 @@ class perf_load_report_publish:
 
 
     def extract_all_variables(self):
-        self.create_report_page(self.parent_page_title, self.report_title)
+        _,err = self.create_report_page(self.parent_page_title, self.report_title)
+        if not _:
+            return err, "error"
         for key_name in self.all_keys:
             key_format = self.main_result[key_name]["format"]
             # if key_format != "analysis":continue
@@ -169,7 +171,9 @@ class perf_load_report_publish:
 
             if page in self.confluence_page_mappings: curr_page_obj = self.confluence_page_mappings[page]
             else:
-                curr_page_obj = self.create_report_page(self.report_title, f"{page}-{self.report_title}")
+                curr_page_obj,err = self.create_report_page(self.report_title, f"{page}-{self.report_title}")
+                if not curr_page_obj:
+                    return err, "error"
                 self.confluence_page_mappings[page]=curr_page_obj
             
             if key_format == "table":
@@ -257,7 +261,31 @@ class perf_load_report_publish:
                     charts_paths_dict[main_heading] = [f'{os.path.join(base_graphs_path,main_heading,str(file_name).replace("/","-")+".png")}' for file_name in list(inside_charts.keys())]
                 curr_page_obj.attach_saved_charts(charts_paths_dict)
             curr_page_obj.update_and_publish()
+        return ("success : Report published successfully"), "success"
+
+# if __name__=='__main__':
+#     url='https://raghav-m.atlassian.net'
+#     email_address = "pbpraghav@gmail.com"
+#     api_key = "ATATT3xFfGF0Tne5mgz28ho5MDsnw1LL_auMF9d0nSufjfGj98I_W2pfpMfbsL1v74wDDPAm5evj46IOmYBQGF8g9UNW8nrsuTur9TuOuKIGnRC2T17j6dFj1hmwOYuHTor9GvtrBNurI92gOBdPwqlgjottdh1Y3WqpfHn2LSrMRd3IDtgrLcc=29FDB196"
+#     space = '~712020a6f5183ca4bf41dcae421b10e977a0c1'
+#     parent_page_title = 'TEST'  
+#     import uuid
+#     report_title = f"TEST {uuid.uuid4()}"
+
+#     # list_of_sprint_runs_to_show_or_compare = [(158,2),(157,1)]
+#     list_of_sprint_runs_to_show_or_compare = [(160,5)]
+#     database_name = "Osquery_LoadTests_New"
+#     collection_name = "ControlPlane"
+    
 
 
+#     obj = perf_load_report_publish(database_name, collection_name, list_of_sprint_runs_to_show_or_compare, parent_page_title, report_title, email_address, api_key, space, url)
+#     if "new_format" not in obj.all_keys:
+#         print("error : We are not dealing with new format mongo document")
+#     else:
+#         obj.all_keys.remove('new_format')
+#         result , status= obj.extract_all_variables()
+#         print(status, result)
+    
     
     

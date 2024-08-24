@@ -1,5 +1,6 @@
 from flask import Flask, render_template, request, jsonify
 from publish_perf_load_report import perf_load_report_publish
+import ast
 
 app = Flask(__name__)
 
@@ -19,23 +20,17 @@ def index():
 @app.route('/process', methods=['POST'])
 def process():
     # Get form data from the request
-    # url = request.form['url']
-    # email_address = request.form['email_address']
-    # api_key = request.form['api_key']
-    # space = request.form['space']
-    # parent_page_title = request.form['parent_page_title']
-    # report_title = request.form['report_title']
+    url = request.form['url']
+    email_address = request.form['email_address']
+    api_key = request.form['api_key']
+    space = request.form['space']
+    parent_page_title = request.form['parent_page_title']
+    report_title = request.form['report_title']
+    string_of_list_of_sprint_runs_to_show_or_compare = request.form['sprint_runs']
+    list_of_sprint_runs_to_show_or_compare  = ast.literal_eval(string_of_list_of_sprint_runs_to_show_or_compare)
+    database_name = request.form['loadtype']
+    collection_name = request.form['loadname']
 
-   
-
-    parent_page_title = 'Performance Load Reports'
-    report_title = "S1 SingleCustomer Load report 2024-08-23 1"
-
-    # list_of_sprint_runs_to_show_or_compare = [(158,2),(157,1)]
-    list_of_sprint_runs_to_show_or_compare = [(160,2) , (160,1)]
-    database_name = "Osquery_LoadTests_New"
-    collection_name = "SingleCustomer"
-    
 
 
     obj = perf_load_report_publish(database_name, collection_name, list_of_sprint_runs_to_show_or_compare, parent_page_title, report_title, email_address, api_key, space, url)
@@ -43,8 +38,9 @@ def process():
         return jsonify({"status": "ERROR", "message": "We are not dealing with new format mongo document"})
     else:
         obj.all_keys.remove('new_format')
-        result = obj.extract_all_variables()
-        return jsonify({"status": "SUCCESS", "message": result})
+        result , status= obj.extract_all_variables()
+        print(status, result)
+        return jsonify({"status": status, "message": result})
 
 if __name__ == '__main__':
     app.run(debug=True)
