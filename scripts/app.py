@@ -36,17 +36,18 @@ def get_ids():
     db = client[database_name]
     collection = db[collection_name]    
     # dictionary = {
-    #     'sprint1': ['runa', 'runb', 'runc'],
-    #     'sprint2': ['runa', 'rund', 'runx'],
-    #     'sprint3': ['runb', 'runa', 'runr']
+    #     '160': [{'run':'1', 'build':160012}, {'run':'2', 'build':160013}, {'run':'5', 'build':160014}],
+    #     '161': [{'run':'2', 'build':160022}, {'run':'3', 'build':160023}, {'run':'6', 'build':160024}],
+    #     '162': [{'run':'3', 'build':160032}, {'run':'4', 'build':160033}, {'run':'7', 'build':160034}],
     # }
     dictionary= {}
-    ids = [(str(doc['load_details']["data"]["sprint"]),str(doc['load_details']["data"]["run"])) for doc in collection.find({}, {'load_details.data.sprint': 1,'load_details.data.run': 1})]
-    for sprint,run in ids:
+    ids = [(str(doc['load_details']["data"]["sprint"]),str(doc['load_details']["data"]["run"]),str(doc['load_details']["data"]["build"]),str(doc['load_details']["data"]["stack"]),str(doc['load_details']["data"]["load_duration_in_hrs"])) for doc in collection.find({}, {'load_details.data.sprint': 1,'load_details.data.run': 1,'load_details.data.build': 1,'load_details.data.stack': 1,'load_details.data.load_duration_in_hrs': 1})]
+    for sprint,run,build, stack, load_dur in ids:
+        item = {'run':run,'build':build, 'stack':stack,'load_duration':load_dur}
         if sprint in dictionary:
-            dictionary[sprint].append(run)
+            dictionary[sprint].append(item)
         else:
-            dictionary[sprint] = [run]
+            dictionary[sprint] = [item]
 
     return jsonify({"dictionary":dictionary, "sprints":list(dictionary)})
 

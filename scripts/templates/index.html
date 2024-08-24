@@ -203,7 +203,7 @@
                 sprintdropdowns = document.querySelectorAll('[id^="sprint_"]');
                 console.log(sprintdropdowns);
                 rundropdowns.forEach(runSelect => {
-                    runSelect.innerHTML = '<option value="">Selectddd Run</option>'; 
+                    runSelect.innerHTML = '<option value="">Select Run</option>'; 
                 });
             }
             else{
@@ -236,10 +236,10 @@
 
         function populateRunDropdowns(runs, run_field) {
             run_field.innerHTML = '<option value="">Select Run</option>'; 
-            runs.forEach(run => {
+            runs.forEach(runItem => {
                 const option = document.createElement('option');
-                option.value = run;
-                option.textContent = run;
+                option.value = runItem.run;
+                option.textContent = "run:"+runItem.run+";"+"build:"+runItem.build+";"+"stack:"+runItem.stack+";"+"load_duration:"+runItem.load_duration;
                 run_field.appendChild(option);
             });
         }
@@ -251,7 +251,7 @@
             let newFields = `
                 <div class="form-group row" id="sprintRunGroup_${fieldCounter}">
                     <div class="col">
-                        <label for="sprint_${fieldCounter}">Sprint${fieldCounter}:</label>
+                        <label for="sprint_${fieldCounter}">Sprint Field${fieldCounter}:</label>
                         <select class="form-control" id="sprint_${fieldCounter}" name="sprint_${fieldCounter}" required>
                             <option value="">Select Sprint</option>
                             <!-- Options will be populated via JavaScript -->
@@ -259,7 +259,7 @@
                         <div class="error-message"></div>
                     </div>
                     <div class="col">
-                        <label for="run_${fieldCounter}">Run${fieldCounter}:</label>
+                        <label for="run_${fieldCounter}">Run Field${fieldCounter}:</label>
                         <select class="form-control run-element" id="run_${fieldCounter}" name="run_${fieldCounter}" required>
                             <option value="">Select Run</option>
                             <!-- Options will be populated via JavaScript -->
