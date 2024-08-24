@@ -69,14 +69,31 @@
         <form id="inputForm" class="border p-4 shadow rounded">
             <div class="form-group">
                 <label for="loadtype">Load Type:</label>
-                <input type="text" class="form-control" id="loadtype" name="loadtype" placeholder="Enter loadtype" required>
+                <select class="form-control" id="loadtype" name="loadtype" required>
+                    <option value="">Select Load Type</option>
+                </select>
                 <div class="error-message"></div>
             </div>
             <div class="form-group">
                 <label for="loadname">Load Name:</label>
-                <input type="text" class="form-control" id="loadname" name="loadname" placeholder="Enter loadname" required>
+                <select class="form-control" id="loadname" name="loadname" required>
+                    <option value="">Select Load Name</option>
+                </select>
                 <div class="error-message"></div>
             </div>
+
+            
+
+            <div class="form-group">
+                <label for="idList">Document _id:</label>
+                <select class="form-control" id="idList" name="idList" required>
+                    <option value="">Select Document ID</option>
+                </select>
+                <div class="error-message"></div>
+            </div>
+
+
+
             <div class="form-group">
                 <label for="sprint_runs">List of sprint_runs:</label>
                 <input type="text" class="form-control" id="sprint_runs" name="sprint_runs" placeholder="Enter sprint_runs list" required>
@@ -123,6 +140,65 @@
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 
     <script>
+
+        // Fetch databases and collections from the server
+        document.addEventListener('DOMContentLoaded', () => {
+            fetch('/get_databases')
+                .then(response => response.json())
+                .then(data => populateLoadTypeDropdown(data.databases))
+                .catch(error => console.error('Error fetching databases:', error));
+        });
+
+        function populateLoadTypeDropdown(databases) {
+            const loadtypeSelect = document.getElementById('loadtype');
+            databases.forEach(db => {
+                const option = document.createElement('option');
+                option.value = db;
+                option.textContent = db;
+                loadtypeSelect.appendChild(option);
+            });
+            loadtypeSelect.addEventListener('change', (event) => {
+                const selectedDB = event.target.value;
+                fetch(`/get_collections?database=${selectedDB}`)
+                    .then(response => response.json())
+                    .then(data => populateLoadNameDropdown(data.collections))
+                    .catch(error => console.error('Error fetching collections:', error));
+            });
+        }
+
+        function populateLoadNameDropdown(collections) {
+            const loadnameSelect = document.getElementById('loadname');
+            loadnameSelect.innerHTML = '<option value="">Select Load Name</option>'; // Reset options
+            collections.forEach(coll => {
+                const option = document.createElement('option');
+                option.value = coll;
+                option.textContent = coll;
+                loadnameSelect.appendChild(option);
+            });
+
+            loadnameSelect.addEventListener('change', (event) => {
+                const selectedDB = document.getElementById('loadtype').value;
+                const selectedColl = event.target.value;
+                if (selectedDB && selectedColl) {
+                    fetch(`/get_ids?database=${selectedDB}&collection=${selectedColl}`)
+                        .then(response => response.json())
+                        .then(data => populateIdListDropdown(data.ids))
+                        .catch(error => console.error('Error fetching _id values:', error));
+                }
+            });
+            
+        }
+        function populateIdListDropdown(ids) {
+            const idListSelect = document.getElementById('idList');
+            idListSelect.innerHTML = '<option value="">Select Document ID</option>'; // Reset options
+            ids.forEach(id => {
+                const option = document.createElement('option');
+                option.value = id;
+                option.textContent = id;
+                idListSelect.appendChild(option);
+            });
+        }
+
         function validateURL(url) {
             const urlPattern = new RegExp('^(https?:\\/\\/)?' + 
                 '((([a-zA-Z\\d]([a-zA-Z\\d-]*[a-zA-Z\\d])*)\\.?)+[a-zA-Z]{2,}|' + 

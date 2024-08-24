@@ -1,18 +1,42 @@
 from flask import Flask, render_template, request, jsonify
 from publish_perf_load_report import perf_load_report_publish
 import ast
+from pymongo import MongoClient
 
 app = Flask(__name__)
 
-# class perf_load_report_publish:
-#     def __init__(self, *args):
-#         # Initialize with the passed parameters
-#         self.all_keys = ["new_format"]  # example key for the demo
-        
-#     def extract_all_variables(self):
-#         # Simulate the extraction process
-#         return "Variables extracted successfully!"
+
+# MongoDB client setup
+client = MongoClient('mongodb://localhost:27017/')
+
+@app.route('/get_databases', methods=['GET'])
+def get_databases():
+    databases = client.list_database_names()
+    return jsonify({'databases': databases})
+
+@app.route('/get_collections', methods=['GET'])
+def get_collections():
+    database_name = request.args.get('database')
+    if not database_name:
+        return jsonify({'collections': []})
     
+    db = client[database_name]
+    collections = db.list_collection_names()
+    return jsonify({'collections': collections})
+
+
+@app.route('/get_ids', methods=['GET'])
+def get_ids():
+    database_name = request.args.get('database')
+    collection_name = request.args.get('collection')
+    if not database_name or not collection_name:
+        return jsonify({'ids': []})
+    
+    db = client[database_name]
+    collection = db[collection_name]
+    ids = [str(doc['_id']) for doc in collection.find({}, {'_id': 1})]
+    return jsonify({'ids': ids})
+
 @app.route('/')
 def index():
     return render_template('index.html')
