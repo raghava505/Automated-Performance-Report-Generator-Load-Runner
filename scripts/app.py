@@ -12,6 +12,7 @@ client = MongoClient('mongodb://localhost:27017/')
 @app.route('/get_databases', methods=['GET'])
 def get_databases():
     databases = client.list_database_names()
+    databases=[item for item in databases if "_LoadTests_New" in item]
     return jsonify({'databases': databases})
 
 @app.route('/get_collections', methods=['GET'])
@@ -33,9 +34,21 @@ def get_ids():
         return jsonify({'ids': []})
     
     db = client[database_name]
-    collection = db[collection_name]
-    ids = [str(doc['_id']) for doc in collection.find({}, {'_id': 1})]
-    return jsonify({'ids': ids})
+    collection = db[collection_name]    
+    # dictionary = {
+    #     'sprint1': ['runa', 'runb', 'runc'],
+    #     'sprint2': ['runa', 'rund', 'runx'],
+    #     'sprint3': ['runb', 'runa', 'runr']
+    # }
+    dictionary= {}
+    ids = [(str(doc['load_details']["data"]["sprint"]),str(doc['load_details']["data"]["run"])) for doc in collection.find({}, {'load_details.data.sprint': 1,'load_details.data.run': 1})]
+    for sprint,run in ids:
+        if sprint in dictionary:
+            dictionary[sprint].append(run)
+        else:
+            dictionary[sprint] = [run]
+
+    return jsonify({"dictionary":dictionary, "sprints":list(dictionary)})
 
 @app.route('/')
 def index():
@@ -44,6 +57,8 @@ def index():
 @app.route('/process', methods=['POST'])
 def process():
     # Get form data from the request
+    print("RETURNED FORM INPUT : ")
+    print(request.form)
     url = request.form['url']
     email_address = request.form['email_address']
     api_key = request.form['api_key']
@@ -52,9 +67,9 @@ def process():
     report_title = request.form['report_title']
     string_of_list_of_sprint_runs_to_show_or_compare = request.form['sprint_runs']
     list_of_sprint_runs_to_show_or_compare  = ast.literal_eval(string_of_list_of_sprint_runs_to_show_or_compare)
+    print(list_of_sprint_runs_to_show_or_compare)
     database_name = request.form['loadtype']
     collection_name = request.form['loadname']
-
 
     # url='https://uptycsjira.atlassian.net'
     # email_address = "masabathularao@uptycs.com"
