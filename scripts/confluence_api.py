@@ -31,7 +31,7 @@ class publish_to_confluence:
                 print(f"Parent page '{self.parent_title}' found")
                 # return True,''
         except Exception as e:
-            return False,str(e)
+            return False,str("ERROR : "+str(e))
         
         try:
             self.body_content="""
