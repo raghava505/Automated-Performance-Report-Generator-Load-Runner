@@ -43,13 +43,33 @@
             color: red;
             font-size: 1.2em;
             margin-left: 10px;
+            
+        }
+        .remove-field:hover{
+            background-color: rgb(255, 5, 5);
+        }
+        #fieldsContainer{
+            /* background-color: #cbcbcb; */
+            padding: 15px;
+        }
+        .inside_fields{
+            background-color: #ececec;
+            padding: 15px;
+        }
+        .button {
+            background-color: #ff9595; /* Initial background color */
+            color: white; /* Text color */
+            border: none; /* Remove border */
+            padding: 0px 7px; /* Button padding */
+            cursor: pointer; /* Change cursor to pointer */
+            transition: background-color 0.2s ease; /* Smooth transition */
         }
     </style>
 </head>
 <body>
     <!-- Menu -->
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-        <a class="navbar-brand" href="#">Performance Report</a>
+        <a class="navbar-brand" href="#">Report Generation UI</a>
         <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
         </button>
@@ -92,40 +112,53 @@
             <div id="fieldsContainer">
                 <!-- Initial set of 'sprint' and 'run' fields will be added here -->
             </div>
-
-            <button type="button" class="btn btn-secondary" onclick="addSprintRunFields()">Add More Fields</button>
+            <div class="text-center">
+                <button type="button" class="btn btn-info col-md-3" onclick="addSprintRunFields()">Add new sprint-run group</button>
+            </div>
+            <br>
            
 
-            <div class="form-group">
-                <label for="url">Confluence URL:</label>
-                <input type="text" class="form-control" id="url" name="url" placeholder="Enter URL" required>
-                <div class="error-message"></div>
+            <div class="form-row">
+                <div class="form-group col-md-6">
+                    <label for="url">Confluence URL:</label>
+                    <input type="text" class="form-control" id="url" name="url" placeholder="Enter URL" required>
+                    <div class="error-message"></div>
+                </div>
+                <div class="form-group col-md-6">
+                    <label for="email_address">Email Address:</label>
+                    <input type="email" class="form-control" id="email_address" name="email_address" placeholder="Enter your email" required>
+                    <div class="error-message"></div>
+                </div>
             </div>
-            <div class="form-group">
-                <label for="email_address">Email Address:</label>
-                <input type="email" class="form-control" id="email_address" name="email_address" placeholder="Enter your email" required>
-                <div class="error-message"></div>
+
+
+            <div class="form-row">
+                <div class="form-group col-md-6">
+                    <label for="api_key">API Key:</label>
+                    <input type="text" class="form-control" id="api_key" name="api_key" placeholder="Enter API key" required>
+                    <div class="error-message"></div>
+                </div>
+                <div class="form-group col-md-6">
+                    <label for="space">Space:</label>
+                    <input type="text" class="form-control" id="space" name="space" placeholder="Enter space" required>
+                    <div class="error-message"></div>
+                </div>
             </div>
-            <div class="form-group">
-                <label for="api_key">API Key:</label>
-                <input type="text" class="form-control" id="api_key" name="api_key" placeholder="Enter API key" required>
-                <div class="error-message"></div>
+
+
+            <div class="form-row">
+                <div class="form-group col-md-6">
+                    <label for="parent_page_title">Parent Page Title:</label>
+                    <input type="text" class="form-control" id="parent_page_title" name="parent_page_title" placeholder="Enter parent page title" required>
+                    <div class="error-message"></div>
+                </div>
+                <div class="form-group col-md-6">
+                    <label for="report_title">Report Title:</label>
+                    <input type="text" class="form-control" id="report_title" name="report_title" placeholder="Enter report title" required>
+                    <div class="error-message"></div>
+                </div>
             </div>
-            <div class="form-group">
-                <label for="space">Space:</label>
-                <input type="text" class="form-control" id="space" name="space" placeholder="Enter space" required>
-                <div class="error-message"></div>
-            </div>
-            <div class="form-group">
-                <label for="parent_page_title">Parent Page Title:</label>
-                <input type="text" class="form-control" id="parent_page_title" name="parent_page_title" placeholder="Enter parent page title" required>
-                <div class="error-message"></div>
-            </div>
-            <div class="form-group">
-                <label for="report_title">Report Title:</label>
-                <input type="text" class="form-control" id="report_title" name="report_title" placeholder="Enter report title" required>
-                <div class="error-message"></div>
-            </div>
+
             <button type="button" class="btn btn-primary btn-block" onclick="validateForm()">Publish to confluence</button>
         </form>
 
@@ -149,6 +182,7 @@
                 .then(data => populateLoadTypeDropdown(data.databases))
                 .catch(error => console.error('Error fetching databases:', error));
         });
+        addSprintRunFields();
         addSprintRunFields();
 
         function populateLoadTypeDropdown(databases) {
@@ -239,7 +273,7 @@
             runs.forEach(runItem => {
                 const option = document.createElement('option');
                 option.value = runItem.run;
-                option.textContent = "run:"+runItem.run+";"+"build:"+runItem.build+";"+"stack:"+runItem.stack+";"+"load_duration:"+runItem.load_duration;
+                option.textContent = "run:"+runItem.run+"; "+"build:"+runItem.build+"; "+"stack:"+runItem.stack+"; "+"duration:"+runItem.load_duration;
                 run_field.appendChild(option);
             });
         }
@@ -249,7 +283,7 @@
             fieldCounter++;
             const container = document.getElementById('fieldsContainer');
             let newFields = `
-                <div class="form-group row" id="sprintRunGroup_${fieldCounter}">
+                <div class="form-group row inside_fields" id="sprintRunGroup_${fieldCounter}">
                     <div class="col">
                         <label for="sprint_${fieldCounter}">Sprint Field${fieldCounter}:</label>
                         <select class="form-control" id="sprint_${fieldCounter}" name="sprint_${fieldCounter}" required>
@@ -269,14 +303,14 @@
 
             `;
             if (fieldCounter!=1){
-                newFields = newFields + `<div class="col-auto">
-                                            <span class="remove-field" onclick="removeFields(${fieldCounter})">x</span>
+                newFields = newFields + `<div>
+                                            <span><button type="button" class="remove-field button" onclick="removeFields(${fieldCounter})">x</button></span>
                                         </div>
                                         `
             }
             else{
-                newFields = newFields + `<div class="col-auto">
-                                            <span class="remove-field"></span>
+                newFields = newFields + `<div>
+                                            <span><button type="button" class="remove-field button"> </button></span>
                                         </div>
                                         `
             }
