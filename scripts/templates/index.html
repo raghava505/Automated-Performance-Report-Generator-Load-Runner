@@ -24,6 +24,9 @@
         .notification.success {
             background-color: #28a745;
         }
+        .notification.info {
+            background-color: #17a2b8;
+        }
         .notification.error {
             background-color: #dc3545;
         }
@@ -166,6 +169,23 @@
 
         function extractAllVariables() {
             const formData = new FormData(document.getElementById('inputForm'));
+            showNotification("Info : Report generation has started ", "info");
+
+            const notificationInterval = setInterval(() => {
+                showNotification("Info : Report generation in progress ... ", "info");
+            }, 10000); // 10 seconds
+
+            let timeoutNotificationInterval;
+
+            const timeoutNotification = setTimeout(() => {
+                clearInterval(notificationInterval); // Stop the original 10-second interval notifications
+                showNotification("Info : Still processing ...", "info");
+
+                // Set up a new interval to trigger timeout notifications every 10 seconds
+                timeoutNotificationInterval = setInterval(() => {
+                    showNotification("Info : Almost done... Please be patient.", "info");
+                }, 10000); // 10 seconds
+            }, 360000); // 6 mins
             
             fetch('/process', {
                 method: 'POST',
@@ -174,9 +194,13 @@
             .then(response => response.json())
             .then(data => {
                 showNotification(data.message, data.status);
+                clearInterval(timeoutNotificationInterval);
+                clearTimeout(timeoutNotification); 
             })
             .catch(error => {
                 showNotification('Error submitting the form. Please try again.', 'error');
+                clearInterval(timeoutNotificationInterval);
+                clearTimeout(timeoutNotification); 
             });
         }
 
