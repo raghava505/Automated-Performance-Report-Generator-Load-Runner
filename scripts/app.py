@@ -52,7 +52,7 @@ def get_ids():
         else:
             dictionary[sprint] = [item]
 
-    return jsonify({"dictionary":dictionary, "sprints":list(dictionary)})
+    return jsonify({"dictionary":dictionary, "sprints":list(reversed(list(dictionary)))})
 
 @app.route('/')
 def index():
