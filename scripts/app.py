@@ -88,7 +88,7 @@ def process():
     # import uuid
     # report_title = f"TEST {uuid.uuid4()}"
 
-    # list_of_sprint_runs_to_show_or_compare = [(160,1)]
+    # list_of_sprint_runs_to_show_or_compare = [[160,5]]
     # database_name = "Osquery_LoadTests_New"
     # collection_name = "ControlPlane"
 

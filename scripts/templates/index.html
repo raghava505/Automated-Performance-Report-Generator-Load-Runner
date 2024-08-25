@@ -30,6 +30,9 @@
         .notification.error {
             background-color: #dc3545;
         }
+        .notification.warning {
+            background-color: #d08700dd;
+        }
         .notification button {
             background: none;
             border: none;
@@ -93,19 +96,22 @@
     <div class="container mt-5">
         <h1 class="mb-4 text-center">Generate Performance Load Report</h1>
         <form id="inputForm" class="border p-4 shadow rounded">
-            <div class="form-group">
-                <label for="loadtype">Load Type:</label>
-                <select class="form-control" id="loadtype" name="loadtype" required>
-                    <option value="">Select Load Type</option>
-                </select>
-                <div class="error-message"></div>
-            </div>
-            <div class="form-group">
-                <label for="loadname">Load Name:</label>
-                <select class="form-control" id="loadname" name="loadname" required>
-                    <option value="">Select Load Name</option>
-                </select>
-                <div class="error-message"></div>
+
+            <div class="form-row">
+                <div class="form-group col-md-6">
+                    <label for="loadtype">Load Type:</label>
+                    <select class="form-control" id="loadtype" name="loadtype" required>
+                        <option value="">Select Load Type</option>
+                    </select>
+                    <div class="error-message"></div>
+                </div>
+                <div class="form-group col-md-6">
+                    <label for="loadname">Load Name:</label>
+                    <select class="form-control" id="loadname" name="loadname" required>
+                        <option value="">Select Load Name</option>
+                    </select>
+                    <div class="error-message"></div>
+                </div>
             </div>
 
             
@@ -173,6 +179,15 @@
         let sprint_run_mappings = {};
         let fieldCounter = 0;
         let available_sprints = [];
+        let already_in_progress = false;
+
+        // window.onload = function() {
+        //     const data = localStorage.getItem('already_in_progress');
+        //     if (data) {
+        //         console.log("Restored data: ", data);
+        //         already_in_progress = data;
+        //     }
+        // };
 
 
         // Fetch databases and collections from the server
@@ -342,36 +357,44 @@
         }
 
         function validateForm() {
-            let isValid = true;
-            const fields = document.querySelectorAll('#inputForm .form-control');
+            if (already_in_progress){
+                showNotification("Warning : Report generation already in progress. Please wait till its completion ", "warning");
+            }
+            else
+            {
+                let isValid = true;
+                const fields = document.querySelectorAll('#inputForm .form-control');
 
-            fields.forEach(field => {
-                const errorMessageDiv = field.nextElementSibling;
-                console.log("processing for field : ", field)
-                if (!field.value.trim()) {
-                    errorMessageDiv.textContent = 'This field is required.';
-                    isValid = false;
-                } else {
-                    errorMessageDiv.textContent = '';
+                fields.forEach(field => {
+                    const errorMessageDiv = field.nextElementSibling;
+                    if (!field.value.trim()) {
+                        errorMessageDiv.textContent = 'This field is required.';
+                        isValid = false;
+                    } else {
+                        errorMessageDiv.textContent = '';
+                    }
+
+                    if (field.id === 'url' && !validateURL(field.value)) {
+                        errorMessageDiv.textContent = 'Please enter a valid URL.';
+                        isValid = false;
+                    }
+
+                    if (field.id === 'email_address' && !validateEmail(field.value)) {
+                        errorMessageDiv.textContent = 'Please enter a valid email address.';
+                        isValid = false;
+                    }
+                });
+
+                if (isValid) {
+                    extractAllVariables();
                 }
-
-                if (field.id === 'url' && !validateURL(field.value)) {
-                    errorMessageDiv.textContent = 'Please enter a valid URL.';
-                    isValid = false;
-                }
-
-                if (field.id === 'email_address' && !validateEmail(field.value)) {
-                    errorMessageDiv.textContent = 'Please enter a valid email address.';
-                    isValid = false;
-                }
-            });
-
-            if (isValid) {
-                extractAllVariables();
             }
         }
 
         function extractAllVariables() {
+            already_in_progress=true;
+            // localStorage.setItem('already_in_progress', true);
+
             const formData = new FormData(document.getElementById('inputForm'));
 
             const sprintRuns = [];
@@ -415,12 +438,16 @@
                 clearInterval(timeoutNotificationInterval);
                 clearInterval(notificationInterval);
                 clearTimeout(timeoutNotification); 
+                already_in_progress=false;
+                // localStorage.setItem('already_in_progress', false);
             })
             .catch(error => {
                 showNotification('Error submitting the form. Please try again.', 'error');
                 clearInterval(timeoutNotificationInterval);
                 clearInterval(notificationInterval);
                 clearTimeout(timeoutNotification); 
+                already_in_progress=false;
+                // localStorage.setItem('already_in_progress', false);
             });
         }
 
