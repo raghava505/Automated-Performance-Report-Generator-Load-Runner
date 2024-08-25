@@ -2,12 +2,13 @@ from flask import Flask, render_template, request, jsonify
 from publish_perf_load_report import perf_load_report_publish
 import ast
 from pymongo import MongoClient
+from config_vars import MONGO_CONNECTION_STRING
 
 app = Flask(__name__)
 
 
 # MongoDB client setup
-client = MongoClient('mongodb://localhost:27017/')
+client = MongoClient(MONGO_CONNECTION_STRING)
 
 @app.route('/get_databases', methods=['GET'])
 def get_databases():
@@ -102,4 +103,4 @@ def process():
         return jsonify({"status": status, "message": result})
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(host='0.0.0.0', port=5000,debug=False)
