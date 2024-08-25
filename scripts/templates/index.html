@@ -121,12 +121,12 @@
             <div class="form-row">
                 <div class="form-group col-md-6">
                     <label for="url">Confluence URL:</label>
-                    <input type="text" class="form-control" id="url" name="url" placeholder="Enter URL" required>
+                    <input type="text" class="form-control" id="url" name="url" value="https://uptycsjira.atlassian.net" placeholder="Enter URL" required>
                     <div class="error-message"></div>
                 </div>
                 <div class="form-group col-md-6">
                     <label for="email_address">Email Address:</label>
-                    <input type="email" class="form-control" id="email_address" name="email_address" placeholder="Enter your email" required>
+                    <input type="email" class="form-control" id="email_address" name="email_address" value="@uptycs.com" placeholder="Enter your email" required>
                     <div class="error-message"></div>
                 </div>
             </div>
@@ -273,7 +273,7 @@
             runs.forEach(runItem => {
                 const option = document.createElement('option');
                 option.value = runItem.run;
-                option.textContent = "run:"+runItem.run+"; "+"build:"+runItem.build+"; "+"stack:"+runItem.stack+"; "+"duration:"+runItem.load_duration;
+                option.textContent = "run:"+runItem.run+"; "+"build:"+runItem.build+"; "+"stack:"+runItem.stack+"; "+"duration:"+runItem.load_duration+"hrs";
                 run_field.appendChild(option);
             });
         }
