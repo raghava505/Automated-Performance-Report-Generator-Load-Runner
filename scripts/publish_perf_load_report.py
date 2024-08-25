@@ -146,13 +146,14 @@ class perf_load_report_publish:
             if display_exact_table or len(builds) == 0: curr_page_obj.add_table_from_dataframe(f"<h{heading_size}>{self.captilise_heading(key_name)}</h{heading_size}>", copy_main_df, collapse=collapse)
             else: curr_page_obj.add_text(f"<h{heading_size}>{self.captilise_heading(key_name)}</h{heading_size}>")
 
-            for compare_col in compare_cols:
-                returned_df = self.compare_dfs(compare_col,merged_df,builds,merge_on_cols)
-                if returned_df is not None and not returned_df.empty :curr_page_obj.add_table_from_dataframe(f"<h{heading_size+1}>Comparison on {self.captilise_heading(compare_col)}</h{heading_size+1}>", returned_df.copy(), collapse=collapse, red_green_column_list=["Absolute","Relative %"])
-            main_df = returned_df.copy()
+            if len(builds) > 0:
+                for compare_col in compare_cols:
+                    returned_df = self.compare_dfs(compare_col,merged_df,builds,merge_on_cols)
+                    if returned_df is not None and not returned_df.empty :
+                        curr_page_obj.add_table_from_dataframe(f"<h{heading_size+1}>Comparison on {self.captilise_heading(compare_col)}</h{heading_size+1}>", returned_df.copy(), collapse=collapse, red_green_column_list=["Absolute","Relative %"])
+                        main_df = returned_df.copy()
         else:
             curr_page_obj.add_table_from_dataframe(f"<h{heading_size}>{self.captilise_heading(key_name)}</h{heading_size}>", copy_main_df, collapse=collapse)
-        if main_df.empty : return main_df
         return main_df
 
 
