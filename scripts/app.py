@@ -23,6 +23,8 @@ def get_collections():
     
     db = client[database_name]
     collections = db.list_collection_names()
+    collections=[item for item in collections if "fs" not in item]
+
     return jsonify({'collections': collections})
 
 
