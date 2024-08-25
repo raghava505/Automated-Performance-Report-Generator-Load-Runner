@@ -2,11 +2,13 @@ atlassian-python-api==3.41.4
 attrs==23.2.0
 bcrypt==4.0.1
 beautifulsoup4==4.12.3
+blinker==1.8.2
 Brotli==1.1.0
 bs4==0.0.2
 certifi==2023.7.22
 cffi==1.16.0
 charset-normalizer==3.3.1
+click==8.1.7
 contourpy==1.1.1
 cryptography==41.0.5
 cssselect2==0.7.0
@@ -17,11 +19,15 @@ dnspython==2.4.2
 elastic-transport==8.10.0
 elasticsearch==8.10.1
 fabric==3.2.2
+Flask==3.0.3
 fonttools==4.43.1
 h11==0.14.0
 html5lib==1.1
 idna==3.4
 invoke==2.2.0
+itsdangerous==2.2.0
+Jinja2==3.1.4
+kaleido==0.2.1
 kiwisolver==1.4.5
 MarkupSafe==2.1.3
 matplotlib==3.8.0
@@ -62,6 +68,7 @@ tzdata==2023.3
 urllib3==2.0.7
 weasyprint==61.0
 webencodings==0.5.1
+Werkzeug==3.0.4
 wrapt==1.15.0
 wsproto==1.2.0
 zopfli==0.2.3
