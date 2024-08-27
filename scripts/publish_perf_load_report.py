@@ -267,10 +267,10 @@ class perf_load_report_publish:
 if __name__=='__main__':
     url='https://raghav-m.atlassian.net'
     email_address = "pbpraghav@gmail.com"
-    space = '~712020a6f5183ca4bf41dcae421b10e977a0c1'
+    space = 'IT'
     parent_page_title = 'TEST'  
     import uuid
-    report_title = f"TEST 1 {uuid.uuid4()}"
+    report_title = f"TEST {uuid.uuid4()}"
 
     # list_of_sprint_runs_to_show_or_compare = [(158,2),(157,1)]
     list_of_sprint_runs_to_show_or_compare = [(160,5),(160,1)]
