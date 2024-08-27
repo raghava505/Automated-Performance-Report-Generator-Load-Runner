@@ -18,7 +18,7 @@ ABACUS_USERNAME = 'abacus'
 ABACUS_PASSWORD = 'abacus' 
 MONGO_CONNECTION_STRING = "mongodb://localhost:27017"
 PRESTO_LOADS_FOLDER_PATH = "/home/abacus/benchto_reports/"
-API_LOADS_FOLDER_PATH_TEMP = "/home/abacus/apache-jmeter-5.6.2/bin/reports/"
+# API_LOADS_FOLDER_PATH_TEMP = "/home/abacus/apache-jmeter-5.6.2/bin/reports/"
 
 #other types
 KUBE_METRICS = ["container_memory_working_set_bytes","container_cpu_usage_seconds_total"]
