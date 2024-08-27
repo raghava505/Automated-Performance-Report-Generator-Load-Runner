@@ -239,7 +239,7 @@ class perf_load_report_publish:
                         print(f"Found no previous data for sprint {prev_sprint} and run {prev_run}")
                         continue
                     prev_data=prev_data[key_name]["data"]
-                    temp_images,memory_combined_df,cpu_combined_df=analysis_main(data["memory_usages_analysis"],prev_data["memory_usages_analysis"],data["cpu_usage_analysis"],prev_data["cpu_usage_analysis"])
+                    temp_images,memory_combined_df,cpu_combined_df=analysis_main(data["memory_usages_analysis"],prev_data["memory_usages_analysis"],data["cpu_usage_analysis"],prev_data["cpu_usage_analysis"],main_build_load_details=self.main_result["load_details"]["data"],prev_build_load_details=self.get_key_result(prev_sprint,prev_run,"load_details")["load_details"]["data"] )
                     unique_identifier = str(uuid.uuid1())
                     analysis_piechart_folder = os.path.join(BASE_ANALYSIS_PIECHARTS_PATH,unique_identifier)
                     os.makedirs(analysis_piechart_folder,exist_ok=True)

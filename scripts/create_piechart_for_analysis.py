@@ -62,8 +62,7 @@ def stitch_images_horizontally(images, border_size=4, border_color="white"):
         x_offset += bordered_img.width
     return stitched_image
 
-def stitch_images_vertically(images,node_type,mem_or_cpu,load_details=""):
-    # load_details="153033:AllFeaturesetsEnabled_run06 VS 153033_run05 \n Stack : Longevity \n Multicustomer and ruleengine load"
+def stitch_images_vertically(images,node_type,mem_or_cpu):
     # Get the maximum width and total height of the input images
     border_size=4
     border_color="white"
@@ -78,10 +77,14 @@ def stitch_images_vertically(images,node_type,mem_or_cpu,load_details=""):
     txt = f"{node_type.title()} nodetype : {mem_or_cpu} usage comparison and analysis"
     x = max_width/8
     draw.text((x,0),text=txt,align="right",font_size=65, fill =(255, 255, 255)) #(max_width//2, text_image_height//2),
-    draw.text((0,0),text=f"{load_details}",align="left",font_size=35, fill =(255, 255, 255)) #(max_width//2, text_image_height//2),
     images.insert(0,text_image)
 
-    stitched_image = Image.new('RGB', (max_width, total_height+text_image_height))
+    text_image_height=120
+    text_image = Image.new('RGB', (max_width, text_image_height), color=outer_background_color)
+    draw = ImageDraw.Draw(text_image)
+    images.insert(0,text_image)
+
+    stitched_image = Image.new('RGB', (max_width, total_height+2*text_image_height))
     y_offset = 0
     for img in images:
         bordered_img = add_border(img, border_size, border_color)
@@ -268,7 +271,7 @@ def generate_piecharts(mem_or_cpu,main_dict,prev_dict):
     return images,total_combined_df
 
 
-def analysis_main(mem_main_dict,mem_prev_dict,cpu_main_dict,cpu_prev_dict):
+def analysis_main(mem_main_dict,mem_prev_dict,cpu_main_dict,cpu_prev_dict,main_build_load_details="",prev_build_load_details=""):
     try:memory_images,memory_combined_df = generate_piecharts("memory",mem_main_dict,mem_prev_dict)
     except Exception as e:
         print(f"error occured while generating piecharts/dataframe for memory usages : {e}")
@@ -313,14 +316,24 @@ def analysis_main(mem_main_dict,mem_prev_dict,cpu_main_dict,cpu_prev_dict):
         print(f"error occured while vertical stitching memory piecharts : {e}")
 
     try:
+        load_details=f'{main_build_load_details["build"]}_run{main_build_load_details["run"]}   VS  {prev_build_load_details["build"]}_run{prev_build_load_details["run"]} \n Stack : {main_build_load_details["stack"]} \n {main_build_load_details["test_title"]}'
         final_images={}
         for node_type in stitched_memory.keys():
             print(node_type)
-            vertical_stitched_image = stitch_images_horizontally([stitched_memory[node_type] , stitched_cpu[node_type]])
+            final_stitched_image = stitch_images_horizontally([stitched_memory[node_type] , stitched_cpu[node_type]])
+
+            text_image_height=120
+            final_image_width,_ = final_stitched_image.size
+            text_image = Image.new('RGB', (final_image_width-13, text_image_height), color=outer_background_color)
+            draw = ImageDraw.Draw(text_image)
+            draw.text((0,0),text=f"{load_details}",align="left",font_size=35, fill =(255, 255, 255)) #(max_width//2, text_image_height//2),
+            draw.text((final_image_width/2.5,0),text=f"{node_type.title()} nodetype",align="center",font_size=75, fill =(255, 255, 255))
+            final_stitched_image.paste(text_image, (8, 0))
+
             # path = f"/Users/masabathulararao/Documents/Loadtest/save-report-data-to-mongo/scripts/csv/{node_type}.png"
-            # vertical_stitched_image.save(path)
-            final_images[node_type] =vertical_stitched_image
-            # vertical_stitched_image.show()
+            # final_stitched_image.save(path)
+            final_images[node_type] =final_stitched_image
+            # final_stitched_image.show()
         return final_images,memory_combined_df,cpu_combined_df
     except Exception as e:
         print(f"error occured while horizotal stitching both memory and CPU images : {e}")
