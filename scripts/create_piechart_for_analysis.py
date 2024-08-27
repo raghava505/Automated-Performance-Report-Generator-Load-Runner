@@ -198,7 +198,7 @@ def get_piechart(nodetype,df,mem_or_cpu,app_cont_pod):
     buffer.seek(0)  # Reset the buffer position
     image = Image.open(buffer)
     plt.close()
-    if app_cont_pod=="container":short="cont"
+    if app_cont_pod=="container":short="container"
     elif app_cont_pod=="application":short="app"
     else:short=app_cont_pod
 
@@ -248,7 +248,7 @@ def generate_piecharts(mem_or_cpu,main_dict,prev_dict):
                 # Access columns by their names
                 a_value = row.contributer
                 b_value = round(row.absolute,2)
-                string+=f'{a_value}:{b_value}{unit}⬆️;   '
+                string+=f'{a_value} : {b_value} {unit} ⬆️;   '
             total_combined_dict[ndtype]["Top 5 contributors to increase"]=string 
     for ndtype,df in decreased_df.items():
         if not df.empty:
@@ -260,7 +260,7 @@ def generate_piecharts(mem_or_cpu,main_dict,prev_dict):
                 # Access columns by their names
                 a_value = row.contributer
                 b_value = round(row.absolute,2)
-                string+=f'{a_value}:{b_value}{unit}⬇️;   '
+                string+=f'{a_value} : {b_value} {unit} ⬇️;   '
             total_combined_dict[ndtype]["Top 5 contributors to decrease"]=string
     total_combined_df = pd.DataFrame(total_combined_dict)
     total_combined_df=total_combined_df.T

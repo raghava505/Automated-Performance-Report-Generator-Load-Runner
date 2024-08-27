@@ -2,7 +2,7 @@ from flask import Flask, render_template, request, jsonify
 from publish_perf_load_report import perf_load_report_publish
 import ast
 from pymongo import MongoClient
-from config_vars import MONGO_CONNECTION_STRING
+from config_vars import MONGO_CONNECTION_STRING, REPORT_UI_PORT
 
 app = Flask(__name__)
 
@@ -98,9 +98,9 @@ def process():
         return jsonify({"status": "ERROR", "message": "We are not dealing with new format mongo document"})
     else:
         obj.all_keys.remove('new_format')
-        result , status= obj.extract_all_variables()
+        result , status= obj.extract_all_variables_and_publish()
         print(status, result)
         return jsonify({"status": status, "message": result})
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000,debug=False)
+    app.run(host='0.0.0.0', port=REPORT_UI_PORT,debug=False)

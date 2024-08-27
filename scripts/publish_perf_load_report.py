@@ -6,6 +6,8 @@ import os
 from create_piechart_for_analysis import analysis_main
 from config_vars import BASE_ANALYSIS_PIECHARTS_PATH, MONGO_CONNECTION_STRING
 from collections import defaultdict
+import uuid
+import shutil
 
 class perf_load_report_publish:
     def __init__(self,dbname,coll_name,sprint_runs_list,parent_page_title, report_title, email_address, api_key, space, url):
@@ -157,135 +159,132 @@ class perf_load_report_publish:
         return main_df
 
 
-    def extract_all_variables(self):
-        _,err = self.create_report_page(self.parent_page_title, self.report_title)
-        if not _:
-            return err, "error"
-        for key_name in self.all_keys:
-            key_format = self.main_result[key_name]["format"]
-            # if key_format != "analysis":continue
-            schema = self.main_result[key_name]["schema"]
-            data = self.main_result[key_name]["data"]
+    def extract_all_variables_and_publish(self):
+        try:
+            _,err = self.create_report_page(self.parent_page_title, self.report_title)
+            if not _:
+                return err, "error"
+            for key_name in self.all_keys:
+                print(f"*** processing main key : {key_name}")
+                key_format = self.main_result[key_name]["format"]
+                schema = self.main_result[key_name]["schema"]
+                data = self.main_result[key_name]["data"]
 
-            if "page" in schema : page = schema["page"]
-            else : page = "Overview"
+                if "page" in schema : page = schema["page"]
+                else : page = "Overview"
 
-            if page in self.confluence_page_mappings: curr_page_obj = self.confluence_page_mappings[page]
-            else:
-                curr_page_obj,err = self.create_report_page(self.report_title, f"{page}-{self.report_title}")
-                if not curr_page_obj:
-                    return err, "error"
-                self.confluence_page_mappings[page]=curr_page_obj
+                if page in self.confluence_page_mappings: curr_page_obj = self.confluence_page_mappings[page]
+                else:
+                    curr_page_obj,err = self.create_report_page(self.report_title, f"{page}-{self.report_title}")
+                    if not curr_page_obj:
+                        return err, "error"
+                    self.confluence_page_mappings[page]=curr_page_obj
+                
+                if key_format == "table":
+                    self.add_standard_table(self.main_result[key_name],key_name,curr_page_obj)
             
-            if key_format == "table":
-                main_df = self.add_standard_table(self.main_result[key_name],key_name,curr_page_obj)
-                if main_df.empty: continue
-                             
-                # if "Overall Memory" in key_name:
-                #     self.overall_memory_df = main_df
-                # if "Overall CPU" in key_name:
-                #     self.overall_cpu_df = main_df
-           
-            elif key_format == "nested_table":
-                curr_page_obj.add_text(f"<h2>{self.captilise_heading(key_name)}</h2>")
-                for nested_key_name in data.keys():
-                    main_df = self.add_standard_table(self.main_result[key_name]["data"][nested_key_name],nested_key_name,curr_page_obj,parent_key=key_name)
-                    if main_df.empty: continue
-
-            elif key_format == "mapping":
-                curr_page_obj.add_text(f"<h2>{self.captilise_heading(key_name)}</h2>")
-                for key,value in data.items():
-                    if type(value) != dict:
-                        if type(value) == str and "http" in value:
-                            value = f'<a href="{value}">{value}</a>'
-                        curr_page_obj.add_text(f"<p>{self.captilise_heading(key)} : {value}</p>\n")
-                    else:
-                        curr_page_obj.add_text(f"<h3>{str(key)}</h3>")
-                        for nested_key,nested_value in value.items():
-                            curr_page_obj.add_text(f"<p>{self.captilise_heading(nested_key)} : {nested_value}</p>\n")
-
-            elif key_format == "list":
-                curr_list = set(data)
-                if len(curr_list) !=0 :
-                    curr_list_to_string = ", ".join(list(map(str,curr_list)))
+                elif key_format == "nested_table":
                     curr_page_obj.add_text(f"<h2>{self.captilise_heading(key_name)}</h2>")
-                    if len(self.sprint_runs_list) == 0 :
-                        print("Previous sprint not found ... ")
-                        curr_page_obj.add_text(f'<p><span style="color: black;">{curr_list_to_string} </span></p>')
+                    for nested_key_name in data.keys():
+                        print(f"processing nested table {nested_key_name}")
+                        self.add_standard_table(self.main_result[key_name]["data"][nested_key_name],nested_key_name,curr_page_obj,parent_key=key_name)
 
-                    else:
-                        prev_sprint,prev_run = self.sprint_runs_list[0][0],self.sprint_runs_list[0][1]
-                        prev_data=self.get_key_result(prev_sprint,prev_run,key_name)
-                        if not prev_data:
-                            print(f"WARNING : Previous sprint data for {key_name} is not found")
-                            curr_page_obj.add_text(f'<p><span style="color: black;">{curr_list_to_string} </span></p>')
+                elif key_format == "mapping":
+                    curr_page_obj.add_text(f"<h2>{self.captilise_heading(key_name)}</h2>")
+                    for key,value in data.items():
+                        if type(value) != dict:
+                            if type(value) == str and "http" in value:
+                                value = f'<a href="{value}">{value}</a>'
+                            curr_page_obj.add_text(f"<p>{self.captilise_heading(key)} : {value}</p>\n")
                         else:
-                            print("Previous sprint data found")
-                            prev_list = set(prev_data[key_name]["data"])
-                            if curr_list == prev_list:
-                                curr_page_obj.add_text(f'<p><span style="color: green;">No new topics added/deleted </span></p>')
+                            curr_page_obj.add_text(f"<h3>{str(key)}</h3>")
+                            for nested_key,nested_value in value.items():
+                                curr_page_obj.add_text(f"<p>{self.captilise_heading(nested_key)} : {nested_value}</p>\n")
+
+                elif key_format == "list":
+                    curr_list = set(data)
+                    if len(curr_list) !=0 :
+                        curr_list_to_string = ", ".join(list(map(str,curr_list)))
+                        curr_page_obj.add_text(f"<h2>{self.captilise_heading(key_name)}</h2>")
+                        if len(self.sprint_runs_list) == 0 :
+                            print("Previous sprint not found ... ")
+                            curr_page_obj.add_text(f'<p><span style="color: black;">{curr_list_to_string} </span></p>')
+
+                        else:
+                            prev_sprint,prev_run = self.sprint_runs_list[0][0],self.sprint_runs_list[0][1]
+                            prev_data=self.get_key_result(prev_sprint,prev_run,key_name)
+                            if not prev_data:
+                                print(f"WARNING : Previous sprint data for {key_name} is not found")
+                                curr_page_obj.add_text(f'<p><span style="color: black;">{curr_list_to_string} </span></p>')
                             else:
-                                newly_added = curr_list - prev_list
-                                deleted = prev_list - curr_list
-                                if len(newly_added)>0:
-                                    curr_page_obj.add_text(f'<p><span style="color: blue;">{len(newly_added)} newly added topics found : {newly_added}</span></p>')
-                                if len(deleted)>0:
-                                    curr_page_obj.add_text(f'<p><span style="color: blue;">{len(deleted)} topics are deleted : {deleted}</span></p>')
-            
-            elif key_format == "analysis":
-                if len(self.sprint_runs_list) == 0:
-                    print("warning sprints not provided to compare and analyse resource usages")
-                    continue
-                prev_sprint,prev_run = self.sprint_runs_list[0][0],self.sprint_runs_list[0][1]
-                prev_data=self.get_key_result(prev_sprint,prev_run,key_name)
-                if not prev_data:
-                    print(f"Found no previous data for sprint {prev_sprint} and run {prev_run}")
-                    continue
-                prev_data=prev_data[key_name]["data"]
-                temp_images,memory_combined_df,cpu_combined_df=analysis_main(data["memory_usages_analysis"],prev_data["memory_usages_analysis"],data["cpu_usage_analysis"],prev_data["cpu_usage_analysis"])
-                os.makedirs(BASE_ANALYSIS_PIECHARTS_PATH,exist_ok=True)
-                final_images=defaultdict(lambda : [])
-                for piechart_name in temp_images:
-                    file_path = f"{BASE_ANALYSIS_PIECHARTS_PATH}/{piechart_name}.png"
-                    temp_images[piechart_name].save(file_path)
-                    final_images[piechart_name].append(file_path)
-                # memory_combined_df = pd.merge(self.overall_memory_df,memory_combined_df,on=["node_type"], how='outer')
-                # cpu_combined_df = pd.merge(self.overall_cpu_df,cpu_combined_df,on=["node_type"], how='outer')
-                curr_page_obj.add_text(f"<h2>Contributers to Resource Usage increase/decrease</h2>")
-                curr_page_obj.add_table_from_dataframe(f'<h3>{self.captilise_heading("memory_usages_analysis")}</h3>', memory_combined_df.copy(), collapse=False,red_green_column_list=list(memory_combined_df.columns))
-                curr_page_obj.add_table_from_dataframe(f'<h3>{self.captilise_heading("cpu_usage_analysis")}</h3>', cpu_combined_df.copy(), collapse=False,red_green_column_list=list(cpu_combined_df.columns))
-                curr_page_obj.attach_saved_charts(final_images,main_heading="Complete Analysis piecharts for resource utilizations")
-            elif key_format == "charts":
-                base_graphs_path=os.path.join(schema["base_graphs_path"],self.graphs_path)
-                charts_paths_dict={}
-                for main_heading,inside_charts in data.items():
-                    charts_paths_dict[main_heading] = [f'{os.path.join(base_graphs_path,main_heading,str(file_name).replace("/","-")+".png")}' for file_name in list(inside_charts.keys())]
-                curr_page_obj.attach_saved_charts(charts_paths_dict)
-            curr_page_obj.update_and_publish()
-        return ("success : Report published successfully"), "success"
+                                print("Previous sprint data found")
+                                prev_list = set(prev_data[key_name]["data"])
+                                if curr_list == prev_list:
+                                    curr_page_obj.add_text(f'<p><span style="color: green;">No new topics added/deleted </span></p>')
+                                else:
+                                    newly_added = curr_list - prev_list
+                                    deleted = prev_list - curr_list
+                                    if len(newly_added)>0:
+                                        curr_page_obj.add_text(f'<p><span style="color: blue;">{len(newly_added)} newly added topics found : {newly_added}</span></p>')
+                                    if len(deleted)>0:
+                                        curr_page_obj.add_text(f'<p><span style="color: blue;">{len(deleted)} topics are deleted : {deleted}</span></p>')
+                
+                elif key_format == "analysis":
+                    if len(self.sprint_runs_list) == 0:
+                        print("warning sprints not provided to compare and analyse resource usages")
+                        continue
+                    prev_sprint,prev_run = self.sprint_runs_list[0][0],self.sprint_runs_list[0][1]
+                    prev_data=self.get_key_result(prev_sprint,prev_run,key_name)
+                    if not prev_data:
+                        print(f"Found no previous data for sprint {prev_sprint} and run {prev_run}")
+                        continue
+                    prev_data=prev_data[key_name]["data"]
+                    temp_images,memory_combined_df,cpu_combined_df=analysis_main(data["memory_usages_analysis"],prev_data["memory_usages_analysis"],data["cpu_usage_analysis"],prev_data["cpu_usage_analysis"])
+                    unique_identifier = str(uuid.uuid1())
+                    analysis_piechart_folder = os.path.join(BASE_ANALYSIS_PIECHARTS_PATH,unique_identifier)
+                    os.makedirs(analysis_piechart_folder,exist_ok=True)
+                    final_images=defaultdict(lambda : [])
+                    for piechart_name in temp_images:
+                        file_path = f"{analysis_piechart_folder}/{piechart_name}.png"
+                        temp_images[piechart_name].save(file_path)
+                        final_images[piechart_name].append(file_path)
+                    curr_page_obj.add_text(f"<h2>Contributers to Resource Usage increase/decrease</h2>")
+                    curr_page_obj.add_table_from_dataframe(f'<h3>{self.captilise_heading("memory_usages_analysis")}</h3>', memory_combined_df.copy(), collapse=False,red_green_column_list=list(memory_combined_df.columns))
+                    curr_page_obj.add_table_from_dataframe(f'<h3>{self.captilise_heading("cpu_usage_analysis")}</h3>', cpu_combined_df.copy(), collapse=False,red_green_column_list=list(cpu_combined_df.columns))
+                    curr_page_obj.attach_saved_charts(final_images,main_heading="Complete Analysis piecharts for resource utilizations")
+                    shutil.rmtree(analysis_piechart_folder)
+                elif key_format == "charts":
+                    base_graphs_path=os.path.join(schema["base_graphs_path"],self.graphs_path)
+                    charts_paths_dict={}
+                    for main_heading,inside_charts in data.items():
+                        charts_paths_dict[main_heading] = [f'{os.path.join(base_graphs_path,main_heading,str(file_name).replace("/","-")+".png")}' for file_name in list(inside_charts.keys())]
+                    curr_page_obj.attach_saved_charts(charts_paths_dict)
+                curr_page_obj.update_and_publish()
+            return ("success : Report published successfully"), "success"
+        except Exception as e:
+            return (f"error : Unexpected error occured : {str(e)}", "error")
 
-# if __name__=='__main__':
-#     url='https://raghav-m.atlassian.net'
-#     email_address = "pbpraghav@gmail.com"
-#     space = '~712020a6f5183ca4bf41dcae421b10e977a0c1'
-#     parent_page_title = 'TEST'  
-#     import uuid
-#     report_title = f"TEST {uuid.uuid4()}"
+if __name__=='__main__':
+    url='https://raghav-m.atlassian.net'
+    email_address = "pbpraghav@gmail.com"
+    space = '~712020a6f5183ca4bf41dcae421b10e977a0c1'
+    parent_page_title = 'TEST'  
+    import uuid
+    report_title = f"TEST 1 {uuid.uuid4()}"
 
-#     # list_of_sprint_runs_to_show_or_compare = [(158,2),(157,1)]
-#     list_of_sprint_runs_to_show_or_compare = [(160,5)]
-#     database_name = "Osquery_LoadTests_New"
-#     collection_name = "ControlPlane"
-    
+    # list_of_sprint_runs_to_show_or_compare = [(158,2),(157,1)]
+    list_of_sprint_runs_to_show_or_compare = [(160,5),(160,1)]
+    database_name = "Osquery_LoadTests_New"
+    collection_name = "ControlPlane"
 
 
-#     obj = perf_load_report_publish(database_name, collection_name, list_of_sprint_runs_to_show_or_compare, parent_page_title, report_title, email_address, api_key, space, url)
-#     if "new_format" not in obj.all_keys:
-#         print("error : We are not dealing with new format mongo document")
-#     else:
-#         obj.all_keys.remove('new_format')
-#         result , status= obj.extract_all_variables()
-#         print(status, result)
+    # obj = perf_load_report_publish(database_name, collection_name, list_of_sprint_runs_to_show_or_compare, parent_page_title, report_title, email_address, api_key, space, url)
+    # if "new_format" not in obj.all_keys:
+    #     print("error : We are not dealing with new format mongo document")
+    # else:
+    #     obj.all_keys.remove('new_format')
+    #     result , status= obj.extract_all_variables_and_publish()
+    #     print(status, result)
     
     
     
