@@ -110,12 +110,12 @@ class publish_to_confluence:
         return_text = ""
         if "⬇️" in str(text):
             for each_text in split_text:
-                return_text+=f'<p><span style="color: green; font-size: 6px;">{str(each_text).strip()}</span></p>'
+                return_text+=f'<div><span style="color: green; font-size: 6px;">{str(each_text).strip()}</span></div>'
             return return_text
             # return f'<span style="color: green;">{text}</span>'
         elif "⬆️" in str(text):
             for each_text in split_text:
-                return_text+=f'<p><span style="color: red; font-size: 6px;">{str(each_text).strip()}</span></p>'
+                return_text+=f'<div><span style="color: red; font-size: 6px;">{str(each_text).strip()}</span></div>'
             return return_text
             # return f'<span style="color: red;">{text}</span>'
         else:
