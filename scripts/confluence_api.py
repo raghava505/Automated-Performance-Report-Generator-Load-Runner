@@ -4,6 +4,7 @@ import pandas as pd
 import os
 import io
 import plotly.io as pio
+import time
 
 # logging.basicConfig(level=logging.DEBUG)
 
@@ -105,11 +106,20 @@ class publish_to_confluence:
     
     def get_red_green_text(self,text):
         text = str(text.split('/')[1]).strip()
+        split_text = text.split(';')
+        return_text = ""
         if "⬇️" in str(text):
-            return f'<span style="color: green;">{text}</span>'
+            for each_text in split_text:
+                return_text+=f'<p><span style="color: green; font-size: 6px;">{str(each_text).strip()}</span></p>'
+            return return_text
+            # return f'<span style="color: green;">{text}</span>'
         elif "⬆️" in str(text):
-            return f'<span style="color: red;">{text}</span>'
-        else:return text
+            for each_text in split_text:
+                return_text+=f'<p><span style="color: red; font-size: 6px;">{str(each_text).strip()}</span></p>'
+            return return_text
+            # return f'<span style="color: red;">{text}</span>'
+        else:
+            return text
 
     def add_table_from_dataframe(self,heading,dataframe,collapse=False,status_col=None,red_green_column_list=None):
         if status_col and red_green_column_list and status_col in red_green_column_list:return False,"ERROR : Status col shouldn't be present in red_green_column_list" 
@@ -224,10 +234,26 @@ class publish_to_confluence:
         for chart_name in dict_of_figures:
             self.attach_plot_as_image(chart_name, dict_of_figures[chart_name], 4)
 
-    def update_and_publish(self):
-        self.confluence.update_page(self.page_id, self.title, self.body_content, 
-                                    parent_id=self.parent_page_id, type='page', 
-                                    representation='storage', minor_edit=False, 
-                                    full_width=True)
-        print("Page published successfully!")
-        self.close()
+    def update_and_publish(self, max_retries=3, retry_delay=2):
+        attempt = 0
+        while attempt < max_retries:
+            try:
+                # Attempt to update and publish the page
+                self.confluence.update_page(self.page_id, self.title, self.body_content,
+                                            parent_id=self.parent_page_id, type='page',
+                                            representation='storage', minor_edit=False,
+                                            full_width=True)
+                print("Page published successfully!")
+                self.close()
+                break  # Exit the loop on successful update
+            except Exception as e:
+                # Handle conflict and stale state exceptions specifically
+                if 'ConflictException' in str(e) or 'StaleStateException' in str(e):
+                    attempt += 1
+                    print(f"Conflict detected, retrying... (Attempt {attempt}/{max_retries})")
+                    time.sleep(retry_delay)  # Wait before retrying
+                else:
+                    # For any other exceptions, re-raise them
+                    raise
+        else:
+            print("Failed to update the page after multiple attempts.")
