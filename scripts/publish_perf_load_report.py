@@ -166,7 +166,8 @@ class perf_load_report_publish:
                 return
                 # return err, "error"
             for key_name in self.all_keys:
-                yield f'data: {{"status": "info", "message": "Processing table : {key_name}"}}\n\n'
+                print(f"Processing {str(key_name).capitalize()}")
+                yield f'data: {{"status": "info", "message": "Processing {str(key_name).capitalize()} section"}}\n\n'
                 key_format = self.main_result[key_name]["format"]
                 schema = self.main_result[key_name]["schema"]
                 data = self.main_result[key_name]["data"]
@@ -184,12 +185,13 @@ class perf_load_report_publish:
                     self.confluence_page_mappings[page]=curr_page_obj
                 
                 if key_format == "table":
-                    yield from self.add_standard_table(self.main_result[key_name],key_name,curr_page_obj)
+                    # yield from 
+                    self.add_standard_table(self.main_result[key_name],key_name,curr_page_obj)
             
                 elif key_format == "nested_table":
                     curr_page_obj.add_text(f"<h2>{self.captilise_heading(key_name)}</h2>")
                     for nested_key_name in data.keys():
-                        yield f'data: {{"status": "info", "message": "Processing nested table : {nested_key_name}"}}\n\n'
+                        yield f'data: {{"status": "info", "message": "Processing nested table : {str(nested_key_name).capitalize()}"}}\n\n'
                         self.add_standard_table(self.main_result[key_name]["data"][nested_key_name],nested_key_name,curr_page_obj,parent_key=key_name)
 
                 elif key_format == "mapping":
@@ -236,7 +238,6 @@ class perf_load_report_publish:
                     if len(self.sprint_runs_list) == 0:
                         warning_message = "Previous sprints not provided by the user to compare and analyze resource usages"
                         print(warning_message)
-                        yield f'data: {{"status": "warning", "message": {warning_message}}}\n\n'
                         continue
                     prev_sprint,prev_run = self.sprint_runs_list[0][0],self.sprint_runs_list[0][1]
                     prev_data=self.get_key_result(prev_sprint,prev_run,key_name)
