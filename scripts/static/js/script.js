@@ -187,28 +187,30 @@ function validateForm() {
         let isValid = true;
         const fields = document.querySelectorAll('#inputForm .form-control');
 
-        fields.forEach(field => {
-            const errorMessageDiv = field.nextElementSibling;
-            if (!field.value.trim()) {
-                errorMessageDiv.textContent = 'This field is required.';
-                isValid = false;
-            } else {
-                errorMessageDiv.textContent = '';
-            }
+        // fields.forEach(field => {
+        //     const errorMessageDiv = field.nextElementSibling;
+        //     if (!field.value.trim()) {
+        //         errorMessageDiv.textContent = 'This field is required.';
+        //         isValid = false;
+        //     } else {
+        //         errorMessageDiv.textContent = '';
+        //     }
 
-            if (field.id === 'url' && !validateURL(field.value)) {
-                errorMessageDiv.textContent = 'Please enter a valid URL.';
-                isValid = false;
-            }
+        //     if (field.id === 'url' && !validateURL(field.value)) {
+        //         errorMessageDiv.textContent = 'Please enter a valid URL.';
+        //         isValid = false;
+        //     }
 
-            if (field.id === 'email_address' && !validateEmail(field.value)) {
-                errorMessageDiv.textContent = 'Please enter a valid email address.';
-                isValid = false;
-            }
-        });
+        //     if (field.id === 'email_address' && !validateEmail(field.value)) {
+        //         errorMessageDiv.textContent = 'Please enter a valid email address.';
+        //         isValid = false;
+        //     }
+        // });
 
         if (isValid) {
             extractAllVariables();
+            document.getElementById("logWindow").scrollIntoView({ behavior: "smooth" });
+
         }
     }
 }
@@ -273,6 +275,7 @@ function extractAllVariables() {
     });
 
     startEventSource()
+    
 }
 
 function showNotification(message, type) {
