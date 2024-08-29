@@ -250,27 +250,85 @@ function extractAllVariables() {
         }, 10000); // 10 seconds
     }, 360000); // 6 mins
     
-    fetch('/process', {
-        method: 'POST',
-        body: formData
-    })
-    .then(response => response.json())
-    .then(data => {
-        showNotification(data.message, data.status);
+    // fetch('/process', {
+    //     method: 'POST',
+    //     body: formData
+    // })
+    // .then(response => response.json())
+    // .then(data => {
+    //     showNotification(data.message, data.status);
+    //     clearInterval(timeoutNotificationInterval);
+    //     clearInterval(notificationInterval);
+    //     clearTimeout(timeoutNotification); 
+    //     already_in_progress=false;
+    //     // localStorage.setItem('already_in_progress', false);
+    // })
+    // .catch(error => {
+    //     showNotification('Error submitting the form. Please try again.', 'error');
+    //     clearInterval(timeoutNotificationInterval);
+    //     clearInterval(notificationInterval);
+    //     clearTimeout(timeoutNotification); 
+    //     already_in_progress=false;
+    //     // localStorage.setItem('already_in_progress', false);
+    // });
+
+    // Use XMLHttpRequest to send the form data via POST
+    let xhr = new XMLHttpRequest();
+    xhr.open("POST", "/process", true);
+    xhr.onload = function() {
+        if (xhr.status === 200) {
+            // Once the form data is successfully posted, set up EventSource
+            let eventSource = new EventSource("/process");
+            
+            eventSource.onmessage = function(event) {
+                const data = JSON.parse(event.data);
+                showNotification(data.message, data.status);
+                var newData = document.createElement("div");
+                newData.innerHTML = event.data;
+                document.getElementById("output").appendChild(newData);
+
+                if (data.status === 'success' || data.status === 'error') {
+                    clearInterval(timeoutNotificationInterval);
+                    clearInterval(notificationInterval);
+                    clearTimeout(timeoutNotification); 
+                    already_in_progress = false;
+                    // Optionally update the progress status in localStorage
+                    // localStorage.setItem('already_in_progress', false);
+                    eventSource.close();
+                }
+            };
+            
+            eventSource.onerror = function() {
+                showNotification('Error receiving updates from the server.', 'error');
+                clearInterval(timeoutNotificationInterval);
+                clearInterval(notificationInterval);
+                clearTimeout(timeoutNotification); 
+                already_in_progress = false;
+                eventSource.close();
+                // Optionally update the progress status in localStorage
+                // localStorage.setItem('already_in_progress', false);
+            };
+        } else {
+            showNotification('Error received from server while submitting the form.', 'error');
+            clearInterval(timeoutNotificationInterval);
+            clearInterval(notificationInterval);
+            clearTimeout(timeoutNotification); 
+            already_in_progress = false;
+            // localStorage.setItem('already_in_progress', false);
+        }
+    };
+
+    xhr.onerror = function() {
+        showNotification('Error occured during XML Request.', 'error');
         clearInterval(timeoutNotificationInterval);
         clearInterval(notificationInterval);
         clearTimeout(timeoutNotification); 
-        already_in_progress=false;
+        already_in_progress = false;
         // localStorage.setItem('already_in_progress', false);
-    })
-    .catch(error => {
-        showNotification('Error submitting the form. Please try again.', 'error');
-        clearInterval(timeoutNotificationInterval);
-        clearInterval(notificationInterval);
-        clearTimeout(timeoutNotification); 
-        already_in_progress=false;
-        // localStorage.setItem('already_in_progress', false);
-    });
+    };
+
+    xhr.send(formData);
+
 }
 
 function showNotification(message, type) {
@@ -285,3 +343,17 @@ function showNotification(message, type) {
 function clearNotification() {
     document.getElementById('statusMessage').style.display = 'none';
 }
+
+// function startEventSource() {
+//     var eventSource = new EventSource("/test2");
+//     eventSource.onmessage = function(event) {
+//         var newData = document.createElement("div");
+//         newData.innerHTML = event.data;
+//         document.getElementById("output").appendChild(newData);
+//     };
+
+//     eventSource.onerror = function() {
+//         console.error("EventSource failed.");
+//         eventSource.close();
+//     };
+// };
