@@ -1,8 +1,9 @@
-from flask import Flask, render_template, request, jsonify
+from flask import Flask, render_template, request, jsonify, Response
 from publish_perf_load_report import perf_load_report_publish
 import ast
 from pymongo import MongoClient
 from config_vars import MONGO_CONNECTION_STRING, REPORT_UI_PORT
+import time
 
 app = Flask(__name__)
 
@@ -27,6 +28,22 @@ def get_collections():
     collections=[item for item in collections if "fs" not in item]
 
     return jsonify({'collections': collections})
+
+from flask import render_template, request, jsonify
+
+@app.route('/test', methods=['GET'])
+def something_test():
+    return render_template('test.html', collections=[x for x in range(5)], database_name="test_database")
+
+@app.route('/test2')
+def stream_data():
+    def generate():
+        for i in range(1, 7):  # 1 minute = 6 iterations (every 10 seconds)
+            collections = [x for x in range(5)]
+            data = f"Data batch {i}: {collections}"
+            yield f"data:{data}\n\n"
+            time.sleep(10)  # Wait for 10 seconds before sending the next batch
+    return Response(generate(), content_type='text/event-stream')
 
 
 @app.route('/get_ids', methods=['GET'])
