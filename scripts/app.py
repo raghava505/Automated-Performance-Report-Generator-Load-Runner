@@ -7,6 +7,7 @@ import time
 
 app = Flask(__name__)
 
+global_queue = []
 
 # MongoDB client setup
 client = MongoClient(MONGO_CONNECTION_STRING)
@@ -34,6 +35,17 @@ from flask import render_template, request, jsonify
 @app.route('/test', methods=['GET'])
 def something_test():
     return render_template('test.html', collections=[x for x in range(5)], database_name="test_database")
+
+
+@app.route('/event_stream')
+def events():
+    def generate():
+        while True:
+            # Yield data from the event queue
+            if global_queue:
+                yield global_queue.pop()
+
+    return Response(generate(), content_type='text/event-stream')
 
 @app.route('/test2')
 def stream_data():
@@ -92,10 +104,6 @@ def process():
     database_name = request.form['loadtype']
     collection_name = request.form['loadname']
 
-    # url='https://uptycsjira.atlassian.net'
-    # email_address = "masabathularao@uptycs.com"
-    # space = '~71202040c8bf45840d41c598c0efad54382c7b'
-
 
     # url='https://raghav-m.atlassian.net'
     # email_address = "pbpraghav@gmail.com"
@@ -105,7 +113,7 @@ def process():
     # import uuid
     # report_title = f"TEST {uuid.uuid4()}"
 
-    # list_of_sprint_runs_to_show_or_compare = [[160,5]]
+    # list_of_sprint_runs_to_show_or_compare = [[160,1],[160,4]]
     # database_name = "Osquery_LoadTests_New"
     # collection_name = "ControlPlane"
 
@@ -116,8 +124,10 @@ def process():
     else:
         obj.all_keys.remove('new_format')
         # message , status= obj.extract_all_variables_and_publish()
-        return Response(obj.extract_all_variables_and_publish(), content_type='text/event-stream')
-        # return jsonify({"status": status, "message": message})
+        # return Response(obj.extract_all_variables_and_publish(), content_type='text/event-stream')
+        for msg in obj.extract_all_variables_and_publish():
+            global_queue.append(msg)
+        return jsonify({"status": "success", "message": "done"})
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=REPORT_UI_PORT,debug=False)
