@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Page</title>
+    <script type="text/javascript">
+        document.addEventListener("DOMContentLoaded", function() {
+            var eventSource = new EventSource("/stream");
+            eventSource.onmessage = function(event) {
+                var newData = document.createElement("div");
+                newData.innerHTML = event.data;
+                document.getElementById("data-container").appendChild(newData);
+            };
+
+            eventSource.onerror = function() {
+                console.error("EventSource failed.");
+                eventSource.close();
+            };
+        });
+    </script>
+</head>
+<body>
+    <h1>Database: {{ database_name }}</h1>
+    <div id="data-container">
+        <!-- Data will be appended here -->
+    </div>
+</body>
+</html>
