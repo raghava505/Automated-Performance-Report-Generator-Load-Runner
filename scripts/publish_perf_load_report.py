@@ -84,7 +84,6 @@ class perf_load_report_publish:
         elif val < 0: return f"{abs(val)} ⬇️"
         elif val == 0: return 0
         else :
-            # print(f"WARNING : Unexpected value found : {val}")
             return val
         
     def preprocess_df(self,final_df):
@@ -163,9 +162,11 @@ class perf_load_report_publish:
         try:
             _,err = self.create_report_page(self.parent_page_title, self.report_title)
             if not _:
-                return err, "error"
+                yield f'data: {{"status": "error", "message": "{err}"}}\n\n'
+                return
+                # return err, "error"
             for key_name in self.all_keys:
-                print(f"*** processing main key : {key_name}")
+                yield f'data: {{"status": "info", "message": "Processing table : {key_name}"}}\n\n'
                 key_format = self.main_result[key_name]["format"]
                 schema = self.main_result[key_name]["schema"]
                 data = self.main_result[key_name]["data"]
@@ -177,16 +178,18 @@ class perf_load_report_publish:
                 else:
                     curr_page_obj,err = self.create_report_page(self.report_title, f"{page}-{self.report_title}")
                     if not curr_page_obj:
-                        return err, "error"
+                        yield f'data: {{"status": "error", "message": {err}}}\n\n'
+                        return
+                        # return err, "error"
                     self.confluence_page_mappings[page]=curr_page_obj
                 
                 if key_format == "table":
-                    self.add_standard_table(self.main_result[key_name],key_name,curr_page_obj)
+                    yield from self.add_standard_table(self.main_result[key_name],key_name,curr_page_obj)
             
                 elif key_format == "nested_table":
                     curr_page_obj.add_text(f"<h2>{self.captilise_heading(key_name)}</h2>")
                     for nested_key_name in data.keys():
-                        print(f"processing nested table {nested_key_name}")
+                        yield f'data: {{"status": "info", "message": "Processing nested table : {nested_key_name}"}}\n\n'
                         self.add_standard_table(self.main_result[key_name]["data"][nested_key_name],nested_key_name,curr_page_obj,parent_key=key_name)
 
                 elif key_format == "mapping":
@@ -231,12 +234,14 @@ class perf_load_report_publish:
                 
                 elif key_format == "analysis":
                     if len(self.sprint_runs_list) == 0:
-                        print("warning sprints not provided to compare and analyse resource usages")
+                        warning_message = "Previous sprints not provided by the user to compare and analyze resource usages"
+                        print(warning_message)
+                        yield f'data: {{"status": "warning", "message": {warning_message}}}\n\n'
                         continue
                     prev_sprint,prev_run = self.sprint_runs_list[0][0],self.sprint_runs_list[0][1]
                     prev_data=self.get_key_result(prev_sprint,prev_run,key_name)
                     if not prev_data:
-                        print(f"Found no previous data for sprint {prev_sprint} and run {prev_run}")
+                        yield f'data: {{"status": "warning", "message": Found no previous data for sprint {prev_sprint} and run {prev_run}}}\n\n'
                         continue
                     prev_data=prev_data[key_name]["data"]
                     temp_images,memory_combined_df,cpu_combined_df=analysis_main(data["memory_usages_analysis"],prev_data["memory_usages_analysis"],data["cpu_usage_analysis"],prev_data["cpu_usage_analysis"],main_build_load_details=self.main_result["load_details"]["data"],prev_build_load_details=self.get_key_result(prev_sprint,prev_run,"load_details")["load_details"]["data"] )
@@ -260,9 +265,12 @@ class perf_load_report_publish:
                         charts_paths_dict[main_heading] = [f'{os.path.join(base_graphs_path,main_heading,str(file_name).replace("/","-")+".png")}' for file_name in list(inside_charts.keys())]
                     curr_page_obj.attach_saved_charts(charts_paths_dict)
                 curr_page_obj.update_and_publish()
-            return ("success : Report published successfully"), "success"
+            yield f'data: {{"status": "success", "message": "Report published successfully"}}\n\n'
+            # return "success : Report published successfully", "success"
         except Exception as e:
-            return (f"error : Unexpected error occured : {str(e)}", "error")
+            yield f'data: {{"status": "error", "message": "Unexpected error occurred: {str(e)}"}}\n\n'
+            # return f"error : Unexpected error occured : {str(e)}", "error"
+           
 
 if __name__=='__main__':
     url='https://raghav-m.atlassian.net'

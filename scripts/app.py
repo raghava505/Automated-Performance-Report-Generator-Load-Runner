@@ -42,7 +42,7 @@ def stream_data():
             collections = [x for x in range(5)]
             data = f"Data batch {i}: {collections}"
             yield f"data:{data}\n\n"
-            time.sleep(10)  # Wait for 10 seconds before sending the next batch
+            time.sleep(2)  # Wait for 10 seconds before sending the next batch
     return Response(generate(), content_type='text/event-stream')
 
 
@@ -75,7 +75,7 @@ def get_ids():
 def index():
     return render_template('index.html')
 
-@app.route('/process', methods=['POST'])
+@app.route('/process',methods=['POST','GET'])
 def process():
     # Get form data from the request
     print("RETURNED FORM INPUT : ")
@@ -99,8 +99,8 @@ def process():
 
     # url='https://raghav-m.atlassian.net'
     # email_address = "pbpraghav@gmail.com"
-    # space = '~712020a6f5183ca4bf41dcae421b10e977a0c1'
-    
+    # space = 'IT'
+    # api_key="ATATT3xFfGF0KW9tfUcm8apnZIpVhN7UiPYVc4_XPIGTRPC6MR17LAGGAojAA_RMopsL8n9_UF61PP0IPx4mGZz36wbIxeIBNiloaxHeU3-6YBjUk_YF7xiZYv_7Sf2c3yuVnSdJx7h7LEtC9EJVypXdJ9YB1FB2IzbALAPxddejGl32XnKAr6A=7357FD40"
     # parent_page_title = 'TEST'  
     # import uuid
     # report_title = f"TEST {uuid.uuid4()}"
@@ -115,9 +115,9 @@ def process():
         return jsonify({"status": "ERROR", "message": "We are not dealing with new format mongo document"})
     else:
         obj.all_keys.remove('new_format')
-        result , status= obj.extract_all_variables_and_publish()
-        print(status, result)
-        return jsonify({"status": status, "message": result})
+        # message , status= obj.extract_all_variables_and_publish()
+        return Response(obj.extract_all_variables_and_publish(), content_type='text/event-stream')
+        # return jsonify({"status": status, "message": message})
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=REPORT_UI_PORT,debug=False)
