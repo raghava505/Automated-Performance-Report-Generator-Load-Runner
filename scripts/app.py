@@ -30,7 +30,6 @@ def get_collections():
 
     return jsonify({'collections': collections})
 
-from flask import render_template, request, jsonify
 
 @app.route('/test', methods=['GET'])
 def something_test():
@@ -87,8 +86,8 @@ def get_ids():
 def index():
     return render_template('index.html')
 
-@app.route('/process',methods=['POST','GET'])
-def process():
+@app.route('/publish_report',methods=['POST','GET'])
+def publish_report():
     # Get form data from the request
     print("RETURNED FORM INPUT : ")
     print(request.form)
@@ -108,12 +107,11 @@ def process():
     # url='https://raghav-m.atlassian.net'
     # email_address = "pbpraghav@gmail.com"
     # space = 'IT'
-    # api_key="ATATT3xFfGF0KW9tfUcm8apnZIpVhN7UiPYVc4_XPIGTRPC6MR17LAGGAojAA_RMopsL8n9_UF61PP0IPx4mGZz36wbIxeIBNiloaxHeU3-6YBjUk_YF7xiZYv_7Sf2c3yuVnSdJx7h7LEtC9EJVypXdJ9YB1FB2IzbALAPxddejGl32XnKAr6A=7357FD40"
     # parent_page_title = 'TEST'  
     # import uuid
     # report_title = f"TEST {uuid.uuid4()}"
 
-    # list_of_sprint_runs_to_show_or_compare = [[160,1],[160,4]]
+    # list_of_sprint_runs_to_show_or_compare = [[160,1]]
     # database_name = "Osquery_LoadTests_New"
     # collection_name = "ControlPlane"
 

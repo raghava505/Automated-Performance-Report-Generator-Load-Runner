@@ -264,6 +264,8 @@ class perf_load_report_publish:
                     charts_paths_dict={}
                     for main_heading,inside_charts in data.items():
                         charts_paths_dict[main_heading] = [f'{os.path.join(base_graphs_path,main_heading,str(file_name).replace("/","-")+".png")}' for file_name in list(inside_charts.keys())]
+                        print(f"inside charts for loop {main_heading}")
+                        yield f'data: {{"status": "info", "message": "Attching {main_heading} charts"}}\n\n'
                     curr_page_obj.attach_saved_charts(charts_paths_dict)
                 curr_page_obj.update_and_publish()
             yield f'data: {{"status": "success", "message": "Report published successfully"}}\n\n'
