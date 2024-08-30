@@ -141,13 +141,13 @@ function addSprintRunFields() {
     `;
     if (fieldCounter!=1){
         newFields = newFields + `<div>
-                                    <span><button type="button" class="remove-field" onclick="removeFields(${fieldCounter})">x</button></span>
+                                    <span><button type="button" class="remove_btn" onclick="removeFields(${fieldCounter})"><i class="fa-solid fa-xmark"></i></button></span>
                                 </div>
                                 `
     }
     else{
         newFields = newFields + `<div class="hidden-content">
-                                    <span><button type="button" class="remove-field" >x</button></span>
+                                    <span><button type="button" class="remove_btn" >x</button></span>
                                 </div>
                                 `
     }
