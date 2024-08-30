@@ -122,7 +122,7 @@ function addSprintRunFields() {
     let newFields = `
         <div class="form-group row inside_fields" id="sprintRunGroup_${fieldCounter}">
             <div class="col">
-                <label for="sprint_${fieldCounter}">Sprint Field${fieldCounter}:</label>
+                <label for="sprint_${fieldCounter}">Sprint Field ${fieldCounter}:</label>
                 <select class="form-control" id="sprint_${fieldCounter}" name="sprint_${fieldCounter}" required>
                     <option value="">Select Sprint</option>
                     <!-- Options will be populated via JavaScript -->
@@ -130,7 +130,7 @@ function addSprintRunFields() {
                 <div class="error-message"></div>
             </div>
             <div class="col">
-                <label for="run_${fieldCounter}">Run Field${fieldCounter}:</label>
+                <label for="run_${fieldCounter}">Run Field ${fieldCounter}:</label>
                 <select class="form-control run-element" id="run_${fieldCounter}" name="run_${fieldCounter}" required>
                     <option value="">Select Run</option>
                     <!-- Options will be populated via JavaScript -->
@@ -187,35 +187,35 @@ function validateForm() {
         let isValid = true;
         const fields = document.querySelectorAll('#inputForm .form-control');
 
-        // fields.forEach(field => {
-        //     const errorMessageDiv = field.nextElementSibling;
-        //     if (!field.value.trim()) {
-        //         errorMessageDiv.textContent = 'This field is required.';
-        //         isValid = false;
-        //     } else {
-        //         errorMessageDiv.textContent = '';
-        //     }
+        fields.forEach(field => {
+            const errorMessageDiv = field.nextElementSibling;
+            if (!field.value.trim()) {
+                errorMessageDiv.textContent = 'This field is required.';
+                isValid = false;
+            } else {
+                errorMessageDiv.textContent = '';
+            }
 
-        //     if (field.id === 'url' && !validateURL(field.value)) {
-        //         errorMessageDiv.textContent = 'Please enter a valid URL.';
-        //         isValid = false;
-        //     }
+            if (field.id === 'url' && !validateURL(field.value)) {
+                errorMessageDiv.textContent = 'Please enter a valid URL.';
+                isValid = false;
+            }
 
-        //     if (field.id === 'email_address' && !validateEmail(field.value)) {
-        //         errorMessageDiv.textContent = 'Please enter a valid email address.';
-        //         isValid = false;
-        //     }
-        // });
+            if (field.id === 'email_address' && !validateEmail(field.value)) {
+                errorMessageDiv.textContent = 'Please enter a valid email address.';
+                isValid = false;
+            }
+        });
 
         if (isValid) {
-            extractAllVariables();
+            publishReportToConfluence();
             document.getElementById("logWindow").scrollIntoView({ behavior: "smooth" });
 
         }
     }
 }
 
-function extractAllVariables() {
+function publishReportToConfluence() {
     already_in_progress=true;
     // localStorage.setItem('already_in_progress', true);
 
@@ -252,7 +252,7 @@ function extractAllVariables() {
     //     }, 10000); // 10 seconds
     // }, 360000); // 6 mins
     
-    fetch('/process', {
+    fetch('/publish_report', {
         method: 'POST',
         body: formData
     })
@@ -298,13 +298,17 @@ function startEventSource() {
         const data = JSON.parse(event.data);
         showNotification(data.message, data.status);
         var newData = document.createElement("div");
-        newData.innerHTML = data.status.toUpperCase() + " : "+ data.message;
+        newData.innerHTML = getCurrentTime() + " - " + data.status.toUpperCase() + " : "+ data.message;
         document.getElementById("logWindow").appendChild(newData);
+        scrollToBottom("logWindow");
 
         if (data.status === 'success' || data.status === 'error') {
             already_in_progress = false;
             // Optionally update the progress status in localStorage
             // localStorage.setItem('already_in_progress', false);
+            var separator = document.createElement("hr");
+            // Append the separator to the log window
+            document.getElementById("logWindow").appendChild(separator);
             eventSource.close();
         }
     };
@@ -317,3 +321,22 @@ function startEventSource() {
         // localStorage.setItem('already_in_progress', false);
     };
 };
+
+function scrollToBottom(id) {
+    var logWindow = document.getElementById(id);
+    logWindow.scrollTop = logWindow.scrollHeight;
+}
+
+function getCurrentTime() {
+    var currentDate = new Date();
+    var hours = currentDate.getHours();
+    var minutes = currentDate.getMinutes();
+    var seconds = currentDate.getSeconds();
+
+    // Add leading zeros if necessary
+    hours = hours < 10 ? '0' + hours : hours;
+    minutes = minutes < 10 ? '0' + minutes : minutes;
+    seconds = seconds < 10 ? '0' + seconds : seconds;
+
+    return hours + ":" + minutes + ":" + seconds;
+}
