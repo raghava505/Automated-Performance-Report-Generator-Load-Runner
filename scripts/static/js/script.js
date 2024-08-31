@@ -219,10 +219,12 @@ function publishReportToConfluence() {
     already_in_progress=true;
     const formData = new FormData(document.getElementById('inputForm'));
 
-    const sprintRuns = [];
     document.querySelectorAll('[id^="sprint_"]').forEach((sprintSelect, index) => {
+        const sprint_id = String(sprintSelect.id);
+        main_id = sprint_id.split("_")[1];
         const sprint = sprintSelect.value;
-        const run = document.querySelector(`#run_${index + 1}`).value;
+        run_elem = document.querySelector(`#run_${main_id}`)
+        const run = run_elem.value;
         if (sprint && run) {
             sprintRuns.push([parseInt(sprint, 10), parseInt(run, 10)]);
         }
@@ -337,8 +339,11 @@ function ViewReport() {
     const formData = new FormData(document.getElementById('inputForm'));
     const sprintRuns = [];
     document.querySelectorAll('[id^="sprint_"]').forEach((sprintSelect, index) => {
+        const sprint_id = String(sprintSelect.id);
+        main_id = sprint_id.split("_")[1];
         const sprint = sprintSelect.value;
-        const run = document.querySelector(`#run_${index + 1}`).value;
+        run_elem = document.querySelector(`#run_${main_id}`)
+        const run = run_elem.value;
         if (sprint && run) {
             sprintRuns.push([parseInt(sprint, 10), parseInt(run, 10)]);
         }
