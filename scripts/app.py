@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, jsonify, Response, send_from_directory, url_for
+from flask import Flask, render_template, request, jsonify, Response, send_from_directory, url_for, flash
 from publish_perf_load_report import perf_load_report_publish
 import ast
 from pymongo import MongoClient
@@ -8,6 +8,7 @@ import queue
 
 
 app = Flask(__name__)
+app.config['SECRET_KEY'] = '343c855017e725321cb7f35b89c98b9e'
 
 publish_logs_queue = queue.Queue()
 report_data_queue = queue.Queue()
@@ -36,7 +37,7 @@ def get_collections():
 
 @app.route('/test', methods=['GET'])
 def something_test():
-    return render_template('test.html', collections=[x for x in range(5)], database_name="test_database")
+    return render_template('test2.html', collections=[x for x in range(5)], database_name="test_database")
 
 
 @app.route('/graphs/<path:filename>')
@@ -119,21 +120,21 @@ def view_report():
     database_name = request.form['loadtype']
     collection_name = request.form['loadname']
 
-    # list_of_sprint_runs_to_show_or_compare = [[160,4]]
+    # list_of_sprint_runs_to_show_or_compare = [[160,4],[160,1]]
     # database_name = "Osquery_LoadTests_New"
     # collection_name = "ControlPlane"
 
     obj = perf_load_report_publish(database_name, collection_name, list_of_sprint_runs_to_show_or_compare, None, None, None, None, None, None,isViewReport=True)
-    if "new_format" not in obj.all_keys:
-        return jsonify({"status": "ERROR", "message": "We are not dealing with new format mongo document"})
-    else:
-        obj.all_keys.remove('new_format')
-        for msg in obj.extract_all_variables_and_publish(url_for):
-            report_data_queue.put(msg) 
-        return jsonify({"status": "success", "message": "done"})
+    if "new_format" in obj.all_keys:obj.all_keys.remove('new_format')
+    while not report_data_queue.empty():
+        print("EMPTYING report_data_queue")
+        report_data_queue.get() 
+    for msg in obj.extract_all_variables_and_publish(url_for):
+        report_data_queue.put(msg)
+    return jsonify({"status": "info", "message": "done"})
     
 
-@app.route('/publish_report',methods=['POST','GET'])
+@app.route('/publish_report',methods=['POST'])
 def publish_report():
     # Get form data from the request
     # print("RETURNED FORM INPUT : ")
@@ -161,16 +162,14 @@ def publish_report():
     # database_name = "Osquery_LoadTests_New"
     # collection_name = "ControlPlane"
 
-
     obj = perf_load_report_publish(database_name, collection_name, list_of_sprint_runs_to_show_or_compare, parent_page_title, report_title, email_address, api_key, space, url,isViewReport=False)
-    if "new_format" not in obj.all_keys:
-        return jsonify({"status": "ERROR", "message": "We are not dealing with new format mongo document"})
-    else:
-        obj.all_keys.remove('new_format')
-        for msg in obj.extract_all_variables_and_publish(url_for):
-            publish_logs_queue.put(msg) 
-            time.sleep(1)
-        return jsonify({"status": "success", "message": "done"})
+    if "new_format" in obj.all_keys:obj.all_keys.remove('new_format')
+    while not publish_logs_queue.empty():publish_logs_queue.get() 
+    for msg in obj.extract_all_variables_and_publish(url_for):
+        # flash(str(msg) , "success")
+        publish_logs_queue.put(msg) 
+        # time.sleep(1)
+    return jsonify({"status": "info", "message": "done"})
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=REPORT_UI_PORT,debug=False)
+    app.run(host='0.0.0.0', port=REPORT_UI_PORT,debug=True)
