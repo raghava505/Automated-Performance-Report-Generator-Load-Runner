@@ -250,7 +250,7 @@ class perf_load_report_publish:
 
                         else:
                             curr_page_obj.add_text(f"<h3>{str(key)}</h3>")
-                            html_text +=f"<h3>{str(key)}</h3>"
+                            html_text +=f"<h4>{str(key)}</h4>"
                             for nested_key,nested_value in value.items():
                                 curr_page_obj.add_text(f"<p>{self.captilise_heading(nested_key)} : {nested_value}</p>\n")
                                 html_text += f"<p>{self.captilise_heading(nested_key)} : {nested_value}</p>"
@@ -267,6 +267,7 @@ class perf_load_report_publish:
                             html_text += f'<p><span style="color: black;">{curr_list_to_string} </span></p>'
 
                         else:
+                            print("prev sprints provided.. checing")
                             prev_sprint,prev_run = self.sprint_runs_list[0][0],self.sprint_runs_list[0][1]
                             prev_data=self.get_key_result(prev_sprint,prev_run,key_name)
                             if not prev_data:

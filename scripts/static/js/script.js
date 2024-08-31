@@ -241,9 +241,11 @@ function publishReportToConfluence() {
     .then(response => response.json())
     .then(data => {
         already_in_progress=false;
+        console.log(data)
     })
     .catch(error => {
         already_in_progress=false;
+        console.log(error)
     });
 }
 
@@ -261,7 +263,7 @@ function clearNotification() {
 }
 
 function startPublishLogsEventSource() {
-    if (window.eventSource && window.eventSource.readyState !== EventSource.CLOSED) {
+    if (window.publish_eventSource && window.publish_eventSource.readyState !== EventSource.CLOSED) {
         console.log("EventSource already open, not reopening.");
         return;
     }
@@ -275,11 +277,12 @@ function startPublishLogsEventSource() {
         scrollToBottom("logWindow");
 
         if (data.status === 'success' || data.status === 'error') {
+            console.log("received "+data.status+ " for pubslihing stream")
             already_in_progress = false;
             var separator = document.createElement("hr");
             // Append the separator to the log window
             document.getElementById("logWindow").appendChild(separator);
-            eventSource.close();
+            publish_eventSource.close();
         }
     };
     
@@ -324,7 +327,9 @@ function validateViewReport() {
     if (isValid) {
         startReportDataEventSource();
         ViewReport();
-        document.getElementById("popupContent").innerHTML = '<span class="close-btn" onclick="closePopup()">&times;</span>'
+        document.getElementById("ReportWindow").innerHTML = ''
+        document.getElementById("ReportWindow").scrollIntoView({ behavior: "smooth" });
+
     }
 }
 
@@ -367,7 +372,7 @@ function startReportDataEventSource() {
         var newData = document.createElement("div");
         newData.innerHTML = data.message;
         console.log(data.message);
-        document.getElementById("popupContent").appendChild(newData);
+        document.getElementById("ReportWindow").appendChild(newData);
     };
     
     eventSource.onerror = function(event) {
@@ -376,30 +381,16 @@ function startReportDataEventSource() {
     };
 }
 
-function closePopup() {
-    const overlay = document.getElementById('popupOverlay');
-    const content = document.getElementById('popupContent');
 
-    // Remove the show class to trigger closing animations
-    overlay.classList.remove('show');
-    content.classList.remove('show');
+window.onscroll = function() {
+    if (document.body.scrollTop > 100 || document.documentElement.scrollTop > 100) {
+        document.querySelector('.back-to-top').style.display = 'block';
+    } else {
+        document.querySelector('.back-to-top').style.display = 'none';
+    }
+};
 
-    // Wait for the animation to finish before completely hiding the popup
-    setTimeout(() => {
-        overlay.style.display = 'none';
-    }, 100); // 300ms matches the transition duration
-}
-
-function openPopup() {
-    const overlay = document.getElementById('popupOverlay');
-    const content = document.getElementById('popupContent');
-
-    // Reset display property to make the overlay visible
-    overlay.style.display = 'block';
-
-    // Add the show class to trigger animations
-    setTimeout(() => {
-        overlay.classList.add('show');
-        content.classList.add('show');
-    }, 5);
+// Scroll to the top of the page when the button is clicked
+function scrollToTop() {
+    window.scrollTo({top: 0, behavior: 'smooth'});
 }
