@@ -210,7 +210,7 @@ function validatePublishForm() {
         if (isValid) {
             startPublishLogsEventSource()
             publishReportToConfluence();
-            document.getElementById("logWindow").scrollIntoView({ behavior: "smooth" });
+            scrollToBlock('logWindow')
         }
     }
 }
@@ -218,12 +218,13 @@ function validatePublishForm() {
 function publishReportToConfluence() {
     already_in_progress=true;
     const formData = new FormData(document.getElementById('inputForm'));
+    const sprintRuns = [];
 
     document.querySelectorAll('[id^="sprint_"]').forEach((sprintSelect, index) => {
         const sprint_id = String(sprintSelect.id);
         main_id = sprint_id.split("_")[1];
         const sprint = sprintSelect.value;
-        run_elem = document.querySelector(`#run_${main_id}`)
+        run_elem = document.querySelector(`#run_${main_id}`);
         const run = run_elem.value;
         if (sprint && run) {
             sprintRuns.push([parseInt(sprint, 10), parseInt(run, 10)]);
@@ -286,6 +287,16 @@ function startPublishLogsEventSource() {
         //     document.getElementById("logWindow").appendChild(separator);
         //     publish_eventSource.close();
         // }
+
+        const logs_loadingAnimation = document.getElementById("logs_loadingAnimation");
+         // Check message content
+        if (data.message.includes("success") || data.message.includes("error")) {
+            logs_loadingAnimation.style.display = 'none'; // Hide loading animation
+        } else {
+            logs_loadingAnimation.style.display = 'block'; // Show loading animation
+        }
+
+
     };
     
     publish_eventSource.onerror = function(event) {
@@ -327,11 +338,15 @@ function validateViewReport() {
         }
     });
     if (isValid) {
+        ReportWindowElement = document.getElementById("ReportWindow")
+        ReportWindowElement.style.marginBottom = "1065px"; //no need to change this value anytime
+        scrollToBlock("ReportWindow")
+        ReportWindowElement.innerHTML = '';
         startReportDataEventSource();
         ViewReport();
-        document.getElementById("ReportWindow").innerHTML = ''
-        document.getElementById("ReportWindow").scrollIntoView({ behavior: "smooth" });
-
+        setTimeout(function() {
+            ReportWindowElement.style.marginBottom = "1px";
+        }, 1000);
     }
 }
 
@@ -342,7 +357,7 @@ function ViewReport() {
         const sprint_id = String(sprintSelect.id);
         main_id = sprint_id.split("_")[1];
         const sprint = sprintSelect.value;
-        run_elem = document.querySelector(`#run_${main_id}`)
+        run_elem = document.querySelector(`#run_${main_id}`);
         const run = run_elem.value;
         if (sprint && run) {
             sprintRuns.push([parseInt(sprint, 10), parseInt(run, 10)]);
@@ -378,6 +393,19 @@ function startReportDataEventSource() {
         newData.innerHTML = data.message;
         console.log(data.message);
         document.getElementById("ReportWindow").appendChild(newData);
+
+        const report_loadingAnimation = document.getElementById("report_loadingAnimation");
+        const report_loadingAnimation_bottom = document.getElementById("report_loadingAnimation_bottom");
+
+         // Check message content
+        if (data.message.includes("success") || data.message.includes("error")) {
+            report_loadingAnimation.style.display = 'none'; // Hide loading animation
+            report_loadingAnimation_bottom.style.display = 'none'; // Hide loading animation
+
+        } else {
+            report_loadingAnimation.style.display = 'block'; // Show loading animation
+            report_loadingAnimation_bottom.style.display = 'block'; // Show loading animation
+        }
     };
     
     eventSource.onerror = function(event) {
@@ -386,16 +414,84 @@ function startReportDataEventSource() {
     };
 }
 
-
-window.onscroll = function() {
-    if (document.body.scrollTop > 100 || document.documentElement.scrollTop > 100) {
-        document.querySelector('.back-to-top').style.display = 'block';
-    } else {
-        document.querySelector('.back-to-top').style.display = 'none';
-    }
-};
-
 // Scroll to the top of the page when the button is clicked
-function scrollToTop() {
-    window.scrollTo({top: 0, behavior: 'smooth'});
+function scrollToBlock(id) {
+    const element = document.getElementById(id);
+    if (element) {
+        // Calculate the top position of the element relative to the viewport
+        const rect = element.getBoundingClientRect();
+        // Calculate the top position of the element relative to the document
+        const elementTop = window.pageYOffset + rect.top;
+        // Calculate the desired scroll position with a 100px gap at the top
+        const scrollToPosition = elementTop - 60;
+
+        // Smoothly scroll to the desired position
+        window.scrollTo({
+            top: scrollToPosition,
+            behavior: 'smooth'
+        });
+    }
+}
+
+
+function checkVisibility() {
+    const reportWindow = document.getElementById('ReportWindow');
+    const down_button = document.getElementById('scroll_through_report_slowly');
+    const up_button = document.getElementById('scroll_up');
+
+    function updateButtonVisibility() {
+        const rect = reportWindow.getBoundingClientRect();
+        // const isAtTop = rect.top >= 0 && rect.top <= window.innerHeight;
+        const isAtTop = rect.top <=63;
+
+        if (isAtTop) {
+            down_button.style.display = 'block'; // Show button
+            up_button.style.display = 'block'; // Show button
+        } else {
+            down_button.style.display = 'none'; // Hide button
+            up_button.style.display = 'none'; // Hide button
+        }
+    }
+
+    // Initial check
+    updateButtonVisibility();
+
+    // Check visibility on scroll and resize
+    window.addEventListener('scroll', updateButtonVisibility);
+    window.addEventListener('resize', updateButtonVisibility);
+}
+
+// Initialize the visibility check
+checkVisibility();
+
+
+// Variable to hold the interval ID
+let scrollInterval = null;
+let isScrolling = false;
+
+// Function to start or stop scrolling
+function toggleScroll() {
+    const button = document.getElementById('scroll_through_report_slowly');
+
+    if (isScrolling) {
+        // If scrolling is active, stop it
+        clearInterval(scrollInterval);
+        isScrolling = false;
+        // Change button icon back to normal
+        button.innerHTML = '<i class="fas fa-arrow-down"></i>';
+    } else {
+        // If scrolling is not active, start it
+        scrollInterval = setInterval(function() {
+            window.scrollBy(0, 1); // Scroll down 1px at a time
+            if ((window.innerHeight + window.scrollY) >= document.body.offsetHeight) {
+                clearInterval(scrollInterval); // Stop scrolling when reaching the bottom
+                isScrolling = false;
+                // Change button icon back to normal
+                button.innerHTML = '<i class="fas fa-arrow-down"></i>';
+            }
+        }, 1); // Adjust interval for scrolling speed
+        isScrolling = true;
+        // Change button icon to indicate "stop scrolling"
+        button.innerHTML = '<i class="fa-solid fa-pause"></i>'; // Use a different icon to indicate stop
+    }
 }

@@ -95,18 +95,61 @@
     </div>
 
     <div class="mt-5 mb-3 pb-5 rounded">
-        <h4 class=" text-center"><i class="bi bi-terminal-fill"></i> Logs</h4>
-            <div id="logWindow" class="rounded p-3 mb-5 pb-5 bg-light code-window">
-                // Logs will be displayed here during the report publishing process
-                <br>
+        <div class="d-flex align-items-center justify-content-center">
+            <!-- Logs Text -->
+            <h4 class="text-center mr-3"><i class="bi bi-terminal-fill"></i> Logs</h4>
+    
+            <!-- Loading Animation -->
+            <div id="logs_loadingAnimation" style="display: none;">
+                <button class="btn btn-primary mb-2" type="button" disabled>
+                    <span class="spinner-grow spinner-grow-sm" role="status" aria-hidden="true"></span>
+                    publishing...
+                </button>
             </div>
+        </div>
+    
+        <div id="logWindow" class="rounded p-3 mb-5 pb-5 bg-light code-window">
+            // Logs will be displayed here during the report publishing process 
+            <br>
+        </div>
     </div>
+    
 
     <div class="pb-3 rounded">
-        <h3 class="text-center mt-1"><i class="fas fa-file-alt"></i> View Report</h3>
-            <div id="ReportWindow" class="rounded p-3 pb-5">
-                <p class="text-center">Report will be displayed here after clicking 'View Report' Button</p>
+        <div class="d-flex align-items-center justify-content-center">
+            <!-- View Report Text -->
+            <h3 class="text-center mt-1 mr-3"><i class="fas fa-file-alt"></i> View Report</h3>
+    
+            <!-- Loading Animation -->
+            <div id="report_loadingAnimation" style="display: none;">
+                <button class="btn btn-primary mb-1" type="button" disabled>
+                    <span class="spinner-grow spinner-grow-sm" role="status" aria-hidden="true"></span>
+                    Loading...
+                </button>
             </div>
+        </div>
+    
+        <div id="ReportWindow" class="rounded p-4 shadow">
+            <p class="text-center">Report will be displayed here after clicking 'View Report' Button</p>
+        </div>
     </div>
+
+    <div id="report_loadingAnimation_bottom" style="display: none; text-align: center;">
+        <button class="btn btn-primary mb-1" type="button" disabled>
+            <span class="spinner-grow spinner-grow-sm" role="status" aria-hidden="true"></span>
+            Loading...
+        </button>
+    </div>
+
+    
+
+
+    <button class="btn btn-primary back-to-top" id="scroll_up"  onclick="scrollToBlock('ReportWindow')">
+        <i class="fas fa-arrow-up"></i>
+    </button>
+    
+    <button class="btn btn-primary " id="scroll_through_report_slowly" onclick="toggleScroll()" >
+        <i class="fas fa-arrow-down"></i>
+    </button>
 
 {%endblock content%}
