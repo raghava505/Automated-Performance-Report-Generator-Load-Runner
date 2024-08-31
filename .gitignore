@@ -23,3 +23,4 @@ project
 scripts/make_resource_analysis_from_scratch.py
 scripts/find_metric_output.py
 scripts/use_publish_to_confluence.py
+scripts/flask_session/

@@ -1,17 +1,20 @@
-from flask import Flask, render_template, request, jsonify, Response, send_from_directory, url_for, flash
+from flask import Flask, render_template, request, jsonify, Response, send_from_directory, url_for, flash, session
 from publish_perf_load_report import perf_load_report_publish
 import ast
 from pymongo import MongoClient
 from config_vars import MONGO_CONNECTION_STRING, REPORT_UI_PORT, BASE_GRAPHS_PATH
 import time
-import queue
-
+from queue import Queue
+from flask_session import Session 
 
 app = Flask(__name__)
-app.config['SECRET_KEY'] = '343c855017e725321cb7f35b89c98b9e'
+# app.config['SECRET_KEY'] = '343c855017e725321cb7f35b89c98b9e'
+app.config['SESSION_TYPE'] = 'filesystem'
+Session(app)
 
-publish_logs_queue = queue.Queue()
-report_data_queue = queue.Queue()
+report_data_user_queues = {}
+publish_logs_user_queues = {}
+
 
 # MongoDB client setup
 client = MongoClient(MONGO_CONNECTION_STRING)
@@ -47,29 +50,53 @@ def serve_image(filename):
 
 @app.route('/publish_logs_stream')
 def get_publish_logs_stream():
-    def generate():
-         while True:
-            if not publish_logs_queue.empty():
-                msg = publish_logs_queue.get()
+    def logs_generate(user_id):
+        """Stream logs from the user's queue."""
+        user_queue = publish_logs_user_queues.get(user_id, None)
+        print("inside generate func : ", user_queue)
+        while True:
+            if not user_queue.empty():
+                msg = user_queue.get()
+                print("POPPING FROM QUEUE")
                 yield msg
+                # yield f'data: {{"status": "success", "message": "user id is {user_id}"}}\n\n'
                 time.sleep(0.1)
             else:
-                time.sleep(0.1)
-    return Response(generate(), content_type='text/event-stream')
+                time.sleep(1)
 
+    """Stream logs for the current user."""
+    user_id = session.get('user_id')
+    if user_id:
+        print(user_id," found in session")
+        return Response(logs_generate(user_id), content_type='text/event-stream')
+    else:
+        print("user id not found in session")
+    return '', 403  # Forbidden if no user ID
 
 @app.route('/report_data_queue_route')
 def get_report_data_stream():
-    def generate():
+    def report_generate(user_id):
+        """Stream logs from the user's queue."""
+        user_queue = report_data_user_queues.get(user_id, None)
+        print("inside generate func : ", user_queue)
         while True:
-            if not report_data_queue.empty():
-                msg = report_data_queue.get()
+            if not user_queue.empty():
+                msg = user_queue.get()
+                print("POPPING FROM QUEUE")
                 yield msg
+                # yield f'data: {{"status": "success", "message": "user id is {user_id}"}}\n\n'
                 time.sleep(0.1)
             else:
-                time.sleep(0.1)
-    
-    return Response(generate(), content_type='text/event-stream')
+                time.sleep(1)
+    """Stream logs for the current user."""
+    user_id = session.get('user_id')
+    if user_id:
+        print(user_id," found in session")
+        return Response(report_generate(user_id), content_type='text/event-stream')
+    else:
+        print("user id not found in session")
+
+    return '', 403  # Forbidden if no user ID
 
 @app.route('/test2')
 def stream_data():
@@ -109,8 +136,17 @@ def get_ids():
 
 @app.route('/')
 def index():
-    return render_template('index.html')
+    """Render the main HTML page."""
+    session['user_id'] = request.cookies.get('user_id', None)  # Get or set a unique user ID
+    if not session['user_id']:
+        session['user_id'] = str(time.time())  # Use timestamp or UUID for unique user ID
 
+    user_id = session.get('user_id')
+    report_data_user_queues[user_id] = Queue()
+    publish_logs_user_queues[user_id] = Queue()
+
+    return render_template('index.html',user_id=user_id)
+    
 
 @app.route('/view_report',methods=['POST','GET'])
 def view_report():
@@ -124,14 +160,21 @@ def view_report():
     # database_name = "Osquery_LoadTests_New"
     # collection_name = "ControlPlane"
 
+    """Add a log message to the queue for the current user."""
+    user_id = session.get('user_id')
+    if not user_id:
+        return '', 403 
+    print("user id ", user_id)
     obj = perf_load_report_publish(database_name, collection_name, list_of_sprint_runs_to_show_or_compare, None, None, None, None, None, None,isViewReport=True)
     if "new_format" in obj.all_keys:obj.all_keys.remove('new_format')
-    while not report_data_queue.empty():
-        print("EMPTYING report_data_queue")
-        report_data_queue.get() 
     for msg in obj.extract_all_variables_and_publish(url_for):
-        report_data_queue.put(msg)
+        if user_id in report_data_user_queues:
+            print("PUSHING INTO QUEUE ", report_data_user_queues[user_id])
+            report_data_user_queues[user_id].put(msg)
+        else:
+            print("FATAL ERROR : userid not found in user queues")
     return jsonify({"status": "info", "message": "done"})
+    
     
 
 @app.route('/publish_report',methods=['POST'])
@@ -162,13 +205,19 @@ def publish_report():
     # database_name = "Osquery_LoadTests_New"
     # collection_name = "ControlPlane"
 
+    user_id = session.get('user_id')
+    if not user_id:
+        return '', 403 
+    print("user id ", user_id)
+
     obj = perf_load_report_publish(database_name, collection_name, list_of_sprint_runs_to_show_or_compare, parent_page_title, report_title, email_address, api_key, space, url,isViewReport=False)
     if "new_format" in obj.all_keys:obj.all_keys.remove('new_format')
-    while not publish_logs_queue.empty():publish_logs_queue.get() 
     for msg in obj.extract_all_variables_and_publish(url_for):
-        # flash(str(msg) , "success")
-        publish_logs_queue.put(msg) 
-        # time.sleep(1)
+        if user_id in publish_logs_user_queues:
+            print("PUSHING INTO QUEUE ", publish_logs_user_queues[user_id])
+            publish_logs_user_queues[user_id].put(msg)
+        else:
+            print("FATAL ERROR : userid not found in user queues")
     return jsonify({"status": "info", "message": "done"})
 
 if __name__ == '__main__':

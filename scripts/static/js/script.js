@@ -276,14 +276,14 @@ function startPublishLogsEventSource() {
         document.getElementById("logWindow").appendChild(newData);
         scrollToBottom("logWindow");
 
-        if (data.status === 'success' || data.status === 'error') {
-            console.log("received "+data.status+ " for pubslihing stream")
-            already_in_progress = false;
-            var separator = document.createElement("hr");
-            // Append the separator to the log window
-            document.getElementById("logWindow").appendChild(separator);
-            publish_eventSource.close();
-        }
+        // if (data.status === 'success' || data.status === 'error') {
+        //     console.log("received "+data.status+ " for pubslihing stream")
+        //     already_in_progress = false;
+        //     var separator = document.createElement("hr");
+        //     // Append the separator to the log window
+        //     document.getElementById("logWindow").appendChild(separator);
+        //     publish_eventSource.close();
+        // }
     };
     
     publish_eventSource.onerror = function(event) {
