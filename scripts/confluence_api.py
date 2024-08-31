@@ -214,9 +214,25 @@ class publish_to_confluence:
 
     def attach_plot_as_image(self, chart_name, fig, heading_tag):
         try:
-            print(f"Attaching : {chart_name}")
-            img_bytes = pio.to_image(fig, format='png') # Convert Plotly figure to image bytes
-            img_stream = io.BytesIO(img_bytes) # Create an Image object from the image bytes
+            print(f"type of figure received is {type(fig)}")
+            try:
+                print(f"Attaching : {chart_name}")
+                img_bytes = pio.to_image(fig, format='png') # Convert Plotly figure to image bytes
+                img_stream = io.BytesIO(img_bytes) # Create an Image object from the image bytes
+
+            except Exception as e:
+                print("first exception occured.. fig is not a plotly image")
+                img_byte_arr = io.BytesIO()
+
+                # Save the PIL image to the BytesIO object in the desired format
+                fig.save(img_byte_arr, format='PNG')  # Use the appropriate format for your image
+
+                # Get the image bytes
+                img_bytes = img_byte_arr.getvalue()
+
+                # Create a BytesIO stream from the image bytes
+                img_stream = io.BytesIO(img_bytes)
+
             attachment = self.confluence.attach_content(content=img_stream, name=chart_name, content_type="image/png", title=self.title, space=self.space)
             attachment_id = attachment['results'][0]['id']
             self.body_content += f"""

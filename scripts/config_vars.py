@@ -30,7 +30,6 @@ BASE_GRAPHS_PATH = os.path.join(os.path.dirname(ROOT_PATH),'graphs')
 BASE_HTMLS_PATH = os.path.join(os.path.dirname(ROOT_PATH),'htmls')
 BASE_PDFS_PATH = os.path.join(os.path.dirname(ROOT_PATH),'pdfs')
 BASE_LOGS_PATH = os.path.join(ROOT_PATH,'logs')
-BASE_ANALYSIS_PIECHARTS_PATH = os.path.join(ROOT_PATH,'analysis_piecharts')
 
 # REPORT UI
 REPORT_UI_PORT = 5000

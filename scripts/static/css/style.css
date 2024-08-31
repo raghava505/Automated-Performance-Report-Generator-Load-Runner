@@ -76,3 +76,113 @@
     line-height: 1.5; 
     /* white-space: pre-wrap;  */
 }
+
+.img-container {
+    width: 100%; /* or set a specific width */
+    overflow: hidden;
+}
+.img-container img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover; /* Ensures the image covers the container without distortion */
+}
+
+.popup-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 999;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+
+.popup-overlay.show {
+    opacity: 1;
+    visibility: visible;
+}
+
+/* Popup window */
+.popup-content {
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%) scale(0.8);
+    width: 90%; /* Adjust width as needed */
+    max-height: calc(100vh - 40px);
+    overflow-y: auto;
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
+    transition: transform 0.3s ease;
+}
+
+.popup-content.show {
+    transform: translateX(-50%) scale(1);
+}
+
+/* Close button */
+.close-btn {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    font-size: 20px;
+    cursor: pointer;
+}
+
+.custom-table {
+    border-radius: 4px;
+    overflow: hidden;
+}
+.custom-table thead {
+    background-color: #585858;
+    color: #ffffff;
+}
+.custom-table tbody tr:nth-child(odd) {
+    background-color: #f8f9faef;
+}
+.custom-table tbody tr:hover  {
+    background-color: #feffc1;
+    transition: background-color 0.1s;
+}
+
+.custom-table th,
+.custom-table td {
+    max-width: 100px; /* Set max width for cells */
+    overflow-x: auto; /* Enable horizontal scrolling */
+    white-space: nowrap; /* Prevent text from wrapping */
+    vertical-align: middle;
+}
+
+/* Add a scrollbar for cells with overflow */
+.custom-table td::-webkit-scrollbar {
+    height: 5px;
+}
+
+.custom-table td::-webkit-scrollbar-thumb {
+    background-color: #888;
+    border-radius: 10px;
+}
+.custom-table td::-webkit-scrollbar-thumb:hover {
+    background-color: #555;
+}
+.tab-cont {
+    overflow-x: auto; /* Enables horizontal scrolling */
+    width: 100%; /* Ensures the container takes the full width */
+    margin-bottom: 15px; /* Adds some space below the table */
+}
+.tab-cont::-webkit-scrollbar {
+    height: 5px;
+}
+.tab-cont::-webkit-scrollbar-thumb {
+    background-color: #888;
+    border-radius: 10px;
+}
+.tab-cont::-webkit-scrollbar-thumb:hover {
+    background-color: #555;
+}

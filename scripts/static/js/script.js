@@ -123,7 +123,7 @@ function addSprintRunFields() {
         <div class="form-group row inside_fields" id="sprintRunGroup_${fieldCounter}">
             <div class="col">
                 <label for="sprint_${fieldCounter}">Sprint Field ${fieldCounter}:</label>
-                <select class="form-control" id="sprint_${fieldCounter}" name="sprint_${fieldCounter}" required>
+                <select class="form-control req-for-view-report" id="sprint_${fieldCounter}" name="sprint_${fieldCounter}" required>
                     <option value="">Select Sprint</option>
                     <!-- Options will be populated via JavaScript -->
                 </select>
@@ -131,7 +131,7 @@ function addSprintRunFields() {
             </div>
             <div class="col">
                 <label for="run_${fieldCounter}">Run Field ${fieldCounter}:</label>
-                <select class="form-control run-element" id="run_${fieldCounter}" name="run_${fieldCounter}" required>
+                <select class="form-control run-element req-for-view-report" id="run_${fieldCounter}" name="run_${fieldCounter}" required>
                     <option value="">Select Run</option>
                     <!-- Options will be populated via JavaScript -->
                 </select>
@@ -178,7 +178,7 @@ function validateEmail(email) {
     return emailPattern.test(email);
 }
 
-function validateForm() {
+function validatePublishForm() {
     if (already_in_progress){
         showNotification("Warning : Report generation already in progress. Please wait till its completion ", "warning");
     }
@@ -208,17 +208,15 @@ function validateForm() {
         });
 
         if (isValid) {
+            startPublishLogsEventSource()
             publishReportToConfluence();
             document.getElementById("logWindow").scrollIntoView({ behavior: "smooth" });
-
         }
     }
 }
 
 function publishReportToConfluence() {
     already_in_progress=true;
-    // localStorage.setItem('already_in_progress', true);
-
     const formData = new FormData(document.getElementById('inputForm'));
 
     const sprintRuns = [];
@@ -235,22 +233,6 @@ function publishReportToConfluence() {
 
 
     showNotification("Info : Report generation has started ", "info");
-
-    // const notificationInterval = setInterval(() => {
-    //     showNotification("Info : Report generation in progress ... ", "info");
-    // }, 10000); // 10 seconds
-
-    // let timeoutNotificationInterval;
-
-    // const timeoutNotification = setTimeout(() => {
-    //     clearInterval(notificationInterval); // Stop the original 10-second interval notifications
-    //     showNotification("Info : Still processing ...", "info");
-
-    //     // Set up a new interval to trigger timeout notifications every 10 seconds
-    //     timeoutNotificationInterval = setInterval(() => {
-    //         showNotification("Info : Almost done... Please be patient.", "info");
-    //     }, 10000); // 10 seconds
-    // }, 360000); // 6 mins
     
     fetch('/publish_report', {
         method: 'POST',
@@ -258,24 +240,11 @@ function publishReportToConfluence() {
     })
     .then(response => response.json())
     .then(data => {
-        // showNotification(data.message, data.status);
-        // clearInterval(timeoutNotificationInterval);
-        // clearInterval(notificationInterval);
-        // clearTimeout(timeoutNotification); 
         already_in_progress=false;
-        // localStorage.setItem('already_in_progress', false);
     })
     .catch(error => {
-        // showNotification('Error submitting the form. Please try again.', 'error');
-        // clearInterval(timeoutNotificationInterval);
-        // clearInterval(notificationInterval);
-        // clearTimeout(timeoutNotification); 
         already_in_progress=false;
-        // localStorage.setItem('already_in_progress', false);
     });
-
-    startEventSource()
-    
 }
 
 function showNotification(message, type) {
@@ -291,10 +260,13 @@ function clearNotification() {
     document.getElementById('statusMessage').style.display = 'none';
 }
 
-function startEventSource() {
-    let eventSource = new EventSource("/event_stream");
-            
-    eventSource.onmessage = function(event) {
+function startPublishLogsEventSource() {
+    if (window.eventSource && window.eventSource.readyState !== EventSource.CLOSED) {
+        console.log("EventSource already open, not reopening.");
+        return;
+    }
+    window.publish_eventSource = new EventSource("/publish_logs_stream");
+    publish_eventSource.onmessage = function(event) {
         const data = JSON.parse(event.data);
         showNotification(data.message, data.status);
         var newData = document.createElement("div");
@@ -304,8 +276,6 @@ function startEventSource() {
 
         if (data.status === 'success' || data.status === 'error') {
             already_in_progress = false;
-            // Optionally update the progress status in localStorage
-            // localStorage.setItem('already_in_progress', false);
             var separator = document.createElement("hr");
             // Append the separator to the log window
             document.getElementById("logWindow").appendChild(separator);
@@ -313,12 +283,10 @@ function startEventSource() {
         }
     };
     
-    eventSource.onerror = function() {
+    publish_eventSource.onerror = function(event) {
         showNotification('Error receiving updates from the server.', 'error');
-        already_in_progress = false;
-        eventSource.close();
-        // Optionally update the progress status in localStorage
-        // localStorage.setItem('already_in_progress', false);
+        console.error("publish_eventSource error:", event);
+        publish_eventSource.close();  // Handle connection issues
     };
 };
 
@@ -339,4 +307,99 @@ function getCurrentTime() {
     seconds = seconds < 10 ? '0' + seconds : seconds;
 
     return hours + ":" + minutes + ":" + seconds;
+}
+
+function validateViewReport() {
+    let isValid = true;
+    const fields = document.querySelectorAll('#inputForm .req-for-view-report');
+    fields.forEach(field => {
+        const errorMessageDiv = field.nextElementSibling;
+        if (!field.value.trim()) {
+            errorMessageDiv.textContent = 'This field is required.';
+            isValid = false;
+        } else {
+            errorMessageDiv.textContent = '';
+        }
+    });
+    if (isValid) {
+        startReportDataEventSource();
+        ViewReport();
+        document.getElementById("popupContent").innerHTML = '<span class="close-btn" onclick="closePopup()">&times;</span>'
+    }
+}
+
+function ViewReport() {
+    const formData = new FormData(document.getElementById('inputForm'));
+    const sprintRuns = [];
+    document.querySelectorAll('[id^="sprint_"]').forEach((sprintSelect, index) => {
+        const sprint = sprintSelect.value;
+        const run = document.querySelector(`#run_${index + 1}`).value;
+        if (sprint && run) {
+            sprintRuns.push([parseInt(sprint, 10), parseInt(run, 10)]);
+        }
+    });
+    formData.append('sprint_runs', JSON.stringify(sprintRuns));
+    
+    fetch('/view_report', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        already_in_progress=false;
+    })
+    .catch(error => {
+        already_in_progress=false;
+    });
+}
+
+function startReportDataEventSource() {
+    // Check if eventSource already exists and is active
+    if (window.eventSource && window.eventSource.readyState !== EventSource.CLOSED) {
+        console.log("EventSource already open, not reopening.");
+        return;
+    }
+
+    window.eventSource = new EventSource("/report_data_queue_route");
+    
+    eventSource.onmessage = function(event) {
+        const data = JSON.parse(event.data);
+        var newData = document.createElement("div");
+        newData.innerHTML = data.message;
+        console.log(data.message);
+        document.getElementById("popupContent").appendChild(newData);
+    };
+    
+    eventSource.onerror = function(event) {
+        console.error("EventSource error:", event);
+        eventSource.close();  // Handle connection issues
+    };
+}
+
+function closePopup() {
+    const overlay = document.getElementById('popupOverlay');
+    const content = document.getElementById('popupContent');
+
+    // Remove the show class to trigger closing animations
+    overlay.classList.remove('show');
+    content.classList.remove('show');
+
+    // Wait for the animation to finish before completely hiding the popup
+    setTimeout(() => {
+        overlay.style.display = 'none';
+    }, 100); // 300ms matches the transition duration
+}
+
+function openPopup() {
+    const overlay = document.getElementById('popupOverlay');
+    const content = document.getElementById('popupContent');
+
+    // Reset display property to make the overlay visible
+    overlay.style.display = 'block';
+
+    // Add the show class to trigger animations
+    setTimeout(() => {
+        overlay.classList.add('show');
+        content.classList.add('show');
+    }, 5);
 }

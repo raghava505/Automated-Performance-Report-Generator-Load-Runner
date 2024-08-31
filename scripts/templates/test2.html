@@ -3,27 +3,69 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Test Page</title>
-    <script type="text/javascript">
-        document.addEventListener("DOMContentLoaded", function() {
-            var eventSource = new EventSource("/stream");
-            eventSource.onmessage = function(event) {
-                var newData = document.createElement("div");
-                newData.innerHTML = event.data;
-                document.getElementById("data-container").appendChild(newData);
-            };
-
-            eventSource.onerror = function() {
-                console.error("EventSource failed.");
-                eventSource.close();
-            };
-        });
-    </script>
+    <title>Collapsible Table Example</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+       
+    </style>
 </head>
 <body>
-    <h1>Database: {{ database_name }}</h1>
-    <div id="data-container">
-        <!-- Data will be appended here -->
+
+<div class="container mt-3">
+    <h2>Collapsible Table</h2>
+
+    <!-- Collapsible Table Section -->
+    <div class="card">
+        <div class="card-header">
+            <h5 class="mb-0">
+                <button class="btn btn-link" type="button" data-toggle="collapse" data-target="#tableCollapse" aria-expanded="false" aria-controls="tableCollapse">
+                    Toggle Table
+                </button>
+            </h5>
+        </div>
+        <div id="tableCollapse" class="collapse">
+            <div class="card-body">
+                <table class="table table-bordered table-striped">
+                    <thead>
+                        <tr>
+                            <th>Node Type</th>
+                            <th>Average</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>cloudquery</td>
+                            <td>2.99</td>
+                        </tr>
+                        <tr>
+                            <td>ep</td>
+                            <td>0.70</td>
+                        </tr>
+                        <tr>
+                            <td>memgraph</td>
+                            <td>0.22</td>
+                        </tr>
+                        <tr>
+                            <td>pg</td>
+                            <td>13.91</td>
+                        </tr>
+                        <tr>
+                            <td>process</td>
+                            <td>32.23</td>
+                        </tr>
+                        <tr>
+                            <td>SUM</td>
+                            <td>50.05</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
     </div>
+
+</div>
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.3/dist/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 </body>
 </html>
