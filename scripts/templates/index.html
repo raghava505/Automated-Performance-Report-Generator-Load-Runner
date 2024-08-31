@@ -45,14 +45,14 @@
                 <div class="form-row">
                     <div class="form-group col-md-6">
                         <label for="loadtype">Load Type:</label>
-                        <select class="form-control" id="loadtype" name="loadtype" required>
+                        <select class="form-control req-for-view-report" id="loadtype" name="loadtype" required>
                             <option value="">Select Load Type</option>
                         </select>
                         <div class="error-message"></div>
                     </div>
                     <div class="form-group col-md-6">
                         <label for="loadname">Load Name:</label>
-                        <select class="form-control" id="loadname" name="loadname" required>
+                        <select class="form-control req-for-view-report" id="loadname" name="loadname" required>
                             <option value="">Select Load Name</option>
                         </select>
                         <div class="error-message"></div>
@@ -114,13 +114,13 @@
                 
                 <div class="form-row">
                     <div class="col-md-6">
-                        <button type="button" class="btn btn-success btn-block" disabled onclick="">
+                        <button type="button" class="btn btn-success btn-block" onclick="validateViewReport()">
                             View Report <i class="fa-solid fa-eye"></i>
                         </button>
                     </div>
 
                     <div class="col-md-6">
-                        <button type="button" class="btn btn-primary btn-block" onclick="validateForm()">
+                        <button type="button" class="btn btn-primary btn-block" onclick="validatePublishForm()">
                             Publish to Confluence <i class="fa-solid fa-paper-plane"></i>
                         </button>
                     </div>
@@ -129,19 +129,36 @@
                 
             </form>
         </div>
-        
+
+        <button class="btn btn-primary" onclick="openPopup()">Open Popup</button>
+
         <div class="mt-5 mb-5 pb-5 rounded">
             <h4 class=" text-center"><i class="bi bi-terminal"></i> Logs</h4>
                 <div id="logWindow" class="rounded p-3 mb-5 pb-5 bg-light code-window">
-                    // You will see logs here
+                    // Logs will be displayed here during the report publishing process
+                    <br>
                 </div>
         </div>
+
+        
+
+        <div class="popup-overlay" id="popupOverlay" onclick="closePopup()">
+            <!-- Popup content -->
+            <div class="popup-content" id="popupContent" onclick="event.stopPropagation();">
+                <span class="close-btn" onclick="closePopup()">&times;</span>
+                <!-- Dynamic content will be inserted here -->
+            </div>
+        </div>
+
     </div>
+
 
     <!-- Bootstrap JS and dependencies -->
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.3/dist/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+    
 
     <script src="{{ url_for('static', filename='js/script.js') }}"></script>
 </body>

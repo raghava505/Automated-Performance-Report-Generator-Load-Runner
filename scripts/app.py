@@ -1,13 +1,16 @@
-from flask import Flask, render_template, request, jsonify, Response
+from flask import Flask, render_template, request, jsonify, Response, send_from_directory, url_for
 from publish_perf_load_report import perf_load_report_publish
 import ast
 from pymongo import MongoClient
-from config_vars import MONGO_CONNECTION_STRING, REPORT_UI_PORT
+from config_vars import MONGO_CONNECTION_STRING, REPORT_UI_PORT, BASE_GRAPHS_PATH
 import time
+import queue
+
 
 app = Flask(__name__)
 
-global_queue = []
+publish_logs_queue = queue.Queue()
+report_data_queue = queue.Queue()
 
 # MongoDB client setup
 client = MongoClient(MONGO_CONNECTION_STRING)
@@ -36,14 +39,35 @@ def something_test():
     return render_template('test.html', collections=[x for x in range(5)], database_name="test_database")
 
 
-@app.route('/event_stream')
-def events():
+@app.route('/graphs/<path:filename>')
+def serve_image(filename):
+    return send_from_directory(BASE_GRAPHS_PATH, filename)
+
+
+@app.route('/publish_logs_stream')
+def get_publish_logs_stream():
+    def generate():
+         while True:
+            if not publish_logs_queue.empty():
+                msg = publish_logs_queue.get()
+                yield msg
+                time.sleep(0.1)
+            else:
+                time.sleep(0.1)
+    return Response(generate(), content_type='text/event-stream')
+
+
+@app.route('/report_data_queue_route')
+def get_report_data_stream():
     def generate():
         while True:
-            # Yield data from the event queue
-            if global_queue:
-                yield global_queue.pop()
-
+            if not report_data_queue.empty():
+                msg = report_data_queue.get()
+                yield msg
+                time.sleep(0.1)
+            else:
+                time.sleep(0.1)
+    
     return Response(generate(), content_type='text/event-stream')
 
 @app.route('/test2')
@@ -86,11 +110,34 @@ def get_ids():
 def index():
     return render_template('index.html')
 
+
+@app.route('/view_report',methods=['POST','GET'])
+def view_report():
+    string_of_list_of_sprint_runs_to_show_or_compare = request.form['sprint_runs']
+    list_of_sprint_runs_to_show_or_compare  = ast.literal_eval(string_of_list_of_sprint_runs_to_show_or_compare)
+    print(list_of_sprint_runs_to_show_or_compare)
+    database_name = request.form['loadtype']
+    collection_name = request.form['loadname']
+
+    # list_of_sprint_runs_to_show_or_compare = [[160,4]]
+    # database_name = "Osquery_LoadTests_New"
+    # collection_name = "ControlPlane"
+
+    obj = perf_load_report_publish(database_name, collection_name, list_of_sprint_runs_to_show_or_compare, None, None, None, None, None, None,isViewReport=True)
+    if "new_format" not in obj.all_keys:
+        return jsonify({"status": "ERROR", "message": "We are not dealing with new format mongo document"})
+    else:
+        obj.all_keys.remove('new_format')
+        for msg in obj.extract_all_variables_and_publish(url_for):
+            report_data_queue.put(msg) 
+        return jsonify({"status": "success", "message": "done"})
+    
+
 @app.route('/publish_report',methods=['POST','GET'])
 def publish_report():
     # Get form data from the request
-    print("RETURNED FORM INPUT : ")
-    print(request.form)
+    # print("RETURNED FORM INPUT : ")
+    # print(request.form)
     url = request.form['url']
     email_address = request.form['email_address']
     api_key = request.form['api_key']
@@ -103,7 +150,6 @@ def publish_report():
     database_name = request.form['loadtype']
     collection_name = request.form['loadname']
 
-
     # url='https://raghav-m.atlassian.net'
     # email_address = "pbpraghav@gmail.com"
     # space = 'IT'
@@ -111,20 +157,19 @@ def publish_report():
     # import uuid
     # report_title = f"TEST {uuid.uuid4()}"
 
-    # list_of_sprint_runs_to_show_or_compare = [[160,1]]
+    # list_of_sprint_runs_to_show_or_compare = [[160,5]]
     # database_name = "Osquery_LoadTests_New"
     # collection_name = "ControlPlane"
 
 
-    obj = perf_load_report_publish(database_name, collection_name, list_of_sprint_runs_to_show_or_compare, parent_page_title, report_title, email_address, api_key, space, url)
+    obj = perf_load_report_publish(database_name, collection_name, list_of_sprint_runs_to_show_or_compare, parent_page_title, report_title, email_address, api_key, space, url,isViewReport=False)
     if "new_format" not in obj.all_keys:
         return jsonify({"status": "ERROR", "message": "We are not dealing with new format mongo document"})
     else:
         obj.all_keys.remove('new_format')
-        # message , status= obj.extract_all_variables_and_publish()
-        # return Response(obj.extract_all_variables_and_publish(), content_type='text/event-stream')
-        for msg in obj.extract_all_variables_and_publish():
-            global_queue.append(msg)
+        for msg in obj.extract_all_variables_and_publish(url_for):
+            publish_logs_queue.put(msg) 
+            time.sleep(1)
         return jsonify({"status": "success", "message": "done"})
 
 if __name__ == '__main__':

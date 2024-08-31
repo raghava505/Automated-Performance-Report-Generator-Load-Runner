@@ -3,14 +3,380 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Collections</title>
+    <title>Animated Popup Window</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        /* Overlay background */
+        .popup-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 999;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+        }
+
+        .popup-overlay.show {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        /* Popup window */
+        .popup-content {
+            position: fixed;
+            top: 50px;
+            left: 50%;
+            transform: translateX(-50%) scale(0.8);
+            width: 80%; /* Adjust width as needed */
+            max-height: calc(100vh - 100px);
+            overflow-y: auto;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+            transition: transform 0.3s ease;
+        }
+
+        .popup-content.show {
+            transform: translateX(-50%) scale(1);
+        }
+
+        /* Close button */
+        .close-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            font-size: 20px;
+            cursor: pointer;
+        }
+
+        .custom-table {
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        .custom-table thead {
+            background-color: #585858;
+            color: #ffffff;
+        }
+        .custom-table tbody tr:nth-child(odd) {
+            background-color: #f8f9faef;
+        }
+        .custom-table tbody tr:hover  {
+            background-color: #feffc1;
+            transition: background-color 0.1s;
+        }
+        
+        .custom-table th,
+        .custom-table td {
+            max-width: 100px; /* Set max width for cells */
+            overflow-x: auto; /* Enable horizontal scrolling */
+            white-space: nowrap; /* Prevent text from wrapping */
+            vertical-align: middle;
+        }
+
+        /* Add a scrollbar for cells with overflow */
+        .custom-table td::-webkit-scrollbar {
+            height: 5px;
+        }
+
+        .custom-table td::-webkit-scrollbar-thumb {
+            background-color: #888;
+            border-radius: 10px;
+        }
+        .custom-table td::-webkit-scrollbar-thumb:hover {
+            background-color: #555;
+        }
+        .tab-cont {
+            overflow-x: auto; /* Enables horizontal scrolling */
+            width: 100%; /* Ensures the container takes the full width */
+            margin-bottom: 15px; /* Adds some space below the table */
+        }
+        .tab-cont::-webkit-scrollbar {
+            height: 5px;
+        }
+        .tab-cont::-webkit-scrollbar-thumb {
+            background-color: #888;
+            border-radius: 10px;
+        }
+        .tab-cont::-webkit-scrollbar-thumb:hover {
+            background-color: #555;
+        }
+
+    </style>
 </head>
 <body>
-    <h1>TEST {{ database_name }}</h1>
-    <ul>
-        {% for collection in collections %}
-            <li>{{ collection }}</li>
-        {% endfor %}
-    </ul>
+
+    <!-- Button to trigger popup -->
+    <button class="btn btn-primary" onclick="openPopup()">Open Popup</button>
+
+    <!-- Popup overlay -->
+    <div class="container">
+
+        
+
+        <div class="card">
+            <button class="btn" type="button" data-toggle="collapse" data-target="#tableCollapse" aria-expanded="false" aria-controls="tableCollapse">
+                <h4>Dynamic Table</h4>
+            </button>
+            <div id="tableCollapse" class="collapse">
+                <div class="tab-cont">
+                    <table class="table  table-bordered table-hover table-sm text-center custom-table">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Column 1</th>
+                                <th>Column 2</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>1</td>
+                                <td>Data 1</td>
+                                <td>Data 2</td> 
+                            </tr>
+                            <tr>
+                                <td>2</td>
+                                <td>Data 3</td>
+                                <td>Data 4</td>
+                            </tr>
+                            <tr>
+                                <td>1</td>
+                                <td>Data 1</td>
+                                <td>Data 2</td>
+                            </tr>
+                            <tr>
+                                <td>3</td>
+                                <td>Data  </td>
+                                <td>Data </td>
+                            </tr>
+                            <tr>
+                                <td>1</td>
+                                <td>Data 1</td>
+                                <td>Data 2</td>
+                            </tr>
+                            <tr>
+                                <td>2</td>
+                                <td>Data 3</td>
+                                <td>Data 4</td>
+                            </tr>
+                            <tr>
+                                <td>1</td>
+                                <td>Data 1</td>
+                                <td>Data 2</td>
+                            </tr>
+                            <tr>
+                                <td>2</td>
+                                <td>Data 3</td>
+                                <td>Data 4</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+
+        <h4>Dynamic Table</h4>
+            <div class="tab-cont">
+                <table class="table  table-bordered table-hover table-sm text-center custom-table">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Column 1</th>
+                            <th>Column 2</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>1</td>
+                            <td>Data 1</td>
+                            <td>Data 2</td> <td>Data 2</td> <td>Data 2</td> <td>Data 2</td> <td>Data 2</td> <td>Data 2</td> <td>Data 2</td> <td>Data 2</td> <td>Data 2</td> <td>Data 2</td> <td>Data 2</td> <td>Data 2</td> <td>Data 2</td><td>Data 2</td> <td>Data 2</td> <td>Data 2</td> <td>Data 2</td> <td>Data 2</td> <td>Data 2</td><td>Data 2</td> <td>Data 2</td> <td>Data 2</td> <td>Data 2</td> <td>Data 2</td> <td>Data 2</td><td>Data 2</td> <td>Data 2</td> <td>Data 2</td> <td>Data 2</td> <td>Data 2</td> <td>Data 2</td>
+                        </tr>
+                        <tr>
+                            <td>2</td>
+                            <td>Data 3</td>
+                            <td>Data 4</td>
+                        </tr>
+                        <tr>
+                            <td>1</td>
+                            <td>Data 1</td>
+                            <td>Data 2</td>
+                        </tr>
+                        <tr>
+                            <td>2kjsafkuwdbvakbvhkadfbvkjdbfjkvbadjkvbakjbfkjvabd</td>
+                            <td>Data 311xx x  x 1212h1uhuieiuwgiuweg;wg;igfawdh;kbfahjbai;gfiu;fgea</td>
+                            <td>Data 4qwekugejhfvbewhjbfkwbrfkhbekhrfbekrbvf</td>
+                        </tr>
+                        <tr>
+                            <td>1</td>
+                            <td>Data 1</td>
+                            <td>Data 2</td>
+                        </tr>
+                        <tr>
+                            <td>2</td>
+                            <td>Data 3</td>
+                            <td>Data 4</td>
+                        </tr>
+                        <tr>
+                            <td>1</td>
+                            <td>Data 1</td>
+                            <td>Data 2</td>
+                        </tr>
+                        <tr>
+                            <td>2</td>
+                            <td>Data 3</td>
+                            <td>Data 4</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+    </div>
+    <div class="popup-overlay" id="popupOverlay" onclick="closePopup()">
+        <!-- Popup content -->
+        <div class="popup-content" id="popupContent" onclick="event.stopPropagation();">
+            <span class="close-btn" onclick="closePopup()">&times;</span>
+            <!-- Dynamic content will be inserted here -->
+        </div>
+    </div>
+
+    <script>
+        // Open the popup with animation
+        function openPopup() {
+            const overlay = document.getElementById('popupOverlay');
+            const content = document.getElementById('popupContent');
+
+            // Reset display property to make the overlay visible
+            overlay.style.display = 'block';
+
+            // Add the show class to trigger animations
+            setTimeout(() => {
+                overlay.classList.add('show');
+                content.classList.add('show');
+            }, 5); // Slight delay to ensure the display change is applied
+            
+            // Example of adding dynamic content
+            content.innerHTML = `
+                <span class="close-btn" onclick="closePopup()">&times;</span>
+                <h4>Dynamic Table</h4>
+                <table class="table table-striped table-bordered">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Column 1</th>
+                            <th>Column 2</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>1</td>
+                            <td>Data 1</td>
+                            <td>Data 2</td>
+                        </tr>
+                        <tr>
+                            <td>2</td>
+                            <td>Data 3</td>
+                            <td>Data 4</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <h4>Dynamic Table</h4>
+                <table class="table table-bordered">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Column 1</th>
+                            <th>Column 2</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>1</td>
+                            <td>Data 1</td>
+                            <td>Data 2</td>
+                        </tr>
+                        <tr>
+                            <td>2</td>
+                            <td>Data 3</td>
+                            <td>Data 4</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <h4>Dynamic Table</h4>
+                <table class="table table-bordered">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Column 1</th>
+                            <th>Column 2</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>1</td>
+                            <td>Data 1</td>
+                            <td>Data 2</td>
+                        </tr>
+                        <tr>
+                            <td>2</td>
+                            <td>Data 3</td>
+                            <td>Data 4</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <h4>Dynamic Table</h4>
+                <table class="table table-bordered">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Column 1</th>
+                            <th>Column 2</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>1</td>
+                            <td>Data 1</td>
+                            <td>Data 2</td>
+                        </tr>
+                        <tr>
+                            <td>2</td>
+                            <td>Data 3</td>
+                            <td>Data 4</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <h4>Dynamic Image</h4>
+                <img src="https://via.placeholder.com/400" class="img-fluid" alt="Placeholder Image">
+            `;
+        }
+
+        // Close the popup with animation
+        function closePopup() {
+            const overlay = document.getElementById('popupOverlay');
+            const content = document.getElementById('popupContent');
+
+            // Remove the show class to trigger closing animations
+            overlay.classList.remove('show');
+            content.classList.remove('show');
+
+            // Wait for the animation to finish before completely hiding the popup
+            setTimeout(() => {
+                overlay.style.display = 'none';
+            }, 100); // 300ms matches the transition duration
+        }
+
+        
+    </script>
+
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.3/dist/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+
 </body>
 </html>

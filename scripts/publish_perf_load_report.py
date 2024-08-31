@@ -4,13 +4,27 @@ from pymongo import MongoClient
 import numpy as np
 import os
 from create_piechart_for_analysis import analysis_main
-from config_vars import BASE_ANALYSIS_PIECHARTS_PATH, MONGO_CONNECTION_STRING
-from collections import defaultdict
+from config_vars import MONGO_CONNECTION_STRING
 import uuid
-import shutil
+import json
+import io
+import base64
+
+class DynamicObject:
+    def __getattr__(self, name):
+        # Returns a callable object for any attribute
+        def method(*args, **kwargs):
+            # You can define custom behavior here if needed
+            return f"Method {name} called with args: {args} and kwargs: {kwargs}"
+        
+        return method
+
+    def __call__(self, *args, **kwargs):
+        # This makes the instance itself callable
+        return f"Instance called with args: {args} and kwargs: {kwargs}"
 
 class perf_load_report_publish:
-    def __init__(self,dbname,coll_name,sprint_runs_list,parent_page_title, report_title, email_address, api_key, space, url):
+    def __init__(self,dbname,coll_name,sprint_runs_list,parent_page_title, report_title, email_address, api_key, space, url,isViewReport = False):
         client = MongoClient(MONGO_CONNECTION_STRING)
         self.database = client[dbname] 
         self.collection = self.database[coll_name]
@@ -32,6 +46,7 @@ class perf_load_report_publish:
         self.api_key=api_key
         self.space=space
         self.url = url
+        self.isViewReport=isViewReport
 
     def get_key_result(self,sprint,run,key_name):
         filter = {f"{key_name}":1,'_id':0}
@@ -39,6 +54,7 @@ class perf_load_report_publish:
         return result
     
     def create_report_page(self,parent_page_title, report_title):
+        if self.isViewReport : return DynamicObject(), "noerror"
         obj = publish_to_confluence(parent_page_title, report_title, self.email_address, self.api_key, self.space, self.url)
         flag, err = obj.create_page()
         if flag == False:
@@ -124,6 +140,7 @@ class perf_load_report_publish:
         return heading
 
     def add_standard_table(self,table_dictionary,key_name,curr_page_obj,parent_key=None):
+        html_text = ""
         schema = table_dictionary["schema"]
         merge_on_cols = schema["merge_on_cols"]
         compare_cols = schema["compare_cols"]
@@ -133,7 +150,7 @@ class perf_load_report_publish:
         except:collapse=True
         data=table_dictionary["data"]
         main_df = pd.DataFrame(data)
-        if main_df.empty : return main_df
+        if main_df.empty : return ""
 
         copy_main_df = main_df.copy()
         if "ccurac" not in key_name and "ugs raised" not in key_name and "servations" not in key_name and "environment details" not in key_name: 
@@ -144,21 +161,45 @@ class perf_load_report_publish:
         if len(self.sprint_runs_list) > 0 and len(merge_on_cols) > 0 and len(compare_cols) > 0:
             merged_df, builds = self.merge_dfs(merge_on_cols,key_name,parent_key_name = parent_key)
             # if no comparison tables, show the exact table
-            if display_exact_table or len(builds) == 0: curr_page_obj.add_table_from_dataframe(f"<h{heading_size}>{self.captilise_heading(key_name)}</h{heading_size}>", copy_main_df, collapse=collapse)
-            else: curr_page_obj.add_text(f"<h{heading_size}>{self.captilise_heading(key_name)}</h{heading_size}>")
+            if display_exact_table or len(builds) == 0: 
+                curr_page_obj.add_table_from_dataframe(f"<h{heading_size}>{self.captilise_heading(key_name)}</h{heading_size}>", copy_main_df, collapse=collapse)
+                html_text+=f'''<h{heading_size}>{self.captilise_heading(key_name)}</h{heading_size}>
+                                <div class="tab-cont">
+                                    {copy_main_df.to_html(classes="table  table-bordered table-hover table-sm text-center custom-table", index=False)}
+                                </div>
+                            '''
+            else: 
+                curr_page_obj.add_text(f"<h{heading_size}>{self.captilise_heading(key_name)}</h{heading_size}>")
+                html_text+=f'''
+                    <h{heading_size}>{self.captilise_heading(key_name)}</h{heading_size}>
+                '''
 
             if len(builds) > 0:
                 for compare_col in compare_cols:
                     returned_df = self.compare_dfs(compare_col,merged_df,builds,merge_on_cols)
                     if returned_df is not None and not returned_df.empty :
                         curr_page_obj.add_table_from_dataframe(f"<h{heading_size+1}>Comparison on {self.captilise_heading(compare_col)}</h{heading_size+1}>", returned_df.copy(), collapse=collapse, red_green_column_list=["Absolute","Relative %"])
+                        html_text+=f'''
+                            <h{heading_size+1}>Comparison on {self.captilise_heading(compare_col)}</h{heading_size+1}>
+                            <div class="tab-cont">
+                                {returned_df.copy().to_html(classes="table  table-bordered table-hover table-sm text-center custom-table", index=False)}
+                            </div>
+                        '''
+                        
                         main_df = returned_df.copy()
         else:
             curr_page_obj.add_table_from_dataframe(f"<h{heading_size}>{self.captilise_heading(key_name)}</h{heading_size}>", copy_main_df, collapse=collapse)
-        return main_df
+            html_text+=f'''
+                    <h{heading_size}>{self.captilise_heading(key_name)}</h{heading_size}>
+                    <div class="tab-cont">
+                        {copy_main_df.to_html(classes="table  table-bordered table-hover table-sm text-center custom-table", index=False)}
+                    </div>
+                '''
+        html_text=html_text.replace('style="text-align: right;"', '')
+        return html_text
 
 
-    def extract_all_variables_and_publish(self):
+    def extract_all_variables_and_publish(self, url_for):
         try:
             _,err = self.create_report_page(self.parent_page_title, self.report_title)
             if not _:
@@ -166,8 +207,9 @@ class perf_load_report_publish:
                 return
                 # return err, "error"
             for key_name in self.all_keys:
+                html_text = ""
                 print(f"Processing {str(key_name).capitalize()}")
-                yield f'data: {{"status": "info", "message": "Processing {str(key_name).capitalize()} section"}}\n\n'
+                if not self.isViewReport:yield f'data: {{"status": "info", "message": "Processing {str(key_name).capitalize()} section"}}\n\n'
                 key_format = self.main_result[key_name]["format"]
                 schema = self.main_result[key_name]["schema"]
                 data = self.main_result[key_name]["data"]
@@ -185,35 +227,44 @@ class perf_load_report_publish:
                     self.confluence_page_mappings[page]=curr_page_obj
                 
                 if key_format == "table":
-                    # yield from 
-                    self.add_standard_table(self.main_result[key_name],key_name,curr_page_obj)
+                    html_text += self.add_standard_table(self.main_result[key_name],key_name,curr_page_obj)
             
                 elif key_format == "nested_table":
                     curr_page_obj.add_text(f"<h2>{self.captilise_heading(key_name)}</h2>")
+                    html_text += f"<h2>{self.captilise_heading(key_name)}</h2>"
+
                     for nested_key_name in data.keys():
-                        yield f'data: {{"status": "info", "message": "Processing nested table : {str(nested_key_name).capitalize()}"}}\n\n'
-                        self.add_standard_table(self.main_result[key_name]["data"][nested_key_name],nested_key_name,curr_page_obj,parent_key=key_name)
+                        if not self.isViewReport:yield f'data: {{"status": "info", "message": "Processing nested table : {str(nested_key_name).capitalize()}"}}\n\n'
+                        html_text += self.add_standard_table(self.main_result[key_name]["data"][nested_key_name],nested_key_name,curr_page_obj,parent_key=key_name)
 
                 elif key_format == "mapping":
                     curr_page_obj.add_text(f"<h2>{self.captilise_heading(key_name)}</h2>")
+                    html_text += f"<h2>{self.captilise_heading(key_name)}</h2>"
+
                     for key,value in data.items():
                         if type(value) != dict:
                             if type(value) == str and "http" in value:
                                 value = f'<a href="{value}">{value}</a>'
                             curr_page_obj.add_text(f"<p>{self.captilise_heading(key)} : {value}</p>\n")
+                            html_text += f"<p>{self.captilise_heading(key)} : {value}</p>"
+
                         else:
                             curr_page_obj.add_text(f"<h3>{str(key)}</h3>")
+                            html_text +=f"<h3>{str(key)}</h3>"
                             for nested_key,nested_value in value.items():
                                 curr_page_obj.add_text(f"<p>{self.captilise_heading(nested_key)} : {nested_value}</p>\n")
+                                html_text += f"<p>{self.captilise_heading(nested_key)} : {nested_value}</p>"
 
                 elif key_format == "list":
                     curr_list = set(data)
                     if len(curr_list) !=0 :
                         curr_list_to_string = ", ".join(list(map(str,curr_list)))
                         curr_page_obj.add_text(f"<h2>{self.captilise_heading(key_name)}</h2>")
+                        html_text += f"<h2>{self.captilise_heading(key_name)}</h2>"
                         if len(self.sprint_runs_list) == 0 :
                             print("Previous sprint not found ... ")
                             curr_page_obj.add_text(f'<p><span style="color: black;">{curr_list_to_string} </span></p>')
+                            html_text += f'<p><span style="color: black;">{curr_list_to_string} </span></p>'
 
                         else:
                             prev_sprint,prev_run = self.sprint_runs_list[0][0],self.sprint_runs_list[0][1]
@@ -221,18 +272,22 @@ class perf_load_report_publish:
                             if not prev_data:
                                 print(f"WARNING : Previous sprint data for {key_name} is not found")
                                 curr_page_obj.add_text(f'<p><span style="color: black;">{curr_list_to_string} </span></p>')
+                                html_text += f'<p><span style="color: black;">{curr_list_to_string} </span></p>'
                             else:
                                 print("Previous sprint data found")
                                 prev_list = set(prev_data[key_name]["data"])
                                 if curr_list == prev_list:
                                     curr_page_obj.add_text(f'<p><span style="color: green;">No new topics added/deleted </span></p>')
+                                    html_text += f'<p><span style="color: green;">No new topics added/deleted </span></p>'
                                 else:
                                     newly_added = curr_list - prev_list
                                     deleted = prev_list - curr_list
                                     if len(newly_added)>0:
                                         curr_page_obj.add_text(f'<p><span style="color: blue;">{len(newly_added)} newly added topics found : {newly_added}</span></p>')
+                                        html_text += f'<p><span style="color: blue;">{len(newly_added)} newly added topics found : {newly_added}</span></p>'
                                     if len(deleted)>0:
                                         curr_page_obj.add_text(f'<p><span style="color: blue;">{len(deleted)} topics are deleted : {deleted}</span></p>')
+                                        html_text += f'<p><span style="color: blue;">{len(deleted)} topics are deleted : {deleted}</span></p>'
                 
                 elif key_format == "analysis":
                     if len(self.sprint_runs_list) == 0:
@@ -246,29 +301,83 @@ class perf_load_report_publish:
                         continue
                     prev_data=prev_data[key_name]["data"]
                     temp_images,memory_combined_df,cpu_combined_df=analysis_main(data["memory_usages_analysis"],prev_data["memory_usages_analysis"],data["cpu_usage_analysis"],prev_data["cpu_usage_analysis"],main_build_load_details=self.main_result["load_details"]["data"],prev_build_load_details=self.get_key_result(prev_sprint,prev_run,"load_details")["load_details"]["data"] )
-                    unique_identifier = str(uuid.uuid1())
-                    analysis_piechart_folder = os.path.join(BASE_ANALYSIS_PIECHARTS_PATH,unique_identifier)
-                    os.makedirs(analysis_piechart_folder,exist_ok=True)
-                    final_images=defaultdict(lambda : [])
+                    curr_page_obj.add_text(f"<h2>Complete Analysis piecharts for resource utilizations</h2>")
+                    html_text += f"<h2>Complete Analysis piecharts for resource utilizations</h2>"
                     for piechart_name in temp_images:
-                        file_path = f"{analysis_piechart_folder}/{piechart_name}.png"
-                        temp_images[piechart_name].save(file_path)
-                        final_images[piechart_name].append(file_path)
+                        curr_page_obj.attach_plot_as_image(piechart_name, temp_images[piechart_name], 3)
+                        if self.isViewReport:
+                            image = temp_images[piechart_name]
+                            buffered = io.BytesIO()
+                            image.save(buffered, format="PNG")  # Adjust format if necessary
+                            img_byte_array = buffered.getvalue()
+                            # Encode byte stream to Base64
+                            img_base64 = base64.b64encode(img_byte_array).decode('utf-8')
+                            # Create HTML img tag
+                            html_text +=f"""
+                                <div class="container">
+                                        <div class="img-container">
+                                            <h3>{piechart_name}</h3>
+                                            <img src="data:image/png;base64,{img_base64}" alt="Image"/>
+                                        </div>
+                                </div>
+                            """
+
                     curr_page_obj.add_text(f"<h2>Contributers to Resource Usage increase/decrease</h2>")
+                    html_text += f"<h2>Contributers to Resource Usage increase/decrease</h2>"
                     curr_page_obj.add_table_from_dataframe(f'<h3>{self.captilise_heading("memory_usages_analysis")}</h3>', memory_combined_df.copy(), collapse=False,red_green_column_list=list(memory_combined_df.columns))
+                    html_text+=f'''<h3>{self.captilise_heading("memory_usages_analysis")}</h3>
+                                    <div class="tab-cont">
+                                        {memory_combined_df.copy().to_html(classes="table  table-bordered table-hover table-sm text-center custom-table", index=False)}
+                                    </div>
+                                '''
                     curr_page_obj.add_table_from_dataframe(f'<h3>{self.captilise_heading("cpu_usage_analysis")}</h3>', cpu_combined_df.copy(), collapse=False,red_green_column_list=list(cpu_combined_df.columns))
-                    curr_page_obj.attach_saved_charts(final_images,main_heading="Complete Analysis piecharts for resource utilizations")
-                    shutil.rmtree(analysis_piechart_folder)
+                    html_text+=f'''<h3>{self.captilise_heading("cpu_usage_analysis")}</h3>
+                                    <div class="tab-cont">
+                                        {cpu_combined_df.copy().to_html(classes="table  table-bordered table-hover table-sm text-center custom-table", index=False)}
+                                    </div>
+                                '''
                 elif key_format == "charts":
                     base_graphs_path=os.path.join(schema["base_graphs_path"],self.graphs_path)
                     charts_paths_dict={}
+                    html_text += f"<h2>Charts</h2>"
                     for main_heading,inside_charts in data.items():
-                        charts_paths_dict[main_heading] = [f'{os.path.join(base_graphs_path,main_heading,str(file_name).replace("/","-")+".png")}' for file_name in list(inside_charts.keys())]
-                        print(f"inside charts for loop {main_heading}")
-                        yield f'data: {{"status": "info", "message": "Attching {main_heading} charts"}}\n\n'
+                        if not self.isViewReport:
+                            temp_list_for_confluence=[f'{os.path.join(base_graphs_path,main_heading,str(file_name).replace("/","-")+".png")}' for file_name in list(inside_charts.keys())]
+                            charts_paths_dict[main_heading] = temp_list_for_confluence
+                            yield f'data: {{"status": "info", "message": "Attching {main_heading} charts"}}\n\n'
+                        else:
+                            html_text += f"<h3>{main_heading}</h3>"
+                            for filename in list(inside_charts.keys()):
+                                image_path = os.path.join(self.graphs_path, main_heading, f"{filename.replace('/', '-')}.png")
+                                if os.path.exists(os.path.join(schema["base_graphs_path"],image_path)):
+                                    html_text += f"""
+                                        <h4>{filename}</h4>
+                                        <img src="{url_for('serve_image', filename=image_path)}" alt="{filename}" class="img-fluid" />
+                                    """
+                                else:
+                                    print(f"{image_path} doest exist")
                     curr_page_obj.attach_saved_charts(charts_paths_dict)
+                if self.isViewReport:
+                    unique_id = str(uuid.uuid4())
+                    # html_text = f""" <div class="card">
+                    #                     <button class="btn" type="button" data-toggle="collapse" data-target="#tableCollapse{unique_id}" aria-expanded="false" aria-controls="tableCollapse{unique_id}">
+                    #                         <h2>{self.captilise_heading(key_name)}</h2>
+                    #                     </button>
+                    #                     <div id="tableCollapse{unique_id}" class="collapse">
+                    #                     {html_text}
+                    #                     </div>
+                    #                 </div>
+                    #             """
+                    json_data = json.dumps({
+                        "status": "info",
+                        "message": html_text
+                    })
+                    # Send the JSON-encoded data as part of the Server-Sent Events stream
+                    yield f'data: {json_data}\n\n'
+                
                 curr_page_obj.update_and_publish()
-            yield f'data: {{"status": "success", "message": "Report published successfully"}}\n\n'
+            if not self.isViewReport:yield f'data: {{"status": "success", "message": "Report published successfully"}}\n\n'
+            else: yield f'data: {{"status": "success", "message": "Report generated successfully"}}\n\n'
             # return "success : Report published successfully", "success"
         except Exception as e:
             yield f'data: {{"status": "error", "message": "Unexpected error occurred: {str(e)}"}}\n\n'
@@ -283,10 +392,22 @@ if __name__=='__main__':
     import uuid
     report_title = f"TEST {uuid.uuid4()}"
 
-    # list_of_sprint_runs_to_show_or_compare = [(158,2),(157,1)]
-    list_of_sprint_runs_to_show_or_compare = [(160,5),(160,1)]
+    list_of_sprint_runs_to_show_or_compare = [[160,5]]
     database_name = "Osquery_LoadTests_New"
     collection_name = "ControlPlane"
+
+    obj = perf_load_report_publish(database_name, collection_name, list_of_sprint_runs_to_show_or_compare, None, None, None, None, None, None,isViewReport=True)
+    # obj = perf_load_report_publish(database_name, collection_name, list_of_sprint_runs_to_show_or_compare, parent_page_title, report_title, email_address, api_key, space, url,isViewReport=False)
+    if "new_format" not in obj.all_keys:
+        print({"status": "ERROR", "message": "We are not dealing with new format mongo document"})
+    else:
+        obj.all_keys.remove('new_format')
+        # message , status= obj.extract_all_variables_and_publish()
+        # return Response(obj.extract_all_variables_and_publish(), content_type='text/event-stream')
+        for msg in obj.extract_all_variables_and_publish():
+            print(msg)
+        print({"status": "success", "message": "done"})
+    
 
 
     # obj = perf_load_report_publish(database_name, collection_name, list_of_sprint_runs_to_show_or_compare, parent_page_title, report_title, email_address, api_key, space, url)
