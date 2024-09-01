@@ -133,6 +133,13 @@ if __name__ == "__main__":
                 "Bugs raised":load_cls.get_bugs_raised(),
                 "new_format":True
             }
+            #--------------------------------complete resource extraction---------------------------------------
+            stack_obj.log.info("******* [NEW] Calculating complete resource utilizations ...")
+            resource_obj=complete_resource_usages(stack_obj,include_nodetypes=load_cls.hostname_types)
+            complete_resource_details=resource_obj.get_complete_result()
+            memory_usages = complete_resource_details.pop("memory_usages", None)
+            cpu_usages = complete_resource_details.pop("cpu_usages", None)
+            if complete_resource_details:final_data_to_save.update(complete_resource_details)
 
             #-------------------------real time query test details--------------------------
             # if domain=="longevity" and variables["load_type"] in ["all_loads_combined"]: 
@@ -274,12 +281,9 @@ if __name__ == "__main__":
             # mem_cpu_usages_dict,overall_usage_dict=comp.make_comparisions(load_cls.common_app_names,load_cls.common_pod_names)
             # if overall_usage_dict:final_data_to_save.update(overall_usage_dict)
             # if mem_cpu_usages_dict:final_data_to_save.update(mem_cpu_usages_dict)
-            #--------------------------------complete resource extraction---------------------------------------
-            stack_obj.log.info("******* [NEW] Calculating complete resource utilizations ...")
-            resource_obj=complete_resource_usages(stack_obj,include_nodetypes=load_cls.hostname_types)
-            complete_resource_details=resource_obj.get_complete_result()
-            if complete_resource_details:final_data_to_save.update(complete_resource_details)
-           
+            #-------------------------------- add remaining resource usages ----------------------------
+            if memory_usages:final_data_to_save.update({"memory_usages":memory_usages})
+            if cpu_usages:final_data_to_save.update({"cpu_usages":cpu_usages})
             #--------------------------------Capture charts data---------------------------------------
             try:
                 step_factor=hours/10 if hours>10 else 1

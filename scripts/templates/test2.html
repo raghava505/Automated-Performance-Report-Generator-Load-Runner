@@ -3,30 +3,120 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Flexbox Example</title>
+    <title>Beautiful Sliding Window</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome (for icons) -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <!-- Custom CSS -->
     <style>
-        .flex-container {
-            /* display: flex; */
-            /* flex-direction: row; */
-            /* justify-content: space-around; */
-            align-items: center;
-            height: 200px;
-            border: 2px solid black;
+        /* Slider container */
+        .slider-window {
+            position: fixed;
+            top: 0;
+            right: -100%;
+            width: 350px; /* Increased width */
+            height: 100%;
+            background-color: #ffffff; /* Light background */
+            box-shadow: -2px 0 10px rgba(0, 0, 0, 0.2); /* Stronger shadow */
+            transition: right 0.4s ease;
+            z-index: 9999;
+            border-left: 5px solid #007bff; /* Bootstrap primary color border */
         }
-        .flex-item {
-            background-color: lightblue;
+
+        /* Show slider */
+        .slider-window.open {
+            right: 0;
+        }
+
+        /* Button to toggle slider */
+        .slider-button {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 10000;
+        }
+
+        /* Close icon styling */
+        .close-slider {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            font-size: 1.5rem;
+            color: #333;
+            cursor: pointer;
+        }
+
+        /* Beautiful card styling */
+        .slider-card {
+            background-color: #f8f9fa;
+            border-radius: 10px;
             padding: 20px;
-            border: 1px solid darkblue;
-            text-align: center;
-            width: 100px;
+            margin-top: 20px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Header styling */
+        .slider-header {
+            font-weight: bold;
+            color: #007bff;
+        }
+
+        /* Add some padding around the slider content */
+        .slider-content {
+            padding: 20px;
         }
     </style>
 </head>
 <body>
-    <div class="flex-container">
-        <div class="flex-item">Item 1</div>
-        <div class="flex-item">Item 2</div>
-        <div class="flex-item">Item 3</div>
+    <!-- Button to toggle the slider -->
+    <button class="btn btn-primary slider-button">
+        <i class="fas fa-arrow-right"></i> Toggle Slider
+    </button>
+
+    <!-- Slider Window -->
+    <div class="slider-window">
+        <!-- Close Icon -->
+        <i class="fas fa-times close-slider"></i>
+        
+        <!-- Slider Content -->
+        <div class="slider-content">
+            <!-- Header -->
+            <h5 class="slider-header">Beautiful Slider Content</h5>
+            <hr>
+
+            <!-- Card Content -->
+            <div class="slider-card">
+                <p>This is a sliding window with a card layout.</p>
+                <p>It includes a header, content, and some icons.</p>
+                <p>Everything is styled with Bootstrap to look stunning.</p>
+                <button class="btn btn-success">Awesome Button</button>
+            </div>
+
+            <!-- Another Card -->
+            <div class="slider-card">
+                <p>Additional content can be placed here.</p>
+                <p>You can add more cards, buttons, and elements as needed.</p>
+            </div>
+        </div>
     </div>
+
+    <!-- jQuery and Bootstrap JS -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+    <!-- Custom JS -->
+    <script>
+        $(document).ready(function() {
+            // Toggle slider window on button click
+            $('.slider-button').on('click', function() {
+                $('.slider-window').toggleClass('open');
+            });
+
+            // Close slider when the close icon is clicked
+            $('.close-slider').on('click', function() {
+                $('.slider-window').removeClass('open');
+            });
+        });
+    </script>
 </body>
 </html>
