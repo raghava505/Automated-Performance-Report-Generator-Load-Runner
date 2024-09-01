@@ -122,7 +122,7 @@ function addSprintRunFields() {
     let newFields = `
         <div class="form-group row inside_fields" id="sprintRunGroup_${fieldCounter}">
             <div class="col">
-                <label for="sprint_${fieldCounter}">Sprint Field ${fieldCounter}:</label>
+                <label for="sprint_${fieldCounter}">Sprint Field ${fieldCounter} :</label>
                 <select class="form-control req-for-view-report" id="sprint_${fieldCounter}" name="sprint_${fieldCounter}" required>
                     <option value="">Select Sprint</option>
                     <!-- Options will be populated via JavaScript -->
@@ -130,7 +130,7 @@ function addSprintRunFields() {
                 <div class="error-message"></div>
             </div>
             <div class="col">
-                <label for="run_${fieldCounter}">Run Field ${fieldCounter}:</label>
+                <label for="run_${fieldCounter}">Run Field ${fieldCounter} :</label>
                 <select class="form-control run-element req-for-view-report" id="run_${fieldCounter}" name="run_${fieldCounter}" required>
                     <option value="">Select Run</option>
                     <!-- Options will be populated via JavaScript -->
@@ -141,7 +141,7 @@ function addSprintRunFields() {
     `;
     if (fieldCounter!=1){
         newFields = newFields + `<div>
-                                    <span><button type="button" class="remove_btn" onclick="removeFields(${fieldCounter})"><i class="fa-solid fa-xmark"></i></button></span>
+                                    <span><button type="button" class="remove_btn" onclick="removeFields(${fieldCounter})"><i class="fa-solid fa-xmark fa-lg"></i></button></span>
                                 </div>
                                 `
     }
@@ -510,7 +510,7 @@ function generateContents() {
     contents.innerHTML = `
         <h5 id="contents_heading" class="text-center btn disabled"><i class="fa-solid fa-list"></i> Contents </h5>
         <div class="input-group mb-3">
-            <span class="input-group-text"><i class="fas fa-search"></i></span>
+        <div class="input-group-prepend"><span class="input-group-text"><i class="fas fa-search"></i></span></div>
             <input type="text" id="searchBox" class="form-control" placeholder="Search...">
         </div>
     `;

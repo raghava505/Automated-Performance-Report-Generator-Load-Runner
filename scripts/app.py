@@ -156,9 +156,9 @@ def view_report():
     database_name = request.form['loadtype']
     collection_name = request.form['loadname']
 
-    # list_of_sprint_runs_to_show_or_compare = [[160,4],[160,1]]
+    # list_of_sprint_runs_to_show_or_compare = [[157,1],[160,1]]
     # database_name = "Osquery_LoadTests_New"
-    # collection_name = "ControlPlane"
+    # collection_name = "MultiCustomer"
 
     """Add a log message to the queue for the current user."""
     user_id = session.get('user_id')
@@ -181,7 +181,7 @@ def view_report():
 def publish_report():
     # Get form data from the request
     # print("RETURNED FORM INPUT : ")
-    # print(request.form)
+    print(request.form)
     url = request.form['url']
     email_address = request.form['email_address']
     api_key = request.form['api_key']
@@ -201,7 +201,7 @@ def publish_report():
     # import uuid
     # report_title = f"TEST {uuid.uuid4()}"
 
-    # list_of_sprint_runs_to_show_or_compare = [[160,5]]
+    # list_of_sprint_runs_to_show_or_compare = [[160,4],[160,1]]
     # database_name = "Osquery_LoadTests_New"
     # collection_name = "ControlPlane"
 

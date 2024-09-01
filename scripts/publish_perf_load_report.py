@@ -77,20 +77,6 @@ class DynamicObject:
                 <div class="tab-cont">
                     {table_html}
                 </div>"""
-
-
-        unique_id = str(uuid.uuid4())
-        return f'''<p>
-                        <button class="btn btn-primary" type="button" data-toggle="collapse" data-target="#collapseExample{unique_id}" aria-expanded="false" aria-controls="collapseExample{unique_id}">
-                            {heading_text}
-                        </button>
-                    </p>
-                    <div class="collapse" id="collapseExample{unique_id}">
-                        <div class="card card-body tab-cont">
-                        {df.to_html(classes="table  table-bordered table-hover table-sm text-center custom-table", index=False)}
-                        </div>
-                    </div>
-                '''
     
     def attach_plot_as_image(self,piechart_name, image, heading_tag):
         buffered = io.BytesIO()
@@ -265,7 +251,6 @@ class perf_load_report_publish:
             if not _:
                 yield f'data: {{"status": "error", "message": "{err}"}}\n\n'
                 return
-                # return err, "error"
             test_title = self.main_result["load_details"]["data"]["test_title"]
             load_type = self.main_result["load_details"]["data"]["load_type"]
             sprint_runs_text_list = ['_'.join(map(str, x)) for x in self.sprint_runs_list]
@@ -273,7 +258,7 @@ class perf_load_report_publish:
             sprint_runs_text = f"<span  class='mb-3 btn btn-success btn-sm disabled'>{self.main_sprint}_{self.main_run}</span>"
             if sprint_runs_text_list:
                 # Define the VS span as a separate string
-                vs_span = "<span class='btn mb-3'>vs</span>"
+                vs_span = "<span class='btn mb-3 btn-sm disabled'>vs</span>"
                 # Join the list with the VS span
                 joined_text = f"{vs_span}".join(sprint_runs_text_list)
                 # Concatenate the main sprint and run with the joined text
