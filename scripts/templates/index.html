@@ -1,6 +1,6 @@
 {% extends "layout.html" %}
 {% block content%}
-    <div>
+    <div class="container">
         <h1 class="mb-4 text-center"><i class="bi bi-clipboard-data-fill"></i>
             Generate Performance Load Report
         </h1>
@@ -94,7 +94,7 @@
         </form>
     </div>
 
-    <div class="mt-5 mb-3 pb-5 rounded">
+    <div class="container mt-5 mb-3 pb-5 rounded">
         <div class="d-flex align-items-center justify-content-center">
             <!-- Logs Text -->
             <h4 class="text-center mr-3"><i class="bi bi-terminal-fill"></i> Logs</h4>
@@ -115,23 +115,39 @@
     </div>
     
 
-    <div class="pb-3 rounded">
-        <div class="d-flex align-items-center justify-content-center">
-            <!-- View Report Text -->
-            <h3 class="text-center mt-1 mr-3"><i class="fas fa-file-alt"></i> View Report</h3>
-    
-            <!-- Loading Animation -->
-            <div id="report_loadingAnimation" style="display: none;">
-                <button class="btn btn-primary mb-1" type="button" disabled>
-                    <span class="spinner-grow spinner-grow-sm" role="status" aria-hidden="true"></span>
-                    Generating ...
-                </button>
+    <div class="pb-3 rounded container-fluid">
+        <div class="row">
+            <div class="col-md-2 d-flex  rounded align-items-center justify-content-center">
+                <!-- <h5 class="text-center mt-1 mr-3"><i class="fa-solid fa-list"></i>  Contents </h5> -->
+            </div>
+
+            <div class="d-flex align-items-center justify-content-center col-md-9">
+                <h3 class="text-center mt-1 mr-3"><i class="fas fa-file-alt"></i> View Report</h3>
+        
+                <!-- Loading Animation -->
+                <div id="report_loadingAnimation" style="display: none;">
+                    <button class="btn btn-primary mb-1" type="button" disabled>
+                        <span class="spinner-grow spinner-grow-sm" role="status" aria-hidden="true"></span>
+                        Generating ...
+                    </button>
+                </div>
             </div>
         </div>
         
-        <div id="ReportWindow" class="rounded  shadow">
+        <!-- <div id="ReportWindow" class="rounded  shadow">
             <p class="text-center">Report will be displayed here after clicking 'View Report' Button</p>
+        </div> -->
+
+        <div class="row">
+            <div id="contents" class="contents col-md-2 rounded">
+                <h5 id="contents_heading" class="text-center btn disabled"><i class="fa-solid fa-list"></i>  Contents </h5>
+            </div>
+            <div id="ReportWindow" class="rounded shadow col-md-9">
+                <p class="text-center">Report will be displayed here after clicking 'View Report' Button</p>
+            </div>
         </div>
+
+
     </div>
 
     <div id="report_loadingAnimation_bottom" style="display: none; text-align: center;">
