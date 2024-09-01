@@ -85,8 +85,8 @@
 }
 
 .img-container {
-    width: 124%;
-    margin-left: -12% ;
+    width: 115%;
+    margin-left: -7.1% ;
     overflow: hidden;
 }
 .img-container img {
@@ -106,7 +106,7 @@
 }
 
 .custom-table {
-    border-radius: 4px;
+    /* border-radius: 4px; */
     overflow: hidden;
 }
 .custom-table thead {
@@ -121,13 +121,13 @@
     transition: background-color 0.1s;
 }
 
-.custom-table th,
+/* .custom-table th,
 .custom-table td {
-    max-width: 100px; /* Set max width for cells */
-    overflow-x: auto; /* Enable horizontal scrolling */
-    white-space: nowrap; /* Prevent text from wrapping */
+    max-width: 100px; 
+    overflow-x: auto; 
+    white-space: nowrap; 
     vertical-align: middle;
-}
+} */
 
 /* Add a scrollbar for cells with overflow */
 .custom-table td::-webkit-scrollbar {
@@ -165,6 +165,8 @@
     background-color: rgb(255, 255, 255);
     width: 129%;
     margin-left: -14% ;
+    /* padding-top: 70px; */
+    padding:80px;
     /* box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1); */
 }
 
@@ -184,3 +186,20 @@
     z-index: 1000;
 }
 
+
+.sortable {
+    cursor: pointer;
+}
+.sortable::after {
+    content: "\f0dc"; /* Default arrow */
+    font-family: "Font Awesome 6 Free";
+    font-weight: 900;
+    float: right;
+    margin-left: 5px;
+}
+.sortable.asc::after {
+    content: "\f0de"; /* Up arrow */
+}
+.sortable.desc::after {
+    content: "\f0dd"; /* Down arrow */
+}
