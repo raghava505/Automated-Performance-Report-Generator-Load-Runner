@@ -100,12 +100,8 @@ class DynamicObject:
         img_base64 = base64.b64encode(img_byte_array).decode('utf-8')
         # Create HTML img tag
         return f"""
-            <div class="container">
-                    <div class="img-container">
-                        <h{heading_tag}>{piechart_name}</h{heading_tag}>
-                        <img src="data:image/png;base64,{img_base64}" alt="Image"/>
-                    </div>
-            </div>
+                <h{heading_tag}>{piechart_name}</h{heading_tag}>
+                <img src="data:image/png;base64,{img_base64}" alt="Image" class="img-fluid w-100"  />
         """
 
 class perf_load_report_publish:
@@ -270,14 +266,21 @@ class perf_load_report_publish:
                 yield f'data: {{"status": "error", "message": "{err}"}}\n\n'
                 return
                 # return err, "error"
-            stack = self.main_result["load_details"]["data"]["stack"]
             test_title = self.main_result["load_details"]["data"]["test_title"]
             load_type = self.main_result["load_details"]["data"]["load_type"]
             sprint_runs_text_list = ['_'.join(map(str, x)) for x in self.sprint_runs_list]
-            sprint_runs_text = f' {self.main_sprint}_{self.main_run} VS {" VS ".join(sprint_runs_text_list)}'
+            sprint_runs_text_list = list(map(lambda x : f"<span  class='mb-3 btn btn-success btn-sm disabled'>{x}</span>",sprint_runs_text_list))
+            sprint_runs_text = f"<span  class='mb-3 btn btn-success btn-sm disabled'>{self.main_sprint}_{self.main_run}</span>"
+            if sprint_runs_text_list:
+                # Define the VS span as a separate string
+                vs_span = "<span class='btn mb-3'>vs</span>"
+                # Join the list with the VS span
+                joined_text = f"{vs_span}".join(sprint_runs_text_list)
+                # Concatenate the main sprint and run with the joined text
+                sprint_runs_text += f"{vs_span}{joined_text}"
 
             if self.isViewReport:
-                data = json.dumps({"status": "info", "message": f"<div style='text-align: center;'><h1>{stack} - {load_type} - {str(test_title).capitalize()} - Performance Report</h1><p  class='p-3'>{sprint_runs_text}</p></div><hr style='border: 1px solid #000000;'><br>"})
+                data = json.dumps({"status": "info", "message": f"<div style='text-align: center;'><h1>{load_type} - {str(test_title).capitalize()}<br>Performance Report</h1>{sprint_runs_text}</div><hr style='border: 1px solid #000000;'><br>"})
                 yield f'data: {data}\n\n'
             for key_name in self.all_keys:
                 html_text =  custom_string()
@@ -381,16 +384,13 @@ class perf_load_report_publish:
                             yield f'data: {{"status": "info", "message": "Attching {main_heading} charts"}}\n\n'
                         else:
                             unique_id = str(uuid.uuid4())
-                            html_text+=f"""
-                                         <p>
-                                            <button class="btn btn-primary" type="button" data-toggle="collapse" data-target="#collapseExample{unique_id}" aria-expanded="false" aria-controls="collapseExample{unique_id}">
-                                                <h3>{main_heading}</h3>
-                                            </button>
-                                        </p>
-
-                                         <div class="collapse" id="collapseExample{unique_id}">
-                                                <div class="card card-body ">
-
+                            html_text+=f"""<p>
+                                                <button class="btn btn-light btn-sm pt-2" style="display: block;" type="button" data-toggle="collapse" data-target="#collapseExample{unique_id}" aria-expanded="false" aria-controls="collapseExample{unique_id}">
+                                                    <h3>{main_heading}</h3>
+                                                </button>
+                                            </p>
+                                            <div class="collapse mb-5" id="collapseExample{unique_id}">
+                                                <div class="">
                                         """
                             for filename in list(inside_charts.keys()):
                                 image_path = os.path.join(self.graphs_path, main_heading, f"{filename.replace('/', '-')}.png")
@@ -399,12 +399,12 @@ class perf_load_report_publish:
 
                                     html_text += f"""
                                                 <h4>{filename}</h4>
-                                                <img src="{url_for('serve_image', filename=image_path)}" alt="{filename}" class="img-fluid" />                                                
+                                                <img src="{url_for('serve_image', filename=image_path)}" alt="{filename}" class="img-fluid w-100" />                                                
                                     """
                                 else:
                                     print(f"{image_path} doest exist")
                             html_text+="""</div>
-                                                </div>"""
+                                         </div>"""
                     curr_page_obj.attach_saved_charts(charts_paths_dict)
                 if self.isViewReport:
                     html_text+='<hr style="border: 1px solid #000000;">'
