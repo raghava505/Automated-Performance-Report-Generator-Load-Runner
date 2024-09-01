@@ -391,7 +391,6 @@ function startReportDataEventSource() {
         const data = JSON.parse(event.data);
         var newData = document.createElement("div");
         newData.innerHTML = data.message;
-        console.log(data.message);
         document.getElementById("ReportWindow").appendChild(newData);
 
         const report_loadingAnimation = document.getElementById("report_loadingAnimation");
@@ -401,7 +400,7 @@ function startReportDataEventSource() {
         if (data.message.includes("success") || data.message.includes("error")) {
             report_loadingAnimation.style.display = 'none'; // Hide loading animation
             report_loadingAnimation_bottom.style.display = 'none'; // Hide loading animation
-
+            generateContents()
         } else {
             report_loadingAnimation.style.display = 'block'; // Show loading animation
             report_loadingAnimation_bottom.style.display = 'block'; // Show loading animation
@@ -438,6 +437,7 @@ function checkVisibility() {
     const reportWindow = document.getElementById('ReportWindow');
     const down_button = document.getElementById('scroll_through_report_slowly');
     const up_button = document.getElementById('scroll_up');
+    const contents = document.getElementById('contents');
 
     function updateButtonVisibility() {
         const rect = reportWindow.getBoundingClientRect();
@@ -447,9 +447,18 @@ function checkVisibility() {
         if (isAtTop) {
             down_button.style.display = 'block'; // Show button
             up_button.style.display = 'block'; // Show button
+            contents.style.position = 'sticky';
+            contents.style.top = '30px';
+            contents.style.left = '5px';
+            contents.style.zIndex = '1000';
+
         } else {
             down_button.style.display = 'none'; // Hide button
             up_button.style.display = 'none'; // Hide button
+            contents.style.position = '';
+            contents.style.top = '';
+            contents.style.left = '';
+            contents.style.zIndex = '';
         }
     }
 
@@ -495,3 +504,125 @@ function toggleScroll() {
         button.innerHTML = '<i class="fa-solid fa-pause"></i>'; // Use a different icon to indicate stop
     }
 }
+function generateContents() {
+    const reportWindow = document.getElementById('ReportWindow');
+    const contents = document.getElementById('contents');
+    contents.innerHTML = `
+        <h5 id="contents_heading" class="text-center btn disabled"><i class="fa-solid fa-list"></i> Contents </h5>
+        <div class="input-group mb-3">
+            <span class="input-group-text"><i class="fas fa-search"></i></span>
+            <input type="text" id="searchBox" class="form-control" placeholder="Search...">
+        </div>
+    `;
+
+    // Create an unordered list
+    const ul = document.createElement('ul');
+    ul.style.listStyleType = 'none'; // Remove default list styling
+    ul.style.padding = '0'; // Remove default padding
+    ul.style.margin = '0'; // Remove default margin
+
+    // Find all headers within the ReportWindow
+    const headers = reportWindow.querySelectorAll('h2');
+
+    // Create and insert list items for each header
+    headers.forEach(header => {
+        const id = header.textContent.trim().replace(/\s+/g, '-').toLowerCase();
+        header.id = id; // Set the id for the header
+
+        const li = document.createElement('li');
+        const link = document.createElement('a');
+        link.href = `#${id}`;
+        link.textContent = header.textContent;
+        link.style.display = 'block';
+        link.style.padding = '5px 5px';
+        link.style.textDecoration = 'none';
+        link.style.color = '#007bff';
+        link.style.borderBottom = '1px solid #ddd'; // Add a border at the bottom of each link
+        link.style.transition = 'background-color 0.3s'; // Smooth transition for background color
+
+        // Add hover effect
+        link.addEventListener('mouseover', () => {
+            link.style.backgroundColor = '#f1f1f1';
+        });
+        link.addEventListener('mouseout', () => {
+            link.style.backgroundColor = '';
+        });
+
+        li.appendChild(link);
+        ul.appendChild(li);
+    });
+
+    contents.appendChild(ul);
+
+    // Filter function for the search box
+    const searchBox = document.getElementById('searchBox');
+    searchBox.addEventListener('input', () => {
+        const filter = searchBox.value.toLowerCase();
+        const links = ul.getElementsByTagName('a');
+
+        Array.from(links).forEach(link => {
+            const text = link.textContent.toLowerCase();
+            if (text.includes(filter)) {
+                link.style.display = 'block'; // Show matching link
+            } else {
+                link.style.display = 'none'; // Hide non-matching link
+            }
+        });
+    });
+}
+
+
+// Call the function to generate contents links
+
+$(document).ready(function() {
+    // Delegate the event handling to the document or a parent container
+    $(document).on('click', '.sortable', function() {
+        var $this = $(this);
+        var order = $this.data('order');
+
+        // Get the parent table of the clicked header
+        var $table = $this.closest('table');
+        var $rows = $table.find('tbody tr').toArray();
+
+        // Sort rows based on the column and order
+        $rows.sort(function(a, b) {
+            // Extract text from the corresponding column in both rows
+            var aText = $(a).find('td').eq($this.index()).text().trim();
+            var bText = $(b).find('td').eq($this.index()).text().trim();
+
+            // Ensure aText and bText are strings, else set them to empty strings
+            aText = typeof aText === 'string' ? aText : '';
+            bText = typeof bText === 'string' ? bText : '';
+
+            // Handle special values like NaN
+            if (aText === "NaN") aText = Number.NEGATIVE_INFINITY;
+            if (bText === "NaN") bText = Number.NEGATIVE_INFINITY;
+
+            // Remove special characters like arrows and extract numeric values
+            var aNumeric = parseFloat(aText.replace(/[^0-9.-]+/g, ''));
+            var bNumeric = parseFloat(bText.replace(/[^0-9.-]+/g, ''));
+
+            // Compare numeric values if both are valid numbers
+            if (!isNaN(aNumeric) && !isNaN(bNumeric)) {
+                return (order === 'desc' ? (bNumeric - aNumeric) : (aNumeric - bNumeric));
+            }
+
+            // Fallback to string comparison if the values are not numeric
+            return (order === 'desc' ? (aText > bText) : (aText < bText)) ? 1 : -1;
+        });
+
+        // Reverse the order for the next click
+        $this.data('order', order === 'desc' ? 'asc' : 'desc');
+
+        // Remove existing sort classes from all headers in the same table
+        $this.closest('tr').find('.sortable').removeClass('asc desc');
+
+        // Add the sort class to the clicked header
+        $this.addClass(order === 'desc' ? 'asc' : 'desc');
+
+        // Append sorted rows to the table body
+        $.each($rows, function(index, row) {
+            $table.children('tbody').append(row);
+        });
+    });
+});
