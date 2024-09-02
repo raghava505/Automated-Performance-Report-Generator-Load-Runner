@@ -104,7 +104,7 @@ class publish_to_confluence:
         '''
         return status_macro
 
-    def add_table_from_dataframe(self,heading,dataframe,collapse=False,status_col=None):
+    def add_table_from_dataframe(self,heading,dataframe,collapse=False,status_col=None,  *args, **kwargs):
         html_table = dataframe.to_html(classes='table table-striped', index=False)
         def colorize_cell(content):
             split_text = content.split(';')

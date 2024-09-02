@@ -1,122 +1,130 @@
 {% extends "layout.html" %}
 {% block content%}
-    <div class="container">
-        <h1 class="mb-4 text-center"><i class="bi bi-clipboard-data-fill"></i>
-            Generate Performance Load Report
-        </h1>
-        <form id="inputForm" class="border p-4 shadow rounded">
-
-            <div class="form-row">
-                <div class="form-group col-md-6">
-                    <label for="loadtype">Load Type :</label>
-                    <select class="form-control req-for-view-report" id="loadtype" name="loadtype" required>
-                        <option value="">Select Load Type</option>
-                    </select>
-                    <div class="error-message"></div>
-                </div>
-                <div class="form-group col-md-6">
-                    <label for="loadname">Load Name :</label>
-                    <select class="form-control req-for-view-report" id="loadname" name="loadname" required>
-                        <option value="">Select Load Name</option>
-                    </select>
-                    <div class="error-message"></div>
-                </div>
-            </div>
-
+<div class="container-fluid">
+    <div class="row mt-5 mb-5">
+        <div  class=" col-md-4 rounded ">
+            <div class="d-flex align-items-center justify-content-center ">
+                
+                <div class="row mt-2">
+                    <h4 class="text-center" style="margin-bottom:0px;"><i class="bi bi-terminal-fill"></i> Logs</h4>
             
-            <div id="fieldsContainer">
-                <!-- Initial set of 'sprint' and 'run' fields will be added here -->
-            </div>
-            <div class="text-center">
-                <button type="button" class="btn btn-info col-md-3" onclick="addSprintRunFields()">Add new sprint-run group &nbsp;<i class="fa-solid fa-square-plus fa-lg"></i></button>
-            </div>
-            <br>
-        
-
-            <div class="form-row">
-                <div class="form-group col-md-6">
-                    <label for="url"><i class="fa-solid fa-link fa-xs"></i> Confluence URL :</label>
-                    <input type="text" class="form-control" id="url" name="url" value="https://uptycsjira.atlassian.net" placeholder="Enter URL" required>
-                    <div class="error-message"></div>
-                </div>
-                <div class="form-group col-md-6">
-                    <label for="email_address"><i class="fa-solid fa-envelope"></i> Email Address :</label>
-                    <input type="email" class="form-control" id="email_address" name="email_address" value="@uptycs.com" placeholder="Enter your email" required>
-                    <div class="error-message"></div>
-                </div>
-            </div>
-
-
-            <div class="form-row">
-                <div class="form-group col-md-6">
-                    <label for="space"><i class="fas fa-folder"></i> Space :</label>
-                    <input type="text" class="form-control" id="space" name="space" value="PERF" placeholder="Enter space" required>
-                    <div class="error-message"></div>
-                </div>
-                <div class="form-group col-md-6">
-                    <label for="api_key"><i class="fa-solid fa-key"></i> API Key :</label>
-                    <input type="text" class="form-control" id="api_key" name="api_key" placeholder="Enter API key" required>
-                    <div class="error-message"></div>
+                    <!-- Loading Animation -->
+                    <div id="logs_loadingAnimation" style="display: none; margin-top: -5px; margin-bottom: -1px;">
+                        <button class="btn btn-primary  ml-2" type="button" disabled>
+                            <span class="spinner-grow spinner-grow-sm" role="status" aria-hidden="true"></span>
+                            Publishing ...
+                        </button>
+                    </div>
                 </div>
             </div>
         
-
-
-            <div class="form-row">
-                <div class="form-group col-md-6">
-                    <label for="parent_page_title"><i class="fas fa-sitemap"></i> Parent Page Title :</label>
-                    <input type="text" class="form-control" id="parent_page_title" name="parent_page_title" placeholder="Enter parent page title" required>
-                    <div class="error-message"></div>
-                </div>
-                <div class="form-group col-md-6">
-                    <label for="report_title">Report Title :</label>
-                    <input type="text" class="form-control" id="report_title" name="report_title" placeholder="Enter report title" required>
-                    <div class="error-message"></div>
-                </div>
-            </div>
-            
-            
-            <div class="form-row">
-                <div class="col-md-6">
-                    <button type="button" class="btn btn-success btn-block" onclick="validateViewReport()">
-                        View Report <i class="fa-solid fa-eye fa-lg"></i>
-                    </button>
-                </div>
-
-                <div class="col-md-6">
-                    <button type="button" class="btn btn-primary btn-block" onclick="validatePublishForm()">
-                        Publish to Confluence <i class="fa-solid fa-paper-plane fa-lg"></i>
-                    </button>
-                </div>
-            </div>
-
-            
-        </form>
-    </div>
-
-    <div class="container mt-5  rounded">
-        <div class="d-flex align-items-center justify-content-center">
-            <!-- Logs Text -->
-            <h4 class="text-center mr-3"><i class="bi bi-terminal-fill"></i> Logs</h4>
-    
-            <!-- Loading Animation -->
-            <div id="logs_loadingAnimation" style="display: none;">
-                <button class="btn btn-primary mb-2" type="button" disabled>
-                    <span class="spinner-grow spinner-grow-sm" role="status" aria-hidden="true"></span>
-                    Publishing ...
-                </button>
+            <div id="logWindow" class="rounded p-3 pb-4 bg-dark ">
+                $ report publishing logs will be displayed here
+                <br>
             </div>
         </div>
-    
-        <div id="logWindow" class="rounded p-3 mb-5 pb-5 bg-light code-window">
-            // Logs will be displayed here during the report publishing process 
-            <br>
-        </div>
-    </div>
-    
 
+        <div class="rounded col-md-7">
+            <h2 class="text-center"><i class="bi bi-clipboard-data-fill"></i>
+                Generate Performance Load Report
+            </h2>
+            <form id="inputForm" class="border shadow p-4 rounded">
+    
+                <div class="form-row">
+                    <div class="form-group col-md-6">
+                        <label for="loadtype">Load Type :</label>
+                        <select class="form-control req-for-view-report" id="loadtype" name="loadtype" required>
+                            <option value="">Select Load Type</option>
+                        </select>
+                        <div class="error-message"></div>
+                    </div>
+                    <div class="form-group col-md-6">
+                        <label for="loadname">Load Name :</label>
+                        <select class="form-control req-for-view-report" id="loadname" name="loadname" required>
+                            <option value="">Select Load Name</option>
+                        </select>
+                        <div class="error-message"></div>
+                    </div>
+                </div>
+    
+                
+                <div id="fieldsContainer">
+                    <!-- Initial set of 'sprint' and 'run' fields will be added here -->
+                </div>
+                <div class="text-center">
+                    <button type="button" class="btn btn-info col-md-3" onclick="addSprintRunFields()">Add sprint-run group &nbsp;<i class="fa-solid fa-square-plus fa-lg"></i></button>
+                </div>
+                <br>
+            
+    
+                <div class="form-row">
+                    <div class="form-group col-md-6">
+                        <label for="url"><i class="fa-solid fa-link fa-xs"></i> Confluence URL :</label>
+                        <input type="text" class="form-control" id="url" name="url" value="https://uptycsjira.atlassian.net" placeholder="Enter URL" required>
+                        <div class="error-message"></div>
+                    </div>
+                    <div class="form-group col-md-6">
+                        <label for="email_address"><i class="fa-solid fa-envelope"></i> Email Address :</label>
+                        <input type="email" class="form-control" id="email_address" name="email_address" value="@uptycs.com" placeholder="Enter your email" required>
+                        <div class="error-message"></div>
+                    </div>
+                </div>
+    
+    
+                <div class="form-row">
+                    <div class="form-group col-md-6">
+                        <label for="space"><i class="fas fa-folder"></i> Space :</label>
+                        <input type="text" class="form-control" id="space" name="space" value="PERF" placeholder="Enter space" required>
+                        <div class="error-message"></div>
+                    </div>
+                    <div class="form-group col-md-6">
+                        <label for="api_key"><i class="fa-solid fa-key"></i> API Key :</label>
+                        <input type="text" class="form-control" id="api_key" name="api_key" placeholder="Enter API key" required>
+                        <div class="error-message"></div>
+                    </div>
+                </div>
+            
+    
+    
+                <div class="form-row">
+                    <div class="form-group col-md-6">
+                        <label for="parent_page_title"><i class="fas fa-sitemap"></i> Parent Page Title :</label>
+                        <input type="text" class="form-control" id="parent_page_title" name="parent_page_title" placeholder="Enter parent page title" required>
+                        <div class="error-message"></div>
+                    </div>
+                    <div class="form-group col-md-6">
+                        <label for="report_title">Report Title :</label>
+                        <input type="text" class="form-control" id="report_title" name="report_title" placeholder="Enter report title" required>
+                        <div class="error-message"></div>
+                    </div>
+                </div>
+                
+                
+                <div class="form-row">
+                    <div class="col-md-6">
+                        <button type="button" class="btn btn-success btn-block" onclick="validateViewReport()">
+                            View Report <i class="fa-solid fa-eye fa-lg"></i>
+                        </button>
+                    </div>
+    
+                    <div class="col-md-6">
+                        <button type="button" class="btn btn-primary btn-block" onclick="validatePublishForm()">
+                            Publish to Confluence <i class="fa-solid fa-paper-plane fa-lg"></i>
+                        </button>
+                    </div>
+                </div>
+    
+                
+            </form>
+        </div>
+       
+    </div>
+</div>
+    
+<hr style="background-color: black; height: 1px; border: none;">
+<br>
     <div class="pb-3 rounded container-fluid">
-        <div class="row">
+        <div class="row pb-1">
             <div class="col-md-2 d-flex  rounded align-items-center justify-content-center">
                 <!-- <h5 class="text-center mt-1 mr-3"><i class="fa-solid fa-list"></i>  Contents </h5> -->
             </div>

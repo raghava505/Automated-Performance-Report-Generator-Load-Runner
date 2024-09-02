@@ -1,382 +1,115 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Animated Popup Window</title>
-    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
-    <style>
-        /* Overlay background */
-        .popup-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.5);
-            z-index: 999;
-            opacity: 0;
-            visibility: hidden;
-            transition: opacity 0.3s ease, visibility 0.3s ease;
-        }
+<div class="border col-md-4 rounded">
+    <div class="mt-1 d-flex align-items-center justify-content-center">
+        <!-- Logs Text -->
+        <h4 class="text-center mr-3"><i class="bi bi-terminal-fill"></i> Logs</h4>
 
-        .popup-overlay.show {
-            opacity: 1;
-            visibility: visible;
-        }
-
-        /* Popup window */
-        .popup-content {
-            position: fixed;
-            top: 50px;
-            left: 50%;
-            transform: translateX(-50%) scale(0.8);
-            width: 80%; /* Adjust width as needed */
-            max-height: calc(100vh - 100px);
-            overflow-y: auto;
-            background-color: #fff;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-            z-index: 1000;
-            transition: transform 0.3s ease;
-        }
-
-        .popup-content.show {
-            transform: translateX(-50%) scale(1);
-        }
-
-        /* Close button */
-        .close-btn {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            font-size: 20px;
-            cursor: pointer;
-        }
-
-        .custom-table {
-            border-radius: 4px;
-            overflow: hidden;
-        }
-        .custom-table thead {
-            background-color: #585858;
-            color: #ffffff;
-        }
-        .custom-table tbody tr:nth-child(odd) {
-            background-color: #f8f9faef;
-        }
-        .custom-table tbody tr:hover  {
-            background-color: #feffc1;
-            transition: background-color 0.1s;
-        }
-        
-        .custom-table th,
-        .custom-table td {
-            max-width: 100px; /* Set max width for cells */
-            overflow-x: auto; /* Enable horizontal scrolling */
-            white-space: nowrap; /* Prevent text from wrapping */
-            vertical-align: middle;
-        }
-
-        /* Add a scrollbar for cells with overflow */
-        .custom-table td::-webkit-scrollbar {
-            height: 5px;
-        }
-
-        .custom-table td::-webkit-scrollbar-thumb {
-            background-color: #888;
-            border-radius: 10px;
-        }
-        .custom-table td::-webkit-scrollbar-thumb:hover {
-            background-color: #555;
-        }
-        .tab-cont {
-            overflow-x: auto; /* Enables horizontal scrolling */
-            width: 100%; /* Ensures the container takes the full width */
-            margin-bottom: 15px; /* Adds some space below the table */
-        }
-        .tab-cont::-webkit-scrollbar {
-            height: 5px;
-        }
-        .tab-cont::-webkit-scrollbar-thumb {
-            background-color: #888;
-            border-radius: 10px;
-        }
-        .tab-cont::-webkit-scrollbar-thumb:hover {
-            background-color: #555;
-        }
-
-    </style>
-</head>
-<body>
-
-    <!-- Button to trigger popup -->
-    <button class="btn btn-primary" onclick="openPopup()">Open Popup</button>
-
-    <!-- Popup overlay -->
-    <div class="container">
-
-        
-
-        <div class="card">
-            <button class="btn" type="button" data-toggle="collapse" data-target="#tableCollapse" aria-expanded="false" aria-controls="tableCollapse">
-                <h4>Dynamic Table</h4>
+        <!-- Loading Animation -->
+        <div id="logs_loadingAnimation" style="display: none;">
+            <button class="btn btn-primary mb-2" type="button" disabled>
+                <span class="spinner-grow spinner-grow-sm" role="status" aria-hidden="true"></span>
+                Publishing ...
             </button>
-            <div id="tableCollapse" class="collapse">
-                <div class="tab-cont">
-                    <table class="table  table-bordered table-hover table-sm text-center custom-table">
-                        <thead>
-                            <tr>
-                                <th>#</th>
-                                <th>Column 1</th>
-                                <th>Column 2</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td>1</td>
-                                <td>Data 1</td>
-                                <td>Data 2</td> 
-                            </tr>
-                            <tr>
-                                <td>2</td>
-                                <td>Data 3</td>
-                                <td>Data 4</td>
-                            </tr>
-                            <tr>
-                                <td>1</td>
-                                <td>Data 1</td>
-                                <td>Data 2</td>
-                            </tr>
-                            <tr>
-                                <td>3</td>
-                                <td>Data  </td>
-                                <td>Data </td>
-                            </tr>
-                            <tr>
-                                <td>1</td>
-                                <td>Data 1</td>
-                                <td>Data 2</td>
-                            </tr>
-                            <tr>
-                                <td>2</td>
-                                <td>Data 3</td>
-                                <td>Data 4</td>
-                            </tr>
-                            <tr>
-                                <td>1</td>
-                                <td>Data 1</td>
-                                <td>Data 2</td>
-                            </tr>
-                            <tr>
-                                <td>2</td>
-                                <td>Data 3</td>
-                                <td>Data 4</td>
-                            </tr>
-                        </tbody>
-                    </table>
+        </div>
+    </div>
+
+    <div id="logWindow" class="rounded p-3 mt-1  pb-5 bg-light">
+        // Logs will be displayed here during the report publishing process 
+        <br>
+    </div>
+</div>
+
+<div id="" class="rounded border col-md-7">
+    <!-- <div id="" class=""> -->
+        <h2 class="text-center"><i class="bi bi-clipboard-data-fill"></i>
+            Generate Performance Load Report
+        </h2>
+        <form id="inputForm" class="border p-4 shadow rounded">
+
+            <div class="form-row">
+                <div class="form-group col-md-6">
+                    <label for="loadtype">Load Type :</label>
+                    <select class="form-control req-for-view-report" id="loadtype" name="loadtype" required>
+                        <option value="">Select Load Type</option>
+                    </select>
+                    <div class="error-message"></div>
+                </div>
+                <div class="form-group col-md-6">
+                    <label for="loadname">Load Name :</label>
+                    <select class="form-control req-for-view-report" id="loadname" name="loadname" required>
+                        <option value="">Select Load Name</option>
+                    </select>
+                    <div class="error-message"></div>
                 </div>
             </div>
-        </div>
 
-
-        <h4>Dynamic Table</h4>
-            <div class="tab-cont">
-                <table class="table  table-bordered table-hover table-sm text-center custom-table">
-                    <thead>
-                        <tr>
-                            <th>#</th>
-                            <th>Column 1</th>
-                            <th>Column 2</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td>1</td>
-                            <td>Data 1</td>
-                            <td>Data 2</td> <td>Data 2</td> <td>Data 2</td> <td>Data 2</td> <td>Data 2</td> <td>Data 2</td> <td>Data 2</td> <td>Data 2</td> <td>Data 2</td> <td>Data 2</td> <td>Data 2</td> <td>Data 2</td> <td>Data 2</td><td>Data 2</td> <td>Data 2</td> <td>Data 2</td> <td>Data 2</td> <td>Data 2</td> <td>Data 2</td><td>Data 2</td> <td>Data 2</td> <td>Data 2</td> <td>Data 2</td> <td>Data 2</td> <td>Data 2</td><td>Data 2</td> <td>Data 2</td> <td>Data 2</td> <td>Data 2</td> <td>Data 2</td> <td>Data 2</td>
-                        </tr>
-                        <tr>
-                            <td>2</td>
-                            <td>Data 3</td>
-                            <td>Data 4</td>
-                        </tr>
-                        <tr>
-                            <td>1</td>
-                            <td>Data 1</td>
-                            <td>Data 2</td>
-                        </tr>
-                        <tr>
-                            <td>2kjsafkuwdbvakbvhkadfbvkjdbfjkvbadjkvbakjbfkjvabd</td>
-                            <td>Data 311xx x  x 1212h1uhuieiuwgiuweg;wg;igfawdh;kbfahjbai;gfiu;fgea</td>
-                            <td>Data 4qwekugejhfvbewhjbfkwbrfkhbekhrfbekrbvf</td>
-                        </tr>
-                        <tr>
-                            <td>1</td>
-                            <td>Data 1</td>
-                            <td>Data 2</td>
-                        </tr>
-                        <tr>
-                            <td>2</td>
-                            <td>Data 3</td>
-                            <td>Data 4</td>
-                        </tr>
-                        <tr>
-                            <td>1</td>
-                            <td>Data 1</td>
-                            <td>Data 2</td>
-                        </tr>
-                        <tr>
-                            <td>2</td>
-                            <td>Data 3</td>
-                            <td>Data 4</td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-    </div>
-    <div class="popup-overlay" id="popupOverlay" onclick="closePopup()">
-        <!-- Popup content -->
-        <div class="popup-content" id="popupContent" onclick="event.stopPropagation();">
-            <span class="close-btn" onclick="closePopup()">&times;</span>
-            <!-- Dynamic content will be inserted here -->
-        </div>
-    </div>
-
-    <script>
-        // Open the popup with animation
-        function openPopup() {
-            const overlay = document.getElementById('popupOverlay');
-            const content = document.getElementById('popupContent');
-
-            // Reset display property to make the overlay visible
-            overlay.style.display = 'block';
-
-            // Add the show class to trigger animations
-            setTimeout(() => {
-                overlay.classList.add('show');
-                content.classList.add('show');
-            }, 5); // Slight delay to ensure the display change is applied
             
-            // Example of adding dynamic content
-            content.innerHTML = `
-                <span class="close-btn" onclick="closePopup()">&times;</span>
-                <h4>Dynamic Table</h4>
-                <table class="table table-striped table-bordered">
-                    <thead>
-                        <tr>
-                            <th>#</th>
-                            <th>Column 1</th>
-                            <th>Column 2</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td>1</td>
-                            <td>Data 1</td>
-                            <td>Data 2</td>
-                        </tr>
-                        <tr>
-                            <td>2</td>
-                            <td>Data 3</td>
-                            <td>Data 4</td>
-                        </tr>
-                    </tbody>
-                </table>
-                <h4>Dynamic Table</h4>
-                <table class="table table-bordered">
-                    <thead>
-                        <tr>
-                            <th>#</th>
-                            <th>Column 1</th>
-                            <th>Column 2</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td>1</td>
-                            <td>Data 1</td>
-                            <td>Data 2</td>
-                        </tr>
-                        <tr>
-                            <td>2</td>
-                            <td>Data 3</td>
-                            <td>Data 4</td>
-                        </tr>
-                    </tbody>
-                </table>
-                <h4>Dynamic Table</h4>
-                <table class="table table-bordered">
-                    <thead>
-                        <tr>
-                            <th>#</th>
-                            <th>Column 1</th>
-                            <th>Column 2</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td>1</td>
-                            <td>Data 1</td>
-                            <td>Data 2</td>
-                        </tr>
-                        <tr>
-                            <td>2</td>
-                            <td>Data 3</td>
-                            <td>Data 4</td>
-                        </tr>
-                    </tbody>
-                </table>
-                <h4>Dynamic Table</h4>
-                <table class="table table-bordered">
-                    <thead>
-                        <tr>
-                            <th>#</th>
-                            <th>Column 1</th>
-                            <th>Column 2</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td>1</td>
-                            <td>Data 1</td>
-                            <td>Data 2</td>
-                        </tr>
-                        <tr>
-                            <td>2</td>
-                            <td>Data 3</td>
-                            <td>Data 4</td>
-                        </tr>
-                    </tbody>
-                </table>
-                <h4>Dynamic Image</h4>
-                <img src="https://via.placeholder.com/400" class="img-fluid" alt="Placeholder Image">
-            `;
-        }
-
-        // Close the popup with animation
-        function closePopup() {
-            const overlay = document.getElementById('popupOverlay');
-            const content = document.getElementById('popupContent');
-
-            // Remove the show class to trigger closing animations
-            overlay.classList.remove('show');
-            content.classList.remove('show');
-
-            // Wait for the animation to finish before completely hiding the popup
-            setTimeout(() => {
-                overlay.style.display = 'none';
-            }, 100); // 300ms matches the transition duration
-        }
-
+            <div id="fieldsContainer">
+                <!-- Initial set of 'sprint' and 'run' fields will be added here -->
+            </div>
+            <div class="text-center">
+                <button type="button" class="btn btn-info col-md-3" onclick="addSprintRunFields()">Add sprint-run group &nbsp;<i class="fa-solid fa-square-plus fa-lg"></i></button>
+            </div>
+            <br>
         
-    </script>
 
-<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.3/dist/umd/popper.min.js"></script>
-<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+            <div class="form-row">
+                <div class="form-group col-md-6">
+                    <label for="url"><i class="fa-solid fa-link fa-xs"></i> Confluence URL :</label>
+                    <input type="text" class="form-control" id="url" name="url" value="https://uptycsjira.atlassian.net" placeholder="Enter URL" required>
+                    <div class="error-message"></div>
+                </div>
+                <div class="form-group col-md-6">
+                    <label for="email_address"><i class="fa-solid fa-envelope"></i> Email Address :</label>
+                    <input type="email" class="form-control" id="email_address" name="email_address" value="@uptycs.com" placeholder="Enter your email" required>
+                    <div class="error-message"></div>
+                </div>
+            </div>
 
 
-</body>
-</html>
+            <div class="form-row">
+                <div class="form-group col-md-6">
+                    <label for="space"><i class="fas fa-folder"></i> Space :</label>
+                    <input type="text" class="form-control" id="space" name="space" value="PERF" placeholder="Enter space" required>
+                    <div class="error-message"></div>
+                </div>
+                <div class="form-group col-md-6">
+                    <label for="api_key"><i class="fa-solid fa-key"></i> API Key :</label>
+                    <input type="text" class="form-control" id="api_key" name="api_key" placeholder="Enter API key" required>
+                    <div class="error-message"></div>
+                </div>
+            </div>
+        
+
+
+            <div class="form-row">
+                <div class="form-group col-md-6">
+                    <label for="parent_page_title"><i class="fas fa-sitemap"></i> Parent Page Title :</label>
+                    <input type="text" class="form-control" id="parent_page_title" name="parent_page_title" placeholder="Enter parent page title" required>
+                    <div class="error-message"></div>
+                </div>
+                <div class="form-group col-md-6">
+                    <label for="report_title">Report Title :</label>
+                    <input type="text" class="form-control" id="report_title" name="report_title" placeholder="Enter report title" required>
+                    <div class="error-message"></div>
+                </div>
+            </div>
+            
+            
+            <div class="form-row">
+                <div class="col-md-6">
+                    <button type="button" class="btn btn-success btn-block" onclick="validateViewReport()">
+                        View Report <i class="fa-solid fa-eye fa-lg"></i>
+                    </button>
+                </div>
+
+                <div class="col-md-6">
+                    <button type="button" class="btn btn-primary btn-block" onclick="validatePublishForm()">
+                        Publish to Confluence <i class="fa-solid fa-paper-plane fa-lg"></i>
+                    </button>
+                </div>
+            </div>
+
+            
+        </form>
+    <!-- </div> -->
+</div>

@@ -216,7 +216,7 @@ function validatePublishForm() {
         if (isValid) {
             startPublishLogsEventSource()
             publishReportToConfluence();
-            scrollToBlock('logWindow')
+            // scrollToBlock('logWindow')
         }
     }
 }
@@ -293,7 +293,7 @@ function startPublishLogsEventSource() {
         const data = JSON.parse(event.data);
         // showNotification(data.message, data.status);
         var newData = document.createElement("div");
-        newData.innerHTML = getCurrentTime() + " - " + data.status.toUpperCase() + " : "+ data.message;
+        newData.innerHTML = getCurrentTime() + "-" + data.status.toUpperCase() + ":"+ data.message;
         log_window.appendChild(newData);
         scrollToBottom("logWindow");
 
@@ -302,6 +302,7 @@ function startPublishLogsEventSource() {
             logs_loadingAnimation.style.display = 'none'; // Hide loading animation
             showNotification(data.message, data.status);
             var separator = document.createElement("hr");
+            separator.style.color="white";
             log_window.appendChild(separator);
             publishing_already_in_progress = false;
             
@@ -465,7 +466,7 @@ function scrollToBlock(id) {
         // Calculate the top position of the element relative to the document
         const elementTop = window.pageYOffset + rect.top;
         // Calculate the desired scroll position with a 100px gap at the top
-        const scrollToPosition = elementTop - 60;
+        const scrollToPosition = elementTop - 87;
 
         // Smoothly scroll to the desired position
         window.scrollTo({
@@ -485,7 +486,7 @@ function checkVisibility() {
     function updateButtonVisibility() {
         const rect = reportWindow.getBoundingClientRect();
         // const isAtTop = rect.top >= 0 && rect.top <= window.innerHeight;
-        const isAtTop = rect.top <=63;
+        const isAtTop = rect.top <=89;
 
         if (isAtTop) {
             down_button.style.display = 'block'; // Show button
@@ -718,3 +719,107 @@ $(document).ready(function() {
         });
     });
 });
+
+
+function addNewRow(event) {
+    // Prevent the default action of the button
+    event.preventDefault();
+
+    // Find the button that was clicked
+    const button = event.target;
+
+    const tableId = button.getAttribute('data-table-id');
+    const table = document.getElementById(tableId);
+    const tableName = table.getAttribute('load_info_header');
+    const row = table.insertRow();
+
+    // Get the headers from the first row to use as names for textareas
+    const headers = table.rows[0].cells;
+    
+    // Iterate over the cells in the header row to match the width and set the name attribute
+    for (let i = 0; i < headers.length - 1; i++) {
+        const cell = row.insertCell();
+        const headerCell = headers[i];
+        cell.style.width = headerCell.offsetWidth + 'px'; // Match the cell width to the header cell width
+        cell.style.backgroundColor = "white";
+
+        // Get the column name from the header
+        const columnName = headerCell.innerText.trim();
+        cell.innerHTML = `<textarea class="form-control" name="${tableName}___${columnName}" style="width:100%; height:100%; text-align:left;"></textarea>`;
+    }
+
+    // Add the Remove button cell
+    const removeCell = row.insertCell();
+    removeCell.style.backgroundColor = "white";
+    removeCell.innerHTML = '<button type="button" class="btn btn-danger btn-sm add_remove_row_btns remove-row">Delete</button>';
+}
+
+
+document.addEventListener('DOMContentLoaded', function() {
+    // Use event delegation to handle click events on dynamically added rows
+    document.body.addEventListener('click', function(event) {
+        // Check if the clicked element or its ancestor is a button with the 'remove-row' class
+        if (event.target.closest('.remove-row')) {
+            removeRow(event);
+        }
+    });
+
+    document.body.addEventListener('click', function(event) {
+        if (event.target.closest('.add_new_row')) {
+            addNewRow(event);
+        }
+    });
+
+
+    document.body.addEventListener('click', function(event) {
+        if (event.target.classList.contains('save_table')) { // Save button
+            save_table_to_mongo(event);
+        }
+    });
+
+
+});
+
+function removeRow(event) {
+    // Prevent the default action of the button
+    event.preventDefault();
+
+    // Find the button that was clicked
+    const button = event.target;
+
+    // Get the row (tr) element that contains the button
+    const row = button.closest('tr');
+
+    // Remove the row from the table
+    console.log("remove row triggered : " , row)
+    if (row) {
+        row.parentNode.removeChild(row);
+    }
+}
+
+function save_table_to_mongo(event){
+    console.log(event)
+    event.preventDefault();
+    const form = event.target.closest('form');
+    console.log("closest form is : " , form)
+    const formData = new FormData(form);    
+    fetch('/submit_table', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        return response.json();
+    })
+    .then(data => {
+        showNotification(data.message, data.status)
+    })
+    .catch(error => {
+        console.error('Fetch error at /view_report POST request :', error); // Log the error for debugging
+        // Show a notification with the error message
+        showNotification(`An error occurred: ${error.message}. Please try again later.`, "error");
+    });
+}
+
