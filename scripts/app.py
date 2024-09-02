@@ -7,6 +7,7 @@ import time
 from queue import Queue
 from flask_session import Session 
 import json
+import pandas as pd
 
 app = Flask(__name__)
 # app.config['SECRET_KEY'] = '343c855017e725321cb7f35b89c98b9e'
@@ -147,7 +148,69 @@ def index():
     publish_logs_user_queues[user_id] = Queue()
 
     return render_template('index.html',user_id=user_id)
+
+@app.route('/submit_table', methods=['POST'])
+def submit_table():
+    # Extract form data and rebuild the dataframe
+    form_data = request.form
+    data_dict = {}
+    key_name = None
+    # Iterate over the ImmutableMultiDict items
+    for key, value in form_data.items(multi=True):
+        print(key, value)
+        database_name = key.split('___')[0]
+        collection_name = key.split('___')[1]
+        sprint = int(key.split('___')[2])
+        run = int(key.split('___')[3])
+        key_name = key.split('___')[4]
+        col_name = key.split('___')[5]  # Extract column name after '___'
+        print(database_name)
+        print(collection_name)
+        print(sprint)
+        print(run)
+        print(key_name)
+        print(col_name)
+        # Append the value to the appropriate list in the dictionary
+        if col_name not in data_dict:
+            data_dict[col_name] = []
+        data_dict[col_name].append(value)
+
+    df = pd.DataFrame(data_dict)
+    print(df)
+    data_to_save = df.to_dict(orient="records")
     
+    db = client[database_name]
+    collection = db[collection_name]    
+    result = collection.update_one(
+        {"load_details.data.sprint": sprint , "load_details.data.run":run},  # Filter to find the document
+        {"$set": {f"{key_name}.data":data_to_save}}  # Update nested fields within "data"
+    )
+    # Extract useful information
+    matched_count = result.matched_count  # Number of documents that matched the filter
+    modified_count = result.modified_count  # Number of documents that were modified
+    acknowledged = result.acknowledged  # Whether the update was acknowledged
+    upserted_id = result.upserted_id  # The _id of the document if an upsert occurred (can be None)
+
+    # Construct a meaningful result string
+    if not acknowledged:
+        result_string = "Update operation was not acknowledged by the server."
+        status = "error"
+    elif matched_count == 0:
+        result_string = "No documents matched the filter criteria. No update performed."
+        status="error"
+    elif modified_count == 0:
+        # result_string = "Document matched the filter criteria, but no changes were made."
+        result_string = "No changes detected. Please modify the table before saving."
+        status="warning"
+    else:
+        result_string = f"Update successful! '{key_name}' table modified."
+        status="success"
+
+    # Check for upsert
+    if upserted_id:
+        result_string += f" A new document was created with _id: {upserted_id}."
+    
+    return jsonify({"status": status, "message": result_string})
 
 @app.route('/view_report',methods=['POST','GET'])
 def view_report():
@@ -157,7 +220,7 @@ def view_report():
     database_name = request.form['loadtype']
     collection_name = request.form['loadname']
 
-    # list_of_sprint_runs_to_show_or_compare = [[161,1], [157,1]]
+    # list_of_sprint_runs_to_show_or_compare = [[158,1], [157,1]]
     # database_name = "Osquery_LoadTests_New"
     # collection_name = "MultiCustomer"
 

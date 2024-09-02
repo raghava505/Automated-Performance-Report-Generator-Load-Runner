@@ -43,17 +43,17 @@ class DynamicObject:
     def add_text(self,text):
         return text
     
-
-    def add_table_from_dataframe(self, heading_text, df, *args, **kwargs):
+    def add_table_from_dataframe(self, heading_text, df, isEditable=False,key_name=None,dbname=None, collname=None, sprint=None , run=None, *args, **kwargs):
+        load_info_header = f"{dbname}___{collname}___{sprint}___{run}___{key_name}"
         # Generate custom header with sortable columns
         custom_header = "<thead><tr>"
+        columns_list = list(df.columns)
         for column in df.columns:
             custom_header += f'<th class="sortable" data-column="{column}" data-order="desc">{column}</th>'
+        '<input type="text" name="cell_{row_idx}_{col_idx}" value="{value}" style="width:100%; text-align:center;">'
+        if isEditable:
+            custom_header += '<th></th>'
         custom_header += "</tr></thead>"
-
-        # Convert the DataFrame to HTML without headers
-        table_html = df.to_html(classes="table table-bordered table-hover table-sm text-center custom-table", 
-                                index=False, header=False)
 
         # Define functions to apply color styles
         def colorize_cell(content):
@@ -64,19 +64,55 @@ class DynamicObject:
             elif "⬆️" in content:
                 return f'<span style="color: red;">{content_with_line_breaks}</span>'
             return content_with_line_breaks
+        
+        def generate_cell_html(value, row_idx, col_idx):
+            return f'<td><textarea class="form-control" name="{load_info_header}___{columns_list[col_idx]}" style="width:100%; height:100%; text-align:left;">{value}</textarea></td>'
+        
+        if not isEditable:
+            # Convert the DataFrame to HTML without headers
+            table_html = df.to_html(classes="table table-bordered table-hover table-sm text-center custom-table", 
+                                    index=False, header=False)
 
-        # Apply color styles to cells
-        #re.sub(pattern, replacement, string)
-        table_html = re.sub(r'(<td>)(.*?)(</td>)', lambda m: m.group(1) + colorize_cell(m.group(2)) + m.group(3), table_html)
+            # Apply color styles to cells
+            table_html = re.sub(r'(<td>)(.*?)(</td>)', lambda m: m.group(1) + colorize_cell(m.group(2)) + m.group(3), table_html)
 
-        # Add custom headers
-        table_html = table_html.replace('<tbody>', custom_header + "<tbody>", 1)
+            # Add custom headers
+            table_html = table_html.replace('<tbody>', custom_header + "<tbody>", 1)
+        else:
+            table_html = custom_header + '<tbody>'
+            for row_idx, row in df.iterrows():
+                table_html += '<tr>'
+                for col_idx, value in enumerate(row):
+                    table_html += generate_cell_html(value, row_idx, col_idx)
+                if row_idx != 0:
+                    table_html += '<td><button type="button" class="btn btn-danger btn-sm add_remove_row_btns remove-row">Delete</button></td>'
+                table_html += '</tr>'
+            table_html += '</tbody>'
+
+            # Add custom headers and wrap the table in a form
+            uuid_table = uuid.uuid4()
+            #method="POST" action="/submit_table"
+            table_html = f"""
+            <form>
+                <table class="table table-bordered table-hover table-sm text-center custom-table" id="{uuid_table}" load_info_header="{load_info_header}">
+                    {table_html}
+                </table>
+                <div class="d-flex justify-content-between">
+                    <button type="button" class="btn btn-primary save_table" id>Save</button>
+                    
+                    <button type="button" class="btn btn-success btn-sm add_new_row" data-table-id="{uuid_table}">Add Row</button>
+                </div>            
+            </form>"""
 
         # Return the final HTML string
         return f"""{heading_text}
-                <div class="tab-cont">
+                <div class="tab-cont form-group">
                     {table_html}
-                </div>"""
+                </div>
+                """
+
+
+
     
     def attach_plot_as_image(self,piechart_name, image, heading_tag):
         buffered = io.BytesIO()
@@ -93,6 +129,8 @@ class DynamicObject:
 class perf_load_report_publish:
     def __init__(self,dbname,coll_name,sprint_runs_list,parent_page_title, report_title, email_address, api_key, space, url,isViewReport = False):
         client = MongoClient(MONGO_CONNECTION_STRING)
+        self.dbname =dbname
+        self.collname = coll_name
         self.database = client[dbname] 
         self.collection = self.database[coll_name]
         self.sprint_runs_list=sprint_runs_list
@@ -215,6 +253,8 @@ class perf_load_report_publish:
         except:display_exact_table=True
         try:collapse = table_dictionary["collapse"]
         except:collapse=True
+        try:isEditable=schema["isEditable"]
+        except:isEditable=False
         data=table_dictionary["data"]
         main_df = pd.DataFrame(data)
         if main_df.empty : return ""
@@ -229,7 +269,7 @@ class perf_load_report_publish:
             merged_df, builds = self.merge_dfs(merge_on_cols,key_name,parent_key_name = parent_key)
             # if no comparison tables, show the exact table
             if display_exact_table or len(builds) == 0: 
-                html_text+=curr_page_obj.add_table_from_dataframe(f"<h{heading_size}>{self.captilise_heading(key_name)}</h{heading_size}>", copy_main_df, collapse=collapse)
+                html_text+=curr_page_obj.add_table_from_dataframe(f"<h{heading_size}>{self.captilise_heading(key_name)}</h{heading_size}>", copy_main_df, collapse=collapse,isEditable=isEditable,key_name=key_name, dbname = self.dbname, collname = self.collname, sprint = self.main_sprint, run = self.main_run)
             else: 
                 html_text+=curr_page_obj.add_text(f"<h{heading_size}>{self.captilise_heading(key_name)}</h{heading_size}>")
                
@@ -237,10 +277,10 @@ class perf_load_report_publish:
                 for compare_col in compare_cols:
                     returned_df = self.compare_dfs(compare_col,merged_df,builds,merge_on_cols)
                     if returned_df is not None and not returned_df.empty :
-                        html_text+=curr_page_obj.add_table_from_dataframe(f"<h{heading_size+1}>Comparison on {self.captilise_heading(compare_col)}</h{heading_size+1}>", returned_df.copy(), collapse=collapse)
+                        html_text+=curr_page_obj.add_table_from_dataframe(f"<h{heading_size+1}>Comparison on {self.captilise_heading(compare_col)}</h{heading_size+1}>", returned_df.copy(), collapse=collapse,isEditable=isEditable,key_name=key_name, dbname = self.dbname, collname = self.collname, sprint = self.main_sprint, run = self.main_run)
                         main_df = returned_df.copy()
         else:
-            html_text+=curr_page_obj.add_table_from_dataframe(f"<h{heading_size}>{self.captilise_heading(key_name)}</h{heading_size}>", copy_main_df, collapse=collapse)
+            html_text+=curr_page_obj.add_table_from_dataframe(f"<h{heading_size}>{self.captilise_heading(key_name)}</h{heading_size}>", copy_main_df, collapse=collapse,isEditable=isEditable,key_name=key_name, dbname = self.dbname, collname = self.collname, sprint = self.main_sprint, run = self.main_run)
         html_text=html_text.replace('style="text-align: right;"', '')
         return html_text
 
