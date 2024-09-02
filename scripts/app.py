@@ -6,6 +6,7 @@ from config_vars import MONGO_CONNECTION_STRING, REPORT_UI_PORT, BASE_GRAPHS_PAT
 import time
 from queue import Queue
 from flask_session import Session 
+import json
 
 app = Flask(__name__)
 # app.config['SECRET_KEY'] = '343c855017e725321cb7f35b89c98b9e'
@@ -156,24 +157,39 @@ def view_report():
     database_name = request.form['loadtype']
     collection_name = request.form['loadname']
 
-    # list_of_sprint_runs_to_show_or_compare = [[157,1],[160,1]]
+    # list_of_sprint_runs_to_show_or_compare = [[161,1], [157,1]]
     # database_name = "Osquery_LoadTests_New"
     # collection_name = "MultiCustomer"
 
     """Add a log message to the queue for the current user."""
     user_id = session.get('user_id')
     if not user_id:
-        return '', 403 
-    print("user id ", user_id)
-    obj = perf_load_report_publish(database_name, collection_name, list_of_sprint_runs_to_show_or_compare, None, None, None, None, None, None,isViewReport=True)
-    if "new_format" in obj.all_keys:obj.all_keys.remove('new_format')
+        # return '', 403 
+        return  jsonify({
+                        "status": "error",
+                        "message": "403 : User not found. Please refresh the page and try again"
+                    })
+    try:
+        obj = perf_load_report_publish(database_name, collection_name, list_of_sprint_runs_to_show_or_compare, None, None, None, None, None, None,isViewReport=True)
+        if "new_format" in obj.all_keys:obj.all_keys.remove('new_format')
+    except Exception as e:
+        error_message = f"Error occurred during object initialization at view-report : {str(e)}"
+        message_dict = {"status": "error", "message": error_message}
+
+        if user_id in report_data_user_queues:
+            json_data = json.dumps(message_dict)
+            msg =  f'data: {json_data}\n\n'
+            report_data_user_queues[user_id].put(msg)
+        print("returning json data on error : " , message_dict)
+        return jsonify(message_dict)
+
     for msg in obj.extract_all_variables_and_publish(url_for):
         if user_id in report_data_user_queues:
-            print("PUSHING INTO QUEUE ", report_data_user_queues[user_id])
             report_data_user_queues[user_id].put(msg)
         else:
             print("FATAL ERROR : userid not found in user queues")
-    return jsonify({"status": "info", "message": "done"})
+            return jsonify({"status": "error", "message": "FATAL : user_id not found in report_data_user_queues. Please refresh the page and try again"})
+    return jsonify({"status": "info", "message": "succesfully processed request for 'view-report' "})
     
     
 
@@ -207,18 +223,34 @@ def publish_report():
 
     user_id = session.get('user_id')
     if not user_id:
-        return '', 403 
-    print("user id ", user_id)
+        # return '', 403 
+        return  jsonify({
+                        "status": "error",
+                        "message": "403 : User not found. Please refresh the page and try again"
+                    })
 
-    obj = perf_load_report_publish(database_name, collection_name, list_of_sprint_runs_to_show_or_compare, parent_page_title, report_title, email_address, api_key, space, url,isViewReport=False)
-    if "new_format" in obj.all_keys:obj.all_keys.remove('new_format')
+    try:
+        obj = perf_load_report_publish(database_name, collection_name, list_of_sprint_runs_to_show_or_compare, parent_page_title, report_title, email_address, api_key, space, url,isViewReport=False)
+        if "new_format" in obj.all_keys:obj.all_keys.remove('new_format')
+    except Exception as e:
+        error_message = f"Error occurred during object initialization at publish-report: {str(e)}"
+        message_dict = {"status": "error", "message": error_message}
+
+        if user_id in publish_logs_user_queues:
+            json_data = json.dumps(message_dict)
+            msg =  f'data: {json_data}\n\n'
+            publish_logs_user_queues[user_id].put(msg)
+        print("returning json data on error : " , message_dict)
+        return jsonify(message_dict)
+    
+
     for msg in obj.extract_all_variables_and_publish(url_for):
         if user_id in publish_logs_user_queues:
-            print("PUSHING INTO QUEUE ", publish_logs_user_queues[user_id])
             publish_logs_user_queues[user_id].put(msg)
         else:
             print("FATAL ERROR : userid not found in user queues")
-    return jsonify({"status": "info", "message": "done"})
+            return jsonify({"status": "error", "message": "FATAL : user_id not found in publish_logs_user_queues. Please refresh the page and try again"})
+    return jsonify({"status": "info", "message": "succesfully processed request for 'pubslih-report' "})
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=REPORT_UI_PORT,debug=True)

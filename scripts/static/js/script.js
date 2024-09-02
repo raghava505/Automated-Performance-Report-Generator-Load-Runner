@@ -1,13 +1,14 @@
 let sprint_run_mappings = {};
 let fieldCounter = 0;
 let available_sprints = [];
-let already_in_progress = false;
+let publishing_already_in_progress = false;
+let report_generating_already_in_progress = false;
 
 // window.onload = function() {
-//     const data = localStorage.getItem('already_in_progress');
+//     const data = localStorage.getItem('publishing_already_in_progress');
 //     if (data) {
 //         console.log("Restored data: ", data);
-//         already_in_progress = data;
+//         publishing_already_in_progress = data;
 //     }
 // };
 
@@ -21,6 +22,11 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 addSprintRunFields();
 addSprintRunFields();
+
+function scrollToTop() {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+window.addEventListener('load', scrollToTop);
 
 function populateLoadTypeDropdown(databases) {
     const loadtypeSelect = document.getElementById('loadtype');
@@ -141,7 +147,7 @@ function addSprintRunFields() {
     `;
     if (fieldCounter!=1){
         newFields = newFields + `<div>
-                                    <span><button type="button" class="remove_btn" onclick="removeFields(${fieldCounter})"><i class="fa-solid fa-xmark fa-lg"></i></button></span>
+                                    <span><button type="button" class="remove_btn" onclick="removeFields(${fieldCounter})"><i class="fa-solid fa-xmark"></i></button></span>
                                 </div>
                                 `
     }
@@ -179,8 +185,8 @@ function validateEmail(email) {
 }
 
 function validatePublishForm() {
-    if (already_in_progress){
-        showNotification("Warning : Report generation already in progress. Please wait till its completion ", "warning");
+    if (publishing_already_in_progress){
+        showNotification("Warning : Report publishing already in progress. Please wait till its completion ", "warning");
     }
     else
     {
@@ -216,7 +222,7 @@ function validatePublishForm() {
 }
 
 function publishReportToConfluence() {
-    already_in_progress=true;
+    publishing_already_in_progress=true;
     const formData = new FormData(document.getElementById('inputForm'));
     const sprintRuns = [];
 
@@ -234,22 +240,30 @@ function publishReportToConfluence() {
 
     console.log(formData)
 
-
-    showNotification("Info : Report generation has started ", "info");
+    showNotification(" Report publishing in progress... ", "info");
     
     fetch('/publish_report', {
         method: 'POST',
         body: formData
     })
-    .then(response => response.json())
+    .then(response => {
+        if (!response.ok) {
+            publishing_already_in_progress=false;
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        return response.json();
+    })
     .then(data => {
-        already_in_progress=false;
-        console.log(data)
+        publishing_already_in_progress=false;
+        showNotification(data.message, data.status)
     })
     .catch(error => {
-        already_in_progress=false;
-        console.log(error)
+        publishing_already_in_progress=false;
+        console.error('Fetch error at /view_report POST request :', error); // Log the error for debugging
+        // Show a notification with the error message
+        showNotification(`An error occurred: ${error.message}. Please try again later.`, "error");
     });
+
 }
 
 function showNotification(message, type) {
@@ -267,42 +281,40 @@ function clearNotification() {
 
 function startPublishLogsEventSource() {
     if (window.publish_eventSource && window.publish_eventSource.readyState !== EventSource.CLOSED) {
-        console.log("EventSource already open, not reopening.");
+        console.log("publish_eventSource already open, not reopening.");
         return;
     }
     window.publish_eventSource = new EventSource("/publish_logs_stream");
+    const logs_loadingAnimation = document.getElementById("logs_loadingAnimation");
+    logs_loadingAnimation.style.display = 'block';
+
+    log_window = document.getElementById("logWindow");
     publish_eventSource.onmessage = function(event) {
         const data = JSON.parse(event.data);
-        showNotification(data.message, data.status);
+        // showNotification(data.message, data.status);
         var newData = document.createElement("div");
         newData.innerHTML = getCurrentTime() + " - " + data.status.toUpperCase() + " : "+ data.message;
-        document.getElementById("logWindow").appendChild(newData);
+        log_window.appendChild(newData);
         scrollToBottom("logWindow");
 
-        // if (data.status === 'success' || data.status === 'error') {
-        //     console.log("received "+data.status+ " for pubslihing stream")
-        //     already_in_progress = false;
-        //     var separator = document.createElement("hr");
-        //     // Append the separator to the log window
-        //     document.getElementById("logWindow").appendChild(separator);
-        //     publish_eventSource.close();
-        // }
-
-        const logs_loadingAnimation = document.getElementById("logs_loadingAnimation");
-         // Check message content
-        if (data.message.includes("success") || data.message.includes("error")) {
+          // Check message content
+        if (data.status.includes("success") || data.status.includes("error")) {
             logs_loadingAnimation.style.display = 'none'; // Hide loading animation
+            showNotification(data.message, data.status);
+            var separator = document.createElement("hr");
+            log_window.appendChild(separator);
+            publishing_already_in_progress = false;
+            
         } else {
             logs_loadingAnimation.style.display = 'block'; // Show loading animation
         }
-
-
     };
     
     publish_eventSource.onerror = function(event) {
-        showNotification('Error receiving updates from the server.', 'error');
-        console.error("publish_eventSource error:", event);
+        showNotification('Error receiving updates from the publish_logs_stream eventsource server ' +  event.message, 'error');
+        console.error("publish_logs_stream error : ", event);
         publish_eventSource.close();  // Handle connection issues
+        publishing_already_in_progress = false;
     };
 };
 
@@ -326,31 +338,38 @@ function getCurrentTime() {
 }
 
 function validateViewReport() {
-    let isValid = true;
-    const fields = document.querySelectorAll('#inputForm .req-for-view-report');
-    fields.forEach(field => {
-        const errorMessageDiv = field.nextElementSibling;
-        if (!field.value.trim()) {
-            errorMessageDiv.textContent = 'This field is required.';
-            isValid = false;
-        } else {
-            errorMessageDiv.textContent = '';
-        }
-    });
-    if (isValid) {
-        ReportWindowElement = document.getElementById("ReportWindow")
-        ReportWindowElement.style.marginBottom = "1065px"; //no need to change this value anytime
-        scrollToBlock("ReportWindow")
-        ReportWindowElement.innerHTML = '';
-        startReportDataEventSource();
-        ViewReport();
-        setTimeout(function() {
-            ReportWindowElement.style.marginBottom = "1px";
-        }, 1000);
+    if (report_generating_already_in_progress){
+        showNotification("Warning : Report generation already in progress. Please wait till its completion ", "warning");
     }
+    else{
+        let isValid = true;
+        const fields = document.querySelectorAll('#inputForm .req-for-view-report');
+        fields.forEach(field => {
+            const errorMessageDiv = field.nextElementSibling;
+            if (!field.value.trim()) {
+                errorMessageDiv.textContent = 'This field is required.';
+                isValid = false;
+            } else {
+                errorMessageDiv.textContent = '';
+            }
+        });
+        if (isValid) {
+            ReportWindowElement = document.getElementById("ReportWindow")
+            ReportWindowElement.style.marginBottom = "1065px"; //no need to change this value anytime
+            scrollToBlock("ReportWindow")
+            ReportWindowElement.innerHTML = '';
+            startReportDataEventSource();
+            ViewReport();
+            setTimeout(function() {
+                ReportWindowElement.style.marginBottom = "1px";
+            }, 1000);
+        }
+    }
+    
 }
 
 function ViewReport() {
+    report_generating_already_in_progress=true
     const formData = new FormData(document.getElementById('inputForm'));
     const sprintRuns = [];
     document.querySelectorAll('[id^="sprint_"]').forEach((sprintSelect, index) => {
@@ -365,51 +384,75 @@ function ViewReport() {
     });
     formData.append('sprint_runs', JSON.stringify(sprintRuns));
     
+    showNotification("Report Generation in progress... ", "info");
+
     fetch('/view_report', {
         method: 'POST',
         body: formData
     })
-    .then(response => response.json())
+    .then(response => {
+        if (!response.ok) {
+            report_generating_already_in_progress=false
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        return response.json();
+    })
     .then(data => {
-        already_in_progress=false;
+        report_generating_already_in_progress=false
+        showNotification(data.message, data.status)
     })
     .catch(error => {
-        already_in_progress=false;
+        report_generating_already_in_progress=false
+        console.error('Fetch error at /view_report POST request :', error); // Log the error for debugging
+        // Show a notification with the error message
+        showNotification(`An error occurred: ${error.message}. Please try again later.`, "error");
     });
 }
 
 function startReportDataEventSource() {
-    // Check if eventSource already exists and is active
-    if (window.eventSource && window.eventSource.readyState !== EventSource.CLOSED) {
+    // Check if report_eventsource already exists and is active
+    if (window.report_eventsource && window.report_eventsource.readyState !== EventSource.CLOSED) {
         console.log("EventSource already open, not reopening.");
         return;
     }
 
-    window.eventSource = new EventSource("/report_data_queue_route");
-    
-    eventSource.onmessage = function(event) {
+    window.report_eventsource = new EventSource("/report_data_queue_route");
+    const generateContents_interval = setInterval(generateContents, 5000);
+
+    const report_loadingAnimation = document.getElementById("report_loadingAnimation");
+    const report_loadingAnimation_bottom = document.getElementById("report_loadingAnimation_bottom");
+    report_loadingAnimation.style.display = 'block'; // Show loading animation
+    report_loadingAnimation_bottom.style.display = 'block'; // Show loading animation
+
+    report_window = document.getElementById("ReportWindow");
+    report_eventsource.onmessage = function(event) {
         const data = JSON.parse(event.data);
         var newData = document.createElement("div");
         newData.innerHTML = data.message;
-        document.getElementById("ReportWindow").appendChild(newData);
-
-        const report_loadingAnimation = document.getElementById("report_loadingAnimation");
-        const report_loadingAnimation_bottom = document.getElementById("report_loadingAnimation_bottom");
+        report_window.appendChild(newData);
 
          // Check message content
-        if (data.message.includes("success") || data.message.includes("error")) {
+        if (data.status.includes("success") || data.status.includes("error")) {
             report_loadingAnimation.style.display = 'none'; // Hide loading animation
             report_loadingAnimation_bottom.style.display = 'none'; // Hide loading animation
-            generateContents()
+            showNotification(data.message, data.status);
+            generateContents();
+            clearInterval(generateContents_interval);
+            report_generating_already_in_progress=false
+            
         } else {
             report_loadingAnimation.style.display = 'block'; // Show loading animation
             report_loadingAnimation_bottom.style.display = 'block'; // Show loading animation
+            // generateContents();
         }
     };
     
-    eventSource.onerror = function(event) {
-        console.error("EventSource error:", event);
-        eventSource.close();  // Handle connection issues
+    report_eventsource.onerror = function(event) {
+        console.error("report_data_stream error:", event);
+        showNotification("Error  receiving updates from the report_data_stream eventsource server : " + event.message, "error");
+        report_eventsource.close();  // Handle connection issues
+        clearInterval(generateContents_interval);
+        report_generating_already_in_progress=false
     };
 }
 
@@ -505,6 +548,7 @@ function toggleScroll() {
     }
 }
 function generateContents() {
+    console.log("request for contents list fillup");
     const reportWindow = document.getElementById('ReportWindow');
     const contents = document.getElementById('contents');
     contents.innerHTML = `
@@ -515,32 +559,45 @@ function generateContents() {
         </div>
     `;
 
-    // Create an unordered list
     const ul = document.createElement('ul');
-    ul.style.listStyleType = 'none'; // Remove default list styling
-    ul.style.padding = '0'; // Remove default padding
-    ul.style.margin = '0'; // Remove default margin
+    ul.style.listStyleType = 'none';
+    ul.style.padding = '0';
+    ul.style.margin = '0';
 
-    // Find all headers within the ReportWindow
-    const headers = reportWindow.querySelectorAll('h2');
+    const headers = reportWindow.querySelectorAll('h2, h3'); // Find all h2 and h3 tags
 
-    // Create and insert list items for each header
+    let lastH2Li = null; // To keep track of the last h2 element for nesting h3
+
     headers.forEach(header => {
         const id = header.textContent.trim().replace(/\s+/g, '-').toLowerCase();
-        header.id = id; // Set the id for the header
+        header.id = id;
 
         const li = document.createElement('li');
+        li.style.width = '100%'; // Ensure the li occupies the full width
+        li.style.display = 'block'; // Make li a block element
+
+        const h2Container = document.createElement('div'); // Create a container div for the icon and link
+        h2Container.style.display = 'flex'; // Use flexbox to align items horizontally
+        h2Container.style.alignItems = 'center'; // Center align icon and link vertically
+        h2Container.style.width = '100%'; // Make sure the container occupies the full width
+        h2Container.style.cursor = 'pointer'; // Make the container appear clickable
+
+        const toggleIcon = document.createElement('i');
+        toggleIcon.className = 'fa fa-plus-square';
+        toggleIcon.style.marginRight = '5px';
+
         const link = document.createElement('a');
         link.href = `#${id}`;
         link.textContent = header.textContent;
-        link.style.display = 'block';
-        link.style.padding = '5px 5px';
+        link.style.display = 'block'; // Make the link block-level to occupy the full width
+        link.style.width = '100%'; // Ensure the link occupies the full width
+        link.style.padding = '5px'; // Adjust padding to apply hover effect across the full block
         link.style.textDecoration = 'none';
         link.style.color = '#007bff';
-        link.style.borderBottom = '1px solid #ddd'; // Add a border at the bottom of each link
-        link.style.transition = 'background-color 0.3s'; // Smooth transition for background color
+        link.style.transition = 'background-color 0.3s';
+        link.style.borderBottom = '1px solid #ddd';
 
-        // Add hover effect
+        // Add hover effect for the entire block
         link.addEventListener('mouseover', () => {
             link.style.backgroundColor = '#f1f1f1';
         });
@@ -548,8 +605,42 @@ function generateContents() {
             link.style.backgroundColor = '';
         });
 
-        li.appendChild(link);
-        ul.appendChild(li);
+        if (header.tagName.toLowerCase() === 'h2') {
+            h2Container.appendChild(toggleIcon);
+            h2Container.appendChild(link);
+            li.appendChild(h2Container); // Append the container div to li
+            ul.appendChild(li);
+
+            const nestedUl = document.createElement('ul');
+            nestedUl.style.listStyleType = 'none';
+            nestedUl.style.paddingLeft = '20px';
+            nestedUl.style.display = 'none'; // Hidden by default
+
+            li.appendChild(nestedUl);
+            lastH2Li = nestedUl;
+
+            // Add toggle functionality for collapsing/expanding
+            toggleIcon.addEventListener('click', (e) => {
+                e.preventDefault(); // Prevent default behavior
+                const isExpanded = nestedUl.style.display === 'block';
+
+                if (isExpanded) {
+                    nestedUl.style.display = 'none';
+                    toggleIcon.className = 'fa fa-plus-square';
+                } else {
+                    nestedUl.style.display = 'block';
+                    toggleIcon.className = 'fa fa-minus-square';
+                }
+            });
+
+            // Add click event to link for navigation
+            link.addEventListener('click', (e) => {
+                // Let the anchor default behavior happen to scroll to the element
+            });
+        } else if (header.tagName.toLowerCase() === 'h3' && lastH2Li) {
+            lastH2Li.appendChild(li); // Nest h3 under the last h2
+            li.appendChild(link);
+        }
     });
 
     contents.appendChild(ul);
@@ -570,6 +661,7 @@ function generateContents() {
         });
     });
 }
+
 
 
 // Call the function to generate contents links

@@ -350,14 +350,13 @@ class perf_load_report_publish:
                         yield f'data: {{"status": "warning", "message": Found no previous data for sprint {prev_sprint} and run {prev_run}}}\n\n'
                         continue
                     prev_data=prev_data[key_name]["data"]
-                    temp_images,memory_combined_df,cpu_combined_df=analysis_main(data["memory_usages_analysis"],prev_data["memory_usages_analysis"],data["cpu_usage_analysis"],prev_data["cpu_usage_analysis"],main_build_load_details=self.main_result["load_details"]["data"],prev_build_load_details=self.get_key_result(prev_sprint,prev_run,"load_details")["load_details"]["data"] )
-                    html_text+=curr_page_obj.add_text(f"<h2>Complete Analysis piecharts for resource utilizations</h2>")
-                    for piechart_name in temp_images:
-                        html_text+=curr_page_obj.attach_plot_as_image(piechart_name, temp_images[piechart_name], 3)
-                            
+                    temp_images,memory_combined_df,cpu_combined_df=analysis_main(data["memory_usages_analysis"],prev_data["memory_usages_analysis"],data["cpu_usage_analysis"],prev_data["cpu_usage_analysis"],main_build_load_details=self.main_result["load_details"]["data"],prev_build_load_details=self.get_key_result(prev_sprint,prev_run,"load_details")["load_details"]["data"] )                    
                     html_text+=curr_page_obj.add_text(f"<h2>Contributers to Resource Usage increase/decrease</h2>")
                     html_text+=curr_page_obj.add_table_from_dataframe(f'<h3>{self.captilise_heading("memory_usages_analysis")}</h3>', memory_combined_df.copy(), collapse=False)
                     html_text+=curr_page_obj.add_table_from_dataframe(f'<h3>{self.captilise_heading("cpu_usage_analysis")}</h3>', cpu_combined_df.copy(), collapse=False)
+                    html_text+=curr_page_obj.add_text(f"<h2>Complete Analysis piecharts for resource utilizations</h2>")
+                    for piechart_name in temp_images:
+                        html_text+=curr_page_obj.attach_plot_as_image(piechart_name, temp_images[piechart_name], 3)
                 elif key_format == "charts":
                     base_graphs_path=os.path.join(schema["base_graphs_path"],self.graphs_path)
                     charts_paths_dict={}
@@ -366,7 +365,7 @@ class perf_load_report_publish:
                         if not self.isViewReport:
                             temp_list_for_confluence=[f'{os.path.join(base_graphs_path,main_heading,str(file_name).replace("/","-")+".png")}' for file_name in list(inside_charts.keys())]
                             charts_paths_dict[main_heading] = temp_list_for_confluence
-                            yield f'data: {{"status": "info", "message": "Attching {main_heading} charts"}}\n\n'
+                            yield f'data: {{"status": "info", "message": "Attaching {main_heading}"}}\n\n'
                         else:
                             unique_id = str(uuid.uuid4())
                             html_text+=f"""<p>
