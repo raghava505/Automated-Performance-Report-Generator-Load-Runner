@@ -30,10 +30,10 @@
     <!-- Status message -->
     <div id="statusMessage" class="notification" style="display:none;">
         <span id="statusText"></span>
-        <button onclick="clearNotification()">×</button>
+        <button onclick="clearNotification()"><i class="fa-solid fa-xmark"></i></button>
     </div>
 
-    <div class=" mt-4">
+    <div id="main_outer_div" class=" mt-4">
         {% with messages = get_flashed_messages(with_categories=True) %}
             {% if messages %}
                 {% for category, message in messages %}

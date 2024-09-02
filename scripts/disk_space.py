@@ -61,7 +61,7 @@ class diskspace_usage_class:
                     percentage_used_before_load=used_space_before_load[node]
                     percentage_used_after_load=used_space_after_load[node]
                 used_space=(percentage_used_after_load-percentage_used_before_load)*total*(1024/100)
-                save_dict[node] = {f"{TYPE}_total_space_configured(TB)" : total , f"{TYPE}_disk_used_percentage_before_load" :percentage_used_before_load,f"{TYPE}_disk_used_percentage_after_load":percentage_used_after_load,f"{TYPE} used_space_during_load(GB)":used_space}
+                save_dict[node] = {f"{TYPE}_total_space_configured(TB)" : total , f"{TYPE}_disk_used_percentage_before_load" :percentage_used_before_load,f"{TYPE}_disk_used_percentage_after_load":percentage_used_after_load,f"{TYPE}_disk_used_space_during_load(GB)":used_space}
             except Exception as e:
                 self.stack_obj.log.error(f"error calculating {TYPE} usage for node {node}")
         df = pd.DataFrame(save_dict)
