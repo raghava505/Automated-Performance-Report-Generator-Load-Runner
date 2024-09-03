@@ -216,6 +216,11 @@ function validatePublishForm() {
         if (isValid) {
             startPublishLogsEventSource()
             publishReportToConfluence();
+            var logWindow = document.getElementById("collapsable_logs_window");
+            if (logWindow.classList.contains("collapsed")) {
+                toggle_logs_window();
+            }
+            
             // scrollToBlock('logWindow')
         }
     }
@@ -861,3 +866,66 @@ function showCopiedTooltip() {
         tooltip.classList.remove("show-tooltip");
     }, 2000);
 }
+// document.getElementById("toggleButton").addEventListener("click", function() {
+//     var logWindow = document.getElementById("collapsable_logs_window");
+//     var mainContent = document.getElementById("mainContent");
+
+//     // Toggle the collapsed class
+//     console.log(logWindow.classList)
+
+//     logWindow.classList.toggle("collapsed");
+//     console.log(logWindow.classList)
+    
+//     // Adjust main content position
+//     if (logWindow.classList.contains("collapsed")) {
+//         console.log("collapsed class found .. in logwindoe")
+//         // mainContent.classList.remove("contract");
+//         logWindow.classList.add("col-md-2");
+//         logWindow.classList.remove("col-md-4");
+        
+//         mainContent.classList.add("col-md-8");
+//         mainContent.classList.remove("col-md-6");
+//         this.innerHTML = '<i class="fa-solid fa-chevron-right"></i>';
+//     } else {
+//         // mainContent.classList.add("contract");
+//         logWindow.classList.remove("col-md-2");
+//         logWindow.classList.add("col-md-4");
+
+//         mainContent.classList.remove("col-md-8");
+//         mainContent.classList.add("col-md-6");
+//         this.innerHTML = '<i class="fa-solid fa-chevron-left"></i>';
+//     }
+// });
+
+function toggle_logs_window(){
+    var logWindow = document.getElementById("collapsable_logs_window");
+    var mainContent = document.getElementById("mainContent");
+    var toggleButton = document.getElementById("toggleButton");
+
+    // Toggle the collapsed class
+    console.log(logWindow.classList)
+
+    logWindow.classList.toggle("collapsed");
+    console.log(logWindow.classList)
+    
+    // Adjust main content position
+    if (logWindow.classList.contains("collapsed")) {
+        console.log("collapsed class found .. in logwindoe")
+        // mainContent.classList.remove("contract");
+        logWindow.classList.add("col-md-2");
+        logWindow.classList.remove("col-md-4");
+        
+        mainContent.classList.add("col-md-8");
+        mainContent.classList.remove("col-md-6");
+        toggleButton.innerHTML = '<i class="fa-solid fa-chevron-right"></i>';
+    } else {
+        // mainContent.classList.add("contract");
+        logWindow.classList.remove("col-md-2");
+        logWindow.classList.add("col-md-4");
+
+        mainContent.classList.remove("col-md-8");
+        mainContent.classList.add("col-md-6");
+        toggleButton.innerHTML = '<i class="fa-solid fa-xmark"></i>';
+    }
+}
+

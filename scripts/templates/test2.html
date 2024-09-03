@@ -1,122 +1,229 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Beautiful Sliding Window</title>
-    <!-- Bootstrap CSS -->
-    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Font Awesome (for icons) -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <!-- Custom CSS -->
-    <style>
-        /* Slider container */
-        .slider-window {
-            position: fixed;
-            top: 0;
-            right: -100%;
-            width: 350px; /* Increased width */
-            height: 100%;
-            background-color: #ffffff; /* Light background */
-            box-shadow: -2px 0 10px rgba(0, 0, 0, 0.2); /* Stronger shadow */
-            transition: right 0.4s ease;
-            z-index: 9999;
-            border-left: 5px solid #007bff; /* Bootstrap primary color border */
-        }
+{% extends "layout.html" %}
+{% block content%}
 
-        /* Show slider */
-        .slider-window.open {
-            right: 0;
-        }
-
-        /* Button to toggle slider */
-        .slider-button {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            z-index: 10000;
-        }
-
-        /* Close icon styling */
-        .close-slider {
-            position: absolute;
-            top: 15px;
-            right: 15px;
-            font-size: 1.5rem;
-            color: #333;
-            cursor: pointer;
-        }
-
-        /* Beautiful card styling */
-        .slider-card {
-            background-color: #f8f9fa;
-            border-radius: 10px;
-            padding: 20px;
-            margin-top: 20px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-        }
-
-        /* Header styling */
-        .slider-header {
-            font-weight: bold;
-            color: #007bff;
-        }
-
-        /* Add some padding around the slider content */
-        .slider-content {
-            padding: 20px;
-        }
-    </style>
-</head>
-<body>
-    <!-- Button to toggle the slider -->
-    <button class="btn btn-primary slider-button">
-        <i class="fas fa-arrow-right"></i> Toggle Slider
+<div class="container-fluid">
+    <button id="toggleButton" class="btn btn-dark toggle-btn btn-sm" onclick="toggle_logs_window()">
+        <i class="fa-solid fa-chevron-right"></i>
     </button>
-
-    <!-- Slider Window -->
-    <div class="slider-window">
-        <!-- Close Icon -->
-        <i class="fas fa-times close-slider"></i>
+    <div class="row mb-5">
+        <!-- Collapsible Logs Window -->
+        <!-- Toggle Button for Collapsing -->
         
-        <!-- Slider Content -->
-        <div class="slider-content">
-            <!-- Header -->
-            <h5 class="slider-header">Beautiful Slider Content</h5>
-            <hr>
+        <div id="collapsable_logs_window" class="col-md-4  rounded transition ">
+            <div class="mb-3  d-flex align-items-center justify-content-center">
+                <div class="row mt-2">
+                    <h4 class="text-center" style="margin-bottom:0px;"><i class="bi bi-terminal-fill"></i> Logs</h4>
+                    
+                    <!-- Loading Animation -->
+                    <div id="logs_loadingAnimation" style="display: none; margin-top: -5px; margin-bottom: -1px;">
+                        <button class="btn btn-primary ml-2" type="button" disabled>
+                            <span class="spinner-grow spinner-grow-sm" role="status" aria-hidden="true"></span>
+                            Publishing ...
+                        </button>
+                    </div>
+                    <span id="copiedTooltip" class="copied-tooltip">Copied!</span>
 
-            <!-- Card Content -->
-            <div class="slider-card">
-                <p>This is a sliding window with a card layout.</p>
-                <p>It includes a header, content, and some icons.</p>
-                <p>Everything is styled with Bootstrap to look stunning.</p>
-                <button class="btn btn-success">Awesome Button</button>
+                    <div class="btn-group position-absolute" style="top: 20px; right: 51px;">
+                        <button id="clearLogsBtn" class="btn btn-sm btn-outline-light transparent-btn">
+                            <i class="fa-solid fa-eraser"></i>
+                        </button>
+                    </div>
+                    <div class="btn-group position-absolute" style="top: 20px; right: 16px;">
+                        <button id="copyLogsBtn" class="btn btn-sm btn-outline-light transparent-btn">
+                            <i class="fa-regular fa-copy"></i>
+                        </button>
+                    </div>
+                </div>
             </div>
+            <div id="logWindow" class="rounded p-3 pb-4 bg-dark text-white position-relative" style="min-height: 200px;">
+                <div>
+                    $ report publishing logs will be displayed here
+                </div>
+                <br>
+            </div>
+            
+        </div>
 
-            <!-- Another Card -->
-            <div class="slider-card">
-                <p>Additional content can be placed here.</p>
-                <p>You can add more cards, buttons, and elements as needed.</p>
+        <!-- Main Content Container -->
+        <div id="mainContent" class="rounded  transition col-md-6">
+            <h2 class="mb-2 mt-2  text-center"><i class="bi bi-clipboard-data-fill"></i> Generate Performance Load Report</h2>
+            <form id="inputForm" class=" shadow p-4 rounded">
+    
+                <div class="form-row">
+                    <div class="form-group col-md-6">
+                        <label for="loadtype">Load Type :</label>
+                        <select class="form-control req-for-view-report" id="loadtype" name="loadtype" required>
+                            <option value="">Select Load Type</option>
+                        </select>
+                        <div class="error-message"></div>
+                    </div>
+                    <div class="form-group col-md-6">
+                        <label for="loadname">Load Name :</label>
+                        <select class="form-control req-for-view-report" id="loadname" name="loadname" required>
+                            <option value="">Select Load Name</option>
+                        </select>
+                        <div class="error-message"></div>
+                    </div>
+                </div>
+    
+                <div class="position-relative text-center my-2">
+                    <hr class="line-through" />
+                    <span class="text-above-line text-muted">Select reports to generate/compare</span>
+                </div>
+                <div id="fieldsContainer">
+                    <!-- Initial set of 'sprint' and 'run' fields will be added here -->
+                </div>
+                <div class="text-center">
+                    <button type="button" class="btn btn-info col-md-2" onclick="addSprintRunFields()">Add more &nbsp; <i class="fa-solid fa-square-plus fa-lg"></i></button>
+                </div>
+                
+                <br>
+            
+    
+                <div class="form-row">
+                    <div class="form-group col-md-6">
+                        <label for="url"><i class="fa-solid fa-link fa-xs"></i> Confluence URL :</label>
+                        <input type="text" class="form-control" id="url" name="url" value="https://uptycsjira.atlassian.net" placeholder="Enter URL" required>
+                        <div class="error-message"></div>
+                    </div>
+                    <div class="form-group col-md-6">
+                        <label for="email_address"><i class="fa-solid fa-envelope"></i> Email Address :</label>
+                        <input type="email" class="form-control" id="email_address" name="email_address" value="@uptycs.com" placeholder="Enter your email" required>
+                        <div class="error-message"></div>
+                    </div>
+                </div>
+    
+    
+                <div class="form-row">
+                    <div class="form-group col-md-6">
+                        <label for="space"><i class="fas fa-folder"></i> Space :</label>
+                        <input type="text" class="form-control" id="space" name="space" value="PERF" placeholder="Enter space" required>
+                        <div class="error-message"></div>
+                    </div>
+                    <div class="form-group col-md-6">
+                        <label for="api_key"><i class="fa-solid fa-key"></i> API Key :</label>
+                        <input type="text" class="form-control" id="api_key" name="api_key" placeholder="Enter API key" required>
+                        <div class="error-message"></div>
+                    </div>
+                </div>
+            
+    
+    
+                <div class="form-row">
+                    <div class="form-group col-md-6">
+                        <label for="parent_page_title"><i class="fas fa-sitemap"></i> Parent Page Title :</label>
+                        <input type="text" class="form-control" id="parent_page_title" name="parent_page_title" placeholder="Enter parent page title" required>
+                        <div class="error-message"></div>
+                    </div>
+                    <div class="form-group col-md-6">
+                        <label for="report_title">Report Title :</label>
+                        <input type="text" class="form-control" id="report_title" name="report_title" placeholder="Enter report title" required>
+                        <div class="error-message"></div>
+                    </div>
+                </div>
+                
+                
+                <div class="form-row">
+                    <div class="col-md-6">
+                        <button type="button" class="btn btn-success btn-block" onclick="validateViewReport()">
+                            View Report <i class="fa-solid fa-eye fa-lg"></i>
+                        </button>
+                    </div>
+    
+                    <div class="col-md-6">
+                        <button type="button" class="btn btn-primary btn-block" onclick="validatePublishForm()">
+                            Publish to Confluence <i class="fa-solid fa-paper-plane fa-lg"></i>
+                        </button>
+                    </div>
+                </div>
+    
+                
+            </form>
+        </div>
+
+        <div  class="col-md-2  rounded transition ">
+            <div class="mb-1  d-flex align-items-center justify-content-center">
+                <div class="row mt-3">
+                    <h5 class="text-center">
+                        <i class="fa-solid fa-history"></i>
+                        Recently collected reports</h5>
+                </div>
+            </div>
+            <div id="recently_saved_to_mongo_reports" class="rounded">
+                <!-- <div class="recently_saved_panel rounded">
+                    loadtype : Osquery<br>
+                    loadname : MultiCustomer <br>
+                    sprint : 160 <br>
+                    build : 160021 <br>
+                    run : 2
+                </div> -->
+                <div class="recently_saved_panel rounded"></div>
+                <div class="recently_saved_panel rounded"></div>
+                <div class="recently_saved_panel rounded"></div>
+                <div class="recently_saved_panel rounded"></div>
             </div>
         </div>
+
+    </div>
+</div>
+
+
+    
+<hr style="background-color: black; height: 1px; border: none;">
+<br>
+    <div class="pb-3 rounded container-fluid">
+        <div class="row pb-1">
+            <div class="col-md-2 d-flex  rounded align-items-center justify-content-center">
+                <!-- <h5 class="text-center mt-1 mr-3"><i class="fa-solid fa-list"></i>  Contents </h5> -->
+            </div>
+
+            <div class="d-flex align-items-center justify-content-center col-md-9">
+                <h2 class="text-center mt-1 mr-3"><i class="fas fa-file-alt"></i> View Report</h2>
+        
+                <!-- Loading Animation -->
+                <div id="report_loadingAnimation" style="display: none;">
+                    <button class="btn btn-primary mb-1" type="button" disabled>
+                        <span class="spinner-grow spinner-grow-sm" role="status" aria-hidden="true"></span>
+                        Generating ...
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- <div id="ReportWindow" class="rounded  shadow">
+            <p class="text-center">Report will be displayed here after clicking 'View Report' Button</p>
+        </div> -->
+
+        <div class="row">
+            <div id="contents" class="contents col-md-2 rounded">
+                <h5 id="contents_heading" class="text-center btn disabled"><i class="fa-solid fa-list"></i>  Contents </h5>
+            </div>
+            <div id="ReportWindow" class="rounded shadow col-md-9">
+                <p class="text-center">Report will be displayed here after clicking 'View Report' Button</p>
+            </div>
+        </div>
+
+
     </div>
 
-    <!-- jQuery and Bootstrap JS -->
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
-    <!-- Custom JS -->
-    <script>
-        $(document).ready(function() {
-            // Toggle slider window on button click
-            $('.slider-button').on('click', function() {
-                $('.slider-window').toggleClass('open');
-            });
+    <div id="report_loadingAnimation_bottom" style="display: none; text-align: center;">
+        <button class="btn btn-primary mb-1" type="button" disabled>
+            <span class="spinner-grow spinner-grow-sm" role="status" aria-hidden="true"></span>
+            Loading...
+        </button>
+    </div>
 
-            // Close slider when the close icon is clicked
-            $('.close-slider').on('click', function() {
-                $('.slider-window').removeClass('open');
-            });
-        });
-    </script>
-</body>
-</html>
+    
+
+
+    <button class="btn btn-primary back-to-top" id="scroll_up"  onclick="scrollToBlock('ReportWindow')">
+        <i class="fas fa-arrow-up"></i>
+    </button>
+    
+    <button class="btn btn-primary " id="scroll_through_report_slowly" onclick="toggleScroll()" >
+        <i class="fas fa-arrow-down"></i>
+    </button>
+
+
+
+{%endblock content%}
