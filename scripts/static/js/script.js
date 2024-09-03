@@ -301,9 +301,9 @@ function startPublishLogsEventSource() {
         if (data.status.includes("success") || data.status.includes("error")) {
             logs_loadingAnimation.style.display = 'none'; // Hide loading animation
             showNotification(data.message, data.status);
-            var separator = document.createElement("hr");
-            separator.style.color="white";
-            log_window.appendChild(separator);
+            // var separator = document.createElement("hr");
+            // separator.style.color="white";
+            // log_window.appendChild(separator);
             publishing_already_in_progress = false;
             
         } else {
@@ -355,9 +355,9 @@ function validateViewReport() {
             }
         });
         if (isValid) {
-            ReportWindowElement = document.getElementById("ReportWindow")
+            ReportWindowElement = document.getElementById("ReportWindow");
             ReportWindowElement.style.marginBottom = "1065px"; //no need to change this value anytime
-            scrollToBlock("ReportWindow")
+            scrollToBlock("ReportWindow");
             ReportWindowElement.innerHTML = '';
             startReportDataEventSource();
             ViewReport();
@@ -411,6 +411,7 @@ function ViewReport() {
 }
 
 function startReportDataEventSource() {
+    generateContents();
     // Check if report_eventsource already exists and is active
     if (window.report_eventsource && window.report_eventsource.readyState !== EventSource.CLOSED) {
         console.log("EventSource already open, not reopening.");
@@ -418,7 +419,7 @@ function startReportDataEventSource() {
     }
 
     window.report_eventsource = new EventSource("/report_data_queue_route");
-    const generateContents_interval = setInterval(generateContents, 5000);
+    let generateContents_interval = setInterval(generateContents, 5000);
 
     const report_loadingAnimation = document.getElementById("report_loadingAnimation");
     const report_loadingAnimation_bottom = document.getElementById("report_loadingAnimation_bottom");
@@ -535,7 +536,7 @@ function toggleScroll() {
     } else {
         // If scrolling is not active, start it
         scrollInterval = setInterval(function() {
-            window.scrollBy(0, 1); // Scroll down 1px at a time
+            window.scrollBy(0, 0.5); // Scroll down 1px at a time
             if ((window.innerHeight + window.scrollY) >= document.body.offsetHeight) {
                 clearInterval(scrollInterval); // Stop scrolling when reaching the bottom
                 isScrolling = false;
@@ -823,3 +824,40 @@ function save_table_to_mongo(event){
     });
 }
 
+// Clear logWindow content
+document.getElementById("clearLogsBtn").addEventListener("click", function() {
+    document.getElementById("logWindow").innerHTML = `<div>$ report publishing logs will be displayed here
+                                                        </div>
+                                                        <br>`;
+});
+
+// Copy logWindow content to clipboard
+document.getElementById("copyLogsBtn").addEventListener("click", function() {
+    const logWindow = document.getElementById("logWindow");
+    const range = document.createRange();
+    range.selectNodeContents(logWindow);
+    const selection = window.getSelection();
+    selection.removeAllRanges(); // Clear any previous selections
+    selection.addRange(range);
+    document.execCommand("copy");
+    console.log("copy called")
+    try {
+        document.execCommand("copy");
+        showCopiedTooltip();
+    } catch (err) {
+        alert("Failed to copy logs. Please try again.");
+    }
+    
+    // Clear the selection after copying
+    selection.removeAllRanges();
+});
+
+function showCopiedTooltip() {
+    const tooltip = document.getElementById("copiedTooltip");
+    tooltip.classList.add("show-tooltip");
+
+    // Hide the tooltip after 2 seconds
+    setTimeout(function() {
+        tooltip.classList.remove("show-tooltip");
+    }, 2000);
+}

@@ -98,9 +98,9 @@ class DynamicObject:
                     {table_html}
                 </table>
                 <div class="d-flex justify-content-between">
-                    <button type="button" class="btn btn-primary save_table" id>Save</button>
+                    <button type="button" class="ml-2 btn btn-primary save_table" id>Save</button>
                     
-                    <button type="button" class="btn btn-success btn-sm add_new_row" data-table-id="{uuid_table}">Add Row</button>
+                    <button type="button" class="btn mr-1 btn-success btn-sm add_new_row" data-table-id="{uuid_table}">Add Row</button>
                 </div>            
             </form>"""
 
@@ -409,7 +409,7 @@ class perf_load_report_publish:
                         else:
                             unique_id = str(uuid.uuid4())
                             html_text+=f"""<p>
-                                                <button class="btn btn-light btn-sm pt-2" style="display: block;" type="button" data-toggle="collapse" data-target="#collapseExample{unique_id}" aria-expanded="false" aria-controls="collapseExample{unique_id}">
+                                                <button class="btn btn-light  pt-2" style="display: block;border-radius: 10px;border-color:#b4b4b4;" type="button" data-toggle="collapse" data-target="#collapseExample{unique_id}" aria-expanded="false" aria-controls="collapseExample{unique_id}">
                                                     <h3>{main_heading}</h3>
                                                 </button>
                                             </p>
