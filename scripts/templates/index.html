@@ -201,19 +201,27 @@
             <div id="ReportWindow" class="rounded shadow col-md-9">
                 <p class="text-center">Report will be displayed here after clicking 'View Report' Button</p>
             </div>
+            <div class="mx-2">
+                    <h5 id="Action_button" class="text-center btn disabled right_fixed_elements"> <i class="fa-solid fa-gears"></i> Actions</h5>
+            </div>
             
             <button class="btn btn-primary right_fixed_elements" id="scroll_through_report_slowly" onclick="toggleScroll()" >
                 <i class="fas fa-arrow-down"></i>
             </button>
 
+            <button class="btn btn-primary btn-sm right_fixed_elements" id="download_html_btn" onclick="download_html_doc()">
+                download html
+                <i class="fa-brands fa-html5 fa-2xl"></i>
+            </button>
+
             <button class="btn btn-primary btn-sm right_fixed_elements" id="download_pdf_btn" onclick="CreatePDFfromHTMLWithStyling()" >
-                &nbsp;download pdf &nbsp;<br>
-                <i class="fa-solid fa-file-pdf fa-xl"></i>
+                download pdf
+                <i class="fa-solid fa-file-pdf fa-2xl"></i>
             </button>
 
             <button class="btn btn-primary btn-sm right_fixed_elements" id="download_word_btn" onclick="SaveHTMLAsWordDocumentWithImages()" >
-                download word<br>
-                <i class="fa-solid fa-file-word fa-xl"></i>
+                download word
+                <i class="fa-solid fa-file-word fa-2xl"></i>
             </button>
 
             <button class="btn btn-primary right_fixed_elements" id="scroll_up"  onclick="scrollToBlock('ReportWindow')">

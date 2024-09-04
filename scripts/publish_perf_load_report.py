@@ -247,14 +247,19 @@ class perf_load_report_publish:
     def add_standard_table(self,table_dictionary,key_name,curr_page_obj,parent_key=None):
         html_text = custom_string()
         schema = table_dictionary["schema"]
-        merge_on_cols = schema["merge_on_cols"]
-        compare_cols = schema["compare_cols"]
-        try:display_exact_table = schema["display_exact_table"]
-        except:display_exact_table=True
-        try:collapse = table_dictionary["collapse"]
-        except:collapse=True
-        try:isEditable=schema["isEditable"]
-        except:isEditable=False
+        merge_on_cols = schema.get("merge_on_cols",[])
+        # merge_on_cols = schema["merge_on_cols"]
+        compare_cols = schema.get("compare_cols",[])
+        # compare_cols = schema["compare_cols"]
+        display_exact_table = schema.get("display_exact_table", True)
+        # try:display_exact_table = schema["display_exact_table"]
+        # except:display_exact_table=True
+        collapse = table_dictionary.get("collapse", True)
+        # try:collapse = table_dictionary["collapse"]
+        # except:collapse=True
+        isEditable=schema.get("isEditable",False)
+        # try:isEditable=schema["isEditable"]
+        # except:isEditable=False
         data=table_dictionary["data"]
         main_df = pd.DataFrame(data)
         if main_df.empty : return ""
@@ -315,8 +320,9 @@ class perf_load_report_publish:
                 schema = self.main_result[key_name]["schema"]
                 data = self.main_result[key_name]["data"]
 
-                if "page" in schema : page = schema["page"]
-                else : page = "Overview"
+                # if "page" in schema : page = schema["page"]
+                # else : page = "Overview"
+                page = schema.get("page" , "Overview")
 
                 if page in self.confluence_page_mappings: curr_page_obj = self.confluence_page_mappings[page]
                 else:
@@ -387,7 +393,7 @@ class perf_load_report_publish:
                     prev_sprint,prev_run = self.sprint_runs_list[0][0],self.sprint_runs_list[0][1]
                     prev_data=self.get_key_result(prev_sprint,prev_run,key_name)
                     if not prev_data:
-                        yield f'data: {{"status": "warning", "message": Found no previous data for sprint {prev_sprint} and run {prev_run}}}\n\n'
+                        yield f'data: {{"status": "warning", "message": "Found no previous data for sprint {prev_sprint} and run {prev_run}"}}\n\n'
                         continue
                     prev_data=prev_data[key_name]["data"]
                     temp_images,memory_combined_df,cpu_combined_df=analysis_main(data["memory_usages_analysis"],prev_data["memory_usages_analysis"],data["cpu_usage_analysis"],prev_data["cpu_usage_analysis"],main_build_load_details=self.main_result["load_details"]["data"],prev_build_load_details=self.get_key_result(prev_sprint,prev_run,"load_details")["load_details"]["data"] )                    
@@ -409,7 +415,7 @@ class perf_load_report_publish:
                         else:
                             unique_id = str(uuid.uuid4())
                             html_text+=f"""<p>
-                                                <button class="btn btn-light  pt-2" style="display: block;border-radius: 10px;border-color:#b4b4b4;" type="button" data-toggle="collapse" data-target="#collapseExample{unique_id}" aria-expanded="false" aria-controls="collapseExample{unique_id}">
+                                                <button class="btn btn-light  pt-2" style="display: block;width:50%;border-radius: 10px;border-color:#b4b4b4;" type="button" data-toggle="collapse" data-target="#collapseExample{unique_id}" aria-expanded="false" aria-controls="collapseExample{unique_id}">
                                                     <h3>{main_heading}</h3>
                                                 </button>
                                             </p>
