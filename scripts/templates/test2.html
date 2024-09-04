@@ -1,249 +1,57 @@
-{% extends "layout.html" %}
-{% block content%}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Beautiful Loading Animation</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        /* Fade-in animation */
+        @keyframes fadeIn {
+            0% {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
 
-<div class="container-fluid">
-    <button id="toggleButton" class="btn btn-dark toggle-btn btn-sm" onclick="toggle_logs_window()">
-        <i class="fa-solid fa-xmark"></i>
-    </button>
-    <div class="row mb-5">
-        <!-- Collapsible Logs Window -->
-        <!-- Toggle Button for Collapsing -->
-        
-        <div id="collapsable_logs_window" class="col-md-4  rounded transition ">
-            <div class="mb-3  d-flex align-items-center justify-content-center">
-                <div class="row mt-2">
-                    <h4 class="text-center" style="margin-bottom:0px;"><i class="bi bi-terminal-fill"></i> Logs</h4>
-                    
-                    <!-- Loading Animation -->
-                    <div id="logs_loadingAnimation" style="display: none; margin-top: -5px; margin-bottom: -1px;">
-                        <button class="btn btn-primary ml-2" type="button" disabled>
-                            <span class="spinner-grow spinner-grow-sm" role="status" aria-hidden="true"></span>
-                            Publishing ...
-                        </button>
-                    </div>
-                    <span id="copiedTooltip" class="copied-tooltip">Copied!</span>
+        /* Apply fade-in animation to all elements */
+        body * {
+            animation: fadeIn 1s ease-in-out;
+            animation-fill-mode: both;
+            opacity: 0; /* Start with elements hidden */
+        }
 
-                    <div class="btn-group position-absolute" style="top: 20px; right: 51px;">
-                        <button id="clearLogsBtn" class="btn btn-sm btn-outline-light transparent-btn">
-                            <i class="fa-solid fa-eraser"></i>
-                        </button>
-                    </div>
-                    <div class="btn-group position-absolute" style="top: 20px; right: 16px;">
-                        <button id="copyLogsBtn" class="btn btn-sm btn-outline-light transparent-btn">
-                            <i class="fa-regular fa-copy"></i>
-                        </button>
-                    </div>
-                </div>
-            </div>
-            <div id="logWindow" class="rounded p-3 pb-4 bg-dark text-white position-relative" style="min-height: 200px;">
-                <div>
-                    $ report publishing logs will be displayed here
-                </div>
-                <br>
-            </div>
-            
-        </div>
-
-        <!-- Main Content Container -->
-        <div id="mainContent" class="rounded  transition col-md-6">
-            <h2 class="mb-2 mt-2  text-center"><i class="bi bi-clipboard-data-fill"></i> Generate Performance Load Report</h2>
-            <form id="inputForm" class=" shadow p-4 rounded">
-    
-                <div class="form-row">
-                    <div class="form-group col-md-6">
-                        <label for="loadtype">Load Type :</label>
-                        <select class="form-control req-for-view-report" id="loadtype" name="loadtype" required>
-                            <option value="">Select Load Type</option>
-                        </select>
-                        <div class="error-message"></div>
-                    </div>
-                    <div class="form-group col-md-6">
-                        <label for="loadname">Load Name :</label>
-                        <select class="form-control req-for-view-report" id="loadname" name="loadname" required>
-                            <option value="">Select Load Name</option>
-                        </select>
-                        <div class="error-message"></div>
-                    </div>
-                </div>
-    
-                <div class="position-relative text-center my-2">
-                    <hr class="line-through" />
-                    <span class="text-above-line text-muted">Select reports to generate/compare</span>
-                </div>
-                <div id="fieldsContainer">
-                    <!-- Initial set of 'sprint' and 'run' fields will be added here -->
-                </div>
-                <div class="text-center">
-                    <button type="button" class="btn btn-info col-md-2" onclick="addSprintRunFields()">Add more &nbsp; <i class="fa-solid fa-square-plus fa-lg"></i></button>
-                </div>
-                
-                <br>
-            
-    
-                <div class="form-row">
-                    <div class="form-group col-md-6">
-                        <label for="url"><i class="fa-solid fa-link fa-xs"></i> Confluence URL :</label>
-                        <input type="text" class="form-control" id="url" name="url" value="https://uptycsjira.atlassian.net" placeholder="Enter URL" required>
-                        <div class="error-message"></div>
-                    </div>
-                    <div class="form-group col-md-6">
-                        <label for="email_address"><i class="fa-solid fa-envelope"></i> Email Address :</label>
-                        <input type="email" class="form-control" id="email_address" name="email_address" value="@uptycs.com" placeholder="Enter your email" required>
-                        <div class="error-message"></div>
-                    </div>
-                </div>
-    
-    
-                <div class="form-row">
-                    <div class="form-group col-md-6">
-                        <label for="space"><i class="fas fa-folder"></i> Space :</label>
-                        <input type="text" class="form-control" id="space" name="space" value="PERF" placeholder="Enter space" required>
-                        <div class="error-message"></div>
-                    </div>
-                    <div class="form-group col-md-6">
-                        <label for="api_key"><i class="fa-solid fa-key"></i> API Key :</label>
-                        <input type="text" class="form-control" id="api_key" name="api_key" placeholder="Enter API key" required>
-                        <div class="error-message"></div>
-                    </div>
-                </div>
-            
-    
-    
-                <div class="form-row">
-                    <div class="form-group col-md-6">
-                        <label for="parent_page_title"><i class="fas fa-sitemap"></i> Parent Page Title :</label>
-                        <input type="text" class="form-control" id="parent_page_title" name="parent_page_title" placeholder="Enter parent page title" required>
-                        <div class="error-message"></div>
-                    </div>
-                    <div class="form-group col-md-6">
-                        <label for="report_title">Report Title :</label>
-                        <input type="text" class="form-control" id="report_title" name="report_title" placeholder="Enter report title" required>
-                        <div class="error-message"></div>
-                    </div>
-                </div>
-                
-                
-                <div class="form-row">
-                    <div class="col-md-6">
-                        <button type="button" class="btn btn-success btn-block" onclick="validateViewReport()">
-                            View Report <i class="fa-solid fa-eye fa-lg"></i>
-                        </button>
-                    </div>
-    
-                    <div class="col-md-6">
-                        <button type="button" class="btn btn-primary btn-block" onclick="validatePublishForm()">
-                            Publish to Confluence <i class="fa-solid fa-paper-plane fa-lg"></i>
-                        </button>
-                    </div>
-                </div>
-    
-                
-            </form>
-        </div>
-
-        <div  class="col-md-2  rounded transition ">
-            <div class="mb-1  d-flex align-items-center justify-content-center">
-                <div class="row mt-3">
-                    <h5 class="text-center">
-                        <i class="fa-solid fa-history"></i>
-                        Recently collected reports</h5>
-                </div>
-            </div>
-            <div id="recently_saved_to_mongo_reports" class="rounded">
-                <!-- <div class="recently_saved_panel rounded">
-                    loadtype : Osquery<br>
-                    loadname : MultiCustomer <br>
-                    sprint : 160 <br>
-                    build : 160021 <br>
-                    run : 2
-                </div> -->
-                <div class="recently_saved_panel rounded"></div>
-                <div class="recently_saved_panel rounded"></div>
-                <div class="recently_saved_panel rounded"></div>
-                <div class="recently_saved_panel rounded"></div>
-            </div>
-        </div>
-
-    </div>
-</div>
-
-
-    
-<hr style="background-color: black; height: 1px; border: none;">
-<br>
-    <div class="pb-3 rounded container-fluid">
-        <div class="row pb-1">
-            <div class="col-md-2 d-flex  rounded align-items-center justify-content-center">
-                <!-- <h5 class="text-center mt-1 mr-3"><i class="fa-solid fa-list"></i>  Contents </h5> -->
-            </div>
-
-            <div class="d-flex align-items-center justify-content-center col-md-9">
-                <h2 class="text-center mt-1 mr-3"><i class="fas fa-file-alt"></i> View Report</h2>
-        
-                <!-- Loading Animation -->
-                <div id="report_loadingAnimation" style="display: none;">
-                    <button class="btn btn-primary mb-1" type="button" disabled>
-                        <span class="spinner-grow spinner-grow-sm" role="status" aria-hidden="true"></span>
-                        Generating ...
-                    </button>
-                </div>
-            </div>
-        </div>
-        
-        <!-- <div id="ReportWindow" class="rounded  shadow">
-            <p class="text-center">Report will be displayed here after clicking 'View Report' Button</p>
-        </div> -->
-
-        <div class="row">
-            <div id="contents" class="contents col-md-3 rounded">
-                <h5 id="contents_heading" class="text-center btn disabled"><i class="fa-solid fa-list"></i>  Contents </h5>
-            </div>
-            <div id="ReportWindow" class="rounded shadow col-md-8">
-                <p class="text-center">Report will be displayed here after clicking 'View Report' Button</p>
-            </div>
-            
-            <div id="report_actions" class="border rounded col-md-1">
-
-                <button class="btn btn-primary right_fixed_elements" id=""  onclick="scrollToBlock('ReportWindow')">
-                    <i class="fas fa-arrow-up"></i>
-                </button>
-                <br>
-                <button class="btn btn-primary right_fixed_elements" id="" onclick="toggleScroll()" >
-                    <i class="fas fa-arrow-down"></i>
-                </button>
-            <br>
-                <button class="btn btn-primary btn-sm right_fixed_elements" id="" onclick="CreatePDFfromHTMLWithStyling()" >
-                    download<br>pdf
-                    <i class="fas fa-download fa-xl"></i>
-                </button>
-            </div>
-        </div>
-
-
+        /* Stagger animation delay for a cascading effect */
+        body *:nth-child(1) { animation-delay: 0.1s; }
+        body *:nth-child(2) { animation-delay: 0.2s; }
+        body *:nth-child(3) { animation-delay: 0.3s; }
+        body *:nth-child(4) { animation-delay: 0.4s; }
+        body *:nth-child(5) { animation-delay: 0.5s; }
+        /* Add more as needed */
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="mt-5">Welcome to My Website</h1>
+        <p>This is a sample page with beautiful loading animations.</p>
+        <button class="btn btn-primary">Click Me!</button>
     </div>
 
-    <div id="report_loadingAnimation_bottom" style="display: none; text-align: center;">
-        <button class="btn btn-primary mb-1" type="button" disabled>
-            <span class="spinner-grow spinner-grow-sm" role="status" aria-hidden="true"></span>
-            Loading...
-        </button>
-    </div>
-
-    
-
-
-    <button class="btn btn-primary right_fixed_elements" id="scroll_up"  onclick="scrollToBlock('ReportWindow')">
-        <i class="fas fa-arrow-up"></i>
-    </button>
-    
-    <button class="btn btn-primary right_fixed_elements" id="scroll_through_report_slowly" onclick="toggleScroll()" >
-        <i class="fas fa-arrow-down"></i>
-    </button>
-
-    <button class="btn btn-primary btn-sm right_fixed_elements" id="download_pdf_btn" onclick="CreatePDFfromHTMLWithStyling()" >
-        download<br>pdf
-        <i class="fas fa-download fa-xl"></i>
-    </button>
-
-    
-{%endblock content%}
+    <script>
+        // Optional: If you want to remove the animation class after the animation completes
+        document.addEventListener("DOMContentLoaded", function () {
+            const elements = document.querySelectorAll("body *");
+            elements.forEach(element => {
+                element.addEventListener("animationend", () => {
+                    element.style.opacity = "1"; // Ensure visibility after animation
+                    element.style.animation = "none"; // Remove animation to prevent re-triggering
+                });
+            });
+        });
+    </script>
+</body>
+</html>

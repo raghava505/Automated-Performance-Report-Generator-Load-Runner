@@ -217,7 +217,7 @@ function validatePublishForm() {
             startPublishLogsEventSource();
             publishReportToConfluence();
             var logWindow = document.getElementById("collapsable_logs_window");
-            if (logWindow.classList.contains("collapsed")) {
+            if (logWindow.classList.contains("collapsed_logs_window")) {
                 toggle_logs_window();
             }
             scrollToTop()
@@ -906,12 +906,12 @@ function toggle_logs_window(){
     // Toggle the collapsed class
     console.log(logWindow.classList)
 
-    logWindow.classList.toggle("collapsed");
+    logWindow.classList.toggle("collapsed_logs_window");
     console.log(logWindow.classList)
     
     // Adjust main content position
-    if (logWindow.classList.contains("collapsed")) {
-        console.log("collapsed class found .. in logwindoe")
+    if (logWindow.classList.contains("collapsed_logs_window")) {
+        console.log("collapsed_logs_window class found .. in logwindoe")
         // mainContent.classList.remove("contract");
         logWindow.classList.add("col-md-2");
         logWindow.classList.remove("col-md-4");
@@ -979,44 +979,196 @@ function CreatePDFfromHTMLWithStyling() {
     
 }
 
+
+function convertImagesToBase64(element) {
+    const imgElements = element.find('img');
+
+    return Promise.all(imgElements.map((index, img) => {
+        return new Promise((resolve, reject) => {
+            try {
+                const canvas = document.createElement('canvas');
+                const context = canvas.getContext('2d');
+                const imgElement = new Image();
+                
+                imgElement.crossOrigin = 'Anonymous'; // Handle CORS issues
+                imgElement.src = img.src;
+
+                imgElement.onload = function() {
+                    try {
+                        canvas.width = imgElement.width;
+                        canvas.height = imgElement.height;
+                        context.drawImage(imgElement, 0, 0);
+                        const dataURL = canvas.toDataURL('image/png');
+                        img.src = dataURL;
+                        resolve();
+                    } catch (drawError) {
+                        console.error("Error drawing image on canvas: ", drawError);
+                        resolve(); // Continue even if drawing fails
+                    }
+                };
+
+                imgElement.onerror = function() {
+                    console.error("Failed to load image: " + img.src);
+                    resolve(); // Continue even if the image fails to load
+                };
+            } catch (error) {
+                console.error("Unexpected error in image conversion: ", error);
+                resolve(); // Continue even in case of unexpected errors
+            }
+        });
+    }).get());
+}
 function SaveHTMLAsWordDocumentWithImages() {
-    var divContents = $("#ReportWindow").clone();
-    divContents.find('.collapse').removeClass('collapse');
+    try {
+        showNotification("Generating word document ...", "info");
 
-    convertImagesToBase64(divContents).then(() => {
-        var divHTML = divContents.html();
+        var divContents = $("#ReportWindow").clone();
+        divContents.find('.collapse').removeClass('collapse');
 
-        var headContent = `
-        <html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
-        <head>
-            <meta charset='utf-8'>
-            <title>Document</title>
-            <style>
-                body {
-                    font-family: Arial, sans-serif;
-                }
-                img {
-                    max-width: 100%;
-                    height: auto;
-                }
-            </style>
-        </head>
-        <body>
-            ${divHTML}
-        </body>
-        </html>
-        `;
+        convertImagesToBase64(divContents).then(() => {
+            try {
+                var divHTML = divContents.html();
 
-        var blob = new Blob(['\ufeff', headContent], {
-            type: 'application/msword'
+                var headContent = `
+                <html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
+                <head>
+                    <meta charset='utf-8'>
+                    <title>Document</title>
+                    <style>
+                        body {
+                            font-family: Arial, sans-serif;
+                        }
+                        img {
+                            max-width: 100%;
+                            height: auto;
+                        }
+                    </style>
+                </head>
+                <body>
+                    ${divHTML}
+                </body>
+                </html>
+                `;
+
+                var blob = new Blob(['\ufeff', headContent], {
+                    type: 'application/msword'
+                });
+
+                var link = document.createElement('a');
+                link.href = URL.createObjectURL(blob);
+                link.download = 'document.doc';
+
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                showNotification("successfully downloaded Word document", "success");
+
+            } catch (blobError) {
+                console.error("Error creating Word document blob: ", blobError);
+                showNotification("Failed to create the Word document. Please try again.", "error");
+            }
+        }).catch((convertError) => {
+            console.error("Error during image conversion: ", convertError);
+            showNotification("Failed to convert images. The document might not include all images ", "error");
+
+        });
+    } catch (error) {
+        console.error("Unexpected error in SaveHTMLAsWordDocumentWithImages: ", error);
+        showNotification("An unexpected error occurred while generating word document ", "error");
+
+    }
+}
+
+
+
+
+function download_html_doc() {
+    showNotification("Generating html document ...", "info");
+    try{
+        // Clone the ReportWindow element to avoid modifying the original
+        var content = document.getElementById("ReportWindow").cloneNode(true);
+
+        // Remove the 'collapse' class from all elements inside the cloned content
+        var collapsedElements = content.querySelectorAll('.collapse');
+        collapsedElements.forEach(element => {
+            element.classList.remove('collapse');
         });
 
-        var link = document.createElement('a');
-        link.href = URL.createObjectURL(blob);
-        link.download = 'document.doc';
+        // Convert images to base64 before generating the HTML file
+        convertImagesToBase64_HTML(content).then(() => {
+            // Get the contents of the <style> tags and <link> tags in the <head>
+            var headContent = document.querySelector('head').innerHTML;
 
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-    });
+            // Wrap the content with a complete HTML structure
+            var fullHTML = `
+            <!DOCTYPE html>
+            <html lang="en">
+            <head>
+                <meta charset="UTF-8">
+                <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                <title>Exported HTML</title>
+                ${headContent}  <!-- Include styles and scripts -->
+            </head>
+            <body>
+                ${content.innerHTML}  <!-- The content of the ReportWindow div -->
+                
+                <!-- Include inline JavaScript if needed -->
+                <script>
+                // You can add your custom JavaScript functions here if needed.
+                </script>
+            </body>
+            </html>`;
+
+            // Create a new Blob with the full HTML content, specifying the MIME type as HTML
+            var blob = new Blob([fullHTML], { type: "text/html" });
+
+            // Create a download link dynamically
+            var downloadLink = document.createElement("a");
+            downloadLink.download = "export.html";
+
+            // Create a URL for the Blob and set it as the href attribute
+            downloadLink.href = window.URL.createObjectURL(blob);
+
+            // Programmatically click the download link to trigger the download
+            downloadLink.click();
+            showNotification("successfully downloaded html document", "success");
+
+        });
+        
+    }
+    catch (error) {
+        console.error("Unexpected error in SaveHTMLAsWordDocumentWithImages: ", error);
+        showNotification("An unexpected error occurred while generating word document ", "error");
+
+    }
+}
+
+// Function to convert all images in an element to base64
+function convertImagesToBase64_HTML(element) {
+    const imgElements = element.querySelectorAll('img');
+
+    return Promise.all(Array.from(imgElements).map((img) => {
+        return new Promise((resolve, reject) => {
+            const canvas = document.createElement('canvas');
+            const context = canvas.getContext('2d');
+            const imgElement = new Image();
+            
+            imgElement.crossOrigin = 'Anonymous'; // Handle CORS issues
+            imgElement.src = img.src;
+
+            imgElement.onload = function() {
+                canvas.width = imgElement.width;
+                canvas.height = imgElement.height;
+                context.drawImage(imgElement, 0, 0);
+                const dataURL = canvas.toDataURL('image/png');
+                img.src = dataURL;
+                resolve();
+            };
+
+            imgElement.onerror = function() {
+                console.error("Failed to load image: " + img.src);
+                resolve(); // Continue even if the image fails to load
+            };
+        });
+    }));
 }
