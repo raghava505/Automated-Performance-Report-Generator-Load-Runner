@@ -220,7 +220,7 @@ def view_report():
     database_name = request.form['loadtype']
     collection_name = request.form['loadname']
 
-    # list_of_sprint_runs_to_show_or_compare = [[158,1]]
+    # list_of_sprint_runs_to_show_or_compare = [[161,1]]
     # database_name = "Osquery_LoadTests_New"
     # collection_name = "MultiCustomer"
 
@@ -260,29 +260,30 @@ def view_report():
 def publish_report():
     # Get form data from the request
     # print("RETURNED FORM INPUT : ")
-    print(request.form)
-    url = request.form['url']
-    email_address = request.form['email_address']
-    api_key = request.form['api_key']
-    space = request.form['space']
-    parent_page_title = request.form['parent_page_title']
-    report_title = request.form['report_title']
-    string_of_list_of_sprint_runs_to_show_or_compare = request.form['sprint_runs']
-    list_of_sprint_runs_to_show_or_compare  = ast.literal_eval(string_of_list_of_sprint_runs_to_show_or_compare)
-    print(list_of_sprint_runs_to_show_or_compare)
-    database_name = request.form['loadtype']
-    collection_name = request.form['loadname']
+    # print(request.form)
+    # url = request.form['url']
+    # email_address = request.form['email_address']
+    # api_key = request.form['api_key']
+    # space = request.form['space']
+    # parent_page_title = request.form['parent_page_title']
+    # report_title = request.form['report_title']
+    # string_of_list_of_sprint_runs_to_show_or_compare = request.form['sprint_runs']
+    # list_of_sprint_runs_to_show_or_compare  = ast.literal_eval(string_of_list_of_sprint_runs_to_show_or_compare)
+    # print(list_of_sprint_runs_to_show_or_compare)
+    # database_name = request.form['loadtype']
+    # collection_name = request.form['loadname']
 
-    # url='https://raghav-m.atlassian.net'
-    # email_address = "pbpraghav@gmail.com"
-    # space = 'IT'
-    # parent_page_title = 'TEST'  
-    # import uuid
-    # report_title = f"TEST {uuid.uuid4()}"
+    url='https://raghav-m.atlassian.net'
+    email_address = "pbpraghav@gmail.com"
+    space = 'IT'
+    parent_page_title = 'TEST'  
+    import uuid
+    report_title = f"TEST {uuid.uuid4()}"
+    api_key="ATATT3xFfGF0KW9tfUcm8apnZIpVhN7UiPYVc4_XPIGTRPC6MR17LAGGAojAA_RMopsL8n9_UF61PP0IPx4mGZz36wbIxeIBNiloaxHeU3-6YBjUk_YF7xiZYv_7Sf2c3yuVnSdJx7h7LEtC9EJVypXdJ9YB1FB2IzbALAPxddejGl32XnKAr6A=7357FD40"
 
-    # list_of_sprint_runs_to_show_or_compare = [[160,4],[160,1]]
-    # database_name = "Osquery_LoadTests_New"
-    # collection_name = "ControlPlane"
+    list_of_sprint_runs_to_show_or_compare = [[160,4],[160,1]]
+    database_name = "Osquery_LoadTests_New"
+    collection_name = "ControlPlane"
 
     user_id = session.get('user_id')
     if not user_id:

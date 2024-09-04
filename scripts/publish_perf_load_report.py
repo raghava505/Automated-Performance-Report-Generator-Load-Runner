@@ -85,7 +85,7 @@ class DynamicObject:
                 for col_idx, value in enumerate(row):
                     table_html += generate_cell_html(value, row_idx, col_idx)
                 if row_idx != 0:
-                    table_html += '<td><button type="button" class="btn btn-danger btn-sm add_remove_row_btns remove-row">Delete</button></td>'
+                    table_html += '<td><button type="button" class="btn btn-danger btn-sm add_remove_row_btns remove-row"><i class="fa-solid fa-trash"></i></button></td>'
                 table_html += '</tr>'
             table_html += '</tbody>'
 
