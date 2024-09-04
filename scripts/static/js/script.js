@@ -214,13 +214,13 @@ function validatePublishForm() {
         });
 
         if (isValid) {
-            startPublishLogsEventSource()
+            startPublishLogsEventSource();
             publishReportToConfluence();
             var logWindow = document.getElementById("collapsable_logs_window");
             if (logWindow.classList.contains("collapsed")) {
                 toggle_logs_window();
             }
-            
+            scrollToTop()
             // scrollToBlock('logWindow')
         }
     }
@@ -376,6 +376,8 @@ function validateViewReport() {
 
 function ViewReport() {
     report_generating_already_in_progress=true
+    const report_loadingAnimation = document.getElementById("report_loadingAnimation");
+    const report_loadingAnimation_bottom = document.getElementById("report_loadingAnimation_bottom");
     const formData = new FormData(document.getElementById('inputForm'));
     const sprintRuns = [];
     document.querySelectorAll('[id^="sprint_"]').forEach((sprintSelect, index) => {
@@ -413,6 +415,8 @@ function ViewReport() {
         // Show a notification with the error message
         showNotification(`An error occurred: ${error.message}. Please try again later.`, "error");
     });
+    report_loadingAnimation.style.display = 'none'; // Hide loading animation
+    report_loadingAnimation_bottom.style.display = 'none'; // Hide loading animation
 }
 
 function startReportDataEventSource() {
@@ -485,26 +489,23 @@ function scrollToBlock(id) {
 
 function checkVisibility() {
     const reportWindow = document.getElementById('ReportWindow');
-    const down_button = document.getElementById('scroll_through_report_slowly');
-    const up_button = document.getElementById('scroll_up');
-    const contents = document.getElementById('contents');
+    const report_action_fixed_buttons = document.querySelectorAll('.right_fixed_elements');
+    const contents = document.getElementById('contents');    
 
     function updateButtonVisibility() {
         const rect = reportWindow.getBoundingClientRect();
-        // const isAtTop = rect.top >= 0 && rect.top <= window.innerHeight;
-        const isAtTop = rect.top <=89;
+        const isAtTop = rect.top <=90;
+
+        report_action_fixed_buttons.forEach(button => {
+            button.style.display = isAtTop ? 'block' : 'none';
+        });
 
         if (isAtTop) {
-            down_button.style.display = 'block'; // Show button
-            up_button.style.display = 'block'; // Show button
             contents.style.position = 'sticky';
             contents.style.top = '30px';
-            contents.style.left = '5px';
             contents.style.zIndex = '1000';
 
         } else {
-            down_button.style.display = 'none'; // Hide button
-            up_button.style.display = 'none'; // Hide button
             contents.style.position = '';
             contents.style.top = '';
             contents.style.left = '';
@@ -757,7 +758,7 @@ function addNewRow(event) {
     // Add the Remove button cell
     const removeCell = row.insertCell();
     removeCell.style.backgroundColor = "white";
-    removeCell.innerHTML = '<button type="button" class="btn btn-danger btn-sm add_remove_row_btns remove-row">Delete</button>';
+    removeCell.innerHTML = '<button type="button" class="btn btn-danger btn-sm add_remove_row_btns remove-row"><i class="fa-solid fa-trash"></i></button>';
 }
 
 
@@ -929,3 +930,93 @@ function toggle_logs_window(){
     }
 }
 
+
+function CreatePDFfromHTMLWithStyling() {
+    var divContents = $("#ReportWindow").clone();
+    divContents.find('.collapse').removeClass('collapse');
+    var divHTML = divContents.html();
+
+    // Create a temporary window for the PDF generation
+    var printWindow = window.open('', '', 'height=400,width=800');
+
+    // Copy the contents of the original window's head (styles and meta tags)
+    var headContent = `
+    <html>
+      <head>
+        <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+        <style>
+          @media print {
+            img {
+              max-width: 100%;
+              height: auto;
+            }
+            /* Remove margins, padding, and other unwanted styles */
+            body {
+              margin: 0;
+              padding: 0;
+            }
+            .no-print {
+              display: none;
+            }
+          }
+        </style>
+      </head>
+    `;
+
+    printWindow.document.write(headContent);
+    printWindow.document.write('<body>');
+    printWindow.document.write(divHTML);  
+    printWindow.document.write('</body></html>');
+    printWindow.document.close();
+
+    // Delay the print operation to allow styles to load fully
+    setTimeout(function() {
+        // Trigger print dialog
+        printWindow.focus(); // Ensure the new window is focused
+        printWindow.print();
+        printWindow.close();
+    }, 1000);  // Adjust delay as necessary
+    
+}
+
+function SaveHTMLAsWordDocumentWithImages() {
+    var divContents = $("#ReportWindow").clone();
+    divContents.find('.collapse').removeClass('collapse');
+
+    convertImagesToBase64(divContents).then(() => {
+        var divHTML = divContents.html();
+
+        var headContent = `
+        <html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
+        <head>
+            <meta charset='utf-8'>
+            <title>Document</title>
+            <style>
+                body {
+                    font-family: Arial, sans-serif;
+                }
+                img {
+                    max-width: 100%;
+                    height: auto;
+                }
+            </style>
+        </head>
+        <body>
+            ${divHTML}
+        </body>
+        </html>
+        `;
+
+        var blob = new Blob(['\ufeff', headContent], {
+            type: 'application/msword'
+        });
+
+        var link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = 'document.doc';
+
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    });
+}

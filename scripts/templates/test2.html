@@ -3,7 +3,7 @@
 
 <div class="container-fluid">
     <button id="toggleButton" class="btn btn-dark toggle-btn btn-sm" onclick="toggle_logs_window()">
-        <i class="fa-solid fa-chevron-right"></i>
+        <i class="fa-solid fa-xmark"></i>
     </button>
     <div class="row mb-5">
         <!-- Collapsible Logs Window -->
@@ -195,11 +195,27 @@
         </div> -->
 
         <div class="row">
-            <div id="contents" class="contents col-md-2 rounded">
+            <div id="contents" class="contents col-md-3 rounded">
                 <h5 id="contents_heading" class="text-center btn disabled"><i class="fa-solid fa-list"></i>  Contents </h5>
             </div>
-            <div id="ReportWindow" class="rounded shadow col-md-9">
+            <div id="ReportWindow" class="rounded shadow col-md-8">
                 <p class="text-center">Report will be displayed here after clicking 'View Report' Button</p>
+            </div>
+            
+            <div id="report_actions" class="border rounded col-md-1">
+
+                <button class="btn btn-primary right_fixed_elements" id=""  onclick="scrollToBlock('ReportWindow')">
+                    <i class="fas fa-arrow-up"></i>
+                </button>
+                <br>
+                <button class="btn btn-primary right_fixed_elements" id="" onclick="toggleScroll()" >
+                    <i class="fas fa-arrow-down"></i>
+                </button>
+            <br>
+                <button class="btn btn-primary btn-sm right_fixed_elements" id="" onclick="CreatePDFfromHTMLWithStyling()" >
+                    download<br>pdf
+                    <i class="fas fa-download fa-xl"></i>
+                </button>
             </div>
         </div>
 
@@ -216,14 +232,18 @@
     
 
 
-    <button class="btn btn-primary back-to-top" id="scroll_up"  onclick="scrollToBlock('ReportWindow')">
+    <button class="btn btn-primary right_fixed_elements" id="scroll_up"  onclick="scrollToBlock('ReportWindow')">
         <i class="fas fa-arrow-up"></i>
     </button>
     
-    <button class="btn btn-primary " id="scroll_through_report_slowly" onclick="toggleScroll()" >
+    <button class="btn btn-primary right_fixed_elements" id="scroll_through_report_slowly" onclick="toggleScroll()" >
         <i class="fas fa-arrow-down"></i>
     </button>
 
+    <button class="btn btn-primary btn-sm right_fixed_elements" id="download_pdf_btn" onclick="CreatePDFfromHTMLWithStyling()" >
+        download<br>pdf
+        <i class="fas fa-download fa-xl"></i>
+    </button>
 
-
+    
 {%endblock content%}
