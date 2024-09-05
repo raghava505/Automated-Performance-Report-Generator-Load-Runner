@@ -28,7 +28,7 @@ class custom_string(str):
 
     def __repr__(self):
         return f"custom_string({self.value!r})"
-class DynamicObject:
+class ViewReportClass:
     def __getattr__(self, name):
         # Returns a callable object for any attribute
         def method(*args, **kwargs):
@@ -187,7 +187,7 @@ class perf_load_report_publish:
         return result
     
     def create_report_page(self,parent_page_title, report_title):
-        if self.isViewReport : return DynamicObject(), "noerror"
+        if self.isViewReport : return ViewReportClass(), "noerror"
         obj = publish_to_confluence(parent_page_title, report_title, self.email_address, self.api_key, self.space, self.url)
         flag, err = obj.create_page()
         if flag == False:
@@ -324,20 +324,21 @@ class perf_load_report_publish:
             if not _:
                 yield f'data: {{"status": "error", "message": "{err}"}}\n\n'
                 return
-            test_title = self.main_result["load_details"]["data"]["test_title"]
-            load_type = self.main_result["load_details"]["data"]["load_type"]
-            sprint_runs_text_list = ['_'.join(map(str, x)) for x in self.sprint_runs_list]
-            sprint_runs_text_list = list(map(lambda x : f"<span  class='mb-3 btn btn-success btn-sm disabled'>{x}</span>",sprint_runs_text_list))
-            sprint_runs_text = f"<span  class='mb-3 btn btn-success btn-sm disabled'>{self.main_sprint}_{self.main_run}</span>"
-            if sprint_runs_text_list:
-                # Define the VS span as a separate string
-                vs_span = "<span class='btn mb-3 btn-sm disabled'>vs</span>"
-                # Join the list with the VS span
-                joined_text = f"{vs_span}".join(sprint_runs_text_list)
-                # Concatenate the main sprint and run with the joined text
-                sprint_runs_text += f"{vs_span}{joined_text}"
-
             if self.isViewReport:
+                test_title = self.main_result["load_details"]["data"]["test_title"]
+                load_type = self.main_result["load_details"]["data"]["load_type"]
+                sprint_runs_text_list = ['_'.join(map(str, x)) for x in self.sprint_runs_list]
+                sprint_runs_text_list = list(map(lambda x : f"<span  class='mb-3 btn btn-success btn-sm disabled'>{x}</span>",sprint_runs_text_list))
+                sprint_runs_text = f"<span  class='mb-3 btn btn-success btn-sm disabled'>{self.main_sprint}_{self.main_run}</span>"
+                if sprint_runs_text_list:
+                    # Define the VS span as a separate string
+                    vs_span = "<span class='btn mb-3 btn-sm disabled'>vs</span>"
+                    # Join the list with the VS span
+                    joined_text = f"{vs_span}".join(sprint_runs_text_list)
+                    # Concatenate the main sprint and run with the joined text
+                    sprint_runs_text += f"{vs_span}{joined_text}"
+
+            # if self.isViewReport:
                 data = json.dumps({"status": "info", "message": f"<div style='text-align: center;'><h1>{load_type} - {str(test_title).capitalize()}<br>Performance Report</h1>{sprint_runs_text}</div><hr style='border: 1px solid #000000;'><br>"})
                 yield f'data: {data}\n\n'
             for key_name in self.all_keys:
