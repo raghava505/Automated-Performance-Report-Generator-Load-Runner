@@ -201,12 +201,17 @@
             <div id="ReportWindow" class="rounded shadow col-md-9">
                 <p class="text-center">Report will be displayed here after clicking 'View Report' Button</p>
             </div>
-            <div class="mx-2">
+            <div class="border-top">
                     <h5 id="Action_button" class="text-center btn disabled right_fixed_elements"> <i class="fa-solid fa-gears"></i> Actions</h5>
             </div>
             
             <button class="btn btn-primary right_fixed_elements" id="scroll_through_report_slowly" onclick="toggleScroll()" >
-                <i class="fas fa-arrow-down"></i>
+                <i class="fas fa-arrow-down fa-lg"></i>
+            </button>
+
+
+            <button id="toggleBetween_expand_collapse" class="btn btn-primary btn-sm right_fixed_elements" onclick="toggleCollapseExpand()" data-expanded="true">
+                <i id="toggleIcon" class="fas fa-compress"></i> Collapse All
             </button>
 
             <button class="btn btn-primary btn-sm right_fixed_elements" id="download_html_btn" onclick="download_html_doc()">
@@ -225,7 +230,7 @@
             </button>
 
             <button class="btn btn-primary right_fixed_elements" id="scroll_up"  onclick="scrollToBlock('ReportWindow')">
-                <i class="fas fa-arrow-up"></i>
+                <i class="fas fa-arrow-up fa-lg"></i>
             </button>
             
         </div>
