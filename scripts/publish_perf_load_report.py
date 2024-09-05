@@ -105,11 +105,24 @@ class DynamicObject:
             </form>"""
 
         # Return the final HTML string
-        return f"""{heading_text}
+        # return f"""{heading_text}
+        #         <div class="tab-cont form-group">
+        #             {table_html}
+        #         </div>
+        #         """
+        table_collapse_uuid = uuid.uuid4()
+        return f"""<p>
+                <button class="btn btn-light btn-sm" style="display: block;width:50%;border-radius: 5px;font-size:12px;border-color:#b4b4b4;" type="button" data-toggle="collapse" data-target="#collapseExample{table_collapse_uuid}" aria-expanded="true" aria-controls="collapseExample{table_collapse_uuid}">
+                    {heading_text}
+                </button>
+            </p>
+            <div class="collapse show mb-5" id="collapseExample{table_collapse_uuid}">
                 <div class="tab-cont form-group">
                     {table_html}
                 </div>
-                """
+            </div>
+        """
+
 
 
 
@@ -121,9 +134,24 @@ class DynamicObject:
         # Encode byte stream to Base64
         img_base64 = base64.b64encode(img_byte_array).decode('utf-8')
         # Create HTML img tag
-        return f"""
+        # return f"""
+        #         <h{heading_tag}>{piechart_name}</h{heading_tag}>
+        #         <img src="data:image/png;base64,{img_base64}" alt="Image" class="img-fluid w-100"  />
+        # """
+    
+        charts_collapse_uuid = uuid.uuid4()
+        return f"""<p>
+              <button class="btn btn-sm analysis_btn-hover-effect" type="button"
+                data-toggle="collapse" 
+                data-target="#collapseExample{charts_collapse_uuid}" 
+                aria-expanded="true" 
+                aria-controls="collapseExample{charts_collapse_uuid}">
                 <h{heading_tag}>{piechart_name}</h{heading_tag}>
+            </button>
+            </p>
+            <div class="collapse show mb-5" id="collapseExample{charts_collapse_uuid}">
                 <img src="data:image/png;base64,{img_base64}" alt="Image" class="img-fluid w-100"  />
+            </div>
         """
 
 class perf_load_report_publish:
@@ -397,10 +425,10 @@ class perf_load_report_publish:
                         continue
                     prev_data=prev_data[key_name]["data"]
                     temp_images,memory_combined_df,cpu_combined_df=analysis_main(data["memory_usages_analysis"],prev_data["memory_usages_analysis"],data["cpu_usage_analysis"],prev_data["cpu_usage_analysis"],main_build_load_details=self.main_result["load_details"]["data"],prev_build_load_details=self.get_key_result(prev_sprint,prev_run,"load_details")["load_details"]["data"] )                    
-                    html_text+=curr_page_obj.add_text(f"<h2>Contributers to Resource Usage increase/decrease</h2>")
+                    html_text+=curr_page_obj.add_text(f'<h2>Contributers to Resource Usage increase/decrease  <span class="badge badge-pill badge-danger analysis-badge-custom"> NEW</span></h2>')
                     html_text+=curr_page_obj.add_table_from_dataframe(f'<h3>{self.captilise_heading("memory_usages_analysis")}</h3>', memory_combined_df.copy(), collapse=False)
                     html_text+=curr_page_obj.add_table_from_dataframe(f'<h3>{self.captilise_heading("cpu_usage_analysis")}</h3>', cpu_combined_df.copy(), collapse=False)
-                    html_text+=curr_page_obj.add_text(f"<h2>Complete Analysis piecharts for resource utilizations</h2>")
+                    html_text+=curr_page_obj.add_text(f'<h2>Complete Analysis piecharts for resource utilizations <span class="badge badge-pill badge-danger analysis-badge-custom"> NEW</span></h2>')
                     for piechart_name in temp_images:
                         html_text+=curr_page_obj.attach_plot_as_image(piechart_name, temp_images[piechart_name], 3)
                 elif key_format == "charts":

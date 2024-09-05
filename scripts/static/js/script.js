@@ -1172,3 +1172,27 @@ function convertImagesToBase64_HTML(element) {
         });
     }));
 }
+
+
+function toggleCollapseExpand() {
+    var toggleButton = document.getElementById("toggleBetween_expand_collapse");
+    var toggleIcon = document.getElementById("toggleIcon");
+    var collapsibles = document.querySelectorAll("#ReportWindow .collapse");
+
+    if (toggleButton.getAttribute("data-expanded") === "true") {
+        // Collapse all
+        collapsibles.forEach(function(collapsible) {
+            $(collapsible).collapse('hide'); // Use jQuery for smooth collapse
+        });
+        toggleButton.innerHTML = '<i id="toggleIcon" class="fas fa-expand"></i> Expand All';
+        toggleButton.setAttribute("data-expanded", "false");
+    } else {
+        // Expand all
+        collapsibles.forEach(function(collapsible) {
+            $(collapsible).collapse('show'); // Use jQuery for smooth expand
+        });
+        toggleButton.innerHTML = '<i id="toggleIcon" class="fas fa-compress"></i> Collapse All';
+        toggleButton.setAttribute("data-expanded", "true");
+    }
+}
+

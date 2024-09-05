@@ -169,6 +169,8 @@
     /* background-color: #888; */
     color: #000000;
     /* border-top: 1px solid black; */
+    border: 1px solid rgb(117, 117, 117);
+    /* padding-top: 10px; */
 }
 #scroll_through_report_slowly{
     /* top: 200px; */
@@ -176,14 +178,18 @@
 
 }
 
+#toggleBetween_expand_collapse{
+    bottom: 670px;
+}
+
 #download_html_btn{
-    bottom: 630px;
+    bottom: 560px;
 
     /* font-size: 12px; */
 }
 
 #download_pdf_btn{
-    bottom: 480px;
+    bottom: 450px;
 
     /* font-size: 12px; */
     /* padding: 10px; */
@@ -192,16 +198,15 @@
     /* white-space: nowrap; */
 }
 #download_word_btn{
-    bottom: 330px;
+    bottom: 340px;
 
     /* font-size: 12px; */
 }
 
 #scroll_up {
 
-    bottom: 190px;
+    bottom: 240px;
 }
-
 
 .sortable {
     cursor: pointer;
@@ -374,4 +379,26 @@
     font-size: 14px;
     right: 1.5%;
 
+}
+
+.analysis_btn-hover-effect {
+    display: block;
+    width: 50%;
+    border-radius: 5px;
+    font-size: 12px;
+    border-color: #b4b4b4;
+    background-color: #efe2ff;
+    transition: background-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+/* On hover: Change background color and add shadow */
+.analysis_btn-hover-effect:hover {
+    background-color: #d8c3ff; /* Darker shade of purple */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Add a shadow effect */
+}
+
+.analysis-badge-custom {
+    font-size: 0.45em;  /* Make the badge smaller */
+    vertical-align: super;  /* Position it a bit higher */
+    padding: 0.2em 0.5em;  /* Adjust padding to make it look good at smaller size */
 }
