@@ -224,7 +224,8 @@ class parent:
                     "schema":{
                         "merge_on_cols" : [],
                         "compare_cols":[],
-                        "page":"Summary"
+                        "page":"Summary",
+                        "isEditable":True
                     },
                     "data":df.to_dict(orient="records")
                 }    
@@ -239,7 +240,8 @@ class parent:
                 "schema":{
                     "merge_on_cols" : [],
                     "compare_cols":[],
-                    "page":"Summary"
+                    "page":"Summary",
+                    "isEditable":True
                     },
                 "data":df.to_dict(orient="records")
                 }    
