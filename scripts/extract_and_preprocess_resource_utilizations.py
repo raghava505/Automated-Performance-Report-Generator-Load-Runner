@@ -141,7 +141,7 @@ class complete_resource_usages:
         df = df[df[average_column_name] >= usage_threshold]
         df = df.round(2)
         # print(self.sum_and_sort_cols(df.copy()))
-        self.stack_obj.log.info(f"\n {df}")
+        # self.stack_obj.log.info(f"\n {df}")
         if for_report:
             return {
                 "format":"table","collapse":True,
@@ -158,7 +158,7 @@ class complete_resource_usages:
     def preprocess_df(self,df,container_name_or_app_name,for_report):
         self.stack_obj.log.info(f"************************************************** Main Dataframe received for {container_name_or_app_name} level usages. Shape : {df.shape} ")
         if df.empty:
-            self.stack_obj.log.info(f"\n {df}")
+            # self.stack_obj.log.info(f"\n {df}")
             self.stack_obj.log.warning(f"Found empty dataframe for {container_name_or_app_name}")
             return {}
         result={}

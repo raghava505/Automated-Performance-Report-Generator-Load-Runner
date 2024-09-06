@@ -428,7 +428,7 @@ class trino_queries_class:
             columns=value['columns']
             schema = value["schema"]
             query = raw_command.replace("<start_utc_str>",self.start_utc_str).replace( "<end_utc_str>", self.end_utc_str)
-            self.stack_obj.log.info(f"\n************************** {heading} ************************ :\n {query}")
+            self.stack_obj.log.info(f"\n************************** {heading} ************************ :\n")
             output= execute_trino_query(self.dnode,query,self.stack_obj)
             # if not output or output.strip()=="":
             #     raise RuntimeError(f"ERROR : command output is empty. Check if trino @ {self.dnode} is in good state. Terminating program ...")
@@ -451,7 +451,7 @@ class trino_queries_class:
             # df = df._append(new_row, ignore_index=True)
             if df.empty: continue
             df = df.head(168)
-            self.stack_obj.log.info(f"\n {df}")
+            # self.stack_obj.log.info(f"\n {df}")
             try:
                 df["query_operation"] = df["query_operation"].astype(str)
             except:
