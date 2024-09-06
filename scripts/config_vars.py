@@ -8,15 +8,12 @@ SSH_PORT = 22
 PGBADGER_PORT = 5602
 ELASTICSEARCH_PORT = 9200
 
-#ips
-PERF_PROD_DASHBOARD = "192.168.146.69"
-
 #int and strings
 PROM_API_PATH = "/api/v1/query_range"
 PROM_POINT_API_PATH = "/api/v1/query"
 ABACUS_USERNAME = 'abacus'  
 ABACUS_PASSWORD = 'abacus' 
-MONGO_CONNECTION_STRING = "mongodb://localhost:27017"
+MONGO_CONNECTION_STRING = "mongodb://mongo:27017"  #use "mongo" when mongo is running  in a container, use "localhost" if running in machine
 PRESTO_LOADS_FOLDER_PATH = "/home/abacus/benchto_reports/"
 # API_LOADS_FOLDER_PATH_TEMP = "/home/abacus/apache-jmeter-5.6.2/bin/reports/"
 

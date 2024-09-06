@@ -1,0 +1,36 @@
+version: '3'
+
+services:
+  mongo:
+    image: mongo:4.2
+    container_name: mongo
+    restart: unless-stopped
+    ports:
+      - "27017:27017"
+    volumes:
+      - ${REPORT_GENERATOR_ROOT_PATH}/mongodb/data/db:/data/db
+    networks:
+      - my-network
+
+  report-generator:
+    image: report-generator
+    container_name: report-generator
+    depends_on:
+      - mongo
+    volumes:
+      - ${REPORT_GENERATOR_ROOT_PATH}/graphs:/app/graphs
+      - ${REPORT_GENERATOR_ROOT_PATH}/htmls:/app/htmls
+      - ${REPORT_GENERATOR_ROOT_PATH}/save-report-data-to-mongo/logs:/app/save-report-data-to-mongo/logs
+      - ${REPORT_GENERATOR_ROOT_PATH}/save-report-data-to-mongo:/app/save-report-data-to-mongo
+      # - ~/save-report-data-to-mongo:/app/save-report-data-to-mongo
+    ports:
+      - "5000:5000"
+    # environment:
+    #   FLASK_ENV: development         # Set Flask environment to development for auto-reloading
+    networks:
+      - my-network
+
+networks:
+  my-network:
+    driver: bridge
+

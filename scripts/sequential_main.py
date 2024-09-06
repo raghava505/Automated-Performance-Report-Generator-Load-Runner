@@ -4,7 +4,7 @@ import pymongo
 import json
 from gridfs import GridFS
 from bson import ObjectId
-import concurrent.futures
+
 from config_vars import *
 from input import create_input_form
 from extract_stack_details import extract_ram_cores_storage_details
@@ -126,121 +126,42 @@ if __name__ == "__main__":
                 except Exception as err:
                     stack_obj.log.error(f"load_details.update(params) => {err}")
             
-            header_data = {
+            final_data_to_save = {
                 "load_details":{"format":"mapping","schema":{"page":"Summary"},"data":load_details},
-                "Test environment details": None,
+                "Test environment details": extract_ram_cores_storage_details(stack_obj),
                 "observations":load_cls.get_observations(),
                 "Bugs raised":load_cls.get_bugs_raised(),
                 "new_format":True
             }
-            complete_resource_details = None
-            accuracies = {}
-            middle_data = None
-            trino_queries_analyse_results=None
-            memory_usages=None
-            cpu_usages=None
-            footer_data = {}
-
             #--------------------------------complete resource extraction---------------------------------------
-            # stack_obj.log.info("******* [NEW] Calculating complete resource utilizations ...")
-            # resource_obj=complete_resource_usages(stack_obj,include_nodetypes=load_cls.hostname_types)
-            # complete_resource_details=resource_obj.get_complete_result()
-            # memory_usages = complete_resource_details.pop("memory_usages", None)
-            # cpu_usages = complete_resource_details.pop("cpu_usages", None)
-            # if complete_resource_details:middle_data.update(complete_resource_details)
-
-            def calculate_resource_utilizations_thread(stack_obj, load_cls):
-                stack_obj.log.info("******* [NEW] Calculating complete resource utilizations ...")
-                resource_obj = complete_resource_usages(stack_obj, include_nodetypes=load_cls.hostname_types)
-                return resource_obj.get_complete_result()
-            
-            def process_trino_queries_thread(stack_obj):
-                stack_obj.log.info("******* Performing trino queries analysis ...")
-                trino_obj = trino_queries_class(stack_obj=stack_obj)
-                return trino_obj.fetch_trino_results()
-            
-            def env_details_thread(stack_obj):
-                return extract_ram_cores_storage_details(stack_obj)
-            
-            def remaining_calculations_thread(stack_obj,variables,test_env_json_details):
-                return_dict={}
-                if variables["load_name"] != "ControlPlane":
-                    stack_obj.log.info("******* Calculating disk space usages ...")
-                    calc = diskspace_usage_class(stack_obj=stack_obj)
-                    disk_space_usage_dict=calc.make_calculations()
-                    if disk_space_usage_dict:return_dict.update({"disk_space_usages":disk_space_usage_dict})
-                #--------------------------------- add kafka topics ---------------------------------------
-                stack_obj.log.info("******* Fetching kafka topics ...")
-                kafka_obj = kafka_topics(stack_obj)
-                kafka_topics_list = kafka_obj.add_topics_to_report()
-                if kafka_topics_list:return_dict.update({"kafka_topics":kafka_topics_list})
-
-                 #---------------No.of Active connections by application---------------
-                stack_obj.log.info("******* Fetching active connection details ...")
-                active_conn_obj = num_active_conn_class(stack_obj=stack_obj)
-                active_conn_results = active_conn_obj.get_avg_active_conn()
-                if active_conn_results:return_dict.update({"Number of active connections group by application on master":active_conn_results})
-                
-                #-------------------------------PG Stats Calculations -------------------------------------
-                stack_obj.log.info("******* Calculating Postgress Tables Details ...")
-                pgtable = pg_stats_class(stack_obj=stack_obj)
-                pg_stats = pgtable.process_output()
-                if pg_stats:return_dict.update({"PG Stats":pg_stats})
-
-                if "elastic_node_ip" in test_env_json_details:
-                    stack_obj.log.info("******* Fetching Elk Errors ...")
-                    elk = elk_errors_class(stack_obj=stack_obj,elastic_ip=test_env_json_details['elastic_node_ip'])
-                    elk_errors = elk.fetch_errors()
-                    if elk_errors:return_dict.update({"ELK Errors":elk_errors})
-                #-------------------------Compaction Status----------------------------
-                if "elastic_node_ip" in test_env_json_details:
-                    stack_obj.log.info("******* Fetching Compaction Status details...")
-                    compaction = CompactionStatus(stack_obj=stack_obj,elastic_ip=test_env_json_details['elastic_node_ip'])
-                    compaction_status = compaction.execute_query()
-                    if compaction_status:return_dict.update({"Compaction Status":compaction_status})
-
-                return return_dict
-
-            with concurrent.futures.ThreadPoolExecutor() as executor:
-                # Submit the resource utilization calculation task
-                future_resource_usages = executor.submit(calculate_resource_utilizations_thread, stack_obj, load_cls)
-                future_trino_analysis = executor.submit(process_trino_queries_thread, stack_obj)
-                future_env_details = executor.submit(env_details_thread, stack_obj)
-                remaining_calculations_details = executor.submit(remaining_calculations_thread, stack_obj,variables,test_env_json_details)
-
-
-                complete_resource_details = future_resource_usages.result()
-                trino_queries_analyse_results = future_trino_analysis.result()
-                env_details_result = future_env_details.result()
-                middle_data = remaining_calculations_details.result()
-
-                if complete_resource_details:
-                    memory_usages = complete_resource_details.pop("memory_usages", None)
-                if complete_resource_details:
-                    cpu_usages = complete_resource_details.pop("cpu_usages", None)
-                header_data["Test environment details"] = env_details_result
+            stack_obj.log.info("******* [NEW] Calculating complete resource utilizations ...")
+            resource_obj=complete_resource_usages(stack_obj,include_nodetypes=load_cls.hostname_types)
+            complete_resource_details=resource_obj.get_complete_result()
+            memory_usages = complete_resource_details.pop("memory_usages", None)
+            cpu_usages = complete_resource_details.pop("cpu_usages", None)
+            if complete_resource_details:final_data_to_save.update(complete_resource_details)
 
             #-------------------------real time query test details--------------------------
             # if domain=="longevity" and variables["load_type"] in ["all_loads_combined"]: 
             #     from realtimequery_tests.real_time_query import realtime_query
             #     stack_obj.log.info(f"Performing realtime query test on stack '{stack}' ...")
             #     realtime_query_results=realtime_query()
-            #     if realtime_query_results:footer_data.update({"Realtimequery test results":realtime_query_results})
+            #     if realtime_query_results:final_data_to_save.update({"Realtimequery test results":realtime_query_results})
             #-------------------------disk space--------------------------
-            # if variables["load_name"] != "ControlPlane":
-            #     stack_obj.log.info("******* Calculating disk space usages ...")
-            #     calc = diskspace_usage_class(stack_obj=stack_obj)
-            #     disk_space_usage_dict=calc.make_calculations()
-            #     if disk_space_usage_dict:footer_data.update({"disk_space_usages":disk_space_usage_dict})
-            # #--------------------------------- add kafka topics ---------------------------------------
-            # stack_obj.log.info("******* Fetching kafka topics ...")
-            # kafka_obj = kafka_topics(stack_obj)
-            # kafka_topics_list = kafka_obj.add_topics_to_report()
-            # if kafka_topics_list:footer_data.update({"kafka_topics":kafka_topics_list})
+            if variables["load_name"] != "ControlPlane":
+                stack_obj.log.info("******* Calculating disk space usages ...")
+                calc = diskspace_usage_class(stack_obj=stack_obj)
+                disk_space_usage_dict=calc.make_calculations()
+                if disk_space_usage_dict:final_data_to_save.update({"disk_space_usages":disk_space_usage_dict})
+            #--------------------------------- add kafka topics ---------------------------------------
+            stack_obj.log.info("******* Fetching kafka topics ...")
+            kafka_obj = kafka_topics(stack_obj)
+            kafka_topics_list = kafka_obj.add_topics_to_report()
+            if kafka_topics_list:final_data_to_save.update({"kafka_topics":kafka_topics_list})
             #------------------------------- (NEW) API load report link--------------------------------------------------
             if apiload_remote_directory_name and 'apiload_simulator_ip' in test_env_json_details and apiload_remote_directory_name!="":
                 api_load_report_link=os.path.join(f"http://{test_env_json_details['apiload_simulator_ip']}:{API_REPORT_PORT}",apiload_remote_directory_name,f"index.html")
-                footer_data.update({"Api load report link":{"format":"mapping","schema":{},"data":{"link":api_load_report_link}}})
+                final_data_to_save.update({"Api load report link":{"format":"mapping","schema":{},"data":{"link":api_load_report_link}}})
             
             #-------------------------Presto LOAD--------------------------
             # if 'prestoload_simulator_ip' in test_env_json_details:
@@ -250,7 +171,7 @@ if __name__ == "__main__":
             #     benchto_load_pdf_path=os.path.join(PRESTO_LOADS_FOLDER_PATH , stack_starttime_string, "Benchto.pdf")
             #     stack_obj.log.info(f"CSV file path for Presto/benchto load : {benchto_load_csv_path}")
             #     presto_load_result_dict = fetch_and_extract_csv(benchto_load_csv_path,test_env_json_details['prestoload_simulator_ip'],stack_obj)
-            #     if presto_load_result_dict:footer_data.update({"Presto Load details":presto_load_result_dict})
+            #     if presto_load_result_dict:final_data_to_save.update({"Presto Load details":presto_load_result_dict})
             # else:
             #     stack_obj.log.warning(f"------------------------------ Skipping presto load details because 'prestoload_simulator_ip' is not present in stack json file")
             #-------------------------(OLD) API load--------------------------
@@ -260,7 +181,7 @@ if __name__ == "__main__":
             #     api_load_csv_path = os.path.join(API_LOADS_FOLDER_PATH_TEMP , stack_starttime_string+".csv")
             #     stack_obj.log.info(f"CSV file path for API/Jmeter load : {api_load_csv_path}")
             #     api_load_result_dict = fetch_and_extract_csv(api_load_csv_path,test_env_json_details['apiload_simulator_ip'],stack_obj)
-            #     if api_load_result_dict:footer_data.update({"API Load details":api_load_result_dict})
+            #     if api_load_result_dict:final_data_to_save.update({"API Load details":api_load_result_dict})
             # else:
             #     stack_obj.log.warning(f"------------------------------ Skipping (old) API load details because 'apiload_simulator_ip' is not present in stack json file")
             #-------------------------Osquery Table Accuracies----------------------------
@@ -278,33 +199,33 @@ if __name__ == "__main__":
                 osq_accuracy_obj= osq_accuracy(stack_obj,api_path=api_path,domain=domain,assets_per_cust=assets_per_cust,ext=extension,trans=True,input_file=input_file_path)
                 Osquery_table_accuracies = osq_accuracy_obj.table_accuracy()
                 # stack_obj.log.info(f"Osquery_table_accuracies : {json.dumps(Osquery_table_accuracies,indent=4)}")
-                if Osquery_table_accuracies:accuracies.update({"Osquery Table Accuracies":Osquery_table_accuracies})
+                if Osquery_table_accuracies:final_data_to_save.update({"Osquery Table Accuracies":Osquery_table_accuracies})
                 # if input_file != "inputFile6tab_12rec.log":
                 stack_obj.log.info("******* Calculating Events/Alerts accuracies for Osquery Load ...")
                 Osquery_event_accuracies = osq_accuracy_obj.events_accuracy(alert_rules_triggered_per_cust,event_rules_triggered_per_cust)
                 # stack_obj.log.info(f"Osquery_event_accuracies : {json.dumps(Osquery_event_accuracies,indent=4)}")
-                if Osquery_event_accuracies:accuracies.update({"Osquery Event Accuracies":Osquery_event_accuracies})
+                if Osquery_event_accuracies:final_data_to_save.update({"Osquery Event Accuracies":Osquery_event_accuracies})
             #-------------------------Kubequery Accuracies----------------------------
             if variables["load_name"] in ["KubeQuery_SingleCustomer","KubeQuery_and_SelfManaged_Combined"] or variables["load_type"] in ["all_loads_combined"]:
                 stack_obj.log.info("******* Calculating accuracies for KubeQuery Load ...")
                 kube_accuracy_obj = Kube_Accuracy(stack_obj=stack_obj)
                 kubequery_accuracies = kube_accuracy_obj.accuracy_kubernetes()
                 stack_obj.log.info(json.dumps(kubequery_accuracies, indent=2))
-                if kubequery_accuracies:accuracies.update({"Kubequery Table Accuracies":kubequery_accuracies})
+                if kubequery_accuracies:final_data_to_save.update({"Kubequery Table Accuracies":kubequery_accuracies})
             #-------------------------SelfManaged Accuracies----------------------------
             if variables["load_name"] in ["SelfManaged_SingleCustomer","KubeQuery_and_SelfManaged_Combined"] or variables["load_type"] in ["all_loads_combined"]:
                 stack_obj.log.info("******* Calculating accuracies for SelfManaged Load ...")
                 selfmanaged_accuracy_obj = SelfManaged_Accuracy(stack_obj=stack_obj)
                 selfmanaged_accuracies = selfmanaged_accuracy_obj.accuracy_selfmanaged()
                 stack_obj.log.info(json.dumps(selfmanaged_accuracies, indent=2))
-                if selfmanaged_accuracies:accuracies.update({"Selfmanaged Table Accuracies":selfmanaged_accuracies})
+                if selfmanaged_accuracies:final_data_to_save.update({"Selfmanaged Table Accuracies":selfmanaged_accuracies})
             #-------------------------Cloudquery Accuracies----------------------------
             # if variables["load_type"] in ["CloudQuery","osquery_cloudquery_combined","all_loads_combined"]:
             #     stack_obj.log.info("******* Calculating accuracies for cloudquery Load...")
             #     cloud_accuracy_obj= cloud_accuracy(stack_obj=stack_obj,variables=variables)
             #     cloudquery_accuracies = cloud_accuracy_obj.calculate_accuracy()
             #     stack_obj.log.info(json.dumps(cloudquery_accuracies, indent=2))
-            #     if cloudquery_accuracies:middle_data.update({"Cloudquery Table Accuracies":{"format":"nested_table","schema":{},"data":cloudquery_accuracies}})
+            #     if cloudquery_accuracies:final_data_to_save.update({"Cloudquery Table Accuracies":{"format":"nested_table","schema":{},"data":cloudquery_accuracies}})
             #-------------------------Azure Load Accuracies----------------------------
             # if variables["load_name"] == "Azure_MultiCustomer" or variables["load_type"] in ["all_loads_combined"]:
             #     stack_obj.log.info("******* Calculating accuracies for Azure Load ...")
@@ -313,56 +234,56 @@ if __name__ == "__main__":
             #     stack_obj.log.info("******* Calculating the counts of various events during the load ...")
             #     calc = events_count_class(variables=variables,stack_obj=stack_obj)
             #     evecount = calc.get_events_count()
-            #     if evecount:middle_data.update({"Cloudquery Event Counts":evecount})
+            #     if evecount:final_data_to_save.update({"Cloudquery Event Counts":evecount})
             #--------------------------------------STS Records-------------------------------------------
             # if variables["load_name"] == "AWS_MultiCustomer":
             #     print("Calculating STS Records ...")
             #     calc = STS_RECORDS(start_timestamp=stack_obj.start_time_UTC,end_timestamp=stack_obj.end_time_UTC,stack_obj=stack_obj,variables=variables)
             #     sts = calc.calc_stsrecords()
-            #     if sts:middle_data.update({"STS Records":sts})
+            #     if sts:final_data_to_save.update({"STS Records":sts})
             #-----------------------------Processing Time for Db Operations------------------------------
             if variables["load_type"] in ["CloudQuery","osquery_cloudquery_combined","all_loads_combined"]:
                 stack_obj.log.info("******* Processing time for Db Operations ...")
                 calc = DB_OPERATIONS_TIME(stack_obj=stack_obj)
                 db_op=calc.db_operations()
-                if db_op:footer_data.update({"Cloudquery Db Operations Processing Time":db_op})
+                if db_op:final_data_to_save.update({"Cloudquery Db Operations Processing Time":db_op})
             #---------------No.of Active connections by application---------------
-            # stack_obj.log.info("******* Fetching active connection details ...")
-            # active_conn_obj = num_active_conn_class(stack_obj=stack_obj)
-            # active_conn_results = active_conn_obj.get_avg_active_conn()
-            # if active_conn_results:footer_data.update({"Number of active connections group by application on master":active_conn_results})
+            stack_obj.log.info("******* Fetching active connection details ...")
+            active_conn_obj = num_active_conn_class(stack_obj=stack_obj)
+            active_conn_results = active_conn_obj.get_avg_active_conn()
+            if active_conn_results:final_data_to_save.update({"Number of active connections group by application on master":active_conn_results})
             
-            # #-------------------------------PG Stats Calculations -------------------------------------
-            # stack_obj.log.info("******* Calculating Postgress Tables Details ...")
-            # pgtable = pg_stats_class(stack_obj=stack_obj)
-            # pg_stats = pgtable.process_output()
-            # if pg_stats:footer_data.update({"PG Stats":pg_stats})
+            #-------------------------------PG Stats Calculations -------------------------------------
+            stack_obj.log.info("******* Calculating Postgress Tables Details ...")
+            pgtable = pg_stats_class(stack_obj=stack_obj)
+            pg_stats = pgtable.process_output()
+            if pg_stats:final_data_to_save.update({"PG Stats":pg_stats})
             #--------------------------------Elk Errors------------------------------------------------
-            # if "elastic_node_ip" in test_env_json_details:
-            #     stack_obj.log.info("******* Fetching Elk Errors ...")
-            #     elk = elk_errors_class(stack_obj=stack_obj,elastic_ip=test_env_json_details['elastic_node_ip'])
-            #     elk_errors = elk.fetch_errors()
-            #     if elk_errors:footer_data.update({"ELK Errors":elk_errors})
-            # #-------------------------Compaction Status----------------------------
-            # if "elastic_node_ip" in test_env_json_details:
-            #     stack_obj.log.info("******* Fetching Compaction Status details...")
-            #     compaction = CompactionStatus(stack_obj=stack_obj,elastic_ip=test_env_json_details['elastic_node_ip'])
-            #     compaction_status = compaction.execute_query()
-            #     if compaction_status:footer_data.update({"Compaction Status":compaction_status})
+            if "elastic_node_ip" in test_env_json_details:
+                stack_obj.log.info("******* Fetching Elk Errors ...")
+                elk = elk_errors_class(stack_obj=stack_obj,elastic_ip=test_env_json_details['elastic_node_ip'])
+                elk_errors = elk.fetch_errors()
+                if elk_errors:final_data_to_save.update({"ELK Errors":elk_errors})
+            #-------------------------Compaction Status----------------------------
+            if "elastic_node_ip" in test_env_json_details:
+                stack_obj.log.info("******* Fetching Compaction Status details...")
+                compaction = CompactionStatus(stack_obj=stack_obj,elastic_ip=test_env_json_details['elastic_node_ip'])
+                compaction_status = compaction.execute_query()
+                if compaction_status:final_data_to_save.update({"Compaction Status":compaction_status})
             #-------------------------Trino Queries--------------------------
-            # stack_obj.log.info("******* Performing trino queries analysis ...")
-            # trino_obj = trino_queries_class(stack_obj=stack_obj)
-            # trino_queries_analyse_results = trino_obj.fetch_trino_results()
-            # if trino_queries_analyse_results:footer_data.update({"Trino Queries Analysis":trino_queries_analyse_results})
+            stack_obj.log.info("******* Performing trino queries analysis ...")
+            trino_obj = trino_queries_class(stack_obj=stack_obj)
+            trino_queries_analyse_results = trino_obj.fetch_trino_results()
+            if trino_queries_analyse_results:final_data_to_save.update({"Trino Queries Analysis":trino_queries_analyse_results})
             #--------------------------------cpu and mem node-wise---------------------------------------
             # stack_obj.log.info("******* Calculating resource utilizations ...")
             # comp = mem_cpu_usage_class(stack_obj=stack_obj,include_nodetypes=load_cls.hostname_types)
             # mem_cpu_usages_dict,overall_usage_dict=comp.make_comparisions(load_cls.common_app_names,load_cls.common_pod_names)
-            # if overall_usage_dict:footer_data.update(overall_usage_dict)
-            # if mem_cpu_usages_dict:footer_data.update(mem_cpu_usages_dict)
+            # if overall_usage_dict:final_data_to_save.update(overall_usage_dict)
+            # if mem_cpu_usages_dict:final_data_to_save.update(mem_cpu_usages_dict)
             #-------------------------------- add remaining resource usages ----------------------------
-            if memory_usages:footer_data.update({"memory_usages":memory_usages})
-            if cpu_usages:footer_data.update({"cpu_usages":cpu_usages})
+            if memory_usages:final_data_to_save.update({"memory_usages":memory_usages})
+            if cpu_usages:final_data_to_save.update({"cpu_usages":cpu_usages})
             #--------------------------------Capture charts data---------------------------------------
             try:
                 step_factor=hours/10 if hours>10 else 1
@@ -371,21 +292,12 @@ if __name__ == "__main__":
                 charts_obj = Charts(stack_obj=stack_obj,fs=fs)
                 complete_charts_data_dict,all_gridfs_fileids=charts_obj.capture_charts_and_save(load_cls.get_all_chart_queries(),step_factor=step_factor)
                 stack_obj.log.info("charts data fetched successfully !")
-                if complete_charts_data_dict:footer_data.update({"charts":{"format":"charts","schema":{"base_graphs_path":BASE_GRAPHS_PATH,"page":"Charts"},"data":complete_charts_data_dict}})
+                if complete_charts_data_dict:final_data_to_save.update({"charts":{"format":"charts","schema":{"base_graphs_path":BASE_GRAPHS_PATH,"page":"Charts"},"data":complete_charts_data_dict}})
 
-                # footer_data.update({"all_gridfs_referenced_ids":all_gridfs_fileids})
+                # final_data_to_save.update({"all_gridfs_referenced_ids":all_gridfs_fileids})
                 
                 #--------------------------------Saving report data to mongodb---------------------------------------
                 stack_obj.log.info("******* Saving report data to mongodb ...")
-                final_data_to_save= {}
-                final_data_to_save.update(header_data)
-                if complete_resource_details: final_data_to_save.update(complete_resource_details)
-                if accuracies:final_data_to_save.update(accuracies)
-                if middle_data:final_data_to_save.update(middle_data)
-                if trino_queries_analyse_results:final_data_to_save.update({"Trino Queries Analysis":trino_queries_analyse_results})
-                if footer_data:final_data_to_save.update(footer_data)
-
-
                 inserted_id = collection.insert_one(final_data_to_save).inserted_id
                 stack_obj.log.info(f"Document pushed to mongo successfully into database:{database_name}, collection:{collection_name} with id {inserted_id}")
                 #---------------CREATING GRAPHS-----------------

@@ -13,7 +13,8 @@ import os
 import pytz
 from helper import save_html_page
 from scrape_pgbadger_tables import scrape_func
-from config_vars import PGBADGER_REPORT_PORT,PERF_PROD_DASHBOARD, PGBADGER_PORT
+from config_vars import PGBADGER_REPORT_PORT, PGBADGER_PORT
+import socket
 
 current_time = datetime.now()
 current_time = current_time.strftime("%Y-%m-%d_%H:%M:%S")
@@ -161,6 +162,19 @@ def get_and_save_pgb_html(stack_obj,elastic_url,base_save_path,pgbadger_tail_pat
     extracted_tables={}
     stack_obj.log.info(f"Converted start time UTC string is : {start_time}")
     stack_obj.log.info(f"Converted end time UTC string is : {end_time}")
+
+    # Create a dummy socket connection
+    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    local_ip_address = "not_found"
+    try:
+        # Connect to a remote host; doesn't need to be reachable
+        s.connect(("8.8.8.8", 80))
+        local_ip_address = s.getsockname()[0]
+    finally:
+        s.close()
+
+    print(f"Local IP Address: {local_ip_address}")
+
     links=get_links(elastic_url , start_time, end_time,pgbadger_reports_mount,check,stack_obj)
     for db,link in links.items():
         stack_obj.log.info(f"Processing pgbadger report for database : {db}")
@@ -178,7 +192,7 @@ def get_and_save_pgb_html(stack_obj,elastic_url,base_save_path,pgbadger_tail_pat
             scraped_res = scrape_func(save_path,db,stack_obj)
             if scraped_res!={}:
                 extracted_tables.update(scraped_res)
-            return_file_names[db] = os.path.join(f"http://{PERF_PROD_DASHBOARD}:{PGBADGER_REPORT_PORT}",pgbadger_tail_path,f"pgbadger_report_{db}.html")
+            return_file_names[db] = os.path.join(f"http://{local_ip_address}:{PGBADGER_REPORT_PORT}",pgbadger_tail_path,f"pgbadger_report_{db}.html")
     stack_obj.log.info(f"Returning pgbadger links dict : {return_file_names}")
     return return_file_names,extracted_tables
 
