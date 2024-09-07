@@ -87,15 +87,16 @@ class elk_errors_class:
                             save_dict.append({"Error Message": error_message, "Count": count})
                         df = pd.DataFrame(save_dict)
                         self.stack_obj.log.info("\n%s",df)
-                        return_dict ={
-                                "format":"table","collapse":True,
-                                "schema":{
-                                    "merge_on_cols" : ["Error Message"],
-                                    "compare_cols":["Count"]
-                                },
-                                "data":df.to_dict(orient="records")
+                        if not df.empty:
+                            return_dict ={
+                                    "format":"table","collapse":True,
+                                    "schema":{
+                                        "merge_on_cols" : ["Error Message"],
+                                        "compare_cols":["Count"]
+                                    },
+                                    "data":df.to_dict(orient="records")
                             }
-                        result_dict[log_type] = return_dict
+                            result_dict[log_type] = return_dict
                     except Exception as e:
                         self.stack_obj.log.error(f"An error occurred while processing result for log_type {log_type}: {e}")
 

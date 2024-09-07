@@ -30,8 +30,8 @@ class num_active_conn_class:
 
             numeric_cols = df.select_dtypes(include=[np.number]).columns
             non_numeric_cols = df.select_dtypes(exclude=[np.number]).columns
-            self.stack_obj.log.info(f"Numeric columns : {numeric_cols}")
-            self.stack_obj.log.info(f"Non-Numeric columns : {non_numeric_cols}")
+            # self.stack_obj.log.info(f"Numeric columns : {numeric_cols}")
+            # self.stack_obj.log.info(f"Non-Numeric columns : {non_numeric_cols}")
 
             fill_values = {}
             fill_values.update({col: 0 for col in numeric_cols})

@@ -348,6 +348,7 @@ class perf_load_report_publish:
                 key_format = self.main_result[key_name]["format"]
                 schema = self.main_result[key_name]["schema"]
                 data = self.main_result[key_name]["data"]
+                html_text += f'<span style="color:red;"><b><i>{str(self.main_result[key_name].get("note",""))}</i></b></span>'
 
                 # if "page" in schema : page = schema["page"]
                 # else : page = "Overview"
