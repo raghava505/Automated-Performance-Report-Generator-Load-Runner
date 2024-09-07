@@ -464,7 +464,7 @@ class trino_queries_class:
             }
 
         if save_dict == {}:return None
-        return {"format":"nested_table","note":"NOTE : All the time columns in this section are in milliseconds","schema":{"page":"Trino Queries Analysis"},"data":save_dict}
+        return {"format":"nested_table","note":"NOTE : All the time column values in this section are in milliseconds","schema":{"page":"Trino Queries Analysis"},"data":save_dict}
     
 if __name__=='__main__':
     print("Testing trino queries analysis ...")
