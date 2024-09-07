@@ -415,8 +415,8 @@ class complete_resource_usages:
     
     def collect_total_usages(self,for_report):
         return_dict = {
-            "memory_usages" : {"format":"nested_table","schema":{"page":"Resource Utilizations"},"data":defaultdict(dict, self.collect_total_memory_usages(for_report))},
-            "cpu_usages" : {"format":"nested_table","schema":{"page":"Resource Utilizations"},"data":defaultdict(dict, self.collect_total_cpu_usages(for_report))}
+            "memory_usages" : {"format":"nested_table","note":"NOTE : All usage values in this section are in GB","schema":{"page":"Resource Utilizations"},"data":defaultdict(dict, self.collect_total_memory_usages(for_report))},
+            "cpu_usages" : {"format":"nested_table","note":"NOTE : All usage values in this section are in cores","schema":{"page":"Resource Utilizations"},"data":defaultdict(dict, self.collect_total_cpu_usages(for_report))}
         }
 
         nodetype_level_memory_usage=return_dict["memory_usages"]["data"]["nodetype_level_usages"]

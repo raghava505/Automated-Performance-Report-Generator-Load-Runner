@@ -424,7 +424,7 @@ if __name__ == "__main__":
                     if pgbadger_links != {} : collection.update_one({"_id": ObjectId(inserted_id)}, {"$set": {f"Pgbadger downloaded report links": {"format":"mapping","schema":{},"data":pgbadger_links}}})
                     
                     if extracted_tables!={}:
-                        stack_obj.log.info("Empty extracted tables dictionary found !")
+                        # stack_obj.log.info("Empty extracted tables dictionary found !")
                         collection.update_one({"_id": ObjectId(inserted_id)}, {"$set": {f"Postgres Queries Analysis": extracted_tables}})
 
                 except Exception as e:

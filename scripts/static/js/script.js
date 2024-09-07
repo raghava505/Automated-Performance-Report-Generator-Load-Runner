@@ -368,7 +368,7 @@ function validateViewReport() {
             ViewReport();
             setTimeout(function() {
                 ReportWindowElement.style.marginBottom = "1px";
-            }, 4000);
+            }, 10000);
         }
     }
     

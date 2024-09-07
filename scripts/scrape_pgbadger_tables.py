@@ -222,19 +222,22 @@ def scrape_func(path,db,stack_obj):
                 except Exception as e:
                     stack_obj.log.error(f"sort and limit params not found for {heading}:{db}")
                 stack_obj.log.info(f"\n {df}")
-                total_result[db+" : "+heading] = {
-                    "format":"table","collapse":True,
-                    "schema":value["schema"],
-                    "data":df.to_dict(orient="records")
-                }
+                if not df.empty:
+                    total_result[db+" : "+heading] = {
+                        "format":"table","collapse":True,
+                        "schema":value["schema"],
+                        "data":df.to_dict(orient="records")
+                    }
             else:
                 stack_obj.log.warning(f"No valid rows found in table {heading}")
         except Exception as e:
             stack_obj.log.error("Error : " ,e)
-    return {"format":"nested_table",
-            "schema":{"page":"Postgres Queries Analysis"},
-            "data":total_result
-            }   
+    if total_result!={}:
+        return {"format":"nested_table",
+                "schema":{"page":"Postgres Queries Analysis"},
+                "data":total_result
+                }   
+    return {}
 
 if __name__=="__main__":
     from settings import stack_configuration

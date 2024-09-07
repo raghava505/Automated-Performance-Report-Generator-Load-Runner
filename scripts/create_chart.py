@@ -62,7 +62,7 @@ inner_background_color = "#191b1f"
 gridline_color = "#404144"
 gridline_width = 0.01
 
-fig_width=22
+fig_width=18
 character_width = 12.0                     #inversly prop to initial ncol
 initial_legend_fontsize=fig_width/1.90
 fontsize_decrease_rate_with_rows=fig_width/165
@@ -209,7 +209,7 @@ if __name__=="__main__":
     fs = GridFS(database)
 
     variables = {
-        "start_time_str_ist":"2024-01-26 13:25",
+        "start_time_str_ist":"2024-08-26 13:25",
         "load_duration_in_hrs":4,
         "test_env_file_name":'s1_nodes.json',
         "build":"153105",
@@ -221,13 +221,13 @@ if __name__=="__main__":
     charts_obj = Charts(stack_obj=stack_obj,fs=fs)
     
     step_factor=variables["load_duration_in_hrs"]/10 if variables["load_duration_in_hrs"]>10 else 1
-    complete_charts_data_dict,all_gridfs_fileids=charts_obj.capture_charts_and_save(load_cls.get_all_chart_queries(),step_factor=step_factor)
-    # complete_charts_data_dict,all_gridfs_fileids=charts_obj.capture_charts_and_save({"live Charts":load_cls.get_other_chart_queries()},step_factor=step_factor)
+    # complete_charts_data_dict,all_gridfs_fileids=charts_obj.capture_charts_and_save(load_cls.get_all_chart_queries(),step_factor=step_factor)
+    complete_charts_data_dict,all_gridfs_fileids=charts_obj.capture_charts_and_save({"live Charts":load_cls.get_basic_chart_queries()},step_factor=step_factor)
     print("Saved charts data successfully !")
     path = "/Users/masabathulararao/Documents/Loadtest/save-report-data-to-mongo/publish_practice/images"
     collection = database["Testing"]
-    inserted_id = collection.insert_one({"charts":complete_charts_data_dict})    
-    create_images_and_save(path,str(inserted_id.inserted_id),collection,fs,variables,stack_obj.end_time_str_ist,1,"Longevity","Multiple Customer Rule Engine, Control Plane, CloudQuery, KubeQuery and SelfManaged Load",step_factor)
+    inserted_id = collection.insert_one({"charts":{"data":complete_charts_data_dict}})    
+    create_images_and_save(path,str(inserted_id.inserted_id),collection,fs,variables,stack_obj.end_time_str_ist,1,"Longevity","Multiple Customer Rule Engine, Control Plane, CloudQuery, KubeQuery and SelfManaged Load",step_factor,stack_obj)
 
     f3_at = time.perf_counter()
     print(f"Collecting the report data took : {round(f3_at - s_at,2)} seconds in total")
