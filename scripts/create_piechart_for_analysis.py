@@ -14,12 +14,14 @@ outer_background_color="#191b1f"
 text_color="#FDFEFE"
 sns.set(rc={"text.color": text_color})
 
+FIGURE_WIDTH = 5
+
 kwargs={'startangle':270, 
-        'wedgeprops': {'edgecolor': outer_background_color, 'linewidth': 2.5},  # Set edge width
-        'textprops': {'fontsize': 23,'fontweight': 'bold'},  # Increase font size of labels
+        'wedgeprops': {'edgecolor': outer_background_color, 'linewidth': FIGURE_WIDTH*0.17},  # Set edge width
+        'textprops': {'fontsize': FIGURE_WIDTH*1.8},  # Increase font size of labels
         'rotatelabels':False,
-        'labeldistance':1.01,
-        'pctdistance':0.78,
+        'labeldistance':1.03,
+        'pctdistance':0.76,
         }
 
 red_colors = [
@@ -37,15 +39,15 @@ green_colors = [
     "#3ed37c", "#4ed787", "#5edb92", "#6ede9d", "#7ee2a8", 
     "#8ee6b3", "#9ee9bd", "#aeedc8", "#bef0d3", "#cef4de"
 ]
-figsize=(23, 14)
-title_fontsize=26
-threshold_to_consider_as_less_contributors=2
+figsize=(FIGURE_WIDTH*2, FIGURE_WIDTH)
+title_fontsize=FIGURE_WIDTH*2.1
+threshold_to_consider_as_less_contributors=5
 
-def add_border(image, border_size, border_color=(0, 0, 0)):
+def add_border(image, border_size=1, border_color=(0, 0, 0)):
     # Add a border around the given image
     return ImageOps.expand(image, border=(border_size, border_size), fill=border_color)
 
-def stitch_images_horizontally(images, border_size=4, border_color="white"):
+def stitch_images_horizontally(images, border_size=1, border_color="white"):
     # Calculate dimensions for the stitched image including borders
     widths, heights = zip(*(add_border(i, border_size).size for i in images))
     total_width = sum(widths)
@@ -64,33 +66,33 @@ def stitch_images_horizontally(images, border_size=4, border_color="white"):
 
 def stitch_images_vertically(images,node_type,mem_or_cpu):
     # Get the maximum width and total height of the input images
-    border_size=4
+    border_size=1
     border_color="white"
     widths, heights = zip(*(add_border(i, border_size).size for i in images))
     max_width = max(widths)
     total_height = sum(heights)
     # Create a new blank image with the maximum width and total height
 
-    text_image_height=120
+    text_image_height=40
     text_image = Image.new('RGB', (max_width, text_image_height), color=outer_background_color)
     draw = ImageDraw.Draw(text_image)
     txt = f"{node_type.title()} nodetype : {mem_or_cpu} usage comparison and analysis"
     x = max_width/8
-    draw.text((x,0),text=txt,align="right",font_size=65, fill =(255, 255, 255)) #(max_width//2, text_image_height//2),
+    draw.text((x,0),text=txt,align="right",font_size=FIGURE_WIDTH*5.3, fill =(255, 255, 255)) #(max_width//2, text_image_height//2),
     images.insert(0,text_image)
 
-    text_image_height=120
-    text_image = Image.new('RGB', (max_width, text_image_height), color=outer_background_color)
+    empty_text_image_height=60
+    text_image = Image.new('RGB', (max_width-1, empty_text_image_height), color=outer_background_color)
     draw = ImageDraw.Draw(text_image)
     images.insert(0,text_image)
 
-    stitched_image = Image.new('RGB', (max_width, total_height+2*text_image_height))
+    stitched_image = Image.new('RGB', (max_width, total_height+empty_text_image_height+text_image_height))
     y_offset = 0
     for img in images:
         bordered_img = add_border(img, border_size, border_color)
         # Paste each image into the stitched image at the current y_offset
         stitched_image.paste(bordered_img, (0, y_offset))
-        y_offset += img.height
+        y_offset += bordered_img.height
     return stitched_image
 
 def compare_dfs(main,prev,merge_on):
@@ -191,7 +193,7 @@ def get_piechart(nodetype,df,mem_or_cpu,app_cont_pod):
             each_piechart_title += f"absolute decrease: {overall_absolute_increase_decrease} {unit}↓\n"
             each_piechart_title += f"relative decrease: {overall_relative_increase_decrease} %↓"
 
-    plt.suptitle(each_piechart_title,fontsize=title_fontsize+6)
+    plt.suptitle(each_piechart_title,fontsize=title_fontsize+3)
     plt.gcf().set_facecolor(outer_background_color)
     plt.tight_layout()
     # plt.savefig(f"/Users/masabathulararao/Documents/Loadtest/save-report-data-to-mongo/scripts/csv/{mem_or_cpu}_{app_cont_pod}_{nodetype}.png")
@@ -322,13 +324,15 @@ def analysis_main(mem_main_dict,mem_prev_dict,cpu_main_dict,cpu_prev_dict,main_b
             print(node_type)
             final_stitched_image = stitch_images_horizontally([stitched_memory[node_type] , stitched_cpu[node_type]])
 
-            text_image_height=120
+            text_image_height=60
             final_image_width,_ = final_stitched_image.size
-            text_image = Image.new('RGB', (final_image_width-13, text_image_height), color=outer_background_color)
+            text_image = Image.new('RGB', (final_image_width, text_image_height), color=outer_background_color)
             draw = ImageDraw.Draw(text_image)
-            draw.text((0,0),text=f"{load_details}",align="left",font_size=35, fill =(255, 255, 255)) #(max_width//2, text_image_height//2),
-            draw.text((final_image_width/2.5,0),text=f"{node_type.title()} nodetype",align="center",font_size=75, fill =(255, 255, 255))
-            final_stitched_image.paste(text_image, (8, 0))
+            
+            draw.text((0,0),text=f"{load_details}",align="left",font_size=FIGURE_WIDTH*3, fill =(255, 255, 255)) #(max_width//2, text_image_height//2),
+            draw.text((final_image_width/2.5,0),text=f"{node_type.title()} nodetype",align="center",font_size=FIGURE_WIDTH*7.35, fill =(255, 255, 255))
+            text_image = add_border(text_image)
+            final_stitched_image.paste(text_image, (2, 0))
 
             # path = f"/Users/masabathulararao/Documents/Loadtest/save-report-data-to-mongo/scripts/csv/{node_type}.png"
             # final_stitched_image.save(path)

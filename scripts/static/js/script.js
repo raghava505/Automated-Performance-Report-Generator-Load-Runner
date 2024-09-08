@@ -538,7 +538,7 @@ function toggleScroll() {
         clearInterval(scrollInterval);
         isScrolling = false;
         // Change button icon back to normal
-        button.innerHTML = '<i class="fas fa-arrow-down"></i>';
+        button.innerHTML = '<i class="fas fa-arrow-down fa-lg"></i>';
     } else {
         // If scrolling is not active, start it
         scrollInterval = setInterval(function() {
@@ -547,12 +547,12 @@ function toggleScroll() {
                 clearInterval(scrollInterval); // Stop scrolling when reaching the bottom
                 isScrolling = false;
                 // Change button icon back to normal
-                button.innerHTML = '<i class="fas fa-arrow-down"></i>';
+                button.innerHTML = '<i class="fas fa-arrow-down fa-lg"></i>';
             }
         }, 1); // Adjust interval for scrolling speed
         isScrolling = true;
         // Change button icon to indicate "stop scrolling"
-        button.innerHTML = '<i class="fa-solid fa-pause"></i>'; // Use a different icon to indicate stop
+        button.innerHTML = '<i class="fa-solid fa-pause fa-lg"></i>'; // Use a different icon to indicate stop
     }
 }
 function generateContents() {
