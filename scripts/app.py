@@ -220,9 +220,9 @@ def view_report():
     database_name = request.form['loadtype']
     collection_name = request.form['loadname']
 
-    # list_of_sprint_runs_to_show_or_compare = [[157,1],[158,1]]
+    # list_of_sprint_runs_to_show_or_compare = [[162,1],[161,2]]
     # database_name = "Osquery_LoadTests_New"
-    # collection_name = "MultiCustomer"
+    # collection_name = "ControlPlane"
 
     """Add a log message to the queue for the current user."""
     user_id = session.get('user_id')
