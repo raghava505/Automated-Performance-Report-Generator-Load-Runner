@@ -147,7 +147,7 @@ class publish_to_confluence:
         else:
             print(f"ERROR : {image_file_path} doesnt exist! Skipping this chart ...")
         
-    def attach_saved_charts(self, dict_of_list_of_filepaths,main_heading=None):
+    def attach_saved_charts(self, dict_of_list_of_filepaths,base_graphs_path=None,main_heading=None,   *args, **kwargs):
         if not main_heading:main_heading="Charts"
         print("Attaching charts ...")
         self.body_content += f"<h2>{main_heading}</h2>"
@@ -167,12 +167,17 @@ class publish_to_confluence:
             """
 
             for filepath in dict_of_list_of_filepaths[directory_name]:
+                base_filename = os.path.basename(filepath)
+                if base_graphs_path:
+                    filepath = str(os.path.join(base_graphs_path,filepath))
+                yield f"Attaching {base_filename}"
                 self.attach_single_file(filepath,4)
 
             self.body_content += """
                     </ac:rich-text-body>
                 </ac:structured-macro>
             """
+            self.update_and_publish()
     
     def add_jira_issue_by_key(self,jira_issue_key):
         print(f"Attaching jira issue : {jira_issue_key}")

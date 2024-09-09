@@ -50,6 +50,7 @@ class ViewReportClass:
         columns_list = list(df.columns)
         for column in df.columns:
             custom_header += f'<th class="sortable" data-column="{column}" data-order="desc">{column}</th>'
+        '<input type="text" name="cell_{row_idx}_{col_idx}" value="{value}" style="width:100%; text-align:center;">'
         if isEditable:
             custom_header += '<th></th>'
         custom_header += "</tr></thead>"
@@ -88,7 +89,9 @@ class ViewReportClass:
                 table_html += '</tr>'
             table_html += '</tbody>'
 
+            # Add custom headers and wrap the table in a form
             uuid_table = uuid.uuid4()
+            #method="POST" action="/submit_table"
             table_html = f"""
             <form>
                 <table class="table table-bordered table-hover table-sm text-center custom-table" id="{uuid_table}" load_info_header="{load_info_header}">
@@ -113,7 +116,7 @@ class ViewReportClass:
                     {heading_text}
                 </button>
             </p>
-            <div class="collapse show mb-3" id="collapseExample{table_collapse_uuid}">
+            <div class="collapse show mb-5" id="collapseExample{table_collapse_uuid}">
                 <div class="tab-cont form-group">
                     {table_html}
                 </div>
@@ -121,6 +124,9 @@ class ViewReportClass:
         """
 
 
+
+
+    
     def attach_plot_as_image(self,piechart_name, image, heading_tag):
         buffered = io.BytesIO()
         image.save(buffered, format="PNG")  # Adjust format if necessary
@@ -135,45 +141,19 @@ class ViewReportClass:
     
         charts_collapse_uuid = uuid.uuid4()
         return f"""<p>
-                    <button class="btn btn-sm analysis_btn-hover-effect" type="button"
-                        data-toggle="collapse" 
-                        data-target="#collapseExample{charts_collapse_uuid}" 
-                        aria-expanded="true" 
-                        aria-controls="collapseExample{charts_collapse_uuid}">
-                        <h{heading_tag}>{piechart_name}</h{heading_tag}>
-                    </button>
-                    </p>
-                    <div class="collapse show mb-3" id="collapseExample{charts_collapse_uuid}">
-                        <img src="data:image/png;base64,{img_base64}" alt="Image" class="img-fluid w-100"  />
-                    </div>
-                """
-    def attach_saved_charts(self,dict_of_list_of_filepaths,base_graphs_path, url_for):
-        html_text=""
-        for main_heading in dict_of_list_of_filepaths:
-            unique_id = str(uuid.uuid4())
-            html_text+=f"""<p>
-                                <button class="btn btn-light  pt-2" style="display: block;width:50%;border-radius: 10px;border-color:#b4b4b4;" type="button" data-toggle="collapse" data-target="#collapseExample{unique_id}" aria-expanded="false" aria-controls="collapseExample{unique_id}">
-                                    <h3>{main_heading}</h3>
-                                </button>
-                            </p>
-                            <div class="collapse mb-5" id="collapseExample{unique_id}">
-                                <div class="">
-                        """
-            for filepath in dict_of_list_of_filepaths[main_heading]:
-                if os.path.exists(os.path.join(base_graphs_path,filepath)):
-                    base_filename = os.path.basename(filepath)
-                    base_filename_without_extension = str(os.path.splitext(base_filename)[0])
+              <button class="btn btn-sm analysis_btn-hover-effect" type="button"
+                data-toggle="collapse" 
+                data-target="#collapseExample{charts_collapse_uuid}" 
+                aria-expanded="true" 
+                aria-controls="collapseExample{charts_collapse_uuid}">
+                <h{heading_tag}>{piechart_name}</h{heading_tag}>
+            </button>
+            </p>
+            <div class="collapse show mb-5" id="collapseExample{charts_collapse_uuid}">
+                <img src="data:image/png;base64,{img_base64}" alt="Image" class="img-fluid w-100"  />
+            </div>
+        """
 
-                    html_text += f"""
-                                <h4>{base_filename_without_extension}</h4>
-                                <img src="{url_for('serve_image', filename=filepath)}" alt="{filepath}" class="img-fluid w-100" />                                                
-                    """
-                else:
-                    print(f"{os.path.join(base_graphs_path,filepath)} doest exist")
-            html_text+="""</div>
-                        </div>"""
-        return html_text
-    
 class perf_load_report_publish:
     def __init__(self,dbname,coll_name,sprint_runs_list,parent_page_title, report_title, email_address, api_key, space, url,isViewReport = False):
         client = MongoClient(MONGO_CONNECTION_STRING)
@@ -192,7 +172,7 @@ class perf_load_report_publish:
         self.confluence_page_mappings={}
         self.main_build = self.main_result["load_details"]["data"]["build"]
         id = str(self.main_result["_id"])
-        self.document_specific_path = os.path.join(dbname,coll_name,id)
+        self.graphs_path = os.path.join(dbname,coll_name,id)
         self.parent_page_title=parent_page_title
         self.report_title=report_title
         self.email_address=email_address
@@ -296,10 +276,18 @@ class perf_load_report_publish:
         html_text = custom_string()
         schema = table_dictionary["schema"]
         merge_on_cols = schema.get("merge_on_cols",[])
+        # merge_on_cols = schema["merge_on_cols"]
         compare_cols = schema.get("compare_cols",[])
+        # compare_cols = schema["compare_cols"]
         display_exact_table = schema.get("display_exact_table", True)
+        # try:display_exact_table = schema["display_exact_table"]
+        # except:display_exact_table=True
         collapse = table_dictionary.get("collapse", True)
+        # try:collapse = table_dictionary["collapse"]
+        # except:collapse=True
         isEditable=schema.get("isEditable",False)
+        # try:isEditable=schema["isEditable"]
+        # except:isEditable=False
         data=table_dictionary["data"]
         main_df = pd.DataFrame(data)
         if main_df.empty : return ""
@@ -343,135 +331,151 @@ class perf_load_report_publish:
                 sprint_runs_text_list = list(map(lambda x : f"<span  class='mb-3 btn btn-success btn-sm disabled'>{x}</span>",sprint_runs_text_list))
                 sprint_runs_text = f"<span  class='mb-3 btn btn-success btn-sm disabled'>{self.main_sprint}_{self.main_run}</span>"
                 if sprint_runs_text_list:
+                    # Define the VS span as a separate string
                     vs_span = "<span class='btn mb-3 btn-sm disabled'>vs</span>"
+                    # Join the list with the VS span
                     joined_text = f"{vs_span}".join(sprint_runs_text_list)
+                    # Concatenate the main sprint and run with the joined text
                     sprint_runs_text += f"{vs_span}{joined_text}"
+
+            # if self.isViewReport:
                 data = json.dumps({"status": "info", "message": f"<div style='text-align: center;'><h1>{load_type} - {str(test_title).capitalize()}<br>Performance Report</h1>{sprint_runs_text}</div><hr style='border: 1px solid #000000;'><br>"})
                 yield f'data: {data}\n\n'
             for key_name in self.all_keys:
-                # if key_name != "charts":continue
-                try:
-                    html_text =  custom_string()
-                    print(f"Processing {str(key_name).capitalize()}")
-                    if not self.isViewReport:yield f'data: {{"status": "info", "message": "Processing {str(key_name).capitalize()} section"}}\n\n'
-                    key_format = self.main_result[key_name]["format"]
-                    schema = self.main_result[key_name]["schema"]
-                    data = self.main_result[key_name]["data"]
-                    html_text += f'<span style="color:red;"><b><i>{str(self.main_result[key_name].get("note",""))}</i></b></span>'
+                html_text =  custom_string()
+                print(f"Processing {str(key_name).capitalize()}")
+                if not self.isViewReport:yield f'data: {{"status": "info", "message": "Processing {str(key_name).capitalize()} section"}}\n\n'
+                key_format = self.main_result[key_name]["format"]
+                schema = self.main_result[key_name]["schema"]
+                data = self.main_result[key_name]["data"]
+                html_text += f'<span style="color:red;"><b><i>{str(self.main_result[key_name].get("note",""))}</i></b></span>'
 
-                    page = schema.get("page" , "Overview")
+                # if "page" in schema : page = schema["page"]
+                # else : page = "Overview"
+                page = schema.get("page" , "Overview")
 
-                    if page in self.confluence_page_mappings: curr_page_obj = self.confluence_page_mappings[page]
-                    else:
-                        curr_page_obj,err = self.create_report_page(self.report_title, f"{page}-{self.report_title}")
-                        if not curr_page_obj:
-                            yield f'data: {{"status": "error", "message": {err}}}\n\n'
-                            return
-                            # return err, "error"
-                        self.confluence_page_mappings[page]=curr_page_obj
-                    
-                    if key_format == "table":
-                        html_text += self.add_standard_table(self.main_result[key_name],key_name,curr_page_obj)
+                if page in self.confluence_page_mappings: curr_page_obj = self.confluence_page_mappings[page]
+                else:
+                    curr_page_obj,err = self.create_report_page(self.report_title, f"{page}-{self.report_title}")
+                    if not curr_page_obj:
+                        yield f'data: {{"status": "error", "message": {err}}}\n\n'
+                        return
+                        # return err, "error"
+                    self.confluence_page_mappings[page]=curr_page_obj
                 
-                    elif key_format == "nested_table":
-                        html_text+=curr_page_obj.add_text(f"<h2>{self.captilise_heading(key_name)}</h2>")
+                if key_format == "table":
+                    html_text += self.add_standard_table(self.main_result[key_name],key_name,curr_page_obj)
+            
+                elif key_format == "nested_table":
+                    html_text+=curr_page_obj.add_text(f"<h2>{self.captilise_heading(key_name)}</h2>")
 
-                        for nested_key_name in data.keys():
-                            if not self.isViewReport:yield f'data: {{"status": "info", "message": "Processing nested table : {str(nested_key_name).capitalize()}"}}\n\n'
-                            html_text += self.add_standard_table(self.main_result[key_name]["data"][nested_key_name],nested_key_name,curr_page_obj,parent_key=key_name)
+                    for nested_key_name in data.keys():
+                        if not self.isViewReport:yield f'data: {{"status": "info", "message": "Processing nested table : {str(nested_key_name).capitalize()}"}}\n\n'
+                        html_text += self.add_standard_table(self.main_result[key_name]["data"][nested_key_name],nested_key_name,curr_page_obj,parent_key=key_name)
 
-                    elif key_format == "mapping":
-                        html_text+=curr_page_obj.add_text(f"<h2>{self.captilise_heading(key_name)}</h2>")
-                        for key,value in data.items():
-                            if type(value) != dict:
-                                if type(value) == str and "http" in value:
-                                    value = f'<a href="{value}">{value}</a>'
-                                html_text+=curr_page_obj.add_text(f"<p>{self.captilise_heading(key)} : {value}</p>\n")
+                elif key_format == "mapping":
+                    html_text+=curr_page_obj.add_text(f"<h2>{self.captilise_heading(key_name)}</h2>")
+                    for key,value in data.items():
+                        if type(value) != dict:
+                            if type(value) == str and "http" in value:
+                                value = f'<a href="{value}">{value}</a>'
+                            html_text+=curr_page_obj.add_text(f"<p>{self.captilise_heading(key)} : {value}</p>\n")
 
-                            else:
-                                html_text+=curr_page_obj.add_text(f"<h3>{str(key)}</h3>")
-                                for nested_key,nested_value in value.items():
-                                    html_text+=curr_page_obj.add_text(f"<p>{self.captilise_heading(nested_key)} : {nested_value}</p>\n")
-
-                    elif key_format == "list":
-                        curr_list = set(data)
-                        if len(curr_list) !=0 :
-                            curr_list_to_string = ", ".join(list(map(str,curr_list)))
-                            html_text+=curr_page_obj.add_text(f"<h2>{self.captilise_heading(key_name)}</h2>")
-                            if len(self.sprint_runs_list) == 0 :
-                                print("Previous sprint not found ... ")
-                                html_text+=curr_page_obj.add_text(f'<p><span style="color: black;">{curr_list_to_string} </span></p>')
-
-                            else:
-                                print("prev sprints provided.. checking")
-                                prev_sprint,prev_run = self.sprint_runs_list[0][0],self.sprint_runs_list[0][1]
-                                prev_data=self.get_key_result(prev_sprint,prev_run,key_name)
-                                if not prev_data:
-                                    print(f"WARNING : Previous sprint data for {key_name} is not found")
-                                    html_text+=curr_page_obj.add_text(f'<p><span style="color: black;">{curr_list_to_string} </span></p>')
-                                else:
-                                    print("Previous sprint data found")
-                                    prev_list = set(prev_data[key_name]["data"])
-                                    if curr_list == prev_list:
-                                        html_text+=curr_page_obj.add_text(f'<p><span style="color: green;">No new topics added/deleted </span></p>')
-                                    else:
-                                        newly_added = curr_list - prev_list
-                                        deleted = prev_list - curr_list
-                                        if len(newly_added)>0:
-                                            html_text+=curr_page_obj.add_text(f'<p><span style="color: blue;">{len(newly_added)} newly added topics found : {newly_added}</span></p>')
-                                        if len(deleted)>0:
-                                            html_text+=curr_page_obj.add_text(f'<p><span style="color: blue;">{len(deleted)} topics are deleted : {deleted}</span></p>')
-                    
-                    elif key_format == "analysis":
-                        if len(self.sprint_runs_list) == 0:
-                            warning_message = "Previous sprints not provided by the user to compare and analyze resource usages"
-                            print(warning_message)
-                            continue
-                        prev_sprint,prev_run = self.sprint_runs_list[0][0],self.sprint_runs_list[0][1]
-                        prev_data=self.get_key_result(prev_sprint,prev_run,key_name)
-                        if not prev_data:
-                            yield f'data: {{"status": "warning", "message": "Found no previous data for sprint {prev_sprint} and run {prev_run}"}}\n\n'
-                            continue
-                        prev_data=prev_data[key_name]["data"]
-                        temp_images,memory_combined_df,cpu_combined_df=analysis_main(data["memory_usages_analysis"],prev_data["memory_usages_analysis"],data["cpu_usage_analysis"],prev_data["cpu_usage_analysis"],main_build_load_details=self.main_result["load_details"]["data"],prev_build_load_details=self.get_key_result(prev_sprint,prev_run,"load_details")["load_details"]["data"] )                    
-                        html_text+=curr_page_obj.add_text(f'<h2>Contributers to Resource Usage increase/decrease  <span class="badge badge-pill badge-danger analysis-badge-custom"> NEW</span></h2>')
-                        html_text+=curr_page_obj.add_table_from_dataframe(f'<h3>{self.captilise_heading("memory_usages_analysis")}</h3>', memory_combined_df.copy(), collapse=False)
-                        html_text+=curr_page_obj.add_table_from_dataframe(f'<h3>{self.captilise_heading("cpu_usage_analysis")}</h3>', cpu_combined_df.copy(), collapse=False)
-                        html_text+=curr_page_obj.add_text(f'<h2>Complete Analysis piecharts for resource utilizations <span class="badge badge-pill badge-danger analysis-badge-custom"> NEW</span></h2>')
-                        for piechart_name in temp_images:
-                            html_text+=curr_page_obj.attach_plot_as_image(piechart_name, temp_images[piechart_name], 3)
-                    elif key_format == "charts":
-                        # base_graphs_path=os.path.join(schema["base_graphs_path"])
-                        charts_paths_dict={}
-                        html_text += f"<h2>Charts</h2>"
-                        for main_heading,inside_charts in data.items():
-                            temp_list_for_confluence=[f'{os.path.join(self.document_specific_path,main_heading,str(file_name).replace("/","-")+".png")}' for file_name in list(inside_charts.keys())]
-                            # temp_list_for_confluence=[f'{os.path.join(self.document_specific_path,main_heading,str(file_name).replace("/","-")+".png")}' for file_name in list(inside_charts.keys())]
-                            charts_paths_dict[main_heading] = temp_list_for_confluence
-                            # if not self.isViewReport:yield f'data: {{"status": "info", "message": "Attaching {main_heading}"}}\n\n'
-
-                        charts_generator=curr_page_obj.attach_saved_charts(charts_paths_dict,base_graphs_path=schema["base_graphs_path"], url_for=url_for)
-                        if not self.isViewReport:
-                            for current_chart_status_msg in charts_generator:
-                                yield f'data: {{"status": "info", "message": "{current_chart_status_msg}"}}\n\n'
                         else:
-                            html_text+=charts_generator
+                            html_text+=curr_page_obj.add_text(f"<h3>{str(key)}</h3>")
+                            for nested_key,nested_value in value.items():
+                                html_text+=curr_page_obj.add_text(f"<p>{self.captilise_heading(nested_key)} : {nested_value}</p>\n")
 
-                    if self.isViewReport:
-                        html_text+='<hr style="border: 1px solid #000000;">'
-                        json_data = json.dumps({
-                            "status": "info",
-                            "message": html_text
-                        })
-                        yield f'data: {json_data}\n\n'
+                elif key_format == "list":
+                    curr_list = set(data)
+                    if len(curr_list) !=0 :
+                        curr_list_to_string = ", ".join(list(map(str,curr_list)))
+                        html_text+=curr_page_obj.add_text(f"<h2>{self.captilise_heading(key_name)}</h2>")
+                        if len(self.sprint_runs_list) == 0 :
+                            print("Previous sprint not found ... ")
+                            html_text+=curr_page_obj.add_text(f'<p><span style="color: black;">{curr_list_to_string} </span></p>')
 
-                    curr_page_obj.update_and_publish()
-                except Exception as e:
-                    error_msg_for_current_iteration = json.dumps({
-                            "status": "warning",
-                            "message": f"Error occured while processing {key_name}. Please check if this key has valid format in mongo. {str(e)}"
+                        else:
+                            print("prev sprints provided.. checing")
+                            prev_sprint,prev_run = self.sprint_runs_list[0][0],self.sprint_runs_list[0][1]
+                            prev_data=self.get_key_result(prev_sprint,prev_run,key_name)
+                            if not prev_data:
+                                print(f"WARNING : Previous sprint data for {key_name} is not found")
+                                html_text+=curr_page_obj.add_text(f'<p><span style="color: black;">{curr_list_to_string} </span></p>')
+                            else:
+                                print("Previous sprint data found")
+                                prev_list = set(prev_data[key_name]["data"])
+                                if curr_list == prev_list:
+                                    html_text+=curr_page_obj.add_text(f'<p><span style="color: green;">No new topics added/deleted </span></p>')
+                                else:
+                                    newly_added = curr_list - prev_list
+                                    deleted = prev_list - curr_list
+                                    if len(newly_added)>0:
+                                        html_text+=curr_page_obj.add_text(f'<p><span style="color: blue;">{len(newly_added)} newly added topics found : {newly_added}</span></p>')
+                                    if len(deleted)>0:
+                                        html_text+=curr_page_obj.add_text(f'<p><span style="color: blue;">{len(deleted)} topics are deleted : {deleted}</span></p>')
+                
+                elif key_format == "analysis":
+                    if len(self.sprint_runs_list) == 0:
+                        warning_message = "Previous sprints not provided by the user to compare and analyze resource usages"
+                        print(warning_message)
+                        continue
+                    prev_sprint,prev_run = self.sprint_runs_list[0][0],self.sprint_runs_list[0][1]
+                    prev_data=self.get_key_result(prev_sprint,prev_run,key_name)
+                    if not prev_data:
+                        yield f'data: {{"status": "warning", "message": "Found no previous data for sprint {prev_sprint} and run {prev_run}"}}\n\n'
+                        continue
+                    prev_data=prev_data[key_name]["data"]
+                    temp_images,memory_combined_df,cpu_combined_df=analysis_main(data["memory_usages_analysis"],prev_data["memory_usages_analysis"],data["cpu_usage_analysis"],prev_data["cpu_usage_analysis"],main_build_load_details=self.main_result["load_details"]["data"],prev_build_load_details=self.get_key_result(prev_sprint,prev_run,"load_details")["load_details"]["data"] )                    
+                    html_text+=curr_page_obj.add_text(f'<h2>Contributers to Resource Usage increase/decrease  <span class="badge badge-pill badge-danger analysis-badge-custom"> NEW</span></h2>')
+                    html_text+=curr_page_obj.add_table_from_dataframe(f'<h3>{self.captilise_heading("memory_usages_analysis")}</h3>', memory_combined_df.copy(), collapse=False)
+                    html_text+=curr_page_obj.add_table_from_dataframe(f'<h3>{self.captilise_heading("cpu_usage_analysis")}</h3>', cpu_combined_df.copy(), collapse=False)
+                    html_text+=curr_page_obj.add_text(f'<h2>Complete Analysis piecharts for resource utilizations <span class="badge badge-pill badge-danger analysis-badge-custom"> NEW</span></h2>')
+                    for piechart_name in temp_images:
+                        html_text+=curr_page_obj.attach_plot_as_image(piechart_name, temp_images[piechart_name], 3)
+                elif key_format == "charts":
+                    base_graphs_path=os.path.join(schema["base_graphs_path"],self.graphs_path)
+                    charts_paths_dict={}
+                    html_text += f"<h2>Charts</h2>"
+                    for main_heading,inside_charts in data.items():
+                        if not self.isViewReport:
+                            temp_list_for_confluence=[f'{os.path.join(base_graphs_path,main_heading,str(file_name).replace("/","-")+".png")}' for file_name in list(inside_charts.keys())]
+                            charts_paths_dict[main_heading] = temp_list_for_confluence
+                            yield f'data: {{"status": "info", "message": "Attaching {main_heading}"}}\n\n'
+                        else:
+                            unique_id = str(uuid.uuid4())
+                            html_text+=f"""<p>
+                                                <button class="btn btn-light  pt-2" style="display: block;width:50%;border-radius: 10px;border-color:#b4b4b4;" type="button" data-toggle="collapse" data-target="#collapseExample{unique_id}" aria-expanded="false" aria-controls="collapseExample{unique_id}">
+                                                    <h3>{main_heading}</h3>
+                                                </button>
+                                            </p>
+                                            <div class="collapse mb-5" id="collapseExample{unique_id}">
+                                                <div class="">
+                                        """
+                            for filename in list(inside_charts.keys()):
+                                image_path = os.path.join(self.graphs_path, main_heading, f"{filename.replace('/', '-')}.png")
+                                if os.path.exists(os.path.join(schema["base_graphs_path"],image_path)):
+                                    
+
+                                    html_text += f"""
+                                                <h4>{filename}</h4>
+                                                <img src="{url_for('serve_image', filename=image_path)}" alt="{filename}" class="img-fluid w-100" />                                                
+                                    """
+                                else:
+                                    print(f"{image_path} doest exist")
+                            html_text+="""</div>
+                                         </div>"""
+                    curr_page_obj.attach_saved_charts(charts_paths_dict)
+                if self.isViewReport:
+                    html_text+='<hr style="border: 1px solid #000000;">'
+                    json_data = json.dumps({
+                        "status": "info",
+                        "message": html_text
                     })
-                    yield f'data: {error_msg_for_current_iteration}\n\n'
+                    # Send the JSON-encoded data as part of the Server-Sent Events stream
+                    yield f'data: {json_data}\n\n'
+                
+                curr_page_obj.update_and_publish()
             if not self.isViewReport:yield f'data: {{"status": "success", "message": "Report published successfully"}}\n\n'
             else: yield f'data: {{"status": "success", "message": "Report generated successfully"}}\n\n'
         except Exception as e:
