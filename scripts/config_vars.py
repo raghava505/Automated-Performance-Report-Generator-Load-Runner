@@ -13,7 +13,7 @@ PROM_API_PATH = "/api/v1/query_range"
 PROM_POINT_API_PATH = "/api/v1/query"
 ABACUS_USERNAME = 'abacus'  
 ABACUS_PASSWORD = 'abacus' 
-MONGO_CONNECTION_STRING = "mongodb://mongo:27017"  #use "mongo" when mongo is running  in a container, use "localhost" if running in machine
+MONGO_CONNECTION_STRING = "mongodb://localhost:27017"  #use "mongo" when mongo is running  in a container, use "localhost" if running in machine
 PRESTO_LOADS_FOLDER_PATH = "/home/abacus/benchto_reports/"
 # API_LOADS_FOLDER_PATH_TEMP = "/home/abacus/apache-jmeter-5.6.2/bin/reports/"
 
