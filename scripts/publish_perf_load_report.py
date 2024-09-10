@@ -357,8 +357,6 @@ class perf_load_report_publish:
                     key_format = self.main_result[key_name]["format"]
                     schema = self.main_result[key_name]["schema"]
                     data = self.main_result[key_name]["data"]
-                    html_text += f'<span style="color:red;"><b><i>{str(self.main_result[key_name].get("note",""))}</i></b></span>'
-
                     page = schema.get("page" , "Overview")
 
                     if page in self.confluence_page_mappings: curr_page_obj = self.confluence_page_mappings[page]
@@ -369,6 +367,9 @@ class perf_load_report_publish:
                             return
                             # return err, "error"
                         self.confluence_page_mappings[page]=curr_page_obj
+                    
+                    note_element = f'<span style="color:red;"><b><i>{str(self.main_result[key_name].get("note",""))}</i></b></span>'
+                    html_text += curr_page_obj.add_text(note_element)
                     
                     if key_format == "table":
                         html_text += self.add_standard_table(self.main_result[key_name],key_name,curr_page_obj)

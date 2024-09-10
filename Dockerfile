@@ -24,9 +24,6 @@ CMD ["/usr/bin/supervisord", "-c", "/etc/supervisor/supervisord.conf"]
 #BUILD IMG
 #docker build -t load-report-generator .
 
-#RUN container
-# docker run -d -p 5000:5000 --name report-generator report-generator
-
 # remove "desktop" here: it worked
 # (raghava_venv) cat ~/.docker/config.json
 # {

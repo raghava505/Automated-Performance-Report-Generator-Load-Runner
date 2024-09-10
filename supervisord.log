@@ -4,3 +4,25 @@
 2024-09-10 04:12:28,025 INFO spawned: 'http_server' with pid 10
 2024-09-10 04:12:29,028 INFO success: load-report-generator entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
 2024-09-10 04:12:29,028 INFO success: http_server entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
+2024-09-10 10:50:40,555 CRIT Supervisor is running as root.  Privileges were not dropped because no user is specified in the config file.  If you intend to run as root, you can set user=root in the config file to avoid this message.
+2024-09-10 10:50:40,597 INFO supervisord started with pid 1
+2024-09-10 10:50:41,609 INFO spawned: 'load-report-generator' with pid 9
+2024-09-10 10:50:41,615 INFO spawned: 'http_server' with pid 10
+2024-09-10 10:50:42,630 INFO success: load-report-generator entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
+2024-09-10 10:50:42,657 INFO success: http_server entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
+2024-09-10 10:58:10,111 INFO exited: load-report-generator (exit status 1; not expected)
+2024-09-10 10:58:11,122 INFO spawned: 'load-report-generator' with pid 243
+2024-09-10 10:58:12,476 INFO success: load-report-generator entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
+2024-09-10 11:00:23,627 INFO exited: load-report-generator (exit status 1; not expected)
+2024-09-10 11:00:24,637 INFO spawned: 'load-report-generator' with pid 327
+2024-09-10 11:00:25,969 INFO success: load-report-generator entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
+2024-09-10 11:40:51,925 WARN received SIGTERM indicating exit request
+2024-09-10 11:40:51,927 INFO waiting for load-report-generator, http_server to die
+2024-09-10 11:40:51,935 INFO stopped: http_server (terminated by SIGTERM)
+2024-09-10 11:40:52,525 INFO stopped: load-report-generator (exit status 0)
+2024-09-10 11:40:53,379 CRIT Supervisor is running as root.  Privileges were not dropped because no user is specified in the config file.  If you intend to run as root, you can set user=root in the config file to avoid this message.
+2024-09-10 11:40:53,381 INFO supervisord started with pid 1
+2024-09-10 11:40:54,394 INFO spawned: 'load-report-generator' with pid 9
+2024-09-10 11:40:54,398 INFO spawned: 'http_server' with pid 10
+2024-09-10 11:40:55,400 INFO success: load-report-generator entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
+2024-09-10 11:40:55,401 INFO success: http_server entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)

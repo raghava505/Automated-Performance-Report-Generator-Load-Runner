@@ -30,8 +30,9 @@ services:
     ports:
       - "8011:8011"
       - "8012:8012"
-    # environment:
-    #   FLASK_ENV: development         # Set Flask environment to development for auto-reloading
+    environment:
+      FLASK_ENV: development         # Set Flask environment to development for auto-reloading
+      LOCAL_IP_ADDRESS : ${LOCAL_IP_ADDRESS}
     networks:
       - my-network
 
@@ -39,7 +40,10 @@ networks:
   my-network:
     driver: bridge
 
-# expose REPORT_GENERATOR_ROOT_PATH=/Users/masabathulararao/Documents/Loadtest
+# export REPORT_GENERATOR_ROOT_PATH=/Users/masabathulararao/Documents/Loadtest
+# echo 'export REPORT_GENERATOR_ROOT_PATH=/Users/masabathulararao/Documents/Loadtest' >> ~/.zshrc
+# source ~/.zshrc
+
 # docker save -o load-report-generator.tar load-report-generator:latest
 # scp to remote node
 # docker load -i /path/to/destination/myimage.tar
