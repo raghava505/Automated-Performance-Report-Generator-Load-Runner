@@ -30,17 +30,19 @@
 ---
 
 # Collect your first report
-1.  Enter into interactive mode 
-    (optional : run this if you want to fetch the latest changes)
+1.  (optional : run this if you want to fetch the latest changes)
+    
     ```
     cd $REPORT_GENERATOR_ROOT_PATH/save-report-data-to-mongo 
     git pull origin main
     ```
+   
+2. Enter into interactive mode 
     ```
     docker exec -it load-report-generator bash   
     ```
 
-2. Run the python script and enter required details to collect the report data and save to mongo:
+3. Run the python script and enter required details to collect the report data and save to mongo:
     ```
     python3 scripts/main.py
     ```
