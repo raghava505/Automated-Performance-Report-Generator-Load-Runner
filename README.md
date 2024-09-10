@@ -1,5 +1,5 @@
 # Setup and Install Report Generator tool
-1. set ```REPORT_GENERATOR_ROOT_PATH``` environment variable in your machine.
+1. set ```REPORT_GENERATOR_ROOT_PATH```  and  ```LOCAL_IP_ADDRESS``` environment variables in your machine.
 
     example : 
      ```
@@ -22,7 +22,7 @@
     ```
 <br>
 
-3. install the ```mongo-report``` and ```load-report-generator``` docker contaiers by running :
+3. install the ```mongo-report``` and ```load-report-generator``` docker containers by running :
 
     ```
     docker-compose up -d
