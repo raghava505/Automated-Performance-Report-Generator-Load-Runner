@@ -33,6 +33,7 @@
 1.  Enter into interactive mode 
     (optional : run this if you want to fetch the latest changes)
     ```
+    cd $REPORT_GENERATOR_ROOT_PATH/save-report-data-to-mongo 
     git pull origin main
     ```
     ```
