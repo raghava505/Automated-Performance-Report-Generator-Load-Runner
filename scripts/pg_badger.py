@@ -164,15 +164,18 @@ def get_and_save_pgb_html(stack_obj,elastic_url,base_save_path,pgbadger_tail_pat
     stack_obj.log.info(f"Converted end time UTC string is : {end_time}")
 
     # Create a dummy socket connection
-    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    local_ip_address = "not_found"
-    try:
-        # Connect to a remote host; doesn't need to be reachable
-        s.connect(("8.8.8.8", 80))
-        local_ip_address = s.getsockname()[0]
-    finally:
-        s.close()
+    # s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    # local_ip_address = "not_found"
+    # try:
+    #     # Connect to a remote host; doesn't need to be reachable
+    #     s.connect(("8.8.8.8", 80))
+    #     local_ip_address = s.getsockname()[0]
+    # finally:
+    #     s.close()
 
+    local_ip_address = os.getenv('LOCAL_IP_ADDRESS')
+
+    # Use the environment variable
     print(f"Local IP Address: {local_ip_address}")
 
     links=get_links(elastic_url , start_time, end_time,pgbadger_reports_mount,check,stack_obj)

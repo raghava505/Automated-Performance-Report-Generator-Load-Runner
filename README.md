@@ -5,11 +5,9 @@
      ```
     sumonkey
     mkdir report_generator_project
-    <!-- export REPORT_GENERATOR_ROOT_PATH=/opt/uptycs/report_generator_project -->
-
     echo 'export REPORT_GENERATOR_ROOT_PATH=/opt/uptycs/report_generator_project' >> ~/.bashrc
+    echo 'export LOCAL_IP_ADDRESS=<YOUR_NODE_IP>'  >> ~/.bashrc
     source ~/.bashrc
-
     ```
 <br>
 
