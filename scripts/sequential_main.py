@@ -220,27 +220,27 @@ if __name__ == "__main__":
                 stack_obj.log.info(json.dumps(selfmanaged_accuracies, indent=2))
                 if selfmanaged_accuracies:final_data_to_save.update({"Selfmanaged Table Accuracies":selfmanaged_accuracies})
             #-------------------------Cloudquery Accuracies----------------------------
-            # if variables["load_type"] in ["CloudQuery","osquery_cloudquery_combined","all_loads_combined"]:
-            #     stack_obj.log.info("******* Calculating accuracies for cloudquery Load...")
-            #     cloud_accuracy_obj= cloud_accuracy(stack_obj=stack_obj,variables=variables)
-            #     cloudquery_accuracies = cloud_accuracy_obj.calculate_accuracy()
-            #     stack_obj.log.info(json.dumps(cloudquery_accuracies, indent=2))
-            #     if cloudquery_accuracies:final_data_to_save.update({"Cloudquery Table Accuracies":{"format":"nested_table","schema":{},"data":cloudquery_accuracies}})
+            if variables["load_type"] in ["CloudQuery","osquery_cloudquery_combined","all_loads_combined"]:
+                stack_obj.log.info("******* Calculating accuracies for cloudquery Load...")
+                cloud_accuracy_obj= cloud_accuracy(stack_obj=stack_obj,variables=variables)
+                cloudquery_accuracies = cloud_accuracy_obj.calculate_accuracy()
+                stack_obj.log.info(json.dumps(cloudquery_accuracies, indent=2))
+                if cloudquery_accuracies:final_data_to_save.update({"Cloudquery Table Accuracies":{"format":"nested_table","schema":{},"data":cloudquery_accuracies}})
             #-------------------------Azure Load Accuracies----------------------------
             # if variables["load_name"] == "Azure_MultiCustomer" or variables["load_type"] in ["all_loads_combined"]:
             #     stack_obj.log.info("******* Calculating accuracies for Azure Load ...")
             #--------------------------------------Events Counts--------------------------------------
-            # if variables["load_type"] in ["CloudQuery","osquery_cloudquery_combined","all_loads_combined"]:
-            #     stack_obj.log.info("******* Calculating the counts of various events during the load ...")
-            #     calc = events_count_class(variables=variables,stack_obj=stack_obj)
-            #     evecount = calc.get_events_count()
-            #     if evecount:final_data_to_save.update({"Cloudquery Event Counts":evecount})
+            if variables["load_type"] in ["CloudQuery","osquery_cloudquery_combined","all_loads_combined"]:
+                stack_obj.log.info("******* Calculating the counts of various events during the load ...")
+                calc = events_count_class(variables=variables,stack_obj=stack_obj)
+                evecount = calc.get_events_count()
+                if evecount:final_data_to_save.update({"Cloudquery Event Counts":evecount})
             #--------------------------------------STS Records-------------------------------------------
-            # if variables["load_name"] == "AWS_MultiCustomer":
-            #     print("Calculating STS Records ...")
-            #     calc = STS_RECORDS(start_timestamp=stack_obj.start_time_UTC,end_timestamp=stack_obj.end_time_UTC,stack_obj=stack_obj,variables=variables)
-            #     sts = calc.calc_stsrecords()
-            #     if sts:final_data_to_save.update({"STS Records":sts})
+            if variables["load_name"] == "AWS_MultiCustomer":
+                print("Calculating STS Records ...")
+                calc = STS_RECORDS(start_timestamp=stack_obj.start_time_UTC,end_timestamp=stack_obj.end_time_UTC,stack_obj=stack_obj,variables=variables)
+                sts = calc.calc_stsrecords()
+                if sts:final_data_to_save.update({"STS Records":sts})
             #-----------------------------Processing Time for Db Operations------------------------------
             if variables["load_type"] in ["CloudQuery","osquery_cloudquery_combined","all_loads_combined"]:
                 stack_obj.log.info("******* Processing time for Db Operations ...")

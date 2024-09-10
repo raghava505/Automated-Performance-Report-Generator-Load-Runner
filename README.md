@@ -3,9 +3,13 @@
 
     example : 
      ```
-     sumonkey
-     mkdir report_generator_project
-     export REPORT_GENERATOR_ROOT_PATH=/opt/uptycs/report_generator_project
+    sumonkey
+    mkdir report_generator_project
+    <!-- export REPORT_GENERATOR_ROOT_PATH=/opt/uptycs/report_generator_project -->
+
+    echo 'export REPORT_GENERATOR_ROOT_PATH=/opt/uptycs/report_generator_project' >> ~/.bashrc
+    source ~/.bashrc
+
     ```
 <br>
 
