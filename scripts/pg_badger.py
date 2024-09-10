@@ -13,7 +13,7 @@ import os
 import pytz
 from helper import save_html_page
 from scrape_pgbadger_tables import scrape_func
-from config_vars import PGBADGER_REPORT_PORT, PGBADGER_PORT
+from config_vars import LOCAL_PGBADGER_REPORT_PORT, PGBADGER_PORT
 import socket
 
 current_time = datetime.now()
@@ -192,7 +192,7 @@ def get_and_save_pgb_html(stack_obj,elastic_url,base_save_path,pgbadger_tail_pat
             scraped_res = scrape_func(save_path,db,stack_obj)
             if scraped_res!={}:
                 extracted_tables.update(scraped_res)
-            return_file_names[db] = os.path.join(f"http://{local_ip_address}:{PGBADGER_REPORT_PORT}",pgbadger_tail_path,f"pgbadger_report_{db}.html")
+            return_file_names[db] = os.path.join(f"http://{local_ip_address}:{LOCAL_PGBADGER_REPORT_PORT}",pgbadger_tail_path,f"pgbadger_report_{db}.html")
     stack_obj.log.info(f"Returning pgbadger links dict : {return_file_names}")
     return return_file_names,extracted_tables
 

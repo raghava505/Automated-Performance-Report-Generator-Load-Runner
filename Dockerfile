@@ -8,12 +8,21 @@ COPY . /app/save-report-data-to-mongo
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Expose the Flask app's port
-EXPOSE 5000
+#local pgbadger report port
+EXPOSE 8011 
+# flask UI port
+EXPOSE 8012 
 
-CMD ["python", "scripts/app.py"]
+RUN apt-get update && apt-get install -y supervisor && rm -rf /var/lib/apt/lists/*
 
+# CMD ["python", "scripts/app.py"]
+# Copy supervisord configuration
+COPY supervisord.conf /etc/supervisor/supervisord.conf
+
+# Command to start Supervisor
+CMD ["/usr/bin/supervisord", "-c", "/etc/supervisor/supervisord.conf"]
 #BUILD IMG
-#docker build -t report-generator .
+#docker build -t load-report-generator .
 
 #RUN container
 # docker run -d -p 5000:5000 --name report-generator report-generator

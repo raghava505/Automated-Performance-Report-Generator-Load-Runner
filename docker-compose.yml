@@ -1,22 +1,26 @@
 version: '3'
 
 services:
-  mongo:
+  mongo-report:
     image: mongo:4.2
-    container_name: mongo
+    container_name: mongo-report
     restart: unless-stopped
     ports:
-      - "27017:27017"
+      - "8013:8013"
     volumes:
       - ${REPORT_GENERATOR_ROOT_PATH}/mongodb/data/db:/data/db
     networks:
       - my-network
+    command: mongod --port 8013 --bind_ip 0.0.0.0
 
-  report-generator:
-    image: report-generator
-    container_name: report-generator
+  load-report-generator:
+    # image: load-report-generator
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: load-report-generator
     depends_on:
-      - mongo
+      - mongo-report
     volumes:
       - ${REPORT_GENERATOR_ROOT_PATH}/graphs:/app/graphs
       - ${REPORT_GENERATOR_ROOT_PATH}/htmls:/app/htmls
@@ -24,7 +28,8 @@ services:
       - ${REPORT_GENERATOR_ROOT_PATH}/save-report-data-to-mongo:/app/save-report-data-to-mongo
       # - ~/save-report-data-to-mongo:/app/save-report-data-to-mongo
     ports:
-      - "5000:5000"
+      - "8011:8011"
+      - "8012:8012"
     # environment:
     #   FLASK_ENV: development         # Set Flask environment to development for auto-reloading
     networks:
@@ -34,3 +39,7 @@ networks:
   my-network:
     driver: bridge
 
+# expose REPORT_GENERATOR_ROOT_PATH=/Users/masabathulararao/Documents/Loadtest
+# docker save -o load-report-generator.tar load-report-generator:latest
+# scp to remote node
+# docker load -i /path/to/destination/myimage.tar

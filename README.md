@@ -1,34 +1,30 @@
-# Steps to save your performance load report data into the database.
+# Setup and Install Report Generator tool
+1. set 'REPORT_GENERATOR_ROOT_PATH' environment variable in your machine.
+    example : 
+     ```
+     sumonkey
+     mkdir report_generator_project
+     export REPORT_GENERATOR_ROOT_PATH=/opt/uptycs/report_generator_project
+     cd report_generator_project
+    ```
+2. Go to the 'REPORT_GENERATOR_ROOT_PATH' path, and git clone this repository (verify/make sure that the git cloned project directonay name is "save-report-data-to-mongo")
+3. 'cd save-report-data-to-mongo'
+4. 'docker-compose up -d' (make sure docker is installed in your machine)
+    This step installs 'mongo-report' and 'load-report-generator' containers .
 
-1. Login to **perf-prod-dashboard** node .
- ```
- ssh abacus@192.168.146.69
- ```
-2. Switch to monkey user
- ```
- sumonkey
- ```
-3. Run generate_report.py script
+---
+
+# Collect your first report
+1.  Enter into interactive mode 
 ```
-./generate_report.sh
+docker exec -it load-report-generator bash   
 ```
-Enter the required load details and the report data will be saved to Mongodb.
-Then you can publish your report from this UI : http://192.168.146.69:5050
+2. run 'python3 scripts/main.py'
+3. Enter the required load details and the report data will be saved to Mongodb.
 
-# Configure a New Lab Stack
+# Generate your first report
 
-1. Create "<your_stack_name>_nodes.json" file inside "stacks" folder if not present 
-```
-vi /stacks/<your_stack_name>_nodes.json
-```
-2. Make sure all your stack host IP Addresses are mapped in ```/etc/hosts``` in perf-prod-dashboard Node
+1. Open 8012 port of your machine in the browser (prefer chrome)
+2. Select the saved report(s) data to view/publish the report.
 
-
-# Configure a New Load Type
-
--  In ```scripts/input.py```  Add a new key-value pair inside load_type_options. The key is the ```load_type``` and the value is another dictionary storing list of ```subtypes```.
-   
--  Optionally you can also pass another key ```class``` by creating a child class from the ```<parent_load_details.parent> class```. This helps to customize your load specific details such as chart queries etc.
-
-
-python environment version: 3.11.4
+---
