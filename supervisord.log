@@ -26,3 +26,125 @@
 2024-09-10 11:40:54,398 INFO spawned: 'http_server' with pid 10
 2024-09-10 11:40:55,400 INFO success: load-report-generator entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
 2024-09-10 11:40:55,401 INFO success: http_server entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
+2024-09-10 16:58:18,353 INFO exited: load-report-generator (exit status 1; not expected)
+2024-09-10 16:58:19,370 INFO spawned: 'load-report-generator' with pid 64
+2024-09-10 16:58:19,516 INFO exited: load-report-generator (exit status 1; not expected)
+2024-09-10 16:58:20,520 INFO spawned: 'load-report-generator' with pid 65
+2024-09-10 16:58:20,672 INFO exited: load-report-generator (exit status 1; not expected)
+2024-09-10 16:58:22,682 INFO spawned: 'load-report-generator' with pid 66
+2024-09-10 16:58:24,340 INFO success: load-report-generator entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
+2024-09-10 17:17:05,159 WARN received SIGTERM indicating exit request
+2024-09-10 17:17:05,162 INFO waiting for load-report-generator, http_server to die
+2024-09-10 17:17:05,167 INFO stopped: http_server (terminated by SIGTERM)
+2024-09-10 17:17:05,740 INFO stopped: load-report-generator (exit status 0)
+2024-09-10 17:17:06,392 CRIT Supervisor is running as root.  Privileges were not dropped because no user is specified in the config file.  If you intend to run as root, you can set user=root in the config file to avoid this message.
+2024-09-10 17:17:06,395 INFO supervisord started with pid 1
+2024-09-10 17:17:07,400 INFO spawned: 'load-report-generator' with pid 9
+2024-09-10 17:17:07,403 INFO spawned: 'http_server' with pid 10
+2024-09-10 17:17:08,950 INFO success: load-report-generator entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
+2024-09-10 17:17:08,951 INFO success: http_server entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
+2024-09-10 17:36:48,043 INFO exited: load-report-generator (exit status 1; not expected)
+2024-09-10 17:36:49,053 INFO spawned: 'load-report-generator' with pid 867
+2024-09-10 17:36:50,282 INFO success: load-report-generator entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
+2024-09-10 17:36:50,283 INFO exited: load-report-generator (exit status 1; not expected)
+2024-09-10 17:36:50,283 INFO spawned: 'load-report-generator' with pid 880
+2024-09-10 17:36:50,391 INFO exited: load-report-generator (exit status 1; not expected)
+2024-09-10 17:36:51,403 INFO spawned: 'load-report-generator' with pid 881
+2024-09-10 17:36:51,527 INFO exited: load-report-generator (exit status 1; not expected)
+2024-09-10 17:36:53,538 INFO spawned: 'load-report-generator' with pid 882
+2024-09-10 17:36:53,674 INFO exited: load-report-generator (exit status 1; not expected)
+2024-09-10 17:36:56,695 INFO spawned: 'load-report-generator' with pid 883
+2024-09-10 17:36:57,785 INFO success: load-report-generator entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
+2024-09-10 17:38:55,365 INFO exited: load-report-generator (exit status 1; not expected)
+2024-09-10 17:38:56,377 INFO spawned: 'load-report-generator' with pid 1013
+2024-09-10 17:38:56,553 INFO exited: load-report-generator (exit status 1; not expected)
+2024-09-10 17:38:57,560 INFO spawned: 'load-report-generator' with pid 1014
+2024-09-10 17:38:57,719 INFO exited: load-report-generator (exit status 1; not expected)
+2024-09-10 17:38:59,733 INFO spawned: 'load-report-generator' with pid 1015
+2024-09-10 17:38:59,913 INFO exited: load-report-generator (exit status 1; not expected)
+2024-09-10 17:39:02,929 INFO spawned: 'load-report-generator' with pid 1016
+2024-09-10 17:39:03,095 INFO exited: load-report-generator (exit status 1; not expected)
+2024-09-10 17:39:04,099 INFO gave up: load-report-generator entered FATAL state, too many start retries too quickly
+2024-09-10 17:47:34,028 WARN received SIGTERM indicating exit request
+2024-09-10 17:47:34,031 INFO waiting for http_server to die
+2024-09-10 17:47:35,047 INFO stopped: http_server (terminated by SIGTERM)
+2024-09-10 17:47:35,531 CRIT Supervisor is running as root.  Privileges were not dropped because no user is specified in the config file.  If you intend to run as root, you can set user=root in the config file to avoid this message.
+2024-09-10 17:47:35,533 INFO supervisord started with pid 1
+2024-09-10 17:47:36,542 INFO spawned: 'load-report-generator' with pid 9
+2024-09-10 17:47:36,547 INFO spawned: 'http_server' with pid 10
+2024-09-10 17:47:37,542 INFO success: load-report-generator entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
+2024-09-10 17:47:38,543 INFO success: http_server entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
+2024-09-10 17:54:02,683 INFO exited: load-report-generator (exit status 1; not expected)
+2024-09-10 17:54:03,691 INFO spawned: 'load-report-generator' with pid 164
+2024-09-10 17:54:04,938 INFO success: load-report-generator entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
+2024-09-10 18:07:43,584 INFO exited: load-report-generator (exit status 1; not expected)
+2024-09-10 18:07:44,591 INFO spawned: 'load-report-generator' with pid 3462
+2024-09-10 18:07:44,736 INFO exited: load-report-generator (exit status 1; not expected)
+2024-09-10 18:07:45,745 INFO spawned: 'load-report-generator' with pid 3463
+2024-09-10 18:07:46,980 INFO success: load-report-generator entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
+2024-09-10 18:07:46,980 INFO exited: load-report-generator (exit status 1; not expected)
+2024-09-10 18:07:47,985 INFO spawned: 'load-report-generator' with pid 3476
+2024-09-10 18:07:49,196 INFO success: load-report-generator entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
+2024-09-10 18:13:24,802 INFO exited: load-report-generator (exit status 1; not expected)
+2024-09-10 18:13:25,815 INFO spawned: 'load-report-generator' with pid 5490
+2024-09-10 18:13:25,939 INFO exited: load-report-generator (exit status 1; not expected)
+2024-09-10 18:13:26,943 INFO spawned: 'load-report-generator' with pid 5491
+2024-09-10 18:13:27,058 INFO exited: load-report-generator (exit status 1; not expected)
+2024-09-10 18:13:29,075 INFO spawned: 'load-report-generator' with pid 5492
+2024-09-10 18:13:30,364 INFO success: load-report-generator entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
+2024-09-10 18:15:47,095 INFO exited: load-report-generator (exit status 1; not expected)
+2024-09-10 18:15:48,102 INFO spawned: 'load-report-generator' with pid 5520
+2024-09-10 18:15:49,507 INFO success: load-report-generator entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
+2024-09-10 18:16:13,627 INFO exited: load-report-generator (exit status 1; not expected)
+2024-09-10 18:16:14,631 INFO spawned: 'load-report-generator' with pid 5572
+2024-09-10 18:16:15,851 INFO success: load-report-generator entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
+2024-09-10 18:17:14,010 INFO exited: load-report-generator (exit status 1; not expected)
+2024-09-10 18:17:15,018 INFO spawned: 'load-report-generator' with pid 5663
+2024-09-10 18:17:16,235 INFO success: load-report-generator entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
+2024-09-10 18:21:21,785 INFO exited: load-report-generator (exit status 1; not expected)
+2024-09-10 18:21:22,791 INFO spawned: 'load-report-generator' with pid 7103
+2024-09-10 18:21:22,905 INFO exited: load-report-generator (exit status 1; not expected)
+2024-09-10 18:21:23,913 INFO spawned: 'load-report-generator' with pid 7104
+2024-09-10 18:21:24,039 INFO exited: load-report-generator (exit status 1; not expected)
+2024-09-10 18:21:26,051 INFO spawned: 'load-report-generator' with pid 7105
+2024-09-10 18:21:26,180 INFO exited: load-report-generator (exit status 1; not expected)
+2024-09-10 18:21:29,199 INFO spawned: 'load-report-generator' with pid 7106
+2024-09-10 18:21:30,961 INFO success: load-report-generator entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
+2024-09-10 18:38:38,616 INFO exited: load-report-generator (exit status 1; not expected)
+2024-09-10 18:38:39,622 INFO spawned: 'load-report-generator' with pid 13637
+2024-09-10 18:38:39,746 INFO exited: load-report-generator (exit status 1; not expected)
+2024-09-10 18:38:40,752 INFO spawned: 'load-report-generator' with pid 13638
+2024-09-10 18:38:40,932 INFO exited: load-report-generator (exit status 1; not expected)
+2024-09-10 18:38:42,945 INFO spawned: 'load-report-generator' with pid 13639
+2024-09-10 18:38:43,144 INFO exited: load-report-generator (exit status 1; not expected)
+2024-09-10 18:38:46,155 INFO spawned: 'load-report-generator' with pid 13640
+2024-09-10 18:38:46,307 INFO exited: load-report-generator (exit status 1; not expected)
+2024-09-10 18:38:47,313 INFO gave up: load-report-generator entered FATAL state, too many start retries too quickly
+2024-09-10 18:39:11,549 WARN received SIGTERM indicating exit request
+2024-09-10 18:39:11,552 INFO waiting for http_server to die
+2024-09-10 18:39:12,571 INFO stopped: http_server (terminated by SIGTERM)
+2024-09-10 18:39:13,264 CRIT Supervisor is running as root.  Privileges were not dropped because no user is specified in the config file.  If you intend to run as root, you can set user=root in the config file to avoid this message.
+2024-09-10 18:39:13,267 INFO supervisord started with pid 1
+2024-09-10 18:39:14,275 INFO spawned: 'load-report-generator' with pid 8
+2024-09-10 18:39:14,281 INFO spawned: 'http_server' with pid 9
+2024-09-10 18:39:15,271 INFO success: load-report-generator entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
+2024-09-10 18:39:16,025 INFO success: http_server entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
+2024-09-10 18:47:11,493 INFO exited: load-report-generator (exit status 1; not expected)
+2024-09-10 18:47:12,504 INFO spawned: 'load-report-generator' with pid 4001
+2024-09-10 18:47:12,661 INFO exited: load-report-generator (exit status 1; not expected)
+2024-09-10 18:47:13,668 INFO spawned: 'load-report-generator' with pid 4002
+2024-09-10 18:47:13,824 INFO exited: load-report-generator (exit status 1; not expected)
+2024-09-10 18:47:15,836 INFO spawned: 'load-report-generator' with pid 4003
+2024-09-10 18:47:17,234 INFO success: load-report-generator entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
+2024-09-10 19:21:21,146 INFO exited: load-report-generator (exit status 1; not expected)
+2024-09-10 19:21:22,154 INFO spawned: 'load-report-generator' with pid 11945
+2024-09-10 19:21:22,278 INFO exited: load-report-generator (exit status 1; not expected)
+2024-09-10 19:21:23,287 INFO spawned: 'load-report-generator' with pid 11946
+2024-09-10 19:21:23,398 INFO exited: load-report-generator (exit status 1; not expected)
+2024-09-10 19:21:25,415 INFO spawned: 'load-report-generator' with pid 11947
+2024-09-10 19:21:25,526 INFO exited: load-report-generator (exit status 1; not expected)
+2024-09-10 19:21:28,537 INFO spawned: 'load-report-generator' with pid 11948
+2024-09-10 19:21:29,943 INFO success: load-report-generator entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
+2024-09-10 19:25:03,173 INFO exited: load-report-generator (exit status 1; not expected)
+2024-09-10 19:25:04,184 INFO spawned: 'load-report-generator' with pid 12712
+2024-09-10 19:25:05,511 INFO success: load-report-generator entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
