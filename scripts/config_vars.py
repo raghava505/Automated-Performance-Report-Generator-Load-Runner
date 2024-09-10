@@ -1,7 +1,6 @@
 import os
 #ports
 API_REPORT_PORT = 8001
-PGBADGER_REPORT_PORT = 8000
 PROMETHEUS_PORT = 9090
 KUBE_PROMETHEUS_PORT = 31090
 SSH_PORT = 22
@@ -13,7 +12,6 @@ PROM_API_PATH = "/api/v1/query_range"
 PROM_POINT_API_PATH = "/api/v1/query"
 ABACUS_USERNAME = 'abacus'  
 ABACUS_PASSWORD = 'abacus' 
-MONGO_CONNECTION_STRING = "mongodb://localhost:27017"  #use "mongo" when mongo is running  in a container, use "localhost" if running in machine
 PRESTO_LOADS_FOLDER_PATH = "/home/abacus/benchto_reports/"
 # API_LOADS_FOLDER_PATH_TEMP = "/home/abacus/apache-jmeter-5.6.2/bin/reports/"
 
@@ -29,4 +27,6 @@ BASE_PDFS_PATH = os.path.join(os.path.dirname(ROOT_PATH),'pdfs')
 BASE_LOGS_PATH = os.path.join(ROOT_PATH,'logs')
 
 # REPORT UI
-REPORT_UI_PORT = 5000
+LOCAL_PGBADGER_REPORT_PORT = 8011
+REPORT_UI_PORT = 8012
+MONGO_CONNECTION_STRING = "mongodb://mongo-report:8013"  #use "mongo" when mongo is running  in a container, use "localhost" if running in machine
