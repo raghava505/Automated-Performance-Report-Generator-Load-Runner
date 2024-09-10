@@ -60,9 +60,9 @@ class cloudquery_child(parent):
     @property
     def kafka_group_names(cls):
         temp = copy.deepcopy(parent.kafka_group_names)
-        temp.extend(["cloudqueryinventorygroup" , "cloudcompliancemanager" , "ruleenginecc","cloudqueryinventory_cgs"])
+        temp.extend(["cloudqueryinventorygroup" , "cloudcompliancemanager" , "ruleenginecc","cloudqueryinventory_cgs","event_cloud_group-cq" , "db-events-cq" , "risksconsumer" , "cloudtraileventsgroup" , "cloudqueryeventsgroup" , "cloudconnectorsink_cloudeventdecorator","cloud-detections"])
         return temp
-    
+
     @classmethod
     @property
     def list_of_observations_to_make(cls):
