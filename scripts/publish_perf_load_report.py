@@ -147,31 +147,66 @@ class ViewReportClass:
                         <img src="data:image/png;base64,{img_base64}" alt="Image" class="img-fluid w-100"  />
                     </div>
                 """
-    def attach_saved_charts(self,dict_of_list_of_filepaths,base_graphs_path, url_for):
-        html_text=""
+    def attach_saved_charts(self, dict_of_list_of_filepaths, base_graphs_path, url_for, document_ids_mapping, main_doc_id):
+        html_text = ""
         for main_heading in dict_of_list_of_filepaths:
             unique_id = str(uuid.uuid4())
-            html_text+=f"""<p>
-                                <button class="btn btn-light  pt-2" style="display: block;width:50%;border-radius: 10px;border-color:#b4b4b4;" type="button" data-toggle="collapse" data-target="#collapseExample{unique_id}" aria-expanded="false" aria-controls="collapseExample{unique_id}">
-                                    <h3>{main_heading}</h3>
-                                </button>
-                            </p>
-                            <div class="collapse mb-5" id="collapseExample{unique_id}">
-                                <div class="">
-                        """
+            html_text += f"""
+            <p>
+                <button class="btn btn-light pt-2" style="display: block; width: 50%; border-radius: 10px; border-color: #b4b4b4;" type="button" data-toggle="collapse" data-target="#collapseExample{unique_id}" aria-expanded="false" aria-controls="collapseExample{unique_id}">
+                    <h3>{main_heading}</h3>
+                </button>
+            </p>
+            <div class="collapse mb-5" id="collapseExample{unique_id}">
+                <div class="">
+            """
             for filepath in dict_of_list_of_filepaths[main_heading]:
-                if os.path.exists(os.path.join(base_graphs_path,filepath)):
+                if os.path.exists(os.path.join(base_graphs_path, filepath)):
+                    unique_id_for_each_image = uuid.uuid4()
                     base_filename = os.path.basename(filepath)
                     base_filename_without_extension = str(os.path.splitext(base_filename)[0])
+                    
+                    html_text += f'<h4 class="mt-4">{base_filename_without_extension}</h4>'
 
-                    html_text += f"""
-                                <h4>{base_filename_without_extension}</h4>
-                                <img src="{url_for('serve_image', filename=filepath)}" alt="{filepath}" class="img-fluid w-100" />                                                
-                    """
+                    # Create tabs
+                    html_text += f'<ul class="nav nav-tabs" id="tab{unique_id_for_each_image}" role="tablist">'
+                    for index, (sprint_run_string, document_id) in enumerate(document_ids_mapping.items()):
+                        curr_filepath = filepath.replace(main_doc_id, document_id)
+                        active_class = "active" if index == 0 else ""
+
+                        html_text += f"""
+                            <li class="nav-item" style="font-size:14px">
+                                <a class="nav-link {active_class}" id="tab-{unique_id_for_each_image}-{index}" 
+                                data-toggle="tab" href="#tab-content-{unique_id_for_each_image}-{index}" role="tab" 
+                                aria-controls="tab-content-{unique_id_for_each_image}-{index}" 
+                                aria-selected="{'true' if index == 0 else 'false'}">
+                                {sprint_run_string}
+                                </a>
+                            </li>
+                        """
+                    html_text += "</ul>"
+
+                    # Create tab content
+                    # html_text += f'<div class="tab-content" id="tab-content-{unique_id_for_each_image}">'
+                    html_text += f'<div class="tab-content">'
+                    for index, (sprint_run_string, document_id) in enumerate(document_ids_mapping.items()):
+                        curr_filepath = filepath.replace(main_doc_id, document_id)
+                        active_class = "show active" if index == 0 else ""
+
+                        html_text += f"""
+                            <div class="tab-pane fade {active_class} transition" id="tab-content-{unique_id_for_each_image}-{index}" 
+                                role="tabpanel" aria-labelledby="tab-{unique_id_for_each_image}-{index}">
+                                <img src="{url_for('serve_image', filename=curr_filepath)}" alt="{curr_filepath}" class="img-fluid w-100" />                                                
+                            </div>
+                        """
+                    html_text += "</div>"
+
                 else:
-                    print(f"{os.path.join(base_graphs_path,filepath)} doest exist")
-            html_text+="""</div>
-                        </div>"""
+                    print(f"{os.path.join(base_graphs_path, filepath)} does not exist")
+            html_text += """
+                </div>
+            </div>
+            """
         return html_text
     
 class perf_load_report_publish:
@@ -191,8 +226,8 @@ class perf_load_report_publish:
 
         self.confluence_page_mappings={}
         self.main_build = self.main_result["load_details"]["data"]["build"]
-        id = str(self.main_result["_id"])
-        self.document_specific_path = os.path.join(dbname,coll_name,id)
+        self.id = str(self.main_result["_id"])
+        self.document_specific_path = os.path.join(dbname,coll_name,self.id)
         self.parent_page_title=parent_page_title
         self.report_title=report_title
         self.email_address=email_address
@@ -201,8 +236,14 @@ class perf_load_report_publish:
         self.url = url
         self.isViewReport=isViewReport
 
+        self.document_ids_mapping = {f"{self.main_sprint}_run{self.main_run}":self.id}
+        for curr_sprint, curr_run in self.sprint_runs_list:
+            self.document_ids_mapping[f"{curr_sprint}_run{curr_run}"] = str(self.get_key_result(curr_sprint, curr_run, "_id")["_id"])
+        print(self.document_ids_mapping)
+
+
     def get_key_result(self,sprint,run,key_name):
-        filter = {f"{key_name}":1,'_id':0}
+        filter = {f"{key_name}":1}
         result=self.collection.find_one({"load_details.data.sprint":sprint , "load_details.data.run":run},filter)
         return result
     
@@ -451,7 +492,7 @@ class perf_load_report_publish:
                             charts_paths_dict[main_heading] = temp_list_for_confluence
                             # if not self.isViewReport:yield f'data: {{"status": "info", "message": "Attaching {main_heading}"}}\n\n'
 
-                        charts_generator=curr_page_obj.attach_saved_charts(charts_paths_dict,base_graphs_path=schema["base_graphs_path"], url_for=url_for)
+                        charts_generator=curr_page_obj.attach_saved_charts(charts_paths_dict,base_graphs_path=schema["base_graphs_path"], url_for=url_for, document_ids_mapping=self.document_ids_mapping, main_doc_id=self.id)
                         if not self.isViewReport:
                             for current_chart_status_msg in charts_generator:
                                 yield f'data: {{"status": "info", "message": "{current_chart_status_msg}"}}\n\n'

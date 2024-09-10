@@ -402,3 +402,25 @@
     vertical-align: super;  /* Position it a bit higher */
     padding: 0.2em 0.5em;  /* Adjust padding to make it look good at smaller size */
 }
+
+
+.tab-pane {
+    opacity: 0;
+    transition: opacity 0.05s ease-in-out;
+}
+
+.tab-pane.show.active {
+    opacity: 1;
+}
+
+.transition {
+    transition: opacity 0.05s ease-in-out;
+}
+
+.nav-tabs.flex-column {
+    border-bottom: 0;
+}
+
+.nav-tabs .nav-link {
+    border-radius: 0;
+}

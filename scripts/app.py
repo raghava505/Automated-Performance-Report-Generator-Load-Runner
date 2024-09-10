@@ -220,7 +220,7 @@ def view_report():
     database_name = request.form['loadtype']
     collection_name = request.form['loadname']
 
-    # list_of_sprint_runs_to_show_or_compare = [[162,1],[161,2]]
+    # list_of_sprint_runs_to_show_or_compare = [[162,1], [161,2], [161,1], [160,1]]
     # database_name = "Osquery_LoadTests_New"
     # collection_name = "ControlPlane"
 
