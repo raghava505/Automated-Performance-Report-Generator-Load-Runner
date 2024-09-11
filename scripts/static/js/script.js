@@ -116,10 +116,15 @@ function populateRunDropdowns(runs, run_field) {
     runs.forEach(runItem => {
         const option = document.createElement('option');
         option.value = runItem.run;
-        option.textContent = "run:"+runItem.run+"; "+"build:"+runItem.build+"; "+"stack:"+runItem.stack+"; "+"duration:"+runItem.load_duration+"hrs";
+        
+        // Using a smaller Unicode character for the circle • (U+2022)
+        const smallCircleIcon = '\u2022';
+
+        option.textContent = `run${runItem.run}${smallCircleIcon}${runItem.build}${smallCircleIcon}${runItem.stack}${smallCircleIcon}${runItem.load_duration}hrs${smallCircleIcon}${runItem.load_start_time_ist}`;
         run_field.appendChild(option);
     });
 }
+
 
 
 function addSprintRunFields() {
