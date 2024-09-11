@@ -187,7 +187,10 @@ class cloud_accuracy:
             self.total_counts = getattr(configs, f'total_counts_{self.load_name.split("_")[0]}', None)
             fs = open(self.api_path)
             file = fs.read()
-            save_dict[self.load_name.split("_")[0]]=self.multi_tables_accuracy(file)
+            try:
+                save_dict[self.load_name.split("_")[0]]=self.multi_tables_accuracy(file)
+            except Exception as e:
+                print(f"ERROR occured while calculating acccuraices for {self.load_name} load")
 
         elif(self.load_name == "Azure_MultiCustomer"):
             print("Azure_MultiCustomer")
@@ -196,7 +199,10 @@ class cloud_accuracy:
             self.total_counts = getattr(configs, f'total_counts_Azure', None)
             fs = open(self.api_path)
             file = fs.read()
-            save_dict["Azure"]=self.multi_tables_accuracy(file)
+            try:
+                save_dict["Azure"]=self.multi_tables_accuracy(file)
+            except Exception as e:
+                print(f"ERROR occured while calculating acccuraices for {self.load_name} load")
 
         elif(self.load_name == "AWS_SingleCustomer"):
             print(2)
@@ -205,20 +211,23 @@ class cloud_accuracy:
             self.total_counts = getattr(configs, f'total_counts_AWS', None)
             fs = open(self.api_path)
             file = fs.read()
-            save_dict["AWS"]=self.multi_tables_accuracy(file)
+            try:
+                save_dict["AWS"]=self.multi_tables_accuracy(file)
+            except Exception as e:
+                print(f"ERROR occured while calculating acccuraices for {self.load_name} load")
         
-        elif(self.load_type == 'osquery_cloudquery_combined'):
-            print(3)
-            obj.get_log(obj.simulators2,"AWS_MultiCustomer")
-            self.api_path=api_path_multi_longevity
-            self.total_counts = getattr(configs, f'total_counts_AWS', None)
-            fs = open(self.api_path)
-            file = fs.read()
-            save_dict["AWS"]=self.multi_tables_accuracy(file)
+        # elif(self.load_type == 'osquery_cloudquery_combined'):
+        #     print(3)
+        #     obj.get_log(obj.simulators2,"AWS_MultiCustomer")
+        #     self.api_path=api_path_multi_longevity
+        #     self.total_counts = getattr(configs, f'total_counts_AWS', None)
+        #     fs = open(self.api_path)
+        #     file = fs.read()
+        #     save_dict["AWS"]=self.multi_tables_accuracy(file)
 
-            obj.get_log(obj.simulators3,"GCP_MultiCustomer")
-            self.total_counts = getattr(configs, f'total_counts_GCP', None)
-            save_dict["GCP"]=self.multi_tables_accuracy(file)
+        #     obj.get_log(obj.simulators3,"GCP_MultiCustomer")
+        #     self.total_counts = getattr(configs, f'total_counts_GCP', None)
+        #     save_dict["GCP"]=self.multi_tables_accuracy(file)
 
         elif(self.load_type == 'all_loads_combined'):
             print(3)
@@ -227,16 +236,24 @@ class cloud_accuracy:
             self.total_counts = getattr(configs, f'total_counts_AWS', None)
             fs = open(self.api_path)
             file = fs.read()
-            save_dict["AWS"]=self.multi_tables_accuracy(file)
+            try:
+                save_dict["AWS"]=self.multi_tables_accuracy(file)
+            except Exception as e:
+                print("ERROR occured while calculating AWS acccuraices for all_loads_combined load")
             
             obj.get_log(obj.azure_simulators,"Azure_MultiCustomer")
             self.total_counts = getattr(configs, f'total_counts_Azure', None)
-            save_dict["Azure"]=self.multi_tables_accuracy(file)
+            try:
+                save_dict["Azure"]=self.multi_tables_accuracy(file)
+            except Exception as e:
+                print("ERROR occured while calculating Azure acccuraices for all_loads_combined load")
 
             obj.get_log(obj.simulators3,"GCP_MultiCustomer")
             self.total_counts = getattr(configs, f'total_counts_GCP', None)
-            save_dict["GCP"]=self.multi_tables_accuracy(file)
-
+            try:
+                save_dict["GCP"]=self.multi_tables_accuracy(file)
+            except Exception as e:
+                print("ERROR occured while calculating GCP acccuraices for all_loads_combined load")
         return save_dict
 
 
