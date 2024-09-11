@@ -190,7 +190,7 @@ class cloud_accuracy:
             try:
                 save_dict[self.load_name.split("_")[0]]=self.multi_tables_accuracy(file)
             except Exception as e:
-                print(f"ERROR occured while calculating acccuraices for {self.load_name} load")
+                print(f"ERROR occured while calculating acccuraices for {self.load_name} load ", e)
 
         elif(self.load_name == "Azure_MultiCustomer"):
             print("Azure_MultiCustomer")
@@ -202,7 +202,7 @@ class cloud_accuracy:
             try:
                 save_dict["Azure"]=self.multi_tables_accuracy(file)
             except Exception as e:
-                print(f"ERROR occured while calculating acccuraices for {self.load_name} load")
+                print(f"ERROR occured while calculating acccuraices for {self.load_name} load ",e)
 
         elif(self.load_name == "AWS_SingleCustomer"):
             print(2)
@@ -214,7 +214,7 @@ class cloud_accuracy:
             try:
                 save_dict["AWS"]=self.multi_tables_accuracy(file)
             except Exception as e:
-                print(f"ERROR occured while calculating acccuraices for {self.load_name} load")
+                print(f"ERROR occured while calculating acccuraices for {self.load_name} load ",e)
         
         # elif(self.load_type == 'osquery_cloudquery_combined'):
         #     print(3)
@@ -239,21 +239,22 @@ class cloud_accuracy:
             try:
                 save_dict["AWS"]=self.multi_tables_accuracy(file)
             except Exception as e:
-                print("ERROR occured while calculating AWS acccuraices for all_loads_combined load")
+                print("ERROR occured while calculating AWS acccuraices for all_loads_combined load ",e)
             
             obj.get_log(obj.azure_simulators,"Azure_MultiCustomer")
             self.total_counts = getattr(configs, f'total_counts_Azure', None)
             try:
                 save_dict["Azure"]=self.multi_tables_accuracy(file)
             except Exception as e:
-                print("ERROR occured while calculating Azure acccuraices for all_loads_combined load")
+                print("ERROR occured while calculating Azure acccuraices for all_loads_combined load ",e)
 
             obj.get_log(obj.simulators3,"GCP_MultiCustomer")
             self.total_counts = getattr(configs, f'total_counts_GCP', None)
             try:
                 save_dict["GCP"]=self.multi_tables_accuracy(file)
             except Exception as e:
-                print("ERROR occured while calculating GCP acccuraices for all_loads_combined load")
+                print("ERROR occured while calculating GCP acccuraices for all_loads_combined load ", e)
+
         return save_dict
 
 
