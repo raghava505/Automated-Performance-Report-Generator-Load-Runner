@@ -121,7 +121,7 @@ class events_count_class:
                 "Total cloud trail events count / hour" : self.format_in_millions(total_sum2_aws / 12),
                 "Total count": self.format_in_millions(total_sum_aws),
                 "Total count / hour:" : self.format_in_millions(total_sum_aws / 12),
-                "Ratio (inventory:events)": f"1:{math.ceil(total_sum2_aws / total_sum3_aws) if total_sum3_aws!=0 else "NaN"}"
+                "Ratio (inventory:events)": f"1:{math.ceil(total_sum2_aws / total_sum3_aws) if total_sum3_aws!=0 else 'Nan'}"
             }
 
             save_dict["GCP"] = {
@@ -131,7 +131,7 @@ class events_count_class:
                 "Total cloud trail events count / hour" : self.format_in_millions(total_sum2_gcp / 12),
                 "Total count": self.format_in_millions(total_sum_gcp),
                 "Total count / hour:" : self.format_in_millions(total_sum_gcp / 12),
-                "Ratio (inventory:events)": f"1:{math.ceil(total_sum2_gcp / total_sum3_gcp) if total_sum3_gcp!=0 else "Nan"}"
+                "Ratio (inventory:events)": f"1:{math.ceil(total_sum2_gcp / total_sum3_gcp) if total_sum3_gcp!=0 else 'Nan'}"
             }
         else:
             
@@ -154,7 +154,7 @@ class events_count_class:
             "Total cloud trail events count / hour": self.format_in_millions(self.total_sum2 / 12),
             "Total count": self.format_in_millions(self.total_sum),
             "Total count / hour": self.format_in_millions(self.total_sum / 12),
-            "Ratio (inventory:events)": f"1:{math.ceil(self.total_sum2 / self.total_sum3) if self.total_sum3!=0 else "Nan"}"
+            "Ratio (inventory:events)": f"1:{math.ceil(self.total_sum2 / self.total_sum3) if self.total_sum3!=0 else 'Nan'}"
             }
 
         self.stack_obj.log.info(save_dict)
