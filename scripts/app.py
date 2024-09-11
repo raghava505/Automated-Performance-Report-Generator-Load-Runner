@@ -126,9 +126,9 @@ def get_ids():
     #     '162': [{'run':'3', 'build':160032}, {'run':'4', 'build':160033}, {'run':'7', 'build':160034}],
     # }
     dictionary= {}
-    ids = [(str(doc['load_details']["data"]["sprint"]),str(doc['load_details']["data"]["run"]),str(doc['load_details']["data"]["build"]),str(doc['load_details']["data"]["stack"]),str(doc['load_details']["data"]["load_duration_in_hrs"])) for doc in collection.find({}, {'load_details.data.sprint': 1,'load_details.data.run': 1,'load_details.data.build': 1,'load_details.data.stack': 1,'load_details.data.load_duration_in_hrs': 1})]
-    for sprint,run,build, stack, load_dur in ids:
-        item = {'run':run,'build':build, 'stack':stack,'load_duration':load_dur}
+    ids = [(str(doc['load_details']["data"]["sprint"]),str(doc['load_details']["data"]["run"]),str(doc['load_details']["data"]["build"]),str(doc['load_details']["data"]["stack"]),str(doc['load_details']["data"]["load_duration_in_hrs"]),str(doc['load_details']["data"]["load_start_time_ist"])) for doc in collection.find({}, {'load_details.data.sprint': 1,'load_details.data.run': 1,'load_details.data.build': 1,'load_details.data.stack': 1,'load_details.data.load_duration_in_hrs': 1,'load_details.data.load_start_time_ist': 1})]
+    for sprint,run,build, stack, load_dur, load_start_time_ist in ids:
+        item = {'run':run,'build':build, 'stack':stack,'load_duration':load_dur, 'load_start_time_ist':load_start_time_ist}
         if sprint in dictionary:
             dictionary[sprint].append(item)
         else:

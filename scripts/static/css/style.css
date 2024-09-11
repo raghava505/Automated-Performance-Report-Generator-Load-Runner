@@ -413,7 +413,7 @@
     opacity: 1;
 }
 
-.transition {
+.images_transition_over_sprints {
     transition: opacity 0.05s ease-in-out;
 }
 

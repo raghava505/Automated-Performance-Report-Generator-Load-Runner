@@ -194,7 +194,7 @@ class ViewReportClass:
                         active_class = "show active" if index == 0 else ""
 
                         html_text += f"""
-                            <div class="tab-pane fade {active_class} transition" id="tab-content-{unique_id_for_each_image}-{index}" 
+                            <div class="tab-pane fade {active_class} images_transition_over_sprints" id="tab-content-{unique_id_for_each_image}-{index}" 
                                 role="tabpanel" aria-labelledby="tab-{unique_id_for_each_image}-{index}">
                                 <img src="{url_for('serve_image', filename=curr_filepath)}" alt="{curr_filepath}" class="img-fluid w-100" />                                                
                             </div>
