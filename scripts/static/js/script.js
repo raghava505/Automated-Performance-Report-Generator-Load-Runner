@@ -582,8 +582,13 @@ function generateContents() {
     let lastH2Li = null; // To keep track of the last h2 element for nesting h3
 
     headers.forEach(header => {
-        const id = header.textContent.trim().replace(/\s+/g, '-').toLowerCase();
+        
+        const baseId = header.textContent.trim().replace(/\s+/g, '-').toLowerCase();
+        const id = `${baseId}-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`; // Combine baseId, current time, and random string
         header.id = id;
+
+        // const id = header.textContent.trim().replace(/\s+/g, '-').toLowerCase();
+        // header.id = id;
 
         const li = document.createElement('li');
         li.style.width = '100%'; // Ensure the li occupies the full width
