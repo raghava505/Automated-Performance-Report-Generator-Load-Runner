@@ -43,7 +43,7 @@ class ViewReportClass:
     def add_text(self,text):
         return text
     
-    def add_table_from_dataframe(self, heading_text, df, isEditable=False,key_name=None,dbname=None, collname=None, sprint=None , run=None, *args, **kwargs):
+    def add_table_from_dataframe(self, heading_text, df, isEditable=False,key_name=None,dbname=None, collname=None, sprint=None , run=None,is_comparison_table=False, *args, **kwargs):
         load_info_header = f"{dbname}___{collname}___{sprint}___{run}___{key_name}"
         # Generate custom header with sortable columns
         custom_header = "<thead><tr>"
@@ -107,18 +107,68 @@ class ViewReportClass:
         #             {table_html}
         #         </div>
         #         """
-        table_collapse_uuid = uuid.uuid4()
-        return f"""<p>
-                <button class="btn btn-light btn-sm" style="display: block;width:50%;border-radius: 5px;font-size:12px;border-color:#b4b4b4;" type="button" data-toggle="collapse" data-target="#collapseExample{table_collapse_uuid}" aria-expanded="true" aria-controls="collapseExample{table_collapse_uuid}">
-                    {heading_text}
-                </button>
-            </p>
-            <div class="collapse show mb-3" id="collapseExample{table_collapse_uuid}">
-                <div class="tab-cont form-group">
+        # import uuid
+        if is_comparison_table:
+            unique_id_for_each_table = uuid.uuid4()
+
+            # Create tab navigation
+            html_text = f'<ul class="nav nav-tabs" id="tab{unique_id_for_each_table}" role="tablist">'
+            html_text += f"""
+                <li class="nav-item" style="font-size:14px">
+                    <a class="nav-link active" id="table-{unique_id_for_each_table}" 
+                    data-toggle="tab" href="#table-content-{unique_id_for_each_table}" role="tab" 
+                    aria-controls="table-content-{unique_id_for_each_table}" 
+                    aria-selected="true">
+                    Table
+                    </a>
+                </li>
+
+                <li class="nav-item" style="font-size:14px" id={unique_id_for_each_table} onclick='generate_dynamic_graph(this)'>
+                    <a class="nav-link" id="graph-{unique_id_for_each_table} " 
+                    data-toggle="tab" href="#graph-content-{unique_id_for_each_table}" role="tab" 
+                    aria-controls="graph-content-{unique_id_for_each_table}" 
+                    aria-selected="false">
+                    Graph
+                    </a>
+                </li>
+            """
+            html_text += "</ul>"
+
+            # Create tab content
+            html_text += f'<div class="tab-content" id="tab-content-{unique_id_for_each_table}">'
+            html_text += f"""
+                <div class="tab-pane fade show active" id="table-content-{unique_id_for_each_table}" 
+                    role="tabpanel" aria-labelledby="table-{unique_id_for_each_table}">
                     {table_html}
                 </div>
+
+                <div class="tab-pane fade" id="graph-content-{unique_id_for_each_table}" 
+                    style="background-color: #191b1f; color: #EAEAEA;" 
+                    role="tabpanel" aria-labelledby="graph-{unique_id_for_each_table}">
+                    <canvas id="chart-{unique_id_for_each_table}" width="400" height="200"></canvas>
+                </div>
+
+            """
+            html_text += "</div>"
+            table_html = html_text
+        # Final HTML return with collapsible section
+        table_collapse_uuid = uuid.uuid4()
+        final_html = f"""
+        <p>
+            <button class="btn btn-light btn-sm" style="display: block;width:50%;border-radius: 5px;font-size:12px;border-color:#b4b4b4;" 
+            type="button" data-toggle="collapse" data-target="#collapseExample{table_collapse_uuid}" 
+            aria-expanded="true" aria-controls="collapseExample{table_collapse_uuid}">
+                {heading_text}
+            </button>
+        </p>
+        <div class="collapse show mb-3" id="collapseExample{table_collapse_uuid}">
+            <div class="tab-cont form-group">
+                {table_html}
             </div>
+        </div>
         """
+        return final_html
+
 
 
     def attach_plot_as_image(self,piechart_name, image, heading_tag):
@@ -158,7 +208,6 @@ class ViewReportClass:
                 </button>
             </p>
             <div class="collapse mb-5" id="collapseExample{unique_id}">
-                <div class="">
             """
             for filepath in dict_of_list_of_filepaths[main_heading]:
                 if os.path.exists(os.path.join(base_graphs_path, filepath)):
@@ -204,7 +253,6 @@ class ViewReportClass:
                 else:
                     print(f"{os.path.join(base_graphs_path, filepath)} does not exist")
             html_text += """
-                </div>
             </div>
             """
         return html_text
@@ -363,7 +411,7 @@ class perf_load_report_publish:
                 for compare_col in compare_cols:
                     returned_df = self.compare_dfs(compare_col,merged_df,builds,merge_on_cols)
                     if returned_df is not None and not returned_df.empty :
-                        html_text+=curr_page_obj.add_table_from_dataframe(f"<h{heading_size+1}>Comparison on {self.captilise_heading(compare_col)}</h{heading_size+1}>", returned_df.copy(), collapse=collapse,isEditable=isEditable,key_name=key_name, dbname = self.dbname, collname = self.collname, sprint = self.main_sprint, run = self.main_run)
+                        html_text+=curr_page_obj.add_table_from_dataframe(f"<h{heading_size+1}>Comparison on {self.captilise_heading(compare_col)}</h{heading_size+1}>", returned_df.copy(), collapse=collapse,isEditable=isEditable,key_name=key_name, dbname = self.dbname, collname = self.collname, sprint = self.main_sprint, run = self.main_run, is_comparison_table = True)
                         main_df = returned_df.copy()
         else:
             html_text+=curr_page_obj.add_table_from_dataframe(f"<h{heading_size}>{self.captilise_heading(key_name)}</h{heading_size}>", copy_main_df, collapse=collapse,isEditable=isEditable,key_name=key_name, dbname = self.dbname, collname = self.collname, sprint = self.main_sprint, run = self.main_run)

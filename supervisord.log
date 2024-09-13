@@ -148,3 +148,33 @@
 2024-09-10 19:25:03,173 INFO exited: load-report-generator (exit status 1; not expected)
 2024-09-10 19:25:04,184 INFO spawned: 'load-report-generator' with pid 12712
 2024-09-10 19:25:05,511 INFO success: load-report-generator entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
+2024-09-12 16:50:44,505 CRIT Supervisor is running as root.  Privileges were not dropped because no user is specified in the config file.  If you intend to run as root, you can set user=root in the config file to avoid this message.
+2024-09-12 16:50:44,507 INFO supervisord started with pid 1
+2024-09-12 16:50:45,515 INFO spawned: 'load-report-generator' with pid 9
+2024-09-12 16:50:45,518 INFO spawned: 'http_server' with pid 10
+2024-09-12 16:50:46,960 INFO success: load-report-generator entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
+2024-09-12 16:50:46,961 INFO success: http_server entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
+2024-09-12 16:51:58,617 INFO exited: load-report-generator (exit status 1; not expected)
+2024-09-12 16:51:59,622 INFO spawned: 'load-report-generator' with pid 379
+2024-09-12 16:52:00,349 INFO exited: load-report-generator (exit status 1; not expected)
+2024-09-12 16:52:01,360 INFO spawned: 'load-report-generator' with pid 389
+2024-09-12 16:52:01,524 INFO exited: load-report-generator (exit status 1; not expected)
+2024-09-12 16:52:03,537 INFO spawned: 'load-report-generator' with pid 390
+2024-09-12 16:52:04,717 INFO success: load-report-generator entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
+2024-09-12 17:27:15,363 INFO exited: load-report-generator (exit status 1; not expected)
+2024-09-12 17:27:16,374 INFO spawned: 'load-report-generator' with pid 4113
+2024-09-12 17:27:16,489 INFO exited: load-report-generator (exit status 1; not expected)
+2024-09-12 17:27:17,496 INFO spawned: 'load-report-generator' with pid 4114
+2024-09-12 17:27:18,683 INFO success: load-report-generator entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
+2024-09-12 17:58:35,438 INFO exited: load-report-generator (exit status 1; not expected)
+2024-09-12 17:58:36,445 INFO spawned: 'load-report-generator' with pid 7136
+2024-09-12 17:58:37,694 INFO success: load-report-generator entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
+2024-09-12 17:58:53,854 INFO exited: load-report-generator (exit status 1; not expected)
+2024-09-12 17:58:54,866 INFO spawned: 'load-report-generator' with pid 7162
+2024-09-12 17:58:55,000 INFO exited: load-report-generator (exit status 1; not expected)
+2024-09-12 17:58:56,005 INFO spawned: 'load-report-generator' with pid 7163
+2024-09-12 17:58:56,135 INFO exited: load-report-generator (exit status 1; not expected)
+2024-09-12 17:58:58,144 INFO spawned: 'load-report-generator' with pid 7164
+2024-09-12 17:58:58,298 INFO exited: load-report-generator (exit status 1; not expected)
+2024-09-12 17:59:01,317 INFO spawned: 'load-report-generator' with pid 7165
+2024-09-12 17:59:02,714 INFO success: load-report-generator entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)

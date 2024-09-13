@@ -1206,3 +1206,198 @@ function toggleCollapseExpand() {
     }
 }
 
+function getRandomBetween(min, max) {
+    return Math.random() * (max - min) + min;
+}
+
+function renderChart(canvas_id, table_id) {
+    const table_element = document.getElementById(table_id).querySelector('table');
+    const headers = Array.from(table_element.querySelectorAll('thead th')).map(th => th.textContent.trim());
+    const xLabels = headers.slice(1, -2); // Ignore the last two columns for x-axis labels
+
+    // Generate random darker colors for each line
+    const getDarkerColor = () => {
+        const r = Math.floor(getRandomBetween(0.2, 0.85) * 256);
+        const g = Math.floor(getRandomBetween(0.2, 0.85) * 256);
+        const b = Math.floor(getRandomBetween(0.2, 0.85) * 256);
+        return `rgba(${r}, ${g}, ${b}, 1)`;
+    };
+
+    const datasets = [];
+    
+    // Extract rows from the table
+    const rows = Array.from(table_element.querySelectorAll('tbody tr'));
+
+    rows.forEach(row => {
+        const cells = Array.from(row.querySelectorAll('td'));
+        
+        // Skip rows that contain "SUM" in any cell
+        if (cells.some(cell => cell.textContent.trim().toUpperCase() === "SUM")) {
+            return;
+        }
+
+        const legend = cells[0].textContent.trim();
+        const yValues = cells.slice(1, -2).map((cell, index) => {
+            const value = parseFloat(cell.textContent.trim());
+            return isNaN(value) ? null : value;
+        });
+
+        const color = getDarkerColor();
+        if (legend && yValues.length === xLabels.length && !yValues.includes(null)) {
+            datasets.push({
+                label: legend,
+                data: yValues,
+                backgroundColor: color,
+                borderColor: color,
+                borderWidth: 3,
+                hidden: false
+            });
+        }
+    });
+
+    const ctx = document.getElementById(canvas_id).getContext('2d');
+
+    // Function to create chart and render based on chart type
+    let chart;
+    const createChart = (type) => {
+        if (chart) chart.destroy(); // Destroy existing chart before creating a new one
+
+        chart = new Chart(ctx, {
+            type: type,
+            data: {
+                labels: xLabels,
+                datasets: datasets
+            },
+            options: {
+                plugins: {
+                    legend: {
+                        display: true,
+                        position: 'top',
+                        labels: {
+                            color: '#fff',
+                            boxWidth: 12,
+                            padding: 20,
+                            filter: (legendItem) => legendItem.text.length <= 20
+                        },
+                        onClick: (e, legendItem, legend) => {
+                            const index = legendItem.datasetIndex;
+                            const ci = legend.chart;
+                            const meta = ci.getDatasetMeta(index);
+
+                            meta.hidden = meta.hidden === null ? !ci.data.datasets[index].hidden : null;
+                            ci.update();
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        beginAtZero: true,
+                        ticks: {
+                            color: '#EAEAEA'
+                        },
+                        grid: {
+                            color: '#404144'
+                        }
+                    },
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            color: '#EAEAEA'
+                        },
+                        grid: {
+                            color: '#404144'
+                        }
+                    }
+                },
+                layout: {
+                    padding: 20
+                },
+                responsive: true,
+                animation: {
+                    duration: 0
+                }
+            }
+        });
+    };
+
+    // Initially create the chart as a line chart
+    createChart('line');
+
+    // Add CSS for scrollable legend area and toggle button
+    const style = document.createElement('style');
+    style.innerHTML = `
+        .chart-legend-wrapper {
+            max-height: 100px;
+            overflow-y: auto;
+        }
+        .toggle-all-btn, .chart-type-dropdown {
+            position: absolute;
+            top: 5px;
+            font-size: 13px;
+            background-color: #333;
+            color: #fff;
+            border: none;
+            padding: 5px 5px;
+            cursor: pointer;
+            z-index: 10;
+            height:30px;
+        }
+        .toggle-all-btn {
+            right: 5px;
+        }
+        .chart-type-dropdown {
+            right: 80px;
+        }
+    `;
+    document.head.appendChild(style);
+
+    setTimeout(() => {
+        const legendContainer = document.querySelector(`#${canvas_id} + .chart-legend`);
+        if (legendContainer) {
+            legendContainer.classList.add('chart-legend-wrapper');
+        }
+
+        // Create a toggle button for enabling/disabling all datasets
+        const toggleAllButton = document.createElement('button');
+        toggleAllButton.className = 'toggle-all-btn';
+        toggleAllButton.textContent = 'Hide All';
+
+        toggleAllButton.addEventListener('click', () => {
+            const allVisible = chart.data.datasets.every(dataset => !dataset.hidden);
+
+            chart.data.datasets.forEach(dataset => {
+                dataset.hidden = allVisible;
+            });
+
+            chart.update();
+            toggleAllButton.textContent = allVisible ? 'Show All' : 'Hide All';
+        });
+
+        // Create a dropdown for selecting chart type
+        const chartTypeDropdown = document.createElement('select');
+        chartTypeDropdown.className = 'chart-type-dropdown';
+        chartTypeDropdown.innerHTML = `
+            <option value="line">Line</option>
+            <option value="bar">Bar</option>
+        `;
+
+        chartTypeDropdown.addEventListener('change', (e) => {
+            createChart(e.target.value); // Change chart type based on selection
+        });
+
+        const chartContainer = document.getElementById(canvas_id).parentElement;
+        chartContainer.style.position = 'relative';
+        chartContainer.appendChild(toggleAllButton);
+        chartContainer.appendChild(chartTypeDropdown);
+    }, 0);
+}
+
+
+
+
+
+function generate_dynamic_graph(element) {
+    // Get the id of the clicked element
+    const id = element.id;
+    renderChart("chart-"+id , "table-content-"+id)
+}

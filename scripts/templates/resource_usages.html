@@ -1,0 +1,55 @@
+{% extends "layout.html" %}
+{% block content %}
+
+<div class="container-fluid">
+    <div class="row mb-5">
+        {% for d in data %}
+            {{ d }}
+        {% endfor %}
+    </div>
+</div>
+
+<div class="container mt-4">
+    <h1>Sales Line Chart</h1>
+    <canvas id="salesChart" width="400" height="200"></canvas>
+</div>
+
+<!-- Include Chart.js library from CDN -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+    // Function to fetch chart data from the Flask backend
+    async function fetchChartData() {
+        const response = await fetch('/get_chart_data');
+        const data = await response.json();
+        return data;
+    }
+
+    // Initialize the line chart
+    async function renderChart() {
+        const chartData = await fetchChartData();
+
+        const ctx = document.getElementById('salesChart').getContext('2d');
+        const salesChart = new Chart(ctx, {
+            type: 'line', // Change chart type to 'line'
+            data: {
+                labels: chartData.labels,  // X-axis labels
+                datasets: chartData.datasets  // Multiple datasets
+            },
+            options: {
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+    }
+
+    // Call the function to render the chart when the page loads
+    document.addEventListener('DOMContentLoaded', function() {
+        renderChart();
+    });
+</script>
+
+{% endblock content %}
