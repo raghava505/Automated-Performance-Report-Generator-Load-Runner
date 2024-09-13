@@ -6,6 +6,7 @@ import io
 import plotly.io as pio
 import time
 import re
+from urllib.parse import urlparse
 # logging.basicConfig(level=logging.DEBUG)
 
 class publish_to_confluence:
@@ -79,30 +80,63 @@ class publish_to_confluence:
                         '''
         self.body_content+=html_page
 
-    def get_status_macro(self,title):
-        title=title.split('/')[1]
-        if len(str(title).strip()) < 1:return ''
-        positive_words = [
-            "passed", "validated", "achieved", "verified", "succeeded", "accurate",
-            "effective", "excellent", "efficient", "thorough", "flawless", "optimal",
-            "superior", "outstanding", "aced", "exceptional", "impressive", "top-notch",
-            "proficient", "masterful", "seamless", "airtight", "error-free", "superb",
-            "remarkable","success","sucess","pass","ok","yes","done","reached","fine",
-            "good","authenticated","reached","met",
-            "accomplished", "fulfilled"
-        ]
+    def add_jira_issue_by_key(self,jira_issue_key):
+        print(f"Attaching jira issue : {jira_issue_key}")
+        jira_issue_macro = f'''<ac:structured-macro ac:name="jira">
+                                    <ac:parameter ac:name="key">{jira_issue_key}</ac:parameter>
+                                </ac:structured-macro>
+                                '''
+        return jira_issue_macro
 
-        if str(title).strip().lower() in positive_words:
+    def add_jira_issue_by_link(self,link_string):
+        base=link_string.split('//')[-1]
+        key=base.split('/')[-1]
+        return self.add_jira_issue_by_key(key)
+
+    def add_link_macro(self, link_string):
+        if not self.is_valid_url(link_string):
+            return link_string
+        return f'<a href="{link_string}" target="_blank">{link_string}</a>'
+
+    def is_valid_url(self, link_string):
+        # Check if the URL contains a valid scheme or is a domain-like string
+        parsed_url = urlparse(link_string)
+        # If the URL has no scheme, prepend 'http://' for validation
+        # if not parsed_url.scheme and not parsed_url.netloc:
+        #     link_string = 'http://' + link_string
+        #     parsed_url = urlparse(link_string)
+        # Check if the URL has a valid scheme and netloc (domain)
+        return bool(parsed_url.scheme in ["http", "https"] and parsed_url.netloc)
+
+
+    def get_status_macro(self,text):
+        if len(str(text).strip()) < 1:return ''
+        positive_words = [
+            "passed", "succeeded", "success","sucess","pass"
+        ]
+        negative_words = [
+            "failed", "error", "fail"
+        ]
+        
+        color=None
+
+        if str(text).strip().lower() in positive_words:
             color="green"
-        else:
+        elif str(text).strip().lower() in negative_words:
             color="red"
-        status_macro = f'''
-        <ac:structured-macro ac:name="status">
-            <ac:parameter ac:name="title">{title}</ac:parameter>
-            <ac:parameter ac:name="color">{color}</ac:parameter>
-        </ac:structured-macro>
-        '''
-        return status_macro
+        
+        if color:
+            status_macro = f'''
+                <ac:structured-macro ac:name="status">
+                    <ac:parameter ac:name="title">{text}</ac:parameter>
+                    <ac:parameter ac:name="color">{color}</ac:parameter>
+                </ac:structured-macro>
+                '''
+            return status_macro
+        else: 
+            if "." not in text or '. ' in text and ' .' in text:
+                return text
+            return self.add_link_macro(text)
 
     def add_table_from_dataframe(self,heading,dataframe,collapse=False,status_col=None,  *args, **kwargs):
         html_table = dataframe.to_html(classes='table table-striped', index=False)
@@ -118,7 +152,9 @@ class publish_to_confluence:
                     return_text+=f'<div><span style="color: red; font-size: 6px;">{str(each_text).strip()}</span></div>'
                 return return_text
             else:
-                return content
+                for each_text in split_text:
+                    return_text+=f'<p>{self.get_status_macro(str(each_text).strip())}</p>'
+                return return_text
         # Apply color styles to cells
         #re.sub(pattern, replacement, string)
         html_table = re.sub(r'(<td>)(.*?)(</td>)', lambda m: m.group(1) + colorize_cell(m.group(2)) + m.group(3), html_table)
@@ -179,22 +215,6 @@ class publish_to_confluence:
             """
             self.update_and_publish()
     
-    def add_jira_issue_by_key(self,jira_issue_key):
-        print(f"Attaching jira issue : {jira_issue_key}")
-        jira_issue_macro = f'''<p>
-            <ac:structured-macro ac:name="jira">
-                <ac:parameter ac:name="key">{jira_issue_key}</ac:parameter>
-            </ac:structured-macro></p>
-            '''
-        self.body_content+=jira_issue_macro
-
-    def close(self):
-        self.confluence.close()
-
-    def add_jira_issue_by_link(self,link_string):
-        base=link_string.split('//')[-1]
-        key=base.split('/')[2]
-        self.add_jira_issue_by_key(key)
 
     def attach_plot_as_image(self, chart_name, fig, heading_tag):
         try:
@@ -233,6 +253,9 @@ class publish_to_confluence:
         self.body_content += "<h2>Charts</h2>"
         for chart_name in dict_of_figures:
             self.attach_plot_as_image(chart_name, dict_of_figures[chart_name], 4)
+
+    def close(self):
+        self.confluence.close()
 
     def update_and_publish(self, max_retries=3, retry_delay=2):
         attempt = 0
