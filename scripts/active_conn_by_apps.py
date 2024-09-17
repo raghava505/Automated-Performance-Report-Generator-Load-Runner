@@ -1,4 +1,4 @@
-from helper import execute_prometheus_query
+from helper import execute_prometheus_query, clean_and_preprocess_df
 import pandas as pd
 import numpy as np
 class num_active_conn_class:
@@ -28,16 +28,8 @@ class num_active_conn_class:
                 self.stack_obj.log.info("Empty dataframe found.. skipping to save this key to mongo")
                 continue
 
-            numeric_cols = df.select_dtypes(include=[np.number]).columns
-            non_numeric_cols = df.select_dtypes(exclude=[np.number]).columns
-            # self.stack_obj.log.info(f"Numeric columns : {numeric_cols}")
-            # self.stack_obj.log.info(f"Non-Numeric columns : {non_numeric_cols}")
+            df = clean_and_preprocess_df(df)
 
-            fill_values = {}
-            fill_values.update({col: 0 for col in numeric_cols})
-            fill_values.update({col: "NaN" for col in non_numeric_cols})
-
-            df = df.fillna(fill_values)
             result_dict[db] = {
                 "format":"table","collapse":True,
                 "schema":{

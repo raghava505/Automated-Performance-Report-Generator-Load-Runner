@@ -220,7 +220,7 @@ def view_report():
     database_name = request.form['loadtype']
     collection_name = request.form['loadname']
 
-    # list_of_sprint_runs_to_show_or_compare = [[162,1], [161,2], [161,1], [160,1]]
+    # list_of_sprint_runs_to_show_or_compare = [[162,1],[161,2],[161,1],[160,1]]
     # database_name = "Osquery_LoadTests_New"
     # collection_name = "ControlPlane"
 
@@ -279,10 +279,9 @@ def publish_report():
     # parent_page_title = 'TEST'  
     # import uuid
     # report_title = f"TEST {uuid.uuid4()}"
-
-    # list_of_sprint_runs_to_show_or_compare = [[157,1]]
+    # list_of_sprint_runs_to_show_or_compare = [[162,1]]
     # database_name = "Osquery_LoadTests_New"
-    # collection_name = "MultiCustomer"
+    # collection_name = "ControlPlane"
 
     user_id = session.get('user_id')
     if not user_id:

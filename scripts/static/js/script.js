@@ -1238,8 +1238,9 @@ function renderChart(canvas_id, table_id) {
 
         const legend = cells[0].textContent.trim();
         const yValues = cells.slice(1, -2).map((cell, index) => {
-            const value = parseFloat(cell.textContent.trim());
-            return isNaN(value) ? null : value;
+            // const value = parseFloat(cell.textContent.trim());
+            // return isNaN(value) ? null : value;
+            return cell.textContent.trim();
         });
 
         const color = getDarkerColor();
@@ -1249,8 +1250,20 @@ function renderChart(canvas_id, table_id) {
                 data: yValues,
                 backgroundColor: color,
                 borderColor: color,
-                borderWidth: 3,
-                hidden: false
+                borderWidth: 2,
+                pointStyle: 'rectRot',
+                pointRadius: 5,
+                // pointBackgroundColor: 'rgba(75, 192, 192, 0.0)',
+                // pointBorderColor: '#ffffff',
+                pointBorderWidth: 2,
+                // hoverBackgroundColor: 'rgba(75, 192, 192, 0.0)',
+                // hoverBorderColor: 'red',
+                hoverBorderWidth: 3,
+                pointHoverRadius: 10,
+                // tension: 0.4,
+                stepped: false,  // Enable or disable stepped lines
+                hidden: false,
+                fill:false
             });
         }
     });
@@ -1379,6 +1392,9 @@ function renderChart(canvas_id, table_id) {
         chartTypeDropdown.innerHTML = `
             <option value="line">Line</option>
             <option value="bar">Bar</option>
+            <option value="pie">Pie</option>
+            <option value="radar">Radar</option>
+            <option value="doughnut">Doughnut</option>
         `;
 
         chartTypeDropdown.addEventListener('change', (e) => {

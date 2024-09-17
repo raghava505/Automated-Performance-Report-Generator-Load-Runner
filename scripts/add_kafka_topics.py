@@ -1,39 +1,41 @@
-import paramiko
 from config_vars import *
+from kafka import KafkaAdminClient
+
+# consumer_groups = admin_client.list_consumer_groups()
+# print(consumer_groups)
+
+# for topic in topics:
+#     topic_description = admin_client.describe_topics(topic)
+#     print(topic_description)
+
 class kafka_topics:
     def __init__(self,stack_obj):
-        self.local_script_path = f'{ROOT_PATH}/scripts/kafka_topics.py'
-        self.host = stack_obj.execute_kafka_topics_script_in
         self.stack_obj = stack_obj
-
+        self.pnode = self.stack_obj.execute_kafka_topics_script_in
+        
     def add_topics_to_report(self):
-        ssh = paramiko.SSHClient()
-        ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
         try:
-            self.stack_obj.log.info(f"Executing kafka topics script in host {self.host}")
-            ssh.connect(self.host, SSH_PORT, ABACUS_USERNAME, ABACUS_PASSWORD)
-            sftp = ssh.open_sftp()
-            # remote_script_path = f'{self.remote_directory}/get_kafka_topics.py'
-            remote_script_path="get_kafka_topics.py"
-            sftp.put(self.local_script_path, remote_script_path)
-            self.stack_obj.log.info(f"The script '{remote_script_path}' has been uploaded to the remote server.")
-            remote_command = f'python3 {remote_script_path}'
-            pip_command="pip install kafka-python"
-            stdin, stdout, stderr = ssh.exec_command(pip_command)
-            self.stack_obj.log.info(stdout.read().decode('utf-8'))
-            stdin, stdout, stderr = ssh.exec_command(remote_command)
-            exit_status = stdout.channel.recv_exit_status()
-            output = stdout.read().decode()
-            output_list = [line for line in output.split('\n') if line.strip()]
-            self.stack_obj.log.info(f"Kafka topics found are : {output_list}")
-            ssh.close()
-            
+            self.bootstrap_server = f'{self.pnode}:9092'
+            admin_client = KafkaAdminClient(bootstrap_servers=self.bootstrap_server)
+            topics= list(sorted(admin_client.list_topics()))
+            self.stack_obj.log.info(f"Kafka topics found are : {topics}")
+
             return {"format":"list",
-                        "schema":{},
-                        "data":output_list
-                        }
+                    "schema":{},
+                    "data":topics
+                    }
             
         except Exception as e:
             self.stack_obj.log.error(f"Error while fetching kafka topics : {str(e)}")
-            ssh.close()
             return None
+
+if __name__ == "__main__":
+    class StackObject:
+        def __init__(self):
+            self.execute_kafka_topics_script_in = None  # This will hold the value 's1c1pn1'
+
+    stack_obj = StackObject()
+    stack_obj.execute_kafka_topics_script_in = "s1c1pn1"
+
+    kaf = kafka_topics(stack_obj)
+    print(kaf.add_topics_to_report())

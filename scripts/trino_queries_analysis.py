@@ -1,7 +1,7 @@
 import pandas as pd
 from io import StringIO
 import numpy as np
-from helper import execute_trino_query
+from helper import execute_trino_query, clean_and_preprocess_df
 pd.set_option('display.max_rows', None)
 pd.set_option('display.max_columns', None)
 pd.set_option('display.expand_frame_repr', False)
@@ -434,24 +434,9 @@ class trino_queries_class:
             #     raise RuntimeError(f"ERROR : command output is empty. Check if trino @ {self.dnode} is in good state. Terminating program ...")
             stringio = StringIO(output)
             df = pd.read_csv(stringio, header=None, names=columns)
-            numeric_cols = df.select_dtypes(include=[np.number]).columns
-            non_numeric_cols = df.select_dtypes(exclude=[np.number]).columns
-            # self.stack_obj.log.info(f"Numeric columns : {numeric_cols}")
-            # self.stack_obj.log.info(f"Non-Numeric columns : {non_numeric_cols}")
 
-            fill_values = {}
-            fill_values.update({col: 0 for col in numeric_cols})
-            fill_values.update({col: "NaN" for col in non_numeric_cols})
-
-            df = df.fillna(fill_values)
-            # integer_columns = df.select_dtypes(include='int').columns
-            # string_columns = df.select_dtypes(include='object').columns
-            # new_row=dict([(int_col,df[int_col].sum()) for int_col in integer_columns])
-            # new_row.update(dict([(str_col,"TOTAL") for str_col in string_columns]))
-            # df = df._append(new_row, ignore_index=True)
             if df.empty: continue
-            df = df.head(168)
-            # self.stack_obj.log.info(f"\n {df}")
+            df = clean_and_preprocess_df(df)
             try:
                 df["query_operation"] = df["query_operation"].astype(str)
             except:

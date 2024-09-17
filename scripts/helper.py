@@ -6,7 +6,7 @@ import time
 from collections import defaultdict
 from config_vars import *
 import pandas as pd
-
+import numpy as np
 
 def measure_time(func):
     """Decorator to measure the execution time of a function."""
@@ -279,3 +279,21 @@ def fetch_and_save_pdf(remote_pdf_path,reports_node_ip , local_pdf_path,stack_ob
     
     except Exception as e:
         stack_obj.log.error(f"Error while fetching the pdf : {e}")
+
+
+def clean_and_preprocess_df(df):
+    #filling null values if any
+    numeric_cols = df.select_dtypes(include=[np.number]).columns
+    non_numeric_cols = df.select_dtypes(exclude=[np.number]).columns
+    fill_values = {}
+    fill_values.update({col: 0 for col in numeric_cols})
+    fill_values.update({col: "NaN" for col in non_numeric_cols})
+    df = df.fillna(fill_values)
+
+    #trim down rows if huge
+    df = df.head(168)
+
+    #round off all values
+    df = df.round(2)
+
+    return df
