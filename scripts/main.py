@@ -388,7 +388,7 @@ if __name__ == "__main__":
                     stack_obj.log.info(f'Saving the html page to {curr_pgbad_html_path}')
                     os.makedirs(curr_pgbad_html_path,exist_ok=True)
                     pgbadger_links,extracted_tables=get_and_save_pgb_html(stack_obj,test_env_json_details['elastic_node_ip'],curr_pgbad_html_path,pgbadger_tail_path,test_env_json_details['pgbadger_reports_mount'])
-                    if pgbadger_links != {} : collection.update_one({"_id": ObjectId(inserted_id)}, {"$set": {f"Pgbadger downloaded report links": {"format":"mapping","schema":{"page":"Postgres stats"},"data":pgbadger_links}}})
+                    if pgbadger_links != {} : collection.update_one({"_id": ObjectId(inserted_id)}, {"$set": {f"Pgbadger downloaded report links": {"format":"mapping","schema":{"page":"Postgres Queries Analysis"},"data":pgbadger_links}}})
                     
                     if extracted_tables!={}:
                         # stack_obj.log.info("Empty extracted tables dictionary found !")

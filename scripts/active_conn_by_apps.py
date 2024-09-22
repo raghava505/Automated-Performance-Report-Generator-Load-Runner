@@ -39,7 +39,7 @@ class num_active_conn_class:
                 "data":df.to_dict(orient="records")
             }
         if result_dict == {}:return None
-        return {"format":"nested_table","schema":{"page":"Postgres stats"},"data":result_dict}
+        return {"format":"nested_table","schema":{"page":"Postgres, Pgbouncer stats"},"data":result_dict}
     
 
 if __name__=='__main__':
