@@ -446,7 +446,7 @@ class perf_load_report_publish:
                     key_format = self.main_result[key_name]["format"]
                     schema = self.main_result[key_name]["schema"]
                     data = self.main_result[key_name]["data"]
-                    page = schema.get("page" , "Overview")
+                    page = schema.get("page" , "Accuracies, DiskSpace Usages, etc..")
 
                     if page in self.confluence_page_mappings: curr_page_obj = self.confluence_page_mappings[page]
                     else:

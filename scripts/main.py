@@ -29,6 +29,8 @@ from capture_charts_data import Charts
 from create_chart import create_images_and_save
 from pg_badger import return_pgbadger_results,get_and_save_pgb_html
 from helper import fetch_and_save_pdf,fetch_and_extract_csv
+from pgbouncer_connections import pgbouncer_conn_class
+from generalised_postgres_mon_queries import postgres_monitoring_stats_class
 
 if __name__ == "__main__":
     s_at = time.perf_counter()
@@ -167,11 +169,23 @@ if __name__ == "__main__":
                 kafka_topics_list = kafka_obj.add_topics_to_report()
                 if kafka_topics_list:return_dict.update({"kafka_topics":kafka_topics_list})
 
-                 #---------------No.of Active connections by application---------------
-                stack_obj.log.info("******* Fetching active connection details ...")
+                #---------------No.of Active connections by application to dbs on master ---------------
+                stack_obj.log.info("******* Fetching dbs active connection details ...")
                 active_conn_obj = num_active_conn_class(stack_obj=stack_obj)
                 active_conn_results = active_conn_obj.get_avg_active_conn()
                 if active_conn_results:return_dict.update({"Number of active connections group by application on master":active_conn_results})
+
+                #--------------- Pgbouncer connections telemetry---------------
+                stack_obj.log.info("******* Fetching pgbouncer connection details ...")
+                pgbouncer_conn_obj = pgbouncer_conn_class(stack_obj=stack_obj)
+                pgbouncer_conn_results = pgbouncer_conn_obj.get_pgbouncer_connections()
+                if pgbouncer_conn_results:return_dict.update(pgbouncer_conn_results)
+
+                #--------------- complete postgres stats---------------
+                stack_obj.log.info("******* Fetching complete postgres stats ...")
+                postgres_stats_conn_obj = postgres_monitoring_stats_class(stack_obj=stack_obj)
+                postgres_stats_conn_results = postgres_stats_conn_obj.get_postgres_monitoring_stats()
+                if postgres_stats_conn_results:return_dict.update(postgres_stats_conn_results)
                 
                 #-------------------------------PG Stats Calculations -------------------------------------
                 stack_obj.log.info("******* Calculating Postgress Tables Details ...")
@@ -374,7 +388,7 @@ if __name__ == "__main__":
                     stack_obj.log.info(f'Saving the html page to {curr_pgbad_html_path}')
                     os.makedirs(curr_pgbad_html_path,exist_ok=True)
                     pgbadger_links,extracted_tables=get_and_save_pgb_html(stack_obj,test_env_json_details['elastic_node_ip'],curr_pgbad_html_path,pgbadger_tail_path,test_env_json_details['pgbadger_reports_mount'])
-                    if pgbadger_links != {} : collection.update_one({"_id": ObjectId(inserted_id)}, {"$set": {f"Pgbadger downloaded report links": {"format":"mapping","schema":{},"data":pgbadger_links}}})
+                    if pgbadger_links != {} : collection.update_one({"_id": ObjectId(inserted_id)}, {"$set": {f"Pgbadger downloaded report links": {"format":"mapping","schema":{"page":"Postgres stats"},"data":pgbadger_links}}})
                     
                     if extracted_tables!={}:
                         # stack_obj.log.info("Empty extracted tables dictionary found !")
