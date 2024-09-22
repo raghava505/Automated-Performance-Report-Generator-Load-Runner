@@ -58,7 +58,7 @@ class postgres_monitoring_stats_class:
                     "data":df.to_dict(orient="records")
                 }
             if result_dict != {}:
-                final_return_dict[section_heading] = {"format":"nested_table","schema":{"page":"Postgres stats"},"data":result_dict}
+                final_return_dict[section_heading] = {"format":"nested_table","schema":{"page":"Postgres, Pgbouncer stats"},"data":result_dict}
         if final_return_dict!={}:
             return final_return_dict
         return None

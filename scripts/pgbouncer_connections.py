@@ -54,7 +54,7 @@ class pgbouncer_conn_class:
                 }
 
             if result_dict != {}:
-                final_return_dict[section_heading] = {"format":"nested_table","schema":{"page":"Pgbouncer connection stats"},"data":result_dict}
+                final_return_dict[section_heading] = {"format":"nested_table","schema":{"page":"Postgres, Pgbouncer stats"},"data":result_dict}
             # return {"format":"nested_table","schema":{},"data":result_dict}
         if final_return_dict!={}:
             return final_return_dict
