@@ -279,7 +279,7 @@ def publish_report():
     # parent_page_title = 'TEST'  
     # import uuid
     # report_title = f"TEST {uuid.uuid4()}"
-    # list_of_sprint_runs_to_show_or_compare = [[162,1]]
+    # list_of_sprint_runs_to_show_or_compare = [[163,1],[162,1],[161,1]]
     # database_name = "Osquery_LoadTests_New"
     # collection_name = "ControlPlane"
 

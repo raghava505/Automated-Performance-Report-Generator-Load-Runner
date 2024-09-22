@@ -235,7 +235,7 @@ def scrape_func(path,db,stack_obj):
     if total_result!={}:
         return {"format":"nested_table",
                 "note":"NOTE : All the time column values in this section are in seconds",
-                "schema":{"page":"Postgres Queries Analysis"},
+                "schema":{"page":"Postgres stats"},
                 "data":total_result
                 }   
     return {}

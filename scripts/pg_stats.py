@@ -58,7 +58,7 @@ class pg_stats_class:
                     continue
 
         if final_result == {}:return None
-        return {"format":"nested_table","schema":{},"data":final_result}
+        return {"format":"nested_table","schema":{"page":"Postgres stats"},"data":final_result}
 
 if __name__ == "__main__":
     from settings import stack_configuration

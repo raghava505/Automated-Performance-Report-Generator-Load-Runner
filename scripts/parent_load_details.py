@@ -136,14 +136,14 @@ class parent:
     def get_connections_chart_queries():
         return {
             "No.of active connections group by application for configdb on master":("uptycs_pg_idle_active_connections_by_app{state=\"active\",db=\"configdb\",role=\"master\"}" , ["application_name"]),
-            "Active Client Connections":("uptycs_pgb_cl_active" , ["host_name","db","db_user"]),
-            "Waiting Client Connections":("uptycs_pgb_cl_waiting", ["db" , "db_user"]),
+            "PGB Active Client Connections":('sum(uptycs_pgb_cl_active) by (db, db_user, host_name)' , ["host_name","db","db_user"]),
+            "PGB Waiting Client Connections":("uptycs_pgb_cl_waiting", ["db" , "db_user"]),
             "Uptycs pg Connections by app":("sum(uptycs_pg_connections_by_app)" , []),
             "Uptycs redis Connections":("sum(uptycs_redis_connection)" , []),
             "Redis client connections for tls":("sum(uptycs_app_redis_clients{app_name='/opt/uptycs/cloud/tls/tls.js'}) by (host_name)" , ["host_name"]),
             "Top 10 redis client connections by app":("sort(topk(9,sum(uptycs_app_redis_clients{}) by (app_name)))" , ["app_name"]),
-            "Active Server Connections":("uptycs_pgb_sv_active", ["db" , "db_user"]),
-            "Idle server connections":("uptycs_pgb_sv_idle", ["db" , "db_user"]),
+            "PGB Active Server Connections":("uptycs_pgb_sv_active", ["db" , "db_user"]),
+            "PGB Idle server connections":("uptycs_pgb_sv_idle", ["db" , "db_user"]),
         }
 
     @staticmethod
@@ -234,7 +234,7 @@ class parent:
     
     @classmethod
     def get_bugs_raised(cls):
-        observations_dict=dict([("Ex : https://uptycsjira.atlassian.net/browse/<ticket_id>",{"Comments":""})])
+        observations_dict=dict([("Ex : https://uptycsjira.atlassian.net/browse/ticket_id",{"Comments":""})])
         df = pd.DataFrame(observations_dict)    
         df=df.T
         df = df.reset_index().rename(columns={'index': 'Ticket'})
