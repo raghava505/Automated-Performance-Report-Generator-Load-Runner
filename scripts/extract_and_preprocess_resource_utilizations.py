@@ -271,15 +271,20 @@ class complete_resource_usages:
         result.update(self.preprocess_df(container_level_memory,'container',for_report))
         # ---------------------------pod level ---------------------------------
         self.stack_obj.log.info("****************************************************************************************************Capturing details for pod-level memory")
-        pod_level_memory_query='sum(uptycs_kubernetes_memory_stats{pod=~".*deployment.*"}) by (node,pod)'
+        pod_level_memory_query='sum(uptycs_kubernetes_memory_stats) by (node,pod)'
         unique_pod_names=set()
         for line in execute_prometheus_query(self.stack_obj,pod_level_memory_query):
             try:
                 if self.host_name_type_mapping[line["metric"]["node"]] in self.exclude_nodetypes:continue
-                pod_name = line["metric"]["pod"].split('-deployment-')[0]
+                if "deployment" in line["metric"]["pod"]:
+                    pod_name = line["metric"]["pod"].split('-deployment-')[0]
+                elif "daemonset" in line["metric"]["pod"]:
+                    pod_name = line["metric"]["pod"].split('-daemonset-')[0]
+                else:
+                    pod_name = '-'.join(line["metric"]["pod"].split('-')[:-1])
                 unique_pod_names.add(pod_name)
             except Exception as e:
-                self.stack_obj.log.error(f'***************** ERROR: Couldnt find host {line["metric"]["node_name"]} in host_name_type_mapping dictionary. Exception occured while calculating pod memory usage for pod:{line["metric"]["container_label_io_kubernetes_pod_name"]}. {e}')
+                self.stack_obj.log.error(f'***************** ERROR: Couldnt find host {line["metric"]["node_name"]} in host_name_type_mapping dictionary. Exception occured while calculating pod memory usage for pod:{pod}. {e}')
 
             
         self.stack_obj.log.info(f"Unique pod names : {unique_pod_names}")
@@ -287,7 +292,7 @@ class complete_resource_usages:
 
         pod_mem_result=[]
         for pod in unique_pod_names:
-            for line in execute_prometheus_query(self.stack_obj,f'sum(uptycs_kubernetes_memory_stats{{pod=~"{pod}-deployment.*"}}) by (node_type,node,pod) / (1024*1024*1024)'):
+            for line in execute_prometheus_query(self.stack_obj,f'sum(uptycs_kubernetes_memory_stats{{pod=~"{pod}.*"}}) by (node_type,node,pod) / (1024*1024*1024)'):
                 try:
                     if line["metric"]["node_type"] in self.exclude_nodetypes:continue
                     pod_mem_result.append({
@@ -299,7 +304,7 @@ class complete_resource_usages:
                         average_column_name : line["values"]["average"]
                     })
                 except Exception as e:
-                    self.stack_obj.log.error(f'***************** ERROR: Couldnt find host {line["metric"]["node_name"]} in host_name_type_mapping dictionary. Exception occured while calculating pod memory usage for pod:{line["metric"]["container_label_io_kubernetes_pod_name"]}. {e}')
+                    self.stack_obj.log.error(f'***************** ERROR: Couldnt find host {line["metric"]["node_name"]} in host_name_type_mapping dictionary. Exception occured while calculating pod memory usage for pod:{pod}. {e}')
 
         pod_level_memory_df = pd.DataFrame(pod_mem_result)
         result.update(self.preprocess_df(pod_level_memory_df,'pod',for_report))
@@ -395,7 +400,7 @@ class complete_resource_usages:
         self.stack_obj.log.info("****************************************************************************************************Capturing details for pod-level cpu")
         pod_cpu_result=[]
         for pod in self.unique_pod_names:
-            for line in execute_prometheus_query(self.stack_obj,f'sum(uptycs_kubernetes_cpu_stats{{pod=~"{pod}-deployment.*"}}) by (node_type,node,pod) / 100'):
+            for line in execute_prometheus_query(self.stack_obj,f'sum(uptycs_kubernetes_cpu_stats{{pod=~"{pod}.*"}}) by (node_type,node,pod) / 100'):
                 try:
                     if line["metric"]["node_type"] in self.exclude_nodetypes:continue
                     pod_cpu_result.append({
@@ -407,7 +412,7 @@ class complete_resource_usages:
                         average_column_name : line["values"]["average"]
                     })
                 except Exception as e:
-                    self.stack_obj.log.error(f'***************** ERROR: Couldnt find host {line["metric"]["node_name"]} in host_name_type_mapping dictionary. Exception occured while calculating pod cpu usage for pod:{line["metric"]["container_label_io_kubernetes_pod_name"]}. {e}')
+                    self.stack_obj.log.error(f'***************** ERROR: Couldnt find host {line["metric"]["node_name"]} in host_name_type_mapping dictionary. Exception occured while calculating pod cpu usage for pod:{pod}. {e}')
 
         pod_level_cpu_df = pd.DataFrame(pod_cpu_result)
         result.update(self.preprocess_df(pod_level_cpu_df,'pod',for_report))
