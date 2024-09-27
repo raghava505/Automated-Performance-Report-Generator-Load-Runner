@@ -278,11 +278,14 @@ class complete_resource_usages:
                 if self.host_name_type_mapping[line["metric"]["node"]] in self.exclude_nodetypes:continue
                 if "deployment" in line["metric"]["pod"]:
                     pod_name = line["metric"]["pod"].split('-deployment-')[0]
+                    suffix = "-deployment-"
                 elif "daemonset" in line["metric"]["pod"]:
                     pod_name = line["metric"]["pod"].split('-daemonset-')[0]
+                    suffix = "-daemonset-"
                 else:
                     pod_name = '-'.join(line["metric"]["pod"].split('-')[:-1])
-                unique_pod_names.add(pod_name)
+                    suffix = ""
+                unique_pod_names.add((pod_name,suffix))
             except Exception as e:
                 self.stack_obj.log.error(f'***************** ERROR: Couldnt find host {line["metric"]["node_name"]} in host_name_type_mapping dictionary. Exception occured while calculating pod memory usage for pod:{pod}. {e}')
 
@@ -291,8 +294,8 @@ class complete_resource_usages:
         self.unique_pod_names=unique_pod_names
 
         pod_mem_result=[]
-        for pod in unique_pod_names:
-            for line in execute_prometheus_query(self.stack_obj,f'sum(uptycs_kubernetes_memory_stats{{pod=~"{pod}.*"}}) by (node_type,node,pod) / (1024*1024*1024)'):
+        for pod,suffix in unique_pod_names:
+            for line in execute_prometheus_query(self.stack_obj,f'sum(uptycs_kubernetes_memory_stats{{pod=~"{pod}{suffix}.*"}}) by (node_type,node,pod) / (1024*1024*1024)'):
                 try:
                     if line["metric"]["node_type"] in self.exclude_nodetypes:continue
                     pod_mem_result.append({
@@ -399,8 +402,8 @@ class complete_resource_usages:
         # --------------------------pod level ----------------------------------
         self.stack_obj.log.info("****************************************************************************************************Capturing details for pod-level cpu")
         pod_cpu_result=[]
-        for pod in self.unique_pod_names:
-            for line in execute_prometheus_query(self.stack_obj,f'sum(uptycs_kubernetes_cpu_stats{{pod=~"{pod}.*"}}) by (node_type,node,pod) / 100'):
+        for pod, suffix in self.unique_pod_names:
+            for line in execute_prometheus_query(self.stack_obj,f'sum(uptycs_kubernetes_cpu_stats{{pod=~"{pod}{suffix}.*"}}) by (node_type,node,pod) / 100'):
                 try:
                     if line["metric"]["node_type"] in self.exclude_nodetypes:continue
                     pod_cpu_result.append({
