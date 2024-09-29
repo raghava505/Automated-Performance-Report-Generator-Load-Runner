@@ -175,17 +175,19 @@ if __name__ == "__main__":
                 active_conn_results = active_conn_obj.get_avg_active_conn()
                 if active_conn_results:return_dict.update({"Number of active connections group by application on master":active_conn_results})
 
-                #--------------- Pgbouncer connections telemetry---------------
-                stack_obj.log.info("******* Fetching pgbouncer connection details ...")
-                pgbouncer_conn_obj = pgbouncer_conn_class(stack_obj=stack_obj)
-                pgbouncer_conn_results = pgbouncer_conn_obj.get_pgbouncer_connections()
-                if pgbouncer_conn_results:return_dict.update(pgbouncer_conn_results)
 
                 #--------------- complete postgres stats---------------
                 stack_obj.log.info("******* Fetching complete postgres stats ...")
                 postgres_stats_conn_obj = postgres_monitoring_stats_class(stack_obj=stack_obj)
                 postgres_stats_conn_results = postgres_stats_conn_obj.get_postgres_monitoring_stats()
                 if postgres_stats_conn_results:return_dict.update(postgres_stats_conn_results)
+                
+                #--------------- Pgbouncer connections telemetry---------------
+                stack_obj.log.info("******* Fetching pgbouncer connection details ...")
+                pgbouncer_conn_obj = pgbouncer_conn_class(stack_obj=stack_obj)
+                pgbouncer_conn_results = pgbouncer_conn_obj.get_pgbouncer_connections()
+                if pgbouncer_conn_results:return_dict.update(pgbouncer_conn_results)
+
                 
                 #-------------------------------PG Stats Calculations -------------------------------------
                 stack_obj.log.info("******* Calculating Postgress Tables Details ...")
