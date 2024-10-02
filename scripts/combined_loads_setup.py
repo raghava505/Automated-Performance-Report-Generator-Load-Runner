@@ -13,13 +13,22 @@ class all_combined_child(parent):
                     
                     "RuleEngine and ControlPlane Load Details":{
                         "total_number_of_customers_osquery": 100,
-                        "number_of_customers_with_auto_exception_enabled": 0,
-                        "osquery total_assets": "32K Control Plane +  8K Multi customer",
-                        "records_sent_per_hour_per_customer": "51,84,000",
-                        "records_sent_per_hour" : "51,84,00,000",
-                        "assets_per_cust":80,
+
+                        # "number_of_customers_with_auto_exception_enabled": 0,
+                        # "osquery total_assets": "32K Control Plane +  8K Multi customer",
+                        # "records_sent_per_hour_per_customer": "51,84,000",
+                        # "records_sent_per_hour" : "51,84,00,000",
+                        # "assets_per_cust":80,
+                        # "input_file": "rhel7-6tab_12rec.log",
+                        # "events_table_name": "dns_lookup_events, socket_events, process_events, process_file_events",
+
+                        "number_of_customers_with_auto_exception_enabled": "0",
+                        "total_assets": "30K Control Plane + 10K Multi customer",
+                        "assets_per_cust":"100",
+                        "records_sent_per_hour_per_customer": "6.48 million", #"5.44 million", 
+                        "records_sent_per_hour" : "648 million", # "653 million", 
                         "input_file": "rhel7-6tab_12rec.log",
-                        "events_table_name": "dns_lookup_events, socket_events, process_events, process_file_events",
+                        "events_table_name": "dns_lookup_events, socket_events, process_events, process_file_events"
                     },
 
                     "CloudQuery Load Details":{
