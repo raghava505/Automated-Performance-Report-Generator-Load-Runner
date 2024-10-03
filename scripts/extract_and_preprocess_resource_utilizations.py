@@ -30,7 +30,7 @@ def get_exclude_filter(exclude_nodetypes,stack_obj):
 
 
 class complete_resource_usages:
-    def __init__(self,stack_obj,include_nodetypes=["process","data","pg","airflow","redis","ep","memgraph","cloudquery"]):
+    def __init__(self,stack_obj,include_nodetypes=["process","data","presto","pg","airflow","redis","ep","memgraph","cloudquery"]):
         self.start_timestamp=stack_obj.start_timestamp
         self.end_timestamp=stack_obj.end_timestamp
         self.hours=stack_obj.hours
