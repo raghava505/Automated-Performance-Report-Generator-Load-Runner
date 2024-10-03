@@ -5,7 +5,7 @@ class parent:
     @classmethod
     @property
     def common_app_names(cls):
-        return  {"sum":["tls","trino",".*airflow.*",".*osqLogger.*","kafka",".*ruleEngine.*",".*redis-server.*","pgbouncer",
+        return  {"sum":["tls","trino",".*airflow.*",".*osqLogger.*","kafka",".*ruleEngine.*",".*ruleengine",".*ruleenginebulkreplay",".*ruleenginecc",".*redis-server.*","pgbouncer",
                         "osqueryIngestion","/usr/local/bin/pushgateway","uptycs-metastoredb","uptycs-configdb",
                         "/opt/uptycs/cloud/go/bin/complianceSummaryConsumer","orc-compaction","data-archival",],
                 "avg":[]
@@ -14,12 +14,12 @@ class parent:
     @classmethod
     @property
     def common_container_names(cls):
-        return ["ingestion","spark-master","spark-worker","debezium","nginx","mongo","alluxio-master","alluxio-worker","metastore"]
+        return ["rule-engine","rule-enginecc","rule-engine-bulk-replay","ingestion","spark-master","spark-worker","debezium","nginx","mongo","alluxio-master","alluxio-worker","metastore"]
     
     @classmethod
     @property
     def common_pod_names(cls):
-        return ["api.*","query-runner.*","graph-query-runner.*","configdb-deployment.*","debezium-consumer-deployment.*","decorators-consumer-deployment.*",
+        return ["rule-engine-daemonset.*","rule-engine-bulk-replay-daemonset.*","rule-enginecc-daemonset.*","api.*","query-runner.*","graph-query-runner.*","configdb-deployment.*","debezium-consumer-deployment.*","decorators-consumer-deployment.*",
                 # "compliance-check-runner-deployment.*","apiscraper-consumer-deployment.*","latest-snapshot-consumer-deployment.*","deadletter-consumer-deployment.*"
                 "checksum-validator-deployment.*","compliance-summary-consumer-deployment.*"]
 
@@ -31,7 +31,7 @@ class parent:
     @classmethod
     @property
     def mon_spark_topic_names(cls):
-        return ['event','audit','prestoquerylogs']
+        return ['event','event_parquet','audit','prestoquerylogs']
     
     @classmethod
     @property
