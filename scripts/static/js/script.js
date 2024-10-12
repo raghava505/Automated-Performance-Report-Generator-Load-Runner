@@ -577,9 +577,10 @@ function generateContents() {
     ul.style.padding = '0';
     ul.style.margin = '0';
 
-    const headers = reportWindow.querySelectorAll('h2, h3'); // Find all h2 and h3 tags
+    const headers = reportWindow.querySelectorAll('h2, h3, h4'); // Find all h2, h3, and h4 tags
 
     let lastH2Li = null; // To keep track of the last h2 element for nesting h3
+    let lastH3Li = null; // To keep track of the last h3 element for nesting h4
 
     headers.forEach(header => {
         
@@ -587,21 +588,17 @@ function generateContents() {
         const id = `${baseId}-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`; // Combine baseId, current time, and random string
         header.id = id;
 
-        // const id = header.textContent.trim().replace(/\s+/g, '-').toLowerCase();
-        // header.id = id;
-
         const li = document.createElement('li');
         li.style.width = '100%'; // Ensure the li occupies the full width
         li.style.display = 'block'; // Make li a block element
 
-        const h2Container = document.createElement('div'); // Create a container div for the icon and link
-        h2Container.style.display = 'flex'; // Use flexbox to align items horizontally
-        h2Container.style.alignItems = 'center'; // Center align icon and link vertically
-        h2Container.style.width = '100%'; // Make sure the container occupies the full width
-        h2Container.style.cursor = 'pointer'; // Make the container appear clickable
+        const hContainer = document.createElement('div'); // Create a container div for the icon and link
+        hContainer.style.display = 'flex'; // Use flexbox to align items horizontally
+        hContainer.style.alignItems = 'center'; // Center align icon and link vertically
+        hContainer.style.width = '100%'; // Make sure the container occupies the full width
+        hContainer.style.cursor = 'pointer'; // Make the container appear clickable
 
         const toggleIcon = document.createElement('i');
-        toggleIcon.className = 'fa fa-plus-square';
         toggleIcon.style.marginRight = '5px';
 
         const link = document.createElement('a');
@@ -624,9 +621,11 @@ function generateContents() {
         });
 
         if (header.tagName.toLowerCase() === 'h2') {
-            h2Container.appendChild(toggleIcon);
-            h2Container.appendChild(link);
-            li.appendChild(h2Container); // Append the container div to li
+            console.log("found h2")
+            toggleIcon.className = 'fa fa-plus-square';
+            hContainer.appendChild(toggleIcon);
+            hContainer.appendChild(link);
+            li.appendChild(hContainer); // Append the container div to li
             ul.appendChild(li);
 
             const nestedUl = document.createElement('ul');
@@ -651,13 +650,43 @@ function generateContents() {
                 }
             });
 
-            // Add click event to link for navigation
-            link.addEventListener('click', (e) => {
-                // Let the anchor default behavior happen to scroll to the element
-            });
         } else if (header.tagName.toLowerCase() === 'h3' && lastH2Li) {
-            lastH2Li.appendChild(li); // Nest h3 under the last h2
-            li.appendChild(link);
+            console.log("found h3", header.innerHTML)
+            toggleIcon.className = 'fa fa-plus-square';
+            hContainer.appendChild(toggleIcon);
+            hContainer.appendChild(link);
+            li.appendChild(hContainer); // Append the container div to li
+            lastH2Li.appendChild(li);
+
+            const nestedUl = document.createElement('ul');
+            nestedUl.style.listStyleType = 'none';
+            nestedUl.style.paddingLeft = '20px';
+            nestedUl.style.display = 'none'; // Hidden by default
+
+            li.appendChild(nestedUl);
+            lastH3Li = nestedUl;
+
+            // Add toggle functionality for collapsing/expanding
+            toggleIcon.addEventListener('click', (e) => {
+                e.preventDefault();
+                const isExpanded = nestedUl.style.display === 'block';
+
+                if (isExpanded) {
+                    nestedUl.style.display = 'none';
+                    toggleIcon.className = 'fa fa-plus-square';
+                } else {
+                    nestedUl.style.display = 'block';
+                    toggleIcon.className = 'fa fa-minus-square';
+                }
+            });
+
+        } else if (header.tagName.toLowerCase() === 'h4' && lastH3Li) {
+            // console.log("found h4", header.innerHTML)
+            // hContainer.appendChild(link);
+            // console.log(hContainer.innerHTML)
+            lastH3Li.appendChild(li); // Nest h4 under the last h3
+            // console.log(lastH3Li.innerHTML)
+            li.appendChild(link)
         }
     });
 
@@ -668,16 +697,90 @@ function generateContents() {
     searchBox.addEventListener('input', () => {
         const filter = searchBox.value.toLowerCase();
         const links = ul.getElementsByTagName('a');
+        
+        // Check if the search box is non-empty
+        const isSearchActive = filter !== '';
 
-        Array.from(links).forEach(link => {
-            const text = link.textContent.toLowerCase();
-            if (text.includes(filter)) {
-                link.style.display = 'block'; // Show matching link
+        // Expand or collapse all nested lists based on search box input
+        const nestedUls = ul.getElementsByTagName('ul');
+        Array.from(nestedUls).forEach(nestedUl => {
+            if (isSearchActive) {
+                nestedUl.style.display = 'block'; // Expand all nested lists when search is active
+                // Change all "fa fa-plus-square" icons to "fa fa-minus-square"
+                const plusIcons = contents.querySelectorAll('.fa.fa-plus-square');
+                plusIcons.forEach(icon => {
+                    icon.className = 'fa fa-minus-square'; // Change the class names
+                });
             } else {
-                link.style.display = 'none'; // Hide non-matching link
+                nestedUl.style.display = 'none'; // Collapse all nested lists when search is empty
+                const minusIcons = contents.querySelectorAll('.fa.fa-minus-square');
+                minusIcons.forEach(icon => {
+                    icon.className = 'fa fa-plus-square'; // Change the class names
+                });
             }
         });
-    });
+
+        // Apply the filter to show/hide matching links, icons, and highlight matches
+        Array.from(links).forEach(link => {
+            const originalText = link.textContent;
+            const lowerCaseText = originalText.toLowerCase();
+            const li = link.parentElement; // The parent <li> of the link
+            const icon = li.querySelector('i'); // The corresponding icon inside the <li>
+    
+            // Reset link inner HTML to the original text (remove previous highlights)
+            link.innerHTML = originalText;
+    
+            if (filter && lowerCaseText.includes(filter)) {
+                link.style.display = 'block'; // Show matching link
+                if (icon) {
+                    icon.style.display = 'inline'; // Show the icon if present
+                }
+    
+                // Highlight the matched substring
+                const startIndex = lowerCaseText.indexOf(filter);
+                const endIndex = startIndex + filter.length;
+    
+                // Split the original text into three parts: before the match, the match, and after the match
+                const beforeMatch = originalText.substring(0, startIndex);
+                const match = originalText.substring(startIndex, endIndex);
+                const afterMatch = originalText.substring(endIndex);
+    
+                // Set the innerHTML with a span around the matching part
+                link.innerHTML = `${beforeMatch}<span style="background-color: #ffeb3b;">${match}</span>${afterMatch}`;
+    
+                // Show all parent links (h3, h2) if an h4 matches the search
+                let currentElement = li.parentElement; // Start from the parent <ul> of the matching link
+                while (currentElement && currentElement !== ul) {
+                    if (currentElement.tagName.toLowerCase() === 'ul') {
+                        const parentLi = currentElement.parentElement; // Get the parent <li> that contains the <ul>
+                        const parentIcon = parentLi.querySelector('i'); // Get the icon of the parent <li>
+                        const parentLink = parentLi.querySelector('a'); // Get the link of the parent <li>
+                        
+                        if (parentLink) {
+                            parentLink.style.display = 'block'; // Display the parent link
+                        }
+                        if (parentIcon) {
+                            parentIcon.style.display = 'inline'; // Show the parent icon if present
+                        }
+                    }
+                    currentElement = currentElement.parentElement; // Move up the DOM tree
+                }
+            } else if (!filter) {
+                // If search is cleared, show all links and icons
+                link.style.display = 'block';
+                if (icon) {
+                    icon.style.display = 'inline';
+                }
+            } else {
+                link.style.display = 'none'; // Hide non-matching link
+                if (icon) {
+                    icon.style.display = 'none'; // Hide the icon if present
+                }
+                // Reset background color for non-matching links (if any highlight was there before)
+                link.innerHTML = originalText;
+            }
+        });
+});
 }
 
 

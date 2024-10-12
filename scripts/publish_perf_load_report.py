@@ -202,20 +202,29 @@ class ViewReportClass:
         for main_heading in dict_of_list_of_filepaths:
             unique_id = str(uuid.uuid4())
             html_text += f"""
-            <p>
-                <button class="btn btn-light pt-2" style="display: block; width: 50%; border-radius: 10px; border-color: #b4b4b4;" type="button" data-toggle="collapse" data-target="#collapseExample{unique_id}" aria-expanded="false" aria-controls="collapseExample{unique_id}">
-                    <h3>{main_heading}</h3>
-                </button>
-            </p>
-            <div class="collapse mb-5" id="collapseExample{unique_id}">
-            """
+                        <hr style="border: 0; height: 2px; background: linear-gradient(to right, grey, white);">
+
+                        <div class="pt-2 mb-4" style="text-align:center;display: block; width: 57%; border-radius: 7px; border: 1px solid #b7b7b7;  background-color:#edf5ff;">
+                            <h3>{main_heading}</h3>
+                        </div>     
+                    """
             for filepath in dict_of_list_of_filepaths[main_heading]:
                 if os.path.exists(os.path.join(base_graphs_path, filepath)):
                     unique_id_for_each_image = uuid.uuid4()
                     base_filename = os.path.basename(filepath)
                     base_filename_without_extension = str(os.path.splitext(base_filename)[0])
+
+                    unique_id = str(uuid.uuid4())
+
+                    html_text += f"""
+                    <p>
+                        <button class="btn btn-light pt-2" style="display: block; width: 50%; border-radius: 10px; border-color: #b4b4b4;" type="button" data-toggle="collapse" data-target="#collapseExample{unique_id}" aria-expanded="false" aria-controls="collapseExample{unique_id}">
+                            <h4 class="">{base_filename_without_extension}</h4>
+                        </button>
+                    </p>
+                    <div class="collapse mb-1" id="collapseExample{unique_id}">
+                    """
                     
-                    html_text += f'<h4 class="mt-4">{base_filename_without_extension}</h4>'
 
                     # Create tabs
                     html_text += f'<ul class="nav nav-tabs" id="tab{unique_id_for_each_image}" role="tablist">'
@@ -243,18 +252,19 @@ class ViewReportClass:
                         active_class = "show active" if index == 0 else ""
 
                         html_text += f"""
-                            <div class="tab-pane fade {active_class} images_transition_over_sprints" id="tab-content-{unique_id_for_each_image}-{index}" 
+                            <div class="mb-4 tab-pane fade {active_class} images_transition_over_sprints" id="tab-content-{unique_id_for_each_image}-{index}" 
                                 role="tabpanel" aria-labelledby="tab-{unique_id_for_each_image}-{index}">
                                 <img src="{url_for('serve_image', filename=curr_filepath)}" alt="{curr_filepath}" class="img-fluid w-100" />                                                
                             </div>
                         """
                     html_text += "</div>"
 
+                    html_text += """
+                    </div>
+                    """
                 else:
                     print(f"{os.path.join(base_graphs_path, filepath)} does not exist")
-            html_text += """
-            </div>
-            """
+            
         return html_text
     
 class perf_load_report_publish:
@@ -435,7 +445,8 @@ class perf_load_report_publish:
                     vs_span = "<span class='btn mb-3 btn-sm disabled'>vs</span>"
                     joined_text = f"{vs_span}".join(sprint_runs_text_list)
                     sprint_runs_text += f"{vs_span}{joined_text}"
-                data = json.dumps({"status": "info", "message": f"<div style='text-align: center;'><h1>{load_type} - {str(test_title).capitalize()}<br>Performance Report</h1>{sprint_runs_text}</div><hr style='border: 1px solid #000000;'><br>"})
+                data = json.dumps({"status": "info", "message": f"<div style='text-align: center;'><h1>{load_type} - {str(test_title).capitalize()}<br>Performance Report</h1>{sprint_runs_text}</div><hr style='border: 0; height: 2px; background: linear-gradient(to right, #ff0000, #0000ff);'><br>"})
+                                                                                                                                                                                                        
                 yield f'data: {data}\n\n'
             for key_name in self.all_keys:
                 # if key_name != "charts":continue
@@ -548,7 +559,7 @@ class perf_load_report_publish:
                             html_text+=charts_generator
 
                     if self.isViewReport:
-                        html_text+='<hr style="border: 1px solid #000000;">'
+                        html_text+='<hr style="border: 0; height: 2px; background: linear-gradient(to right, #ff0000, #0000ff);">'
                         json_data = json.dumps({
                             "status": "info",
                             "message": html_text
