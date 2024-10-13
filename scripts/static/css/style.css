@@ -179,17 +179,17 @@
 }
 
 #toggleBetween_expand_collapse{
-    bottom: 670px;
+    bottom: 700px;
 }
 
 #download_html_btn{
-    bottom: 560px;
+    bottom: 620px;
 
     /* font-size: 12px; */
 }
 
 #download_pdf_btn{
-    bottom: 450px;
+    bottom: 540px;
 
     /* font-size: 12px; */
     /* padding: 10px; */
@@ -198,14 +198,14 @@
     /* white-space: nowrap; */
 }
 #download_word_btn{
-    bottom: 340px;
+    bottom: 460px;
 
     /* font-size: 12px; */
 }
 
 #scroll_up {
 
-    bottom: 240px;
+    bottom: 390px;
 }
 
 .sortable {
@@ -371,13 +371,14 @@
 }
 
 .right_fixed_elements{
-    width: 5%;
+    width: 4%;
     position: fixed;
     display: none;
     z-index: 1000;
     padding: 5px;
     font-size: 14px;
-    right: 1.5%;
+    right: 2%;
+    font-size: 10px;
 
 }
 
