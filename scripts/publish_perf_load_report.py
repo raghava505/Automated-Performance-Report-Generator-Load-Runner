@@ -445,7 +445,7 @@ class perf_load_report_publish:
                     vs_span = "<span class='btn mb-3 btn-sm disabled'>vs</span>"
                     joined_text = f"{vs_span}".join(sprint_runs_text_list)
                     sprint_runs_text += f"{vs_span}{joined_text}"
-                data = json.dumps({"status": "info", "message": f"<div style='text-align: center;'><h1>{load_type} - {str(test_title).capitalize()}<br>Performance Report</h1>{sprint_runs_text}</div><hr style='border: 0; height: 2px; background: linear-gradient(to right, #ff0000, #0000ff);'><br>"})
+                data = json.dumps({"status": "info", "message": f"<div style='text-align: center;'><h1>{load_type} - {str(test_title).capitalize()}<br>Performance Report</h1>{sprint_runs_text}</div><hr style='border: 0; height: 2px; background: linear-gradient(to right, black, #0000ff);'><br>"})
                                                                                                                                                                                                         
                 yield f'data: {data}\n\n'
             for key_name in self.all_keys:
@@ -559,7 +559,7 @@ class perf_load_report_publish:
                             html_text+=charts_generator
 
                     if self.isViewReport:
-                        html_text+='<hr style="border: 0; height: 2px; background: linear-gradient(to right, #ff0000, #0000ff);">'
+                        html_text+='<hr style="border: 0; height: 2px; background: linear-gradient(to right, black, #0000ff);">'
                         json_data = json.dumps({
                             "status": "info",
                             "message": html_text
