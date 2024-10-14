@@ -7,6 +7,7 @@ import re
 import jwt
 from urllib3.exceptions import InsecureRequestWarning 
 import pandas as pd
+import math
 requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
 
 def get_results(url, job_id, headers,stack_obj):
@@ -363,7 +364,8 @@ class osq_accuracy:
                 self.stack_obj.log.info(actual)
             else:
                 utc_days=self.get_utc_days_involved()
-                expect=alerts_triggered*1000*(utc_days+1)
+                # expect=alerts_triggered*1000*(utc_days+1)
+                expect = alerts_triggered * 50 * math.ceil(self.hours)
                 query="select count(*) from {} where  created_at >= timestamp '{}' and created_at < timestamp '{}' and code like '%-builder-added%'".format(table,self.start_time,self.end_time)
                 self.stack_obj.log.info(f"Executing query : {query}")
                 actual = http_query(api, query, self.ext,self.stack_obj)
@@ -371,7 +373,7 @@ class osq_accuracy:
             if table=="upt_detections":
                 accuracy[table]={"actual":actual,"expected":expect,"accuracy":0}
             else:
-                accuracy[table]={"actual":actual,"expected":expect,"accuracy":round((actual/expect)*100,2)}
+                accuracy[table]={"actual":actual,"expected":expect,"accuracy":(actual/expect)*100}
         df = pd.DataFrame(accuracy)
         df=df.T
         if df.empty : 
