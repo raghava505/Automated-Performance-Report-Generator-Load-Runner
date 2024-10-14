@@ -3,7 +3,7 @@ from settings import stack_configuration
 import json
 
 variables = {
-        "start_time_str_ist":"2024-10-14 19:40",
+        "start_time_str_ist":"2024-10-14 21:20",
         "load_duration_in_hrs":0.5,
         "test_env_file_name":'longevity_nodes.json'
     }
@@ -13,7 +13,7 @@ stack_json_file = variables["test_env_file_name"]
 if "longevity_nodes" in stack_json_file:
     api_file = "longevity"
     assets_per_cust= 100
-    domain='longevity'
+    base_domain='longevity'
     extension='net'
     alert_rules_triggered_per_cust=12
     event_rules_triggered_per_cust=33  
@@ -21,7 +21,7 @@ if "longevity_nodes" in stack_json_file:
 elif "s1_nodes" in stack_json_file:
     api_file = "jupiter"
     assets_per_cust= 100
-    domain='jupiter'
+    base_domain='jupiter'
     extension='net'
     alert_rules_triggered_per_cust=16
     event_rules_triggered_per_cust=34  
@@ -31,21 +31,23 @@ elif "s1_nodes" in stack_json_file:
 elif "s12_nodes" in stack_json_file:
     api_file = "milkyway"
     assets_per_cust= 112
-    domain='milkyway'
+    base_domain='milkyway'
     extension='net'
     alert_rules_triggered_per_cust=28
     event_rules_triggered_per_cust=39  
     input_file_path="rhel7-6tab_12rec.log"
 
-input_file_path = f"/Users/masabathulararao/Documents/Loadtest/save-report-data-to-mongo/scripts/osquery/testinputfiles/{input_file_path}"
+input_file_path = f"scripts/osquery/testinputfiles/{input_file_path}"
 print(input_file_path)
-api_path = f'/Users/masabathulararao/Documents/Loadtest/save-report-data-to-mongo/scripts/osquery/api_keys/{api_file}.json'
+api_path = f'scripts/osquery/api_keys/{api_file}.json'
 
 stack_obj=stack_configuration(variables)
 
-for i in range(6):
+for i in range(4):
     if i!=0:
-        domain = "longevity"+str(i)
+        domain = base_domain+str(i)
+    else:
+        domain = base_domain
     accuracy_obj= osq_accuracy(stack_obj,api_path=api_path,domain=domain,assets_per_cust=assets_per_cust,ext=extension,trans=True,input_file=input_file_path)
 
     stack_obj.log.info("Calculating Table accuracies for Osquery Load...")
