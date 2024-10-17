@@ -105,6 +105,13 @@ class parent:
     def get_pod_level_cpu_used_queries(cls):
         return dict([(f"CPU used by pod {pod}",(f'sum(uptycs_kubernetes_cpu_stats{{pod=~"{pod}"}}) by (node) / 100' , ["node"] , 'cores') ) for pod in cls.common_pod_names])
 
+    @staticmethod
+    def miscellaneous():
+        return {
+            "Airflow apps RAM usage":('sum(uptycs_app_memory{app_name=~"airflow-.*"}) by (app_name) ' , ["app_name"] , '%'),
+            "Airflow apps CPU usage":('sum(uptycs_app_cpu{app_name=~"airflow-.*"}) by (app_name) / 100' , ["app_name"] , 'cores'),
+        }
+
 # {__name__=~"uptycs_mon_spark_drain_rate|uptycs_mon_spark_inject_rate"}
     @staticmethod
     def get_inject_drain_and_lag_uptycs_mon_spark(topic):
@@ -201,6 +208,7 @@ class parent:
             "Container-level CPU Charts":cls.get_docker_level_cpu_used_queries(),
             "Pod-level Memory Charts":cls.get_pod_level_mem_used_queries(),
             "Pod-level CPU Charts":cls.get_pod_level_cpu_used_queries(),
+            "Miscellaneous" : cls.miscellaneous(),
             "Inject-Drain rate and Lag Charts":cls.get_inject_drain_rate_and_lag_chart_queries(),
             "Pg Stats Charts": cls.get_pg_charts(),
             "Restart count Charts": cls.get_restart_count_charts(),
