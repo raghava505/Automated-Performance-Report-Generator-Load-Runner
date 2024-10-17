@@ -15,7 +15,7 @@ usage_threshold = 0.03
 
 def get_exclude_pattern(lst):return '|'.join(lst)
 
-exclude_applications=[".*osqLogger.*" , ".*redis-server.*" , ".*airflow.*"]
+exclude_applications=[".*osqLogger.*" , ".*redis-server.*" , ".*airflow.*worker.*"]
 exclude_containers=[".*tls.*"]
 
 def get_exclude_filter(exclude_nodetypes,stack_obj):

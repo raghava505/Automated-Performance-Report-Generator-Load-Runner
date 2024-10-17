@@ -3,16 +3,16 @@ from settings import stack_configuration
 import json
 
 variables = {
-        "start_time_str_ist":"2024-10-14 21:20",
-        "load_duration_in_hrs":0.5,
-        "test_env_file_name":'longevity_nodes.json'
+        "start_time_str_ist":"2024-10-17 14:18",
+        "load_duration_in_hrs":1,
+        "test_env_file_name":'s1_nodes.json'
     }
 
 stack_json_file = variables["test_env_file_name"]
 
 if "longevity_nodes" in stack_json_file:
     api_file = "longevity"
-    assets_per_cust= 100
+    assets_per_cust= 300
     base_domain='longevity'
     extension='net'
     alert_rules_triggered_per_cust=12

@@ -5,7 +5,7 @@ class parent:
     @classmethod
     @property
     def common_app_names(cls):
-        return  {"sum":["tls","trino",".*airflow.*",".*osqLogger.*","kafka",".*ruleEngine.*",".*ruleengine",".*ruleenginebulkreplay",".*ruleenginecc",".*redis-server.*","pgbouncer",
+        return  {"sum":["tls","trino",".*airflow.*","airflow-.*",".*osqLogger.*","kafka",".*ruleEngine.*",".*ruleengine",".*ruleenginebulkreplay",".*ruleenginecc",".*redis-server.*","pgbouncer",
                         "osqueryIngestion","/usr/local/bin/pushgateway","uptycs-metastoredb","uptycs-configdb",
                         "/opt/uptycs/cloud/go/bin/complianceSummaryConsumer","orc-compaction","data-archival",],
                 "avg":[]
@@ -105,7 +105,7 @@ class parent:
     def get_pod_level_cpu_used_queries(cls):
         return dict([(f"CPU used by pod {pod}",(f'sum(uptycs_kubernetes_cpu_stats{{pod=~"{pod}"}}) by (node) / 100' , ["node"] , 'cores') ) for pod in cls.common_pod_names])
 
-
+# {__name__=~"uptycs_mon_spark_drain_rate|uptycs_mon_spark_inject_rate"}
     @staticmethod
     def get_inject_drain_and_lag_uptycs_mon_spark(topic):
         return {
