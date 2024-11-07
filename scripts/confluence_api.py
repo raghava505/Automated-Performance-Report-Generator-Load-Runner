@@ -152,9 +152,10 @@ class publish_to_confluence:
                     return_text+=f'<div><span style="color: red; font-size: 6px;">{str(each_text).strip()}</span></div>'
                 return return_text
             else:
-                for each_text in split_text:
-                    return_text+=f'<p>{self.get_status_macro(str(each_text).strip())}</p>'
-                return return_text
+                # for each_text in split_text:
+                #     return_text+=f'<p>{self.get_status_macro(str(each_text).strip())}</p>'
+                # return return_text
+                return content
         # Apply color styles to cells
         #re.sub(pattern, replacement, string)
         html_table = re.sub(r'(<td>)(.*?)(</td>)', lambda m: m.group(1) + colorize_cell(m.group(2)) + m.group(3), html_table)

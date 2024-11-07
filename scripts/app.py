@@ -220,9 +220,9 @@ def view_report():
     database_name = request.form['loadtype']
     collection_name = request.form['loadname']
 
-    # list_of_sprint_runs_to_show_or_compare = [[162,1],[161,2],[161,1],[160,1]]
+    # list_of_sprint_runs_to_show_or_compare = [[163,3],[163,2]]
     # database_name = "Osquery_LoadTests_New"
-    # collection_name = "ControlPlane"
+    # collection_name = "MultiCustomer"
 
     """Add a log message to the queue for the current user."""
     user_id = session.get('user_id')
@@ -273,15 +273,16 @@ def publish_report():
     database_name = request.form['loadtype']
     collection_name = request.form['loadname']
 
-    # url='https://raghav-m.atlassian.net'
-    # email_address = "pbpraghav@gmail.com"
-    # space = 'IT'
-    # parent_page_title = 'TEST'  
+    # url='https://uptycsjira.atlassian.net'
+    # email_address = "masabathularao@uptycs.com"
+    # space = '~71202040c8bf45840d41c598c0efad54382c7b'
+    # parent_page_title = 'Performance Load Reports'  
     # import uuid
     # report_title = f"TEST {uuid.uuid4()}"
-    # list_of_sprint_runs_to_show_or_compare = [[163,1],[162,1],[161,1]]
+    # list_of_sprint_runs_to_show_or_compare = [[163,3],[163,2]]
+    # api_key = "ATATT3xFfGF08UUkY1FfDh8o_N52lHVF0gp-_RqbOAsuct-GnVvAYlTA5sGcpZdLRHV939NjNipCdFbdZO3igfz1fBdtZLc5yvjIuwmImzFSMff26-bq4htB6c2me5KUoye5VeiU9P83vaD0VkxWORvUXBIIFiqcLpwopAmilMQbwdkvC9XYPDw=D9B7B52A"
     # database_name = "Osquery_LoadTests_New"
-    # collection_name = "ControlPlane"
+    # collection_name = "MultiCustomer"
 
     user_id = session.get('user_id')
     if not user_id:

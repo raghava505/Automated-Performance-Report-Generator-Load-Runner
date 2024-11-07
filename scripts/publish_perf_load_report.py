@@ -449,7 +449,7 @@ class perf_load_report_publish:
                                                                                                                                                                                                         
                 yield f'data: {data}\n\n'
             for key_name in self.all_keys:
-                # if key_name != "charts":continue
+                # if key_name not in ['cpu_usages']:continue
                 try:
                     html_text =  custom_string()
                     print(f"Processing {str(key_name).capitalize()}")
