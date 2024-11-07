@@ -280,7 +280,6 @@ def publish_report():
     # import uuid
     # report_title = f"TEST {uuid.uuid4()}"
     # list_of_sprint_runs_to_show_or_compare = [[163,3],[163,2]]
-    # api_key = "ATATT3xFfGF08UUkY1FfDh8o_N52lHVF0gp-_RqbOAsuct-GnVvAYlTA5sGcpZdLRHV939NjNipCdFbdZO3igfz1fBdtZLc5yvjIuwmImzFSMff26-bq4htB6c2me5KUoye5VeiU9P83vaD0VkxWORvUXBIIFiqcLpwopAmilMQbwdkvC9XYPDw=D9B7B52A"
     # database_name = "Osquery_LoadTests_New"
     # collection_name = "MultiCustomer"
 
