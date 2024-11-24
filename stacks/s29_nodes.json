@@ -1,0 +1,17 @@
+{
+    "stack": "S29",
+    "architecture": "1 X 3SU",
+    "domain": "cosmos",
+    "suffix": "uptycs.net",
+    "monitoring_node_ip":"s29monitor1",
+    "event_rules_per_cust": {
+        "enabled": 37,
+        "triggered": 34
+    },
+    "alert_rules_per_cust": {
+        "enabled": 36,
+        "triggered": 33
+    },
+    "execute_kafka_topics_script_in":"s29c1pn1",
+    "execute_trino_queries_in":"s29c1pn2"
+}

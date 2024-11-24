@@ -350,8 +350,8 @@ class osq_accuracy:
         for table in events_tables:
             if table=="upt_events":
                 expect=sum(expected.values())
-                if expect>events_triggered*self.hours*100000:
-                    expect=events_triggered*self.hours*100000
+                # if expect>events_triggered*self.hours*100000:
+                #     expect=events_triggered*self.hours*100000
                 query="select count(*) from {} where upt_day>= {} and created_at >= timestamp '{}' and created_at < timestamp '{}' and code like '%-builder-added%'".format(table,self.upt_day,self.start_time,self.end_time)
                 self.stack_obj.log.info(f"Executing query : {query}")
                 actual = http_query(api, query,self.ext,self.stack_obj)
