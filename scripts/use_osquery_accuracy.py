@@ -3,16 +3,16 @@ from settings import stack_configuration
 import json
 
 variables = {
-        "start_time_str_ist":"2024-10-17 14:18",
-        "load_duration_in_hrs":1,
-        "test_env_file_name":'s1_nodes.json'
+        "start_time_str_ist":"2024-11-23 22:00",
+        "load_duration_in_hrs":2,
+        "test_env_file_name":'s29_nodes.json'
     }
 
 stack_json_file = variables["test_env_file_name"]
 
 if "longevity_nodes" in stack_json_file:
     api_file = "longevity"
-    assets_per_cust= 300
+    assets_per_cust= 100
     base_domain='longevity'
     extension='net'
     alert_rules_triggered_per_cust=12
@@ -36,6 +36,14 @@ elif "s12_nodes" in stack_json_file:
     alert_rules_triggered_per_cust=28
     event_rules_triggered_per_cust=39  
     input_file_path="rhel7-6tab_12rec.log"
+elif "s29_nodes" in stack_json_file:
+    api_file = "cosmos"
+    assets_per_cust= 2528
+    base_domain='cosmos'
+    extension='net'
+    alert_rules_triggered_per_cust=33
+    event_rules_triggered_per_cust=34
+    input_file_path="rhel7-6tab_12rec.log"
 
 input_file_path = f"scripts/osquery/testinputfiles/{input_file_path}"
 print(input_file_path)
@@ -43,7 +51,7 @@ api_path = f'scripts/osquery/api_keys/{api_file}.json'
 
 stack_obj=stack_configuration(variables)
 
-for i in range(4):
+for i in range(1):
     if i!=0:
         domain = base_domain+str(i)
     else:
@@ -52,7 +60,7 @@ for i in range(4):
 
     stack_obj.log.info("Calculating Table accuracies for Osquery Load...")
     Osquery_table_accuracies = accuracy_obj.table_accuracy()
-    # stack_obj.log.info(f"Osquery_table_accuracies : {json.dumps(Osquery_table_accuracies,indent=4)}")
+    stack_obj.log.info(f"Osquery_table_accuracies : {json.dumps(Osquery_table_accuracies,indent=4)}")
 
     stack_obj.log.info("Calculating Events accuracies for Osquery Load ...")
     # print("*********************** Accuracies for customer : " , domain)

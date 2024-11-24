@@ -45,7 +45,11 @@ def execute_command_in_node(node,command,stack_obj):
         raise RuntimeError(f"ERROR : Unable to connect to {node} , {e}") from e
 
 def execute_trino_query(node,query,stack_obj,schema="system"):
-    trino_command = f"sudo -u monkey docker exec trino-monitoring /opt/uptycs/cloud/utilities/trino-cli.sh --user uptycs --password prestossl --catalog uptycs --schema upt_{schema} --execute  \"{query}\""
+    if stack_obj.stack_name == "S29":
+        container = "node"
+    else:
+        container = "trino-monitoring"
+    trino_command = f"sudo -u monkey docker exec {container} /opt/uptycs/cloud/utilities/trino-cli.sh --user uptycs --password prestossl --catalog uptycs --schema upt_{schema} --execute  \"{query}\""
     return execute_command_in_node(node,trino_command,stack_obj)
 
 def execute_configdb_query(node,query,stack_obj):

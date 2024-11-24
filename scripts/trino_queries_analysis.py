@@ -447,6 +447,7 @@ class trino_queries_class:
                 "schema":schema,
                 "data":df.to_dict(orient="records")
             }
+            self.stack_obj.log.info(f"\n {df}")
 
         if save_dict == {}:return None
         return {"format":"nested_table","note":"NOTE : All the time column values in this section are in milliseconds","schema":{"page":"Trino Queries Analysis"},"data":save_dict}
@@ -456,9 +457,9 @@ if __name__=='__main__':
     from settings import stack_configuration
 
     variables = {
-        "start_time_str_ist":"2024-01-26 13:25",
-        "load_duration_in_hrs":4,
-        "test_env_file_name":'s1_nodes.json'
+        "start_time_str_ist":"2024-11-23 22:00",
+        "load_duration_in_hrs":2,
+        "test_env_file_name":'s29_nodes.json'
     }
     stack_obj = stack_configuration(variables)
     
@@ -468,7 +469,7 @@ if __name__=='__main__':
     from pymongo import MongoClient
 
     # Create a sample DataFrame
-    client = MongoClient('mongodb://localhost:27017/')
+    client = MongoClient('mongodb://localhost:8013/')
     db = client['Osquery_LoadTests']  # Replace 'your_database_name' with your actual database name
     collection = db['Testing']  # Replace 'your_collection_name' with your actual collection name
 

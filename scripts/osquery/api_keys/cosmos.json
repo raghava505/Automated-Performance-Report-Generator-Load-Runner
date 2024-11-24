@@ -1,0 +1,30 @@
+{
+    "cosmos":{
+        "id": "76011909-5186-4ae6-bf85-1b4ecbe7d4f0",
+        "user_id": "b16d2c6f-145d-4759-a263-4fe91f5f418c",
+        "customer_id": "29a5cf4e-5d4b-492f-a861-ea893e57c7b3",
+        "active": true,
+        "isInternal": false,
+        "key": "HIHZQCPNZYI2QUSXLCEGJHGNQ2IBCUPX",
+        "secret": "GYInQIclH4v0DRxhjBOhqO3huj1raMq5hCPvnXite66nJEzyxLeNvdDI7/ehhEkF",
+        "expiry": null,
+        "updated_at": "2024-11-18T06:43:42.297Z",
+        "created_at": "2024-11-18T06:43:42.297Z",
+        "domainSuffix": ".uptycs.net",
+        "domain": "cosmos"
+    },
+    "cosmos1":{
+        "id": "5391d711-1f88-4122-9ae5-1d5a233ea3fd",
+        "user_id": "83b6537d-d30e-4699-9c31-2d66dd11f025",
+        "customer_id": "92248c33-3345-449d-8ac3-c20a38f98c61",
+        "active": true,
+        "isInternal": false,
+        "key": "6JX5NO655LA6WOH2MB2EKTEJDDVQFUNU",
+        "secret": "nCtTSphmgPRbpDImetOpi8Er7eYJRR+kWZJHLPxXWxIutkmHUsO2QNuoQlAqDYPL",
+        "expiry": null,
+        "updated_at": "2024-11-18T06:45:29.036Z",
+        "created_at": "2024-11-18T06:45:29.036Z",
+        "domainSuffix": ".uptycs.net",
+        "domain": "cosmos1"
+      }
+}
