@@ -3,7 +3,7 @@ from settings import stack_configuration
 import json
 
 variables = {
-        "start_time_str_ist":"2024-11-23 22:00",
+        "start_time_str_ist":"2024-11-24 17:40",
         "load_duration_in_hrs":2,
         "test_env_file_name":'s29_nodes.json'
     }
@@ -51,7 +51,7 @@ api_path = f'scripts/osquery/api_keys/{api_file}.json'
 
 stack_obj=stack_configuration(variables)
 
-for i in range(1):
+for i in range(1,2):
     if i!=0:
         domain = base_domain+str(i)
     else:
