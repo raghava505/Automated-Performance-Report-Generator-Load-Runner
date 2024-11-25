@@ -13,5 +13,6 @@
         "triggered": 33
     },
     "execute_kafka_topics_script_in":"s29c1pn1",
-    "execute_trino_queries_in":"s29c1pn2"
+    "execute_trino_queries_in":"s29c1pn2",
+    "apiload_simulator_ip": "192.168.128.55"
 }
