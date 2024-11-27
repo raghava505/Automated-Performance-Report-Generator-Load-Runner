@@ -175,8 +175,12 @@ def create_images_and_save(path,doc_id,collection,fs,variables,end_time_str,run,
                     end_hr_to_replace=max(complete_time_set).hour
                     end_min_to_replace=30
                 else:
-                    end_hr_to_replace = max(complete_time_set).hour+1
-                    end_min_to_replace = 0
+                    if max(complete_time_set).hour != 23:
+                        end_hr_to_replace = max(complete_time_set).hour+1
+                        end_min_to_replace = 0
+                    else:
+                        end_hr_to_replace = max(complete_time_set).hour
+                        end_min_to_replace = max(complete_time_set).minute
                 end_time_in_charts = date2num(max(complete_time_set).replace(minute=end_min_to_replace,hour=end_hr_to_replace))+(offset_ist_minutes / (60 * 24))
                 plt.xlim((start_time_in_charts,end_time_in_charts))
                 ax = plt.gca()
@@ -204,14 +208,14 @@ if __name__=="__main__":
     from capture_charts_data import Charts
     from parent_load_details import parent as load_cls
     s_at = time.perf_counter()
-    client = pymongo.MongoClient("mongodb://localhost:27017")
+    client = pymongo.MongoClient("mongodb://localhost:8013")
     database = client["Osquery_LoadTests"]
     fs = GridFS(database)
 
     variables = {
-        "start_time_str_ist":"2024-08-26 13:25",
-        "load_duration_in_hrs":4,
-        "test_env_file_name":'s1_nodes.json',
+        "start_time_str_ist":"2024-11-26 21:28",
+        "load_duration_in_hrs":2,
+        "test_env_file_name":'s29_nodes.json',
         "build":"153105",
 
     }
