@@ -245,3 +245,17 @@
 2024-11-24 10:49:54,501 INFO spawned: 'http_server' with pid 10
 2024-11-24 10:49:56,032 INFO success: load-report-generator entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
 2024-11-24 10:49:56,033 INFO success: http_server entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
+2024-11-26 09:59:02,540 WARN received SIGTERM indicating exit request
+2024-11-26 09:59:02,551 INFO waiting for load-report-generator, http_server to die
+2024-11-26 09:59:02,565 INFO stopped: http_server (terminated by SIGTERM)
+2024-11-26 09:59:03,284 INFO stopped: load-report-generator (exit status 0)
+2024-11-27 06:47:15,370 CRIT Supervisor is running as root.  Privileges were not dropped because no user is specified in the config file.  If you intend to run as root, you can set user=root in the config file to avoid this message.
+2024-11-27 06:47:15,372 INFO supervisord started with pid 1
+2024-11-27 06:47:16,385 INFO spawned: 'load-report-generator' with pid 9
+2024-11-27 06:47:16,388 INFO spawned: 'http_server' with pid 10
+2024-11-27 06:47:17,392 INFO success: load-report-generator entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
+2024-11-27 06:47:17,398 INFO success: http_server entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
+2024-11-27 07:46:35,007 WARN received SIGTERM indicating exit request
+2024-11-27 07:46:35,009 INFO waiting for load-report-generator, http_server to die
+2024-11-27 07:46:35,010 INFO stopped: http_server (terminated by SIGTERM)
+2024-11-27 07:46:36,235 INFO stopped: load-report-generator (exit status 0)
