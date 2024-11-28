@@ -459,7 +459,7 @@ if __name__=='__main__':
     variables = {
         "start_time_str_ist":"2024-11-24 17:44",
         "load_duration_in_hrs":2,
-        "test_env_file_name":'s29_nodes.json'
+        "test_env_file_name":'longevity_nodes.json'
     }
     stack_obj = stack_configuration(variables)
     

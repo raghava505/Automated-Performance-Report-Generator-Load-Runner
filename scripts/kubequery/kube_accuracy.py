@@ -58,7 +58,7 @@ class Kube_Accuracy:
             else:
                 query = """select count(*) from {} where upt_day>={} and upt_time>=timestamp'{}'  and upt_time<=timestamp'{}' and upt_hostname like 'cluster%'""".format(t,self.upt_day,self.load_start,end_time)
             
-            command="""sudo -u monkey docker exec trino-monitoring /opt/uptycs/cloud/utilities/trino-cli.sh --user uptycs --password prestossl --catalog uptycs --schema upt_{} --execute "{};" """.format(self.cloud_domain, query)
+            command="""sudo -u monkey docker exec node /opt/uptycs/cloud/utilities/trino-cli.sh --user uptycs --password prestossl --catalog uptycs --schema upt_{} --execute "{};" """.format(self.cloud_domain, query)
             conn = Connection(host=self.target_host, user=self.username, connect_kwargs={'password': self.password})
             # print(command)
             res = conn.sudo(command, password=self.password, hide='stderr')

@@ -46,11 +46,11 @@ def execute_command_in_node(node,command,stack_obj):
 
 def execute_trino_query(node,query,stack_obj,schema="system"):
     if stack_obj.stack_name == "S29":
-        stack_obj.log.info("s29 stack : using node container to run trino queries")
         container = "node"
     else:
-        container = "trino-monitoring"
+        container = "node"
     print(query)
+    stack_obj.log.info(f"using {container} container to run trino queries")
     trino_command = f"sudo -u monkey docker exec {container} /opt/uptycs/cloud/utilities/trino-cli.sh --user uptycs --password prestossl --catalog uptycs --schema upt_{schema} --execute  \"{query}\""
     return execute_command_in_node(node,trino_command,stack_obj)
 
