@@ -27,7 +27,7 @@
     ```
     docker-compose up -d
     ```
-    NOTE : This step builds the image in your machine. We will pushing the built image to a docker hub in futube, which avoids building the image locally.
+    NOTE : This step builds the image in your machine. We will be pushing the built image to a docker hub in future, which avoids building the image locally.
 
 ---
 
