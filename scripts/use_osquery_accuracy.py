@@ -3,8 +3,8 @@ from settings import stack_configuration
 import json
 
 variables = {
-        "start_time_str_ist":"2024-11-25 21:21",
-        "load_duration_in_hrs":2,
+        "start_time_str_ist":"2024-12-01 23:00",
+        "load_duration_in_hrs":5/60,
         "test_env_file_name":'s29_nodes.json'
     }
 
@@ -38,7 +38,8 @@ elif "s12_nodes" in stack_json_file:
     input_file_path="rhel7-6tab_12rec.log"
 elif "s29_nodes" in stack_json_file:
     api_file = "cosmos"
-    assets_per_cust= 2528
+    # assets_per_cust= 2528
+    assets_per_cust = 300
     base_domain='cosmos'
     extension='net'
     alert_rules_triggered_per_cust=33
