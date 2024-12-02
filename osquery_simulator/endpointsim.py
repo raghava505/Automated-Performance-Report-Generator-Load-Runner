@@ -46,11 +46,11 @@ print(f"Number of Data Assets: {data_assets}")
 print(f"Number of ControlPlane Assets: {controlplane_assets}")
 
 if data_assets and controlplane_assets :
-    print("Wrong command : Do not pass both data_assets and controlplane_assets arguments in the same request. Exiting... ")
+    print("ERROR : Wrong command : Do not pass both data_assets and controlplane_assets arguments in the same request. Exiting... ")
     sys.exit(1)
 
 if data_assets is None and controlplane_assets is None:
-    print("Wrong command : Pass any one of these arguments -> '--data_assets' or '--controlplane_assets' in the request. Exiting... ")
+    print("ERROR : Wrong command : Pass any one of these arguments -> '--data_assets' or '--controlplane_assets' in the request. Exiting... ")
     sys.exit(1)
 
 
@@ -153,10 +153,12 @@ def enroll_asset(asset_id, customer_secret, results_lock, hostid_nodekey_mapping
     try:
         enrol_body = generate_enrol_body(customer_secret, asset_id)
         response = session.post(enroll_url, headers=headers, json=enrol_body, verify=False)
-        print(f"Status Code: {response.status_code}")
-        print(f"Response Body: {response.text}")
+        if response.status_code == 200:
+            print(f"INFO : Asset {asset_id} enrolled successfully. Status Code: {response.status_code}")
+        else:
+            print(f"ERROR : Failed to enrol Asset {asset_id}. Status Code: {response.status_code}. ResponseText : {response.text} ")
+
         node_key = json.loads(response.text)["node_key"]
-        
         # Save the result in a thread-safe manner
         with results_lock:
             hostid_nodekey_mapping[asset_id] = node_key
@@ -169,11 +171,15 @@ def send_config(asset_params):
     try:
         config_payload = {"node_key": node_key}
         response = session.post(config_url, headers=headers, json=config_payload, verify=False,  timeout=1000)
+        
         with print_lock:
-            print(f"Asset {asset_id} sent config: {response.status_code}")
+            if response.status_code == 200:
+                print(f"INFO : Asset {asset_id} sent config successfully. Status Code: {response.status_code}")
+            else:
+                print(f"ERROR : Failed to send config for Asset {asset_id}. Status Code: {response.status_code}. ResponseText : {response.text} ")
     except Exception as e:
         with print_lock:
-            print(f"Asset {asset_id} failed config call: {e}")
+            print(f"ERROR : Exception occured during config call for Asset {asset_id} : {e}")
 
 d = {}
 def send_log(asset_id, node_key, message, unix_timestamp, max_retries=5, retry_delay=5):
@@ -190,16 +196,16 @@ def send_log(asset_id, node_key, message, unix_timestamp, max_retries=5, retry_d
             response = session.post(log_url, headers=headers, json=message, verify=False, timeout=1000)
             if response.status_code == 200:
                 if attempt!=0:
-                    print(f"Asset {asset_id} sent data successfully in attemt{attempt}. Response: {response.status_code}")
+                    print(f"INFO : Asset {asset_id} sent data successfully in attemt-{attempt}. Response: {response.status_code}")
                 break
             else:
-                print(f"Asset {asset_id} received non-200 status: {response.status_code}. Retrying...")
+                print(f"WARNING : Asset {asset_id} received non-200 status: {response.status_code}. Retrying...")
         except Exception as e:
-            print(f"Asset {asset_id} failed to send message: {e}. Retrying...")
+            print(f"WARNING : Asset {asset_id} failed to send message : {e}. Retrying...")
 
         attempt += 1
         if max_retries is not None and attempt >= max_retries:
-            print(f"Asset {asset_id} failed after {max_retries} retries. Aborting.")
+            print(f"ERROR : Failed to send message to asset {asset_id} even after {max_retries} retries. Aborting.")
             break
         time.sleep(retry_delay)
 
@@ -212,7 +218,7 @@ def start_consumer():
             socket.connect(f"tcp://127.0.0.1:{port}")
             socket.setsockopt_string(zmq.SUBSCRIBE, "")  # Subscribe to all messages
 
-            print(f"Consumer started.")
+            print(f"INFO : Consumer started.")
 
             while True:
                 try:
@@ -223,27 +229,27 @@ def start_consumer():
                     def wrapped_send_log(params):
                         asset_id, node_key = params
                         send_log(asset_id, node_key, message, unix_timestamp)
-                    with concurrent.futures.ThreadPoolExecutor(max_workers=min(final_num_of_assets, 20)) as executor:
+                    with concurrent.futures.ThreadPoolExecutor(max_workers=min(final_num_of_assets, 100)) as executor:
                         executor.map(wrapped_send_log, hostid_nodekey_mapping.items())
 
                 except zmq.Again:
                     # No message received; retry
                     time.sleep(1)
                 except Exception as e:
-                    print(f"Consumer encountered an error: {e}")
+                    print(f"ERROR : Consumer encountered an error: {e}")
                     break  # Exit loop to recreate the socket
                 # time.sleep(2)
         except Exception as e:
-            print(f"Consumer failed to connect: {e}")
+            print(f"ERROR : Consumer failed to connect: {e}")
             time.sleep(1)  # Retry after a short delay
 
 
 def schedule_tasks(hostid_nodekey_mapping):
     def config_task():
-        print("Starting config API calls...")
-        with concurrent.futures.ThreadPoolExecutor(max_workers=min(final_num_of_assets, 5)) as executor:
+        print("INFO : Starting config API calls...")
+        with concurrent.futures.ThreadPoolExecutor(max_workers=min(final_num_of_assets, 50)) as executor:
             executor.map(send_config, hostid_nodekey_mapping.items())
-        print("Config API calls completed.")
+        print("INFO : Config API calls completed.")
 
     if data_assets:
         threading.Thread(target=start_consumer).start()
@@ -268,29 +274,29 @@ if True:
 
     # for thread in threads:     # Wait for all threads to finish
     #     thread.join()
-else :
-    with open(f"{domain}.pkl", 'rb') as file:
-        loaded_dict = pickle.load(file)
-        connection_params = loaded_dict["connection_params"]
-        hostid_nodekey_mapping = loaded_dict["hostid_nodekey_mapping"]
-    print(f"Dictionary loaded from {domain}.pkl")
+# else :
+#     with open(f"{domain}.pkl", 'rb') as file:
+#         loaded_dict = pickle.load(file)
+#         connection_params = loaded_dict["connection_params"]
+#         hostid_nodekey_mapping = loaded_dict["hostid_nodekey_mapping"]
+#     print(f"Dictionary loaded from {domain}.pkl")
 
 # hostid_nodekey_mapping={'f4600f7a-d70e-4a57-ad67-a594dc8417f3': '4cfa8006-fcf2-49dc-8f8e-96087785c6c9:f4600f7a-d70e-4a57-ad67-a594dc8417f3:asset:asset:jupiter100'}
 # print(hostid_nodekey_mapping)
 # send_log(next(iter(hostid_nodekey_mapping.items())))
 
 
-connection_params = {
-    "domain":domain,
-    "domain_url":domain_url,
-    "secret":secret,
-    # "Authorisation1":Authorisation1,
-    "data_assets":data_assets,
-    "controlplane_assets":controlplane_assets,
-    "headers":headers
-}
+# connection_params = {
+#     "domain":domain,
+#     "domain_url":domain_url,
+#     "secret":secret,
+#     # "Authorisation1":Authorisation1,
+#     "data_assets":data_assets,
+#     "controlplane_assets":controlplane_assets,
+#     "headers":headers
+# }
 
-print("connection_params : ",connection_params)
+# print("connection_params : ",connection_params)
 
 # with open(f"{domain}.pkl", 'wb') as file:
 #     pickle.dump({"connection_params":connection_params,"hostid_nodekey_mapping":hostid_nodekey_mapping}, file)
