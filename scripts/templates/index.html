@@ -2,42 +2,43 @@
 {% block content%}
 
 <div class="container-fluid">
-    <button id="toggleButton" class="btn btn-dark toggle-btn btn-sm" onclick="toggle_logs_window()">
+    <button id="toggleButton" class="btn btn-sm btn-outline-light transparent-btn" onclick="toggle_logs_window()">
         <i class="fa-solid fa-xmark"></i>
     </button>
-    <div class="row mb-5">
+    <div class="row">
         <!-- Collapsible Logs Window -->
         <!-- Toggle Button for Collapsing -->
         
         <div id="collapsable_logs_window" class="col-md-4  rounded transition ">
-            <div class="mb-3  d-flex align-items-center justify-content-center">
-                <div class="row mt-2">
-                    <h4 class="text-center" style="margin-bottom:0px;"><i class="bi bi-terminal-fill"></i> Logs</h4>
-                    
+            <!-- <div class="d-flex align-items-center justify-content-center"> -->
+                <!-- <div class="row"> -->
+                    <h5 class="text-center" ><i class="bi bi-terminal-fill fa-xs"></i> Logs</h5>
+
                     <!-- Loading Animation -->
-                    <div id="logs_loadingAnimation" style="display: none; margin-top: -5px; margin-bottom: -1px;">
-                        <button class="btn btn-primary ml-2" type="button" disabled>
+                    <div class="text-center" id="logs_loadingAnimation" style="display: none; margin-top: -36px; margin-bottom: -2px; margin-left:200px">
+
+                        <button class="btn btn-primary" type="button" style="font-size: 11px;" disabled>
                             <span class="spinner-grow spinner-grow-sm" role="status" aria-hidden="true"></span>
                             Publishing ...
                         </button>
                     </div>
                     <span id="copiedTooltip" class="copied-tooltip">Copied!</span>
 
-                    <div class="btn-group position-absolute" style="top: 20px; right: 51px;">
+                    <div class="btn-group position-absolute" style="top: 4px; right: 48px;">
                         <button id="clearLogsBtn" class="btn btn-sm btn-outline-light transparent-btn">
                             <i class="fa-solid fa-eraser"></i>
                         </button>
                     </div>
-                    <div class="btn-group position-absolute" style="top: 20px; right: 16px;">
+                    <div class="btn-group position-absolute" style="top: 4px; right: 16px;">
                         <button id="copyLogsBtn" class="btn btn-sm btn-outline-light transparent-btn">
                             <i class="fa-regular fa-copy"></i>
                         </button>
                     </div>
-                </div>
-            </div>
-            <div id="logWindow" class="rounded p-3 pb-4 bg-dark text-white position-relative" style="min-height: 200px;">
+                <!-- </div> -->
+            <!-- </div> -->
+            <div id="logWindow" class="rounded p-2 pb-4 bg-light text-black position-relative" >
                 <div>
-                    $ report publishing logs will be displayed here
+                    $ report publishing logs will be displayed here<br>
                 </div>
                 <br>
             </div>
@@ -46,8 +47,8 @@
 
         <!-- Main Content Container -->
         <div id="mainContent" class="rounded  transition col-md-6">
-            <h2 class="mb-2 mt-2  text-center"><i class="bi bi-clipboard-data-fill"></i> Generate Performance Load Report</h2>
-            <form id="inputForm" class=" shadow p-4 rounded">
+            <h4 class="text-center"><i class="bi bi-clipboard-data-fill fa-xs"></i> Generate Performance Load Report</h4>
+            <form id="inputForm" class="p-3 rounded">
     
                 <div class="form-row">
                     <div class="form-group col-md-6">
@@ -73,8 +74,8 @@
                 <div id="fieldsContainer">
                     <!-- Initial set of 'sprint' and 'run' fields will be added here -->
                 </div>
-                <div class="text-center">
-                    <button type="button" class="btn btn-info col-md-2" onclick="addSprintRunFields()">Add more <i class="fa-solid fa-square-plus fa-lg"></i></button>
+                <div class="text-center" >
+                    <button type="button" style="font-size:12px;" class="btn btn-info col-md-2 mx-5" onclick="addSprintRunFields()">Add more <i class="fa-solid fa-square-plus fa-lg"></i></button>
                 </div>
                 
                 <br>
@@ -142,11 +143,11 @@
         </div>
 
         <div  class="col-md-2  rounded transition ">
-            <div class="mb-1  d-flex align-items-center justify-content-center">
-                <div class="row mt-3">
-                    <h5 class="text-center">
-                        <i class="fa-solid fa-history"></i>
-                        Recently collected reports</h5>
+            <div class="mb-3 d-flex align-items-center justify-content-center">
+                <div class="row text-center">
+                    <h7 class="text-center">
+                        <i class="fa-solid fa-history fa-xs"></i>
+                        Recently collected reports</h7>
                 </div>
             </div>
             <div id="recently_saved_to_mongo_reports" class="rounded align-items-center text-center"><span class="badge badge-pill badge-info">In progress</span>
@@ -160,7 +161,7 @@
                 <div class="recently_saved_panel rounded"></div>
                 <div class="recently_saved_panel rounded"></div>
                 <div class="recently_saved_panel rounded"></div>
-                <div class="recently_saved_panel rounded"></div>
+                
             </div>
         </div>
 
@@ -169,16 +170,16 @@
 
 
     
-<hr style="background-color: black; height: 1px; border: none;">
-<br>
-    <div class="pb-3 rounded container-fluid">
+<!-- <hr style="background-color: black; height: 1px; border: none;"> -->
+<!-- <br> -->
+    <div class="pb-3 mt-5 rounded container-fluid">
         <div class="row pb-1">
             <div class="col-md-2 d-flex  rounded align-items-center justify-content-center">
                 <!-- <h5 class="text-center mt-1 mr-3"><i class="fa-solid fa-list"></i>  Contents </h5> -->
             </div>
 
             <div class="d-flex align-items-center justify-content-center col-md-9">
-                <h2 class="text-center mt-1 mr-3"><i class="fas fa-file-alt"></i> View Report</h2>
+                <h4 class="text-center mt-1 mr-3"><i class="fas fa-file-alt fa-xs"></i> View Report</h4>
         
                 <!-- Loading Animation -->
                 <div id="report_loadingAnimation" style="display: none;">
@@ -196,7 +197,7 @@
 
         <div class="row">
             <div id="contents" class="contents col-md-2 rounded">
-                <h5 id="contents_heading" class="text-center btn disabled"><i class="fa-solid fa-list"></i>  Contents </h5>
+                <h6 id="contents_heading" class="text-center btn disabled"><i class="fa-solid fa-list fa-xs"></i>  Contents </h6>
             </div>
             <div id="ReportWindow" class="rounded shadow col-md-9">
                 <p class="text-center">Report will be displayed here after clicking 'View Report' Button</p>

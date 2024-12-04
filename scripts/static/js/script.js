@@ -577,10 +577,10 @@ function generateContents() {
     ul.style.padding = '0';
     ul.style.margin = '0';
 
-    const headers = reportWindow.querySelectorAll('h2, h3, h4'); // Find all h2, h3, and h4 tags
+    const headers = reportWindow.querySelectorAll('h4, h5, h6'); // Find all h4, h5, and h6 tags
 
-    let lastH2Li = null; // To keep track of the last h2 element for nesting h3
-    let lastH3Li = null; // To keep track of the last h3 element for nesting h4
+    let lastH2Li = null; // To keep track of the last h4 element for nesting h5
+    let lastH3Li = null; // To keep track of the last h5 element for nesting h6
 
     headers.forEach(header => {
         
@@ -620,8 +620,8 @@ function generateContents() {
             link.style.backgroundColor = '';
         });
 
-        if (header.tagName.toLowerCase() === 'h2') {
-            console.log("found h2")
+        if (header.tagName.toLowerCase() === 'h4') {
+            console.log("found h4")
             toggleIcon.className = 'fa fa-plus-square';
             hContainer.appendChild(toggleIcon);
             hContainer.appendChild(link);
@@ -650,8 +650,8 @@ function generateContents() {
                 }
             });
 
-        } else if (header.tagName.toLowerCase() === 'h3' && lastH2Li) {
-            console.log("found h3", header.innerHTML)
+        } else if (header.tagName.toLowerCase() === 'h5' && lastH2Li) {
+            console.log("found h5", header.innerHTML)
             toggleIcon.className = 'fa fa-plus-square';
             hContainer.appendChild(toggleIcon);
             hContainer.appendChild(link);
@@ -680,11 +680,11 @@ function generateContents() {
                 }
             });
 
-        } else if (header.tagName.toLowerCase() === 'h4' && lastH3Li) {
-            // console.log("found h4", header.innerHTML)
+        } else if (header.tagName.toLowerCase() === 'h6' && lastH3Li) {
+            // console.log("found h6", header.innerHTML)
             // hContainer.appendChild(link);
             // console.log(hContainer.innerHTML)
-            lastH3Li.appendChild(li); // Nest h4 under the last h3
+            lastH3Li.appendChild(li); // Nest h6 under the last h5
             // console.log(lastH3Li.innerHTML)
             li.appendChild(link)
         }
@@ -748,7 +748,7 @@ function generateContents() {
                 // Set the innerHTML with a span around the matching part
                 link.innerHTML = `${beforeMatch}<span style="background-color: #ffeb3b;">${match}</span>${afterMatch}`;
     
-                // Show all parent links (h3, h2) if an h4 matches the search
+                // Show all parent links (h5, h4) if an h6 matches the search
                 let currentElement = li.parentElement; // Start from the parent <ul> of the matching link
                 while (currentElement && currentElement !== ul) {
                     if (currentElement.tagName.toLowerCase() === 'ul') {
