@@ -205,7 +205,7 @@ class ViewReportClass:
                         <hr style="border: 0; height: 2px; background: linear-gradient(to right, grey, white);">
 
                         <div class="pt-2 mb-4" style="text-align:center;display: block; width: 57%; border-radius: 7px; border: 1px solid #b7b7b7;  background-color:#edf5ff;">
-                            <h3>{main_heading}</h3>
+                            <h5>{main_heading}</h5>
                         </div>     
                     """
             for filepath in dict_of_list_of_filepaths[main_heading]:
@@ -218,11 +218,11 @@ class ViewReportClass:
 
                     html_text += f"""
                     <p>
-                        <button class="btn btn-light pt-2" style="display: block; width: 50%; border-radius: 10px; border-color: #b4b4b4;" type="button" data-toggle="collapse" data-target="#collapseExample{unique_id}" aria-expanded="false" aria-controls="collapseExample{unique_id}">
-                            <h4 class="">{base_filename_without_extension}</h4>
+                        <button class="btn btn-light " style="display: block; width: 50%; border-radius: 10px; border-color: #b4b4b4;" type="button" data-toggle="collapse" data-target="#collapseExample{unique_id}" aria-expanded="false" aria-controls="collapseExample{unique_id}">
+                            <h6 class="">{base_filename_without_extension}</h6>
                         </button>
                     </p>
-                    <div class="collapse mb-1" id="collapseExample{unique_id}">
+                    <div class="collapse " id="collapseExample{unique_id}">
                     """
                     
 
@@ -407,7 +407,7 @@ class perf_load_report_publish:
         if "ccurac" not in key_name and "ugs raised" not in key_name and "servations" not in key_name and "environment details" not in key_name: 
             copy_main_df = self.preprocess_df(copy_main_df)
 
-        heading_size = 3 if parent_key else 2
+        heading_size = 3+2 if parent_key else 2+2
 
         if len(self.sprint_runs_list) > 0 and len(merge_on_cols) > 0 and len(compare_cols) > 0:
             merged_df, builds = self.merge_dfs(merge_on_cols,key_name,parent_key_name = parent_key)
@@ -445,7 +445,7 @@ class perf_load_report_publish:
                     vs_span = "<span class='btn mb-3 btn-sm disabled'>vs</span>"
                     joined_text = f"{vs_span}".join(sprint_runs_text_list)
                     sprint_runs_text += f"{vs_span}{joined_text}"
-                data = json.dumps({"status": "info", "message": f"<div style='text-align: center;'><h1>{load_type} - {str(test_title).capitalize()}<br>Performance Report</h1>{sprint_runs_text}</div><hr style='border: 0; height: 2px; background: linear-gradient(to right, black, #0000ff);'><br>"})
+                data = json.dumps({"status": "info", "message": f"<div style='text-align: center;'><h3>{load_type} - {str(test_title).capitalize()}<br>Performance Report</h3>{sprint_runs_text}</div><hr style='border: 0; height: 2px; background: linear-gradient(to right, black, #0000ff);'><br>"})
                                                                                                                                                                                                         
                 yield f'data: {data}\n\n'
             for key_name in self.all_keys:
@@ -475,14 +475,14 @@ class perf_load_report_publish:
                         html_text += self.add_standard_table(self.main_result[key_name],key_name,curr_page_obj)
                 
                     elif key_format == "nested_table":
-                        html_text+=curr_page_obj.add_text(f"<h2>{self.captilise_heading(key_name)}</h2>")
+                        html_text+=curr_page_obj.add_text(f"<h4>{self.captilise_heading(key_name)}</h4>")
 
                         for nested_key_name in data.keys():
                             if not self.isViewReport:yield f'data: {{"status": "info", "message": "Processing nested table : {str(nested_key_name).capitalize()}"}}\n\n'
                             html_text += self.add_standard_table(self.main_result[key_name]["data"][nested_key_name],nested_key_name,curr_page_obj,parent_key=key_name)
 
                     elif key_format == "mapping":
-                        html_text+=curr_page_obj.add_text(f"<h2>{self.captilise_heading(key_name)}</h2>")
+                        html_text+=curr_page_obj.add_text(f"<h4>{self.captilise_heading(key_name)}</h4>")
                         for key,value in data.items():
                             if type(value) != dict:
                                 if type(value) == str and "http" in value:
@@ -490,7 +490,7 @@ class perf_load_report_publish:
                                 html_text+=curr_page_obj.add_text(f"<p>{self.captilise_heading(key)} : {value}</p>\n")
 
                             else:
-                                html_text+=curr_page_obj.add_text(f"<h3>{str(key)}</h3>")
+                                html_text+=curr_page_obj.add_text(f"<h5>{str(key)}</h5>")
                                 for nested_key,nested_value in value.items():
                                     html_text+=curr_page_obj.add_text(f"<p>{self.captilise_heading(nested_key)} : {nested_value}</p>\n")
 
@@ -498,7 +498,7 @@ class perf_load_report_publish:
                         curr_list = set(data)
                         if len(curr_list) !=0 :
                             curr_list_to_string = ", ".join(list(map(str,curr_list)))
-                            html_text+=curr_page_obj.add_text(f"<h2>{self.captilise_heading(key_name)}</h2>")
+                            html_text+=curr_page_obj.add_text(f"<h4>{self.captilise_heading(key_name)}</h4>")
                             if len(self.sprint_runs_list) == 0 :
                                 print("Previous sprint not found ... ")
                                 html_text+=curr_page_obj.add_text(f'<p><span style="color: black;">{curr_list_to_string} </span></p>')
@@ -535,16 +535,16 @@ class perf_load_report_publish:
                             continue
                         prev_data=prev_data[key_name]["data"]
                         temp_images,memory_combined_df,cpu_combined_df=analysis_main(data["memory_usages_analysis"],prev_data["memory_usages_analysis"],data["cpu_usage_analysis"],prev_data["cpu_usage_analysis"],main_build_load_details=self.main_result["load_details"]["data"],prev_build_load_details=self.get_key_result(prev_sprint,prev_run,"load_details")["load_details"]["data"] )                    
-                        html_text+=curr_page_obj.add_text(f'<h2>Contributers to Resource Usage increase/decrease  <span class="badge badge-pill badge-danger analysis-badge-custom"> NEW</span></h2>')
-                        html_text+=curr_page_obj.add_table_from_dataframe(f'<h3>{self.captilise_heading("memory_usages_analysis")}</h3>', memory_combined_df.copy(), collapse=False)
-                        html_text+=curr_page_obj.add_table_from_dataframe(f'<h3>{self.captilise_heading("cpu_usage_analysis")}</h3>', cpu_combined_df.copy(), collapse=False)
-                        html_text+=curr_page_obj.add_text(f'<h2>Complete Analysis piecharts for resource utilizations <span class="badge badge-pill badge-danger analysis-badge-custom"> NEW</span></h2>')
+                        html_text+=curr_page_obj.add_text(f'<h4>Contributers to Resource Usage increase/decrease</h4>')
+                        html_text+=curr_page_obj.add_table_from_dataframe(f'<h5>{self.captilise_heading("memory_usages_analysis")}</h5>', memory_combined_df.copy(), collapse=False)
+                        html_text+=curr_page_obj.add_table_from_dataframe(f'<h5>{self.captilise_heading("cpu_usage_analysis")}</h5>', cpu_combined_df.copy(), collapse=False)
+                        html_text+=curr_page_obj.add_text(f'<h4>Complete Analysis piecharts for resource utilizations</h4>')
                         for piechart_name in temp_images:
                             html_text+=curr_page_obj.attach_plot_as_image(piechart_name, temp_images[piechart_name], 3)
                     elif key_format == "charts":
                         # base_graphs_path=os.path.join(schema["base_graphs_path"])
                         charts_paths_dict={}
-                        html_text += f"<h2>Charts</h2>"
+                        html_text += f"<h4>Charts</h4>"
                         for main_heading,inside_charts in data.items():
                             temp_list_for_confluence=[f'{os.path.join(self.document_specific_path,main_heading,str(file_name).replace("/","-")+".png")}' for file_name in list(inside_charts.keys())]
                             # temp_list_for_confluence=[f'{os.path.join(self.document_specific_path,main_heading,str(file_name).replace("/","-")+".png")}' for file_name in list(inside_charts.keys())]
