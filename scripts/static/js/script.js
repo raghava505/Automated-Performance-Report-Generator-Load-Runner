@@ -492,10 +492,10 @@ function scrollToBlock(id) {
 }
 
 
-function checkVisibility() {
+function checkVisibility(element_id, top) {
     const reportWindow = document.getElementById('ReportWindow');
     const report_action_fixed_buttons = document.querySelectorAll('.right_fixed_elements');
-    const contents = document.getElementById('contents');    
+    const contents = document.getElementById(element_id);    
 
     function updateButtonVisibility() {
         const rect = reportWindow.getBoundingClientRect();
@@ -507,7 +507,7 @@ function checkVisibility() {
 
         if (isAtTop) {
             contents.style.position = 'sticky';
-            contents.style.top = '30px';
+            contents.style.top = top;
             contents.style.zIndex = '1000';
 
         } else {
@@ -527,7 +527,9 @@ function checkVisibility() {
 }
 
 // Initialize the visibility check
-checkVisibility();
+checkVisibility('contents','30px');
+checkVisibility('actions','80px');
+
 
 
 // Variable to hold the interval ID
@@ -543,7 +545,7 @@ function toggleScroll() {
         clearInterval(scrollInterval);
         isScrolling = false;
         // Change button icon back to normal
-        button.innerHTML = '<i class="fas fa-arrow-down fa-lg"></i>';
+        button.innerHTML = '<i class="fas fa-arrow-down fa-xl"></i>';
     } else {
         // If scrolling is not active, start it
         scrollInterval = setInterval(function() {
@@ -552,12 +554,12 @@ function toggleScroll() {
                 clearInterval(scrollInterval); // Stop scrolling when reaching the bottom
                 isScrolling = false;
                 // Change button icon back to normal
-                button.innerHTML = '<i class="fas fa-arrow-down fa-lg"></i>';
+                button.innerHTML = '<i class="fas fa-arrow-down fa-xl"></i>';
             }
         }, 1); // Adjust interval for scrolling speed
         isScrolling = true;
         // Change button icon to indicate "stop scrolling"
-        button.innerHTML = '<i class="fa-solid fa-pause fa-lg"></i>'; // Use a different icon to indicate stop
+        button.innerHTML = '<i class="fa-solid fa-pause fa-xl"></i>'; // Use a different icon to indicate stop
     }
 }
 function generateContents() {
@@ -945,13 +947,27 @@ function save_table_to_mongo(event){
 
 // Clear logWindow content
 document.getElementById("clearLogsBtn").addEventListener("click", function() {
-    document.getElementById("logWindow").innerHTML = `<div>$ report publishing logs will be displayed here
-                                                        </div>
-                                                        <br>`;
-});
+    document.getElementById("logWindow").innerHTML = `<div  class="rounded  text-black position-relative" >
+                                                        <br>
+                                                            $ report publishing logs will be displayed here<br>
+                                                        <br>
+                                                    </div>
+
+                                                    <div class="btn-group position-absolute" style="top: 31px; right: 4px;">
+                                                        <button id="clearLogsBtn" class="btn btn-sm btn-outline-light transparent-btn">
+                                                            <i class="fa-solid fa-eraser"></i>
+                                                        </button>
+                                                    </div>
+                                                    <div class="btn-group position-absolute" style="top: 4px; right: 4px;">
+                                                        <button id="copyLogsBtn" class="btn btn-sm btn-outline-light transparent-btn">
+                                                            <i class="fa-regular fa-copy"></i>
+                                                        </button>
+                                                    </div>`;
+                                                    });
 
 // Copy logWindow content to clipboard
 document.getElementById("copyLogsBtn").addEventListener("click", function() {
+    console.log("evemt lis for copy logs")
     const logWindow = document.getElementById("logWindow");
     const range = document.createRange();
     range.selectNodeContents(logWindow);
@@ -973,6 +989,7 @@ document.getElementById("copyLogsBtn").addEventListener("click", function() {
 
 function showCopiedTooltip() {
     const tooltip = document.getElementById("copiedTooltip");
+    console.log("called")
     tooltip.classList.add("show-tooltip");
 
     // Hide the tooltip after 2 seconds
@@ -1297,14 +1314,14 @@ function toggleCollapseExpand() {
         collapsibles.forEach(function(collapsible) {
             $(collapsible).collapse('hide'); // Use jQuery for smooth collapse
         });
-        toggleButton.innerHTML = '<i id="toggleIcon" class="fas fa-expand"></i> Expand All';
+        toggleButton.innerHTML = '<i id="toggleIcon" class="fas fa-expand"></i>';
         toggleButton.setAttribute("data-expanded", "false");
     } else {
         // Expand all
         collapsibles.forEach(function(collapsible) {
             $(collapsible).collapse('show'); // Use jQuery for smooth expand
         });
-        toggleButton.innerHTML = '<i id="toggleIcon" class="fas fa-compress"></i> Collapse All';
+        toggleButton.innerHTML = '<i id="toggleIcon" class="fas fa-compress"></i>';
         toggleButton.setAttribute("data-expanded", "true");
     }
 }

@@ -40,9 +40,9 @@ def get_collections():
     return jsonify({'collections': collections})
 
 
-@app.route('/test', methods=['GET'])
+@app.route('/dashboards/', methods=['GET'])
 def something_test():
-    return render_template('test2.html', collections=[x for x in range(5)], database_name="test_database")
+    return render_template('dashboards.html')
 
 
 @app.route('/graphs/<path:filename>')

@@ -1,60 +1,59 @@
 {% extends "layout.html" %}
 {% block content%}
 
+
 <div class="container-fluid">
-    <button id="toggleButton" class="btn btn-sm btn-outline-light transparent-btn" onclick="toggle_logs_window()">
-        <i class="fa-solid fa-xmark"></i>
-    </button>
     <div class="row">
-        <!-- Collapsible Logs Window -->
-        <!-- Toggle Button for Collapsing -->
-        
-        <div id="collapsable_logs_window" class="col-md-4  rounded transition ">
-            <!-- <div class="d-flex align-items-center justify-content-center"> -->
-                <!-- <div class="row"> -->
-                    <h5 class="text-center" ><i class="bi bi-terminal-fill fa-xs"></i> Logs</h5>
-
-                    <!-- Loading Animation -->
-                    <div class="text-center" id="logs_loadingAnimation" style="display: none; margin-top: -36px; margin-bottom: -2px; margin-left:200px">
-
-                        <button class="btn btn-primary" type="button" style="font-size: 11px;" disabled>
-                            <span class="spinner-grow spinner-grow-sm" role="status" aria-hidden="true"></span>
-                            Publishing ...
-                        </button>
-                    </div>
-                    <span id="copiedTooltip" class="copied-tooltip">Copied!</span>
-
-                    <div class="btn-group position-absolute" style="top: 4px; right: 48px;">
-                        <button id="clearLogsBtn" class="btn btn-sm btn-outline-light transparent-btn">
-                            <i class="fa-solid fa-eraser"></i>
-                        </button>
-                    </div>
-                    <div class="btn-group position-absolute" style="top: 4px; right: 16px;">
-                        <button id="copyLogsBtn" class="btn btn-sm btn-outline-light transparent-btn">
-                            <i class="fa-regular fa-copy"></i>
-                        </button>
-                    </div>
-                <!-- </div> -->
-            <!-- </div> -->
-            <div id="logWindow" class="rounded p-2 pb-4 bg-light text-black position-relative" >
-                <div>
-                    $ report publishing logs will be displayed here<br>
-                </div>
-                <br>
+        <div class="col-md-2  rounded mx-5">
+            <h6 class="text-center" style="margin-top: 10px;">
+                <!-- <i class="fa-solid fa-history fa-xs"></i>
+                Recently collected reports</h6> -->
+        </div>
+        <div class="col-md-6  rounded mx-1">            
+            <h4 class="text-center"><i class="bi bi-clipboard-data-fill fa-xs"></i> Generate Performance Load Report</h4>
+        </div>
+        <div class="col-md-3  rounded mx-1">
+            <h5 class="text-center" style="margin-top: 5px;"><i class="bi bi-terminal-fill fa-xs"></i> Logs
+                <span id="copiedTooltip" class="copied-tooltip">Copied!</span></h5>
+            <div class="text-center" id="logs_loadingAnimation" style="display: none; margin-top: -36px; margin-left:180px">
+                <button class="btn btn-primary" type="button" style="font-size: 11px;" disabled>
+                    <span class="spinner-grow spinner-grow-sm" role="status" aria-hidden="true"></span>
+                    Publishing ...
+                </button>
             </div>
             
         </div>
+    </div>
 
-        <!-- Main Content Container -->
-        <div id="mainContent" class="rounded  transition col-md-6">
-            <h4 class="text-center"><i class="bi bi-clipboard-data-fill fa-xs"></i> Generate Performance Load Report</h4>
+    <div class="row">
+        <div class="col-md-2 cards-section rounded mx-5">
+              <div class="card text-center mb-2" style="width: 18rem;">
+                <div class="card-body">
+                  <h5 class="card-title">Resource Dashboards </h5>
+                  <p class="card-text">Detailed comparison and trend analysis of resource utilization over past sprints</p>
+                  <a href="#" class="btn btn-primary">Inprogress</a>
+                </div>
+              </div>
+
+              <div class="card text-center mb-2" style="width: 18rem;">
+                <div class="card-body">
+                  <h5 class="card-title">Other Dashboards</h5>
+                  <p class="card-text">Shows various other stats and metrics</p>
+                  <a href="#" class="btn btn-primary">Inprogress</a>
+                </div>
+              </div>
+              
+        </div>
+
+            
+        <div class="col-md-6 border rounded mx-1" style="background-color: rgb(255, 255, 255);">            
             <form id="inputForm" class="p-3 rounded">
     
                 <div class="form-row">
                     <div class="form-group col-md-6">
                         <label for="loadtype">Load Type :</label>
                         <select class="form-control req-for-view-report" id="loadtype" name="loadtype" required>
-                            <option value="">Select Load Type</option>
+                            <option  value="">Select Load Type</option>
                         </select>
                         <div class="error-message"></div>
                     </div>
@@ -67,7 +66,7 @@
                     </div>
                 </div>
     
-                <div class="position-relative text-center my-2">
+                <div class="position-relative text-center">
                     <hr class="line-through" />
                     <span class="text-above-line text-muted">Select reports to generate/compare</span>
                 </div>
@@ -80,7 +79,6 @@
                 
                 <br>
             
-    
                 <div class="form-row">
                     <div class="form-group col-md-6">
                         <label for="url"><i class="fa-solid fa-link fa-xs"></i> Confluence URL :</label>
@@ -93,7 +91,6 @@
                         <div class="error-message"></div>
                     </div>
                 </div>
-    
     
                 <div class="form-row">
                     <div class="form-group col-md-6">
@@ -108,7 +105,6 @@
                     </div>
                 </div>
             
-    
     
                 <div class="form-row">
                     <div class="form-group col-md-6">
@@ -137,111 +133,104 @@
                         </button>
                     </div>
                 </div>
-    
-                
             </form>
         </div>
+        <div class="col-md-3 border rounded mx-1 text-black position-relative" id="logWindow">
+            <div  class="rounded  text-black position-relative" >
+                <br>
+                    $ report publishing logs will be displayed here<br>sd
+                <br>
+            </div>
 
-        <div  class="col-md-2  rounded transition ">
-            <div class="mb-3 d-flex align-items-center justify-content-center">
-                <div class="row text-center">
-                    <h7 class="text-center">
-                        <i class="fa-solid fa-history fa-xs"></i>
-                        Recently collected reports</h7>
-                </div>
+            <div class="btn-group position-absolute" style="top: 31px; right: 4px;">
+                <button id="clearLogsBtn" class="btn btn-sm btn-outline-light transparent-btn">
+                    <i class="fa-solid fa-eraser"></i>
+                </button>
             </div>
-            <div id="recently_saved_to_mongo_reports" class="rounded align-items-center text-center"><span class="badge badge-pill badge-info">In progress</span>
-                <!-- <div class="recently_saved_panel rounded">
-                    loadtype : Osquery<br>
-                    loadname : MultiCustomer <br>
-                    sprint : 160 <br>
-                    build : 160021 <br>
-                    run : 2
-                </div> -->
-                <div class="recently_saved_panel rounded"></div>
-                <div class="recently_saved_panel rounded"></div>
-                <div class="recently_saved_panel rounded"></div>
-                
+            <div class="btn-group position-absolute" style="top: 4px; right: 4px;">
+                <button id="copyLogsBtn" class="btn btn-sm btn-outline-light transparent-btn">
+                    <i class="fa-regular fa-copy"></i>
+                </button>
             </div>
+
         </div>
-
     </div>
+    
 </div>
 
 
-    
-<!-- <hr style="background-color: black; height: 1px; border: none;"> -->
-<!-- <br> -->
-    <div class="pb-3 mt-5 rounded container-fluid">
-        <div class="row pb-1">
-            <div class="col-md-2 d-flex  rounded align-items-center justify-content-center">
-                <!-- <h5 class="text-center mt-1 mr-3"><i class="fa-solid fa-list"></i>  Contents </h5> -->
-            </div>
 
-            <div class="d-flex align-items-center justify-content-center col-md-9">
-                <h4 class="text-center mt-1 mr-3"><i class="fas fa-file-alt fa-xs"></i> View Report</h4>
+<div class="pb-3 mt-5 rounded container-fluid">
+    <div class="row pb-1">
+        <div class="col-md-2 d-flex  rounded align-items-center justify-content-center">
+            <!-- <h5 class="text-center mt-1 mr-3"><i class="fa-solid fa-list"></i>  Contents </h5> -->
+        </div>
+
+        <div class="d-flex align-items-center justify-content-center col-md-9">
+            <h4 class="text-center mt-1 mr-3"><i class="fas fa-file-alt fa-xs"></i> View Report</h4>
+    
+            <!-- Loading Animation -->
+            <div id="report_loadingAnimation" style="display: none;">
+                <button class="btn btn-primary mb-1" type="button" disabled>
+                    <span class="spinner-grow spinner-grow-sm" role="status" aria-hidden="true"></span>
+                    Generating ...
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div id="contents" class="contents col-md-2 rounded">
+            <h6 id="contents_heading" class="text-center btn disabled"><i class="fa-solid fa-list fa-xs"></i>  Contents </h6>
+        </div>
+        <div id="ReportWindow" class="rounded shadow col-md-9">
+            <p class="text-center">Report will be displayed here after clicking 'View Report' Button</p>
+        </div>
+        <div class="col-md-1">
+            <div id="actions" class="container contents col-md-12 rounded">
+                <span id="contents_heading" class="text-center btn disabled">
+                    <i class="fa-solid fa-gears"></i> Actions
+                </span>
+                <div id="button-container">
+                    <button class="btn btn-primary right_fixed_elements mt-5" id="scroll_through_report_slowly" onclick="toggleScroll()">
+                        <i class="fas fa-arrow-down fa-lg"></i>
+                    </button>
         
-                <!-- Loading Animation -->
-                <div id="report_loadingAnimation" style="display: none;">
-                    <button class="btn btn-primary mb-1" type="button" disabled>
-                        <span class="spinner-grow spinner-grow-sm" role="status" aria-hidden="true"></span>
-                        Generating ...
+                    <button id="toggleBetween_expand_collapse" class="btn btn-primary btn-sm right_fixed_elements" onclick="toggleCollapseExpand()" data-expanded="true">
+                        <i id="toggleIcon" class="fas fa-compress fa-lg"></i>
+                    </button>
+        
+                    <button class="btn btn-primary btn-sm right_fixed_elements" id="download_html_btn" onclick="download_html_doc()">
+                        <i class="fa-brands fa-html5 fa-xl"></i>
+                    </button>
+        
+                    <button class="btn btn-primary btn-sm right_fixed_elements" id="download_pdf_btn" onclick="CreatePDFfromHTMLWithStyling()">
+                        <i class="fa-solid fa-file-pdf fa-xl"></i>
+                    </button>
+        
+                    <button class="btn btn-primary btn-sm right_fixed_elements" id="download_word_btn" onclick="SaveHTMLAsWordDocumentWithImages()">
+                        <i class="fa-solid fa-file-word fa-xl"></i>
+                    </button>
+        
+                    <button class="btn btn-primary right_fixed_elements mb-4" id="scroll_up" onclick="scrollToBlock('ReportWindow')">
+                        <i class="fas fa-arrow-up fa-lg"></i>
                     </button>
                 </div>
             </div>
         </div>
         
-        <!-- <div id="ReportWindow" class="rounded  shadow">
-            <p class="text-center">Report will be displayed here after clicking 'View Report' Button</p>
-        </div> -->
-
-        <div class="row">
-            <div id="contents" class="contents col-md-2 rounded">
-                <h6 id="contents_heading" class="text-center btn disabled"><i class="fa-solid fa-list fa-xs"></i>  Contents </h6>
-            </div>
-            <div id="ReportWindow" class="rounded shadow col-md-9">
-                <p class="text-center">Report will be displayed here after clicking 'View Report' Button</p>
-            </div>
-            <div class="border-top">
-                    <h5 id="Action_button" class="text-center btn disabled right_fixed_elements"> <i class="fa-solid fa-gears"></i> Actions</h5>
-            </div>
-            
-            <button class="btn btn-primary right_fixed_elements" id="scroll_through_report_slowly" onclick="toggleScroll()" >
-                <i class="fas fa-arrow-down fa-xl"></i>
-            </button>
-
-
-            <button id="toggleBetween_expand_collapse" class="btn btn-primary btn-sm right_fixed_elements" onclick="toggleCollapseExpand()" data-expanded="true">
-                <i id="toggleIcon" class="fas fa-compress fa-lg"></i> Collapse All
-            </button>
-
-            <button class="btn btn-primary btn-sm right_fixed_elements" id="download_html_btn" onclick="download_html_doc()">download html
-                <i class="fa-brands fa-html5 fa-xl"></i>
-            </button>
-
-            <button class="btn btn-primary btn-sm right_fixed_elements" id="download_pdf_btn" onclick="CreatePDFfromHTMLWithStyling()" >download pdf
-                <i class="fa-solid fa-file-pdf fa-xl"></i>
-            </button>
-
-            <button class="btn btn-primary btn-sm right_fixed_elements" id="download_word_btn" onclick="SaveHTMLAsWordDocumentWithImages()" >download word
-                <i class="fa-solid fa-file-word fa-xl"></i>
-            </button>
-
-            <button class="btn btn-primary right_fixed_elements" id="scroll_up"  onclick="scrollToBlock('ReportWindow')">
-                <i class="fas fa-arrow-up fa-xl"></i>
-            </button>
-            
-        </div>
-
-
+        
     </div>
 
-    <div id="report_loadingAnimation_bottom" style="display: none; text-align: center;">
-        <button class="btn btn-primary mb-1" type="button" disabled>
-            <span class="spinner-grow spinner-grow-sm" role="status" aria-hidden="true"></span>
-            Loading...
-        </button>
-    </div>
+
+</div>
+
+<div id="report_loadingAnimation_bottom" style="display: none; text-align: center;">
+    <button class="btn btn-primary mb-1" type="button" disabled>
+        <span class="spinner-grow spinner-grow-sm" role="status" aria-hidden="true"></span>
+        Loading...
+    </button>
+</div>
 
     
 

@@ -1,0 +1,63 @@
+{% extends "layout.html" %}
+{% block content %}
+<!-- <style>
+    /* Fade-in animation */
+    @keyframes fadeIn {
+        0% {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        100% {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    /* Apply fade-in animation to all elements except navbar */
+    body *:not(.navbar):not(.navbar *) {
+        animation: fadeIn 1s ease-in-out;
+        animation-fill-mode: both;
+        opacity: 0; /* Start with elements hidden */
+    }
+
+    /* Stagger animation delay for a cascading effect */
+    body *:not(.navbar):not(.navbar *):nth-child(1) { animation-delay: 0.01s; }
+    body *:not(.navbar):not(.navbar *):nth-child(2) { animation-delay: 0.02s; }
+    body *:not(.navbar):not(.navbar *):nth-child(3) { animation-delay: 0.03s; }
+    body *:not(.navbar):not(.navbar *):nth-child(4) { animation-delay: 0.04s; }
+    body *:not(.navbar):not(.navbar *):nth-child(5) { animation-delay: 0.05s; }
+    /* Add more as needed */
+</style> -->
+
+<style>
+    iframe {
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        border-radius: 8px;
+    }
+</style>
+
+<div class="container">
+    <h1 class="mt-5">Welcome to Resource Usage Dashboards</h1>
+    <p>This is a sample text.</p>
+    <button class="btn btn-primary disabled" style="cursor: default;">Inprogress...!</button>
+</div>
+
+
+<!-- <div class="container-fuild mt-4">
+    <iframe src="/dashboards/embed/" width="100%" height="3000px" style="border:none;"></iframe>
+</div> -->
+
+<!-- <script>
+    // Optional: If you want to remove the animation class after the animation completes
+    document.addEventListener("DOMContentLoaded", function () {
+        const elements = document.querySelectorAll("body *:not(.navbar):not(.navbar *)");
+        elements.forEach(element => {
+            element.addEventListener("animationend", () => {
+                element.style.opacity = "1"; // Ensure visibility after animation
+                element.style.animation = "none"; // Remove animation to prevent re-triggering
+            });
+        });
+    });
+</script> -->
+
+{% endblock content %}
