@@ -65,7 +65,7 @@ class ViewReportClass:
             return content_with_line_breaks
         
         def generate_cell_html(value, row_idx, col_idx):
-            return f'<td><textarea class="form-control" name="{load_info_header}___{columns_list[col_idx]}" style="width:100%; height:100%; text-align:left;">{value}</textarea></td>'
+            return f'<td><textarea  style="font-size:12px;" class="form-control" name="{load_info_header}___{columns_list[col_idx]}" style="width:100%; height:100%; text-align:left;">{value}</textarea></td>'
         
         if not isEditable:
             # Convert the DataFrame to HTML without headers
@@ -204,7 +204,7 @@ class ViewReportClass:
             html_text += f"""
                         <hr style="border: 0; height: 2px; background: linear-gradient(to right, grey, white);">
 
-                        <div class="pt-2 mb-4" style="text-align:center;display: block; width: 57%; border-radius: 7px; border: 1px solid #b7b7b7;  background-color:#edf5ff;">
+                        <div class="pt-2 mb-4" style="text-align:center;display: block; width: 47%; border-radius: 7px; border: 1px solid #b7b7b7;  background-color:#edf5ff;">
                             <h5>{main_heading}</h5>
                         </div>     
                     """
@@ -218,7 +218,7 @@ class ViewReportClass:
 
                     html_text += f"""
                     <p>
-                        <button class="btn btn-light " style="display: block; width: 50%; border-radius: 10px; border-color: #b4b4b4;" type="button" data-toggle="collapse" data-target="#collapseExample{unique_id}" aria-expanded="false" aria-controls="collapseExample{unique_id}">
+                        <button class="btn btn-light " style="display: block; width: 40%; border-radius: 10px; border-color: #b4b4b4;" type="button" data-toggle="collapse" data-target="#collapseExample{unique_id}" aria-expanded="false" aria-controls="collapseExample{unique_id}">
                             <h6 class="">{base_filename_without_extension}</h6>
                         </button>
                     </p>
