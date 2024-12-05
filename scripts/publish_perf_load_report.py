@@ -95,9 +95,9 @@ class ViewReportClass:
                     {table_html}
                 </table>
                 <div class="d-flex justify-content-between">
-                    <button type="button" class="ml-2 btn btn-primary save_table" id>Save</button>
+                    <button type="button" class="ml-2 btn btn-success save_table" style="font-size:10px;" id>Save</button>
                     
-                    <button type="button" class="btn mr-1 btn-success btn-sm add_new_row" data-table-id="{uuid_table}">Add Row</button>
+                    <button type="button" class="btn mr-1 btn-primary btn-sm add_new_row" style="font-size:10px;" data-table-id="{uuid_table}">Add Row</button>
                 </div>            
             </form>"""
 
@@ -445,7 +445,7 @@ class perf_load_report_publish:
                     vs_span = "<span class='btn mb-3 btn-sm disabled'>vs</span>"
                     joined_text = f"{vs_span}".join(sprint_runs_text_list)
                     sprint_runs_text += f"{vs_span}{joined_text}"
-                data = json.dumps({"status": "info", "message": f"<div style='text-align: center;'><h3>{load_type} - {str(test_title).capitalize()}<br>Performance Report</h3>{sprint_runs_text}</div><hr style='border: 0; height: 2px; background: linear-gradient(to right, black, #0000ff);'><br>"})
+                data = json.dumps({"status": "info", "message": f"<div style='text-align: center; margin-top:10px;'><h3>{load_type} - {str(test_title).capitalize()} Performance Report</h3>{sprint_runs_text}</div><hr style='border: 0; height: 2px; background: linear-gradient(to right, black, #0000ff);'><br>"})
                                                                                                                                                                                                         
                 yield f'data: {data}\n\n'
             for key_name in self.all_keys:

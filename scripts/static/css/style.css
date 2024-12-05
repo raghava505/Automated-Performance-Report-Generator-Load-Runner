@@ -27,18 +27,18 @@ body {
 }
 
 .notification.success {
-    background-color:#ace5c8;
+    background-color:#7ddaaa;
 }
 .notification.info {
     /* background-color: #3be5ff; */
-    background-color: #8bc8cc;
+    background-color: #83cafc;
 
 }
 .notification.error {
-    background-color: #d48f8f;
+    background-color: #ff8484;
 }
 .notification.warning {
-    background-color:  #d59b7e;
+    background-color:  #ffa071;
 }
 .notification button {
     background: none;

@@ -341,3 +341,18 @@
 2024-12-05 07:06:11,061 INFO spawned: 'http_server' with pid 10
 2024-12-05 07:06:12,062 INFO success: load-report-generator entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
 2024-12-05 07:06:12,063 INFO success: http_server entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
+2024-12-05 12:33:23,599 CRIT Supervisor is running as root.  Privileges were not dropped because no user is specified in the config file.  If you intend to run as root, you can set user=root in the config file to avoid this message.
+2024-12-05 12:33:23,602 INFO supervisord started with pid 1
+2024-12-05 12:33:24,607 INFO spawned: 'load-report-generator' with pid 9
+2024-12-05 12:33:24,608 INFO spawned: 'http_server' with pid 10
+2024-12-05 12:33:26,143 INFO success: load-report-generator entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
+2024-12-05 12:33:26,143 INFO success: http_server entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
+2024-12-05 14:56:17,125 CRIT Supervisor is running as root.  Privileges were not dropped because no user is specified in the config file.  If you intend to run as root, you can set user=root in the config file to avoid this message.
+2024-12-05 14:56:17,130 INFO supervisord started with pid 1
+2024-12-05 14:56:18,138 INFO spawned: 'load-report-generator' with pid 9
+2024-12-05 14:56:18,150 INFO spawned: 'http_server' with pid 10
+2024-12-05 14:56:19,153 INFO success: load-report-generator entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
+2024-12-05 14:56:19,153 INFO success: http_server entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
+2024-12-05 17:10:25,626 INFO exited: load-report-generator (exit status 1; not expected)
+2024-12-05 17:10:26,634 INFO spawned: 'load-report-generator' with pid 1271
+2024-12-05 17:10:27,722 INFO success: load-report-generator entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
