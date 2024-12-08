@@ -567,10 +567,10 @@ function generateContents() {
     const reportWindow = document.getElementById('ReportWindow');
     const contents = document.getElementById('contents');
     contents.innerHTML = `
-        <h5 id="contents_heading" class="text-center btn disabled"><i class="fa-solid fa-list"></i> Contents </h5>
+    <h5 id="contents_heading" class="text-center btn disabled"><i class="fa-solid fa-list fa-sm"></i>  Contents </h5>
         <div class="input-group mb-3">
-        <div class="input-group-prepend"><span class="input-group-text"><i class="fas fa-search"></i></span></div>
-            <input type="text" id="searchBox" class="form-control" placeholder="Search...">
+            <div  class="input-group-prepend"><span class="input-group-text"><i class="fas fa-search fa-xs"></i></span></div>
+                <input style="font-size:12px;" type="text" id="searchBox" class="form-control" placeholder="Search...">
         </div>
     `;
 
