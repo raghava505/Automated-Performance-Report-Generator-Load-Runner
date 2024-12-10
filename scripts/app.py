@@ -1,13 +1,14 @@
 from flask import Flask, render_template, request, jsonify, Response, send_from_directory, url_for, flash, session
 from publish_perf_load_report import perf_load_report_publish
-import ast
+import ast,os
 from pymongo import MongoClient
-from config_vars import MONGO_CONNECTION_STRING, REPORT_UI_PORT, BASE_GRAPHS_PATH
+from config_vars import MONGO_CONNECTION_STRING, REPORT_UI_PORT, BASE_GRAPHS_PATH,STACK_JSONS_PATH,SIMULATOR_SERVER_PORT
 import time
 from queue import Queue
 from flask_session import Session 
 import json
 import pandas as pd
+import requests
 
 app = Flask(__name__)
 # app.config['SECRET_KEY'] = '343c855017e725321cb7f35b89c98b9e'
@@ -40,10 +41,38 @@ def get_collections():
     return jsonify({'collections': collections})
 
 
-@app.route('/dashboards/', methods=['GET'])
-def something_test():
-    return render_template('dashboards.html')
+@app.route('/simulator', methods=['GET'])
+def simulator():
+    all_files = os.listdir(STACK_JSONS_PATH)
+    stack_json_options = sorted([(file.split('.')[0]).split('_')[0] for file in all_files if file.endswith('.json') and '_nodes' in file])
+    load_name_options = ["MultiCustomer","SingleCustomer","ControlPlane"]
+    return render_template('simulator.html',stack_json_options=stack_json_options,load_name_options=load_name_options)
 
+@app.route('/get_simulators_list', methods=['GET','POST'])
+def get_simulators_list():
+    stack_json_file_name = request.args.get('stack_json_file_name')
+    print(stack_json_file_name)
+    with open(f"{STACK_JSONS_PATH}/{stack_json_file_name}" , 'r') as f:
+        contents = json.load(f)    
+    main_osquery_data_simulator="localhost"
+    loadname = request.args.get('loadname')
+    if main_osquery_data_simulator == "localhost":
+        url = f"http://host.docker.internal:{SIMULATOR_SERVER_PORT}/get_osquery_simulator_names?stack_json_file_name={stack_json_file_name}&loadname={loadname}"
+    else:
+        url = f"http://{main_osquery_data_simulator}:{SIMULATOR_SERVER_PORT}/get_osquery_simulator_names?stack_json_file_name={stack_json_file_name}&loadname={loadname}"
+
+    response = requests.get(url)
+
+    if response.status_code == 200:
+        return jsonify({"main_osquery_data_simulator": response.json()["osquery_load_sims"]})
+    else:
+        return jsonify({"error": "Failed to fetch data from simulator server", "status_code": response.status_code})
+    return jsonify({'collections': [f"{str(response)}","123"]})
+
+@app.route('/dashboard', methods=['GET'])
+def dashboard():
+    print("indashboards")
+    return render_template('dashboards.html')
 
 @app.route('/graphs/<path:filename>')
 def serve_image(filename):

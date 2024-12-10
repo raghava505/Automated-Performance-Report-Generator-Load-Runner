@@ -26,3 +26,4 @@ scripts/use_publish_to_confluence.py
 scripts/flask_session/
 flask_session/
 scripts/test.py
+.*log

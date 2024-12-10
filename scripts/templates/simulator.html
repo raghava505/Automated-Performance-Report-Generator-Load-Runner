@@ -1,0 +1,92 @@
+{% extends "layout.html" %}
+{% block content %}
+
+<link rel="stylesheet" href="{{ url_for('static', filename='css/simulator.css') }}">
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-1 "></div>
+        <div class="col-md-7 ">            
+            <h4 class="text-center">Start an Osquery Load</h4>
+        </div>
+        <div class="col-md-4 "></div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-1 border"></div>
+        <div class="col-md-7 border rounded" style="background-color: rgb(255, 255, 255);">            
+            <form id="SimulatorForm" class="p-3 rounded custom-forms">
+                <div class="form-row">
+                    <div class="form-group col-md-6">
+                        <label for="stack">Stack :</label>
+                        <select class="form-control req-for-view-report" id="stack" name="stack" required>
+                            <option value="">Select Stack</option>
+                            {% for stack in stack_json_options %}
+                                <option value="{{ stack }}">{{ stack }}</option>
+                            {% endfor %}
+                        </select>
+                        <div class="error-message"></div>
+                    </div>
+                    <div class="form-group col-md-6">
+                        <label for="loadname">Load Name :</label>
+                        <select class="form-control req-for-view-report" id="loadname" name="loadname" required>
+                            <option value="">Select Load Name</option>
+                            {% for loadname in load_name_options %}
+                                <option value="{{ loadname }}">{{ loadname }}</option>
+                            {% endfor %}
+                        </select>
+                        <div class="error-message"></div>
+                    </div>
+                    
+                </div>
+                
+                <div class="form-row">
+                    <div class="col-md-4">
+                        <button type="button" class="btn btn-primary btn-block" onclick="">
+                            Update Simulator params
+                        </button>
+                    </div>
+
+                    <div class="col-md-4">
+                        <button type="button" class="btn btn-primary btn-block" onclick="">
+                            Enroll Assets 
+                        </button>
+                    </div>
+                    <div class="col-md-4">
+                        <button type="button" class="btn btn-primary btn-block" onclick="">
+                            Start Load 
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+        <div class="col-md-4 border d-flex" id="simulator-grid">
+            <div class="ml-2 row">
+
+                <div class="card mb-2 mx-1 simulator_card shadow offline">
+                    <span class="offline_status"><i class="fa-solid fa-solid fa-ban mx-1" style="color: red;"></i><span class="status-text">Offline</span></span>
+                    <span class="online_status"><i class="fa-solid fa-circle fa-sm mx-1" style="color: green;"></i><span class="status-text">Online</span></span>
+
+                    <div class="p-2 mt-2 text-center">
+                      <h6 class="card-title">s1sim1a</h6>
+                      <p class="card-text">endpointsim:10 <br> node:10</p>
+                    </div>
+                </div>
+                <div class="card mb-2 mx-1 simulator_card shadow online">
+                    <span class="offline_status"><i class="fa-solid fa-solid fa-ban mx-1" style="color: red;"></i><span class="status-text">Offline</span></span>
+                    <span class="online_status"><i class="fa-solid fa-circle fa-sm mx-1" style="color: green;"></i><span class="status-text">Online</span></span>
+
+                    <div class="p-2 mt-2 text-center">
+                      <h6 class="card-title">s1sim1a</h6>
+                      <p class="card-text">endpointsim:10 <br> node:10</p>
+                    </div>
+                </div>
+                
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="{{ url_for('static', filename='js/simulator.js') }}"></script>
+{% endblock content %}
+
