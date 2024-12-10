@@ -1,0 +1,39 @@
+.simulator_card{
+    height: 140px; 
+    width:140px ; 
+    overflow-x: scroll; 
+    
+    font-size: 11px;
+    border-radius: 10px;
+}
+
+.simulator_card.online{
+    border: 2px solid rgb(0, 230, 8);
+}
+
+.simulator_card.offline{
+    border: 2px solid rgb(255, 7, 7);
+}
+
+.simulator_card span.online_status {
+    display: none; /* Default: hide the status span */
+}
+.simulator_card span.offline_status {
+    display: none; /* Default: hide the status span */
+}
+
+.simulator_card.online span.online_status {
+    display: inline; /* Show the status span for the 'online' class */
+}
+
+.simulator_card.offline span.offline_status {
+    display: inline; /* Show the status span for the 'offline' class */
+}
+
+.simulator_card.online span.offline_status {
+    display: none; /* Show the status span for the 'online' class */
+}
+
+.simulator_card.offline span.online_status {
+    display: none; /* Show the status span for the 'offline' class */
+}

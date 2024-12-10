@@ -30,3 +30,4 @@ BASE_LOGS_PATH = os.path.join(ROOT_PATH,'logs')
 LOCAL_PGBADGER_REPORT_PORT = 8011
 REPORT_UI_PORT = 8012
 MONGO_CONNECTION_STRING = "mongodb://mongo-report:8013"  #use "mongo" when mongo is running  in a container, use "localhost" if running in machine
+SIMULATOR_SERVER_PORT = 8123
