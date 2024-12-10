@@ -4,22 +4,28 @@
 <link rel="stylesheet" href="{{ url_for('static', filename='css/simulator.css') }}">
 
 <div class="container-fluid">
-    <div class="row">
-        <div class="col-md-1 "></div>
-        <div class="col-md-7 ">            
-            <h4 class="text-center">Start an Osquery Load</h4>
+    <div class="row align-items-center">
+        <div class="col-md-1"></div>
+        <div class="col-md-5">
+            <h5 class="text-center">Start an Osquery Load</h5>
         </div>
-        <div class="col-md-4 "></div>
+        <div class="col-md-6 position-relative">
+            <h6 class="text-center">View all simulator instances here</h6>
+            <button type="button" id="simulator_refresh_button" class="btn btn-success position-absolute btn-sm" style="right: 25%;bottom:13%">
+                Refresh <i class="fa-solid fa-arrows-rotate fa-xs"></i>
+            </button>
+        </div>
     </div>
+    
 
     <div class="row">
         <div class="col-md-1 border"></div>
-        <div class="col-md-7 border rounded" style="background-color: rgb(255, 255, 255);">            
-            <form id="SimulatorForm" class="p-3 rounded custom-forms">
+        <div class="col-md-5 border rounded" >            
+            <form id="SimulatorForm" class="p-4 border rounded custom-forms" style="background-color: rgb(255, 255, 255);">
                 <div class="form-row">
                     <div class="form-group col-md-6">
-                        <label for="stack">Stack :</label>
-                        <select class="form-control req-for-view-report" id="stack" name="stack" required>
+                        <label for="stack">Stack:</label>
+                        <select class="form-control req-for-view-report" id="stack_json_file" name="stack_json_file" required>
                             <option value="">Select Stack</option>
                             {% for stack in stack_json_options %}
                                 <option value="{{ stack }}">{{ stack }}</option>
@@ -28,7 +34,7 @@
                         <div class="error-message"></div>
                     </div>
                     <div class="form-group col-md-6">
-                        <label for="loadname">Load Name :</label>
+                        <label for="loadname">Load Name:</label>
                         <select class="form-control req-for-view-report" id="loadname" name="loadname" required>
                             <option value="">Select Load Name</option>
                             {% for loadname in load_name_options %}
@@ -39,48 +45,242 @@
                     </div>
                     
                 </div>
+                <div class="form-row">
+                    <div class="form-group col-md-6">
+                        <label for="num_customers"> Number of Customers to send load from:</label>
+                        <input type="number" class="form-control" id="num_customers" name="num_customers" value=100 placeholder="Enter Number of Customers" min="0" required oninput="this.value = this.value.replace(/[^0-9]/g, '');">
+                        <div class="error-message"></div>
+                    </div>
+                    <div class="form-group col-md-6">
+                        <label for="total_number_of_assets">Total Number of Assets:</label>
+                        <input type="number" class="form-control" id="total_number_of_assets" name="total_number_of_assets" value="10000" placeholder="Enter Total Number of Assets" min="0" required oninput="this.value = this.value.replace(/[^0-9]/g, '');">
+                        <div class="error-message"></div>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group col-md-6">
+                        <label for="first_x_customer_percentage">First x% of customers:</label>
+                        <input type="number" class="form-control" id="first_x_customer_percentage" name="first_x_customer_percentage" value="50" placeholder="Enter x" min="0" required oninput="this.value = this.value.replace(/[^0-9]/g, '');">
+                        <div class="error-message"></div>
+                    </div>
+                    <div class="form-group col-md-6">
+                        <label for="load_percentage_for_first_x_percent_customers">Gets y% of total load: </label>
+                        <input type="number" class="form-control" id="load_percentage_for_first_x_percent_customers" value="50" name="load_percentage_for_first_x_percent_customers" placeholder="Enter y" min="0" required oninput="this.value = this.value.replace(/[^0-9]/g, '');">
+                        <div class="error-message"></div>
+                    </div>
+                </div>
                 
                 <div class="form-row">
-                    <div class="col-md-4">
+                    <div class="form-group col-md-6">
+                        <label for="endline">Endline(endline x2=Load Duration in sec):</label>
+                        <input type="number" class="form-control" id="endline" name="endline" placeholder="Enter endline" min="0" required value=18000 oninput="this.value = this.value.replace(/[^0-9]/g, '');">
+                        <div class="error-message"></div>
+                    </div>
+                    <div class="form-group col-md-6">
+                        <label for="inputfile">Inputfile:</label>
+                        <input type="text" class="form-control" id="inputfile" name="inputfile" placeholder="Enter inputfile" min="0" required value="rhel7-6tab_12rec.log">
+                        <div class="error-message"></div>
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="col-md-3">
+                        <button type="button" id="ValidateSimulatorForm_button" class="btn btn-primary btn-block">
+                            Update params
+                        </button>
+                    </div>
+                    <!-- <div class="col-md-3">
                         <button type="button" class="btn btn-primary btn-block" onclick="">
-                            Update Simulator params
+                            Kill all assets
                         </button>
                     </div>
 
-                    <div class="col-md-4">
+                    <div class="col-md-3">
                         <button type="button" class="btn btn-primary btn-block" onclick="">
                             Enroll Assets 
                         </button>
                     </div>
-                    <div class="col-md-4">
+                    <div class="col-md-3">
                         <button type="button" class="btn btn-primary btn-block" onclick="">
                             Start Load 
                         </button>
-                    </div>
+                    </div> -->
                 </div>
             </form>
         </div>
-        <div class="col-md-4 border d-flex" id="simulator-grid">
-            <div class="ml-2 row">
+        <div class="col-md-6 pr-5 border d-flex" id="simulator-grid">
+            
+            <div class="row border">
 
-                <div class="card mb-2 mx-1 simulator_card shadow offline">
-                    <span class="offline_status"><i class="fa-solid fa-solid fa-ban mx-1" style="color: red;"></i><span class="status-text">Offline</span></span>
-                    <span class="online_status"><i class="fa-solid fa-circle fa-sm mx-1" style="color: green;"></i><span class="status-text">Online</span></span>
+                <div class="card mb-2 mx-1 simulator_card online" >
+                    <span class="offline_status"><i class="fa-solid fa-solid fa-ban mx-1 pt-1" style="color: red;"></i><span class="status-text">Offline</span></span>
+                    <span class="online_status"><i class="fa-solid fa-circle fa-sm mx-1 pt-2" style="color: green;"></i><span class="status-text">Online</span></span>
 
-                    <div class="p-2 mt-2 text-center">
+                    <div class="pt-2 text-center">
                       <h6 class="card-title">s1sim1a</h6>
-                      <p class="card-text">endpointsim:10 <br> node:10</p>
+                      <table style="font-size: 9px;" class="dataframe table table-bordered table-hover table-sm text-center custom-table simulator_card_table">
+                        <thead><tr><th class="sortable" data-column="node_type" data-order="desc">parameter</th><th class="sortable" data-column="avg" data-order="desc">value</th></tr></thead><tbody>
+                          <tr>
+                            <td>airflowairflowairflowairflow</td>
+                            <td>17.88</td>
+                          </tr>
+                          <tr>
+                            <td>cloudquery</td>
+                            <td>2.40</td>
+                          </tr>
+                          <tr>
+                            <td>data</td>
+                            <td>830.61</td>
+                          </tr>
+                        </tbody>
+                      </table>
                     </div>
                 </div>
-                <div class="card mb-2 mx-1 simulator_card shadow online">
-                    <span class="offline_status"><i class="fa-solid fa-solid fa-ban mx-1" style="color: red;"></i><span class="status-text">Offline</span></span>
-                    <span class="online_status"><i class="fa-solid fa-circle fa-sm mx-1" style="color: green;"></i><span class="status-text">Online</span></span>
+                <div class="card mb-2 mx-1 simulator_card offline" >
+                    <span class="offline_status"><i class="fa-solid fa-solid fa-ban mx-1 pt-1" style="color: red;"></i><span class="status-text">Offline</span></span>
+                    <span class="online_status"><i class="fa-solid fa-circle fa-sm mx-1 pt-2" style="color: green;"></i><span class="status-text">Online</span></span>
 
-                    <div class="p-2 mt-2 text-center">
+                    <div class="pt-2 text-center">
                       <h6 class="card-title">s1sim1a</h6>
-                      <p class="card-text">endpointsim:10 <br> node:10</p>
+                      <table style="font-size: 9px;" class="dataframe table table-bordered table-hover table-sm text-center custom-table simulator_card_table">
+                        <thead><tr><th class="sortable" data-column="node_type" data-order="desc">parameter</th><th class="sortable" data-column="avg" data-order="desc">value</th></tr></thead><tbody>
+                          <tr>
+                            <td>airflowairflowairflowairflow</td>
+                            <td>17.88</td>
+                          </tr>
+                          <tr>
+                            <td>cloudquery</td>
+                            <td>2.40</td>
+                          </tr>
+                          <tr>
+                            <td>data</td>
+                            <td>830.61</td>
+                          </tr>
+                        </tbody>
+                      </table>
                     </div>
                 </div>
+                <div class="card mb-2 mx-1 simulator_card online" >
+                    <span class="offline_status"><i class="fa-solid fa-solid fa-ban mx-1 pt-1" style="color: red;"></i><span class="status-text">Offline</span></span>
+                    <span class="online_status"><i class="fa-solid fa-circle fa-sm mx-1 pt-2" style="color: green;"></i><span class="status-text">Online</span></span>
+
+                    <div class="pt-2 text-center">
+                      <h6 class="card-title">s1sim1a</h6>
+                      <table style="font-size: 9px;" class="dataframe table table-bordered table-hover table-sm text-center custom-table simulator_card_table">
+                        <thead><tr><th class="sortable" data-column="node_type" data-order="desc">parameter</th><th class="sortable" data-column="avg" data-order="desc">value</th></tr></thead><tbody>
+                          <tr>
+                            <td>airflowairflowairflowairflow</td>
+                            <td>17.88</td>
+                          </tr>
+                          <tr>
+                            <td>cloudquery</td>
+                            <td>2.40</td>
+                          </tr>
+                          <tr>
+                            <td>data</td>
+                            <td>830.61</td>
+                          </tr>
+                        </tbody>
+                      </table>
+                    </div>
+                </div>
+                <div class="card mb-2 mx-1 simulator_card offline" >
+                    <span class="offline_status"><i class="fa-solid fa-solid fa-ban mx-1 pt-1" style="color: red;"></i><span class="status-text">Offline</span></span>
+                    <span class="online_status"><i class="fa-solid fa-circle fa-sm mx-1 pt-2" style="color: green;"></i><span class="status-text">Online</span></span>
+
+                    <div class="pt-2 text-center">
+                      <h6 class="card-title">s1sim1a</h6>
+                      <table style="font-size: 9px;" class="dataframe table table-bordered table-hover table-sm text-center custom-table simulator_card_table">
+                        <thead><tr><th class="sortable" data-column="node_type" data-order="desc">parameter</th><th class="sortable" data-column="avg" data-order="desc">value</th></tr></thead><tbody>
+                          <tr>
+                            <td>airflowairflowairflowairflow</td>
+                            <td>17.88</td>
+                          </tr>
+                          <tr>
+                            <td>cloudquery</td>
+                            <td>2.40</td>
+                          </tr>
+                          <tr>
+                            <td>data</td>
+                            <td>830.61</td>
+                          </tr>
+                        </tbody>
+                      </table>
+                    </div>
+                </div>
+                <div class="card mb-2 mx-1 simulator_card online" >
+                    <span class="offline_status"><i class="fa-solid fa-solid fa-ban mx-1 pt-1" style="color: red;"></i><span class="status-text">Offline</span></span>
+                    <span class="online_status"><i class="fa-solid fa-circle fa-sm mx-1 pt-2" style="color: green;"></i><span class="status-text">Online</span></span>
+
+                    <div class="pt-2 text-center">
+                      <h6 class="card-title">s1sim1a</h6>
+                      <table style="font-size: 9px;" class="dataframe table table-bordered table-hover table-sm text-center custom-table simulator_card_table">
+                        <thead><tr><th class="sortable" data-column="node_type" data-order="desc">parameter</th><th class="sortable" data-column="avg" data-order="desc">value</th></tr></thead><tbody>
+                          <tr>
+                            <td>airflowairflowairflowairflow</td>
+                            <td>17.88</td>
+                          </tr>
+                          <tr>
+                            <td>cloudquery</td>
+                            <td>2.40</td>
+                          </tr>
+                          <tr>
+                            <td>data</td>
+                            <td>830.61</td>
+                          </tr>
+                        </tbody>
+                      </table>
+                    </div>
+                </div>
+                <div class="card mb-2 mx-1 simulator_card offline" >
+                    <span class="offline_status"><i class="fa-solid fa-solid fa-ban mx-1 pt-1" style="color: red;"></i><span class="status-text">Offline</span></span>
+                    <span class="online_status"><i class="fa-solid fa-circle fa-sm mx-1 pt-2" style="color: green;"></i><span class="status-text">Online</span></span>
+
+                    <div class="pt-2 text-center">
+                      <h6 class="card-title">s1sim1a</h6>
+                      <table style="font-size: 9px;" class="dataframe table table-bordered table-hover table-sm text-center custom-table simulator_card_table">
+                        <thead><tr><th class="sortable" data-column="node_type" data-order="desc">parameter</th><th class="sortable" data-column="avg" data-order="desc">value</th></tr></thead><tbody>
+                          <tr>
+                            <td>airflowairflowairflowairflow</td>
+                            <td>17.88</td>
+                          </tr>
+                          <tr>
+                            <td>cloudquery</td>
+                            <td>2.40</td>
+                          </tr>
+                          <tr>
+                            <td>data</td>
+                            <td>830.61</td>
+                          </tr>
+                        </tbody>
+                      </table>
+                    </div>
+                </div>
+                <div class="card mb-2 mx-1 simulator_card online" >
+                    <span class="offline_status"><i class="fa-solid fa-solid fa-ban mx-1 pt-1" style="color: red;"></i><span class="status-text">Offline</span></span>
+                    <span class="online_status"><i class="fa-solid fa-circle fa-sm mx-1 pt-2" style="color: green;"></i><span class="status-text">Online</span></span>
+
+                    <div class="pt-2 text-center">
+                      <h6 class="card-title">s1sim1a</h6>
+                      <table style="font-size: 9px;" class="dataframe table table-bordered table-hover table-sm text-center custom-table simulator_card_table">
+                        <thead><tr><th class="sortable" data-column="node_type" data-order="desc">parameter</th><th class="sortable" data-column="avg" data-order="desc">value</th></tr></thead><tbody>
+                          <tr>
+                            <td>airflowairflowairflowairflow</td>
+                            <td>17.88</td>
+                          </tr>
+                          <tr>
+                            <td>cloudquery</td>
+                            <td>2.40</td>
+                          </tr>
+                          <tr>
+                            <td>data</td>
+                            <td>830.61</td>
+                          </tr>
+                        </tbody>
+                      </table>
+                    </div>
+                </div>
+                
                 
             </div>
         </div>
@@ -88,5 +288,7 @@
 </div>
 
 <script src="{{ url_for('static', filename='js/simulator.js') }}"></script>
+
+
 {% endblock content %}
 

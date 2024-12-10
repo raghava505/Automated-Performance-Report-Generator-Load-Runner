@@ -1,18 +1,22 @@
 .simulator_card{
-    height: 140px; 
-    width:140px ; 
-    overflow-x: scroll; 
+    height: 230px; 
+    width:190px ; 
+    overflow-y: scroll; 
     
     font-size: 11px;
-    border-radius: 10px;
+    border-radius: 7px;
+    box-shadow: -2px 2px 5px 1px rgba(125, 125, 125, 0.3);
 }
 
 .simulator_card.online{
-    border: 2px solid rgb(0, 230, 8);
+    border: 2px solid rgb(0, 214, 7);
+    box-shadow: -2px 2px 5px 1px rgba(0, 255, 42, 0.385);
 }
 
 .simulator_card.offline{
-    border: 2px solid rgb(255, 7, 7);
+    border: 2px solid rgb(251, 40, 40);
+    box-shadow: -2px 2px 5px 1px rgba(255, 0, 0, 0.334);
+
 }
 
 .simulator_card span.online_status {
@@ -36,4 +40,15 @@
 
 .simulator_card.offline span.online_status {
     display: none; /* Show the status span for the 'offline' class */
+}
+.simulator_card_table {
+    width: 100%;
+    table-layout: fixed; /* Ensures table cells respect specified dimensions */
+}
+
+.table td {
+    max-width: 150px; /* Adjust the max-width of the cell as needed */
+    overflow: auto; /* Makes the content scroll if it's too long */
+    white-space: nowrap; /* Prevents the text from wrapping */
+    /* text-overflow: ellipsis; Adds ellipsis if text overflows */
 }

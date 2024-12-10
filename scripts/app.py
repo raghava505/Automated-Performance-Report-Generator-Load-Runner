@@ -48,30 +48,120 @@ def simulator():
     load_name_options = ["MultiCustomer","SingleCustomer","ControlPlane"]
     return render_template('simulator.html',stack_json_options=stack_json_options,load_name_options=load_name_options)
 
-@app.route('/get_simulators_list', methods=['GET','POST'])
+@app.route('/get_simulators_list', methods=['GET', 'POST'])
 def get_simulators_list():
     stack_json_file_name = request.args.get('stack_json_file_name')
-    print(stack_json_file_name)
-    with open(f"{STACK_JSONS_PATH}/{stack_json_file_name}" , 'r') as f:
-        contents = json.load(f)    
-    main_osquery_data_simulator="localhost"
     loadname = request.args.get('loadname')
-    if main_osquery_data_simulator == "localhost":
-        url = f"http://host.docker.internal:{SIMULATOR_SERVER_PORT}/get_osquery_simulator_names?stack_json_file_name={stack_json_file_name}&loadname={loadname}"
-    else:
+
+    if not stack_json_file_name or not loadname:
+        return jsonify({"status": "error","message": "Both 'stack_json_file_name' and 'loadname' parameters are required."}), 400  # Bad Request
+
+    # Validate the stack JSON file path
+    stack_json_file_path = os.path.join(STACK_JSONS_PATH, stack_json_file_name)
+    if not os.path.exists(stack_json_file_path):
+        return jsonify({"status": "error","message": f"The file '{stack_json_file_path}' was not found on the report UI server."}), 404  # Not Found
+
+    try:
+        # Read and parse the stack JSON file
+        with open(stack_json_file_path, 'r') as f:
+            contents = json.load(f)
+
+        try:
+            main_osquery_data_simulator = contents["main_osquery_data_simulator"]
+        except KeyError as e:
+            return jsonify({"status": "error","message": f"The key 'main_osquery_data_simulator' is missing in '{stack_json_file_path}': {e}"}), 500  # Internal Server Error
+
+        # Construct the URL for the external API call
         url = f"http://{main_osquery_data_simulator}:{SIMULATOR_SERVER_PORT}/get_osquery_simulator_names?stack_json_file_name={stack_json_file_name}&loadname={loadname}"
 
-    response = requests.get(url)
+        # Make the GET request to the external API
+        try:
+            response = requests.get(url, timeout=10)  # Add a timeout for better reliability
+        except requests.RequestException as e:
+            return jsonify({"status": "error","message": f"Failed to connect to the simulator server '{main_osquery_data_simulator}': {e}"}), 503  # Service Unavailable
 
+        # Handle the response from the external API
+        if response.status_code == 200:
+            return response.json(), 200  # OK
+        else:
+            # Extract and include the error message from the external API if available
+            try:
+                error_message = response.json().get('message', 'No error message provided.')
+            except ValueError:
+                error_message = response.text
+            return jsonify({
+                "status": "error","message": f"Failed to fetch simulator list from the simulator server '{main_osquery_data_simulator}'. "f"Status code: {response.status_code}. Error message: {error_message}"}), response.status_code
+
+    except json.JSONDecodeError as e:
+        # Handle JSON parsing errors
+        return jsonify({"status": "error","message": f"Failed to parse JSON from '{stack_json_file_path}': {e}"}), 400  # Bad Request
+
+    except Exception as e:
+        # Handle unexpected errors
+        return jsonify({"status": "error","message": f"An unexpected error occurred while processing the request: {e}"}), 500  # Internal Server Error
+
+
+@app.route('/call_check_sim_health', methods=['GET'])
+def call_check_sim_health():
+    sim_hostname = request.args.get('sim_hostname')
+    print(f"checking health for {sim_hostname} ")
+    url = f"http://{sim_hostname}:{SIMULATOR_SERVER_PORT}/check_sim_health"
+    try:
+        print(f"trying to {url}")
+        response = requests.get(url, timeout=10)  # Add a timeout for better reliability
+    except requests.RequestException as e:
+        return jsonify({"status": "error","message": f"Failed to connect to the simulator server '{sim_hostname}': {e}"}), 503  # Service Unavailable
+
+    # Handle the response from the external API
     if response.status_code == 200:
-        return jsonify({"main_osquery_data_simulator": response.json()["osquery_load_sims"]})
+        return response.json(), 200  # OK
     else:
-        return jsonify({"error": "Failed to fetch data from simulator server", "status_code": response.status_code})
-    return jsonify({'collections': [f"{str(response)}","123"]})
+        # Extract and include the error message from the external API if available
+        try:
+            error_message = response.json().get('message', 'No error message provided.')
+        except ValueError:
+            error_message = response.text
+        return jsonify({"status": "error","message": f"Failed to fetch simulator health from the simulator server '{sim_hostname}'. "f"Status code: {response.status_code}. Error message: {error_message}"}), response.status_code
+
+@app.route('/call_update_sim_params', methods=['POST'])
+def call_update_sim_params():
+    # Extract form data from the request
+    formdata = request.form.to_dict()
+    
+    # Extract simulator hostname from query parameters
+    sim_hostname = str(request.args.get('sim_hostname')).strip()
+    if not sim_hostname:
+        return jsonify({"status": "error","message": "Simulator hostname is required in the query parameters."}), 400  # Bad Request
+
+    # Construct the target URL for the external POST request
+    url = f"http://{sim_hostname}:{SIMULATOR_SERVER_PORT}/update_load_params"
+    print(f"trying to {url}")
+
+    try:
+        response = requests.post(url, data=formdata, timeout=10)  # Use 'data' for form-encoded data
+    except requests.RequestException as e:
+        # Handle network or request-related errors
+        return jsonify({"status": "error","message": f"Failed to connect to the simulator server '{sim_hostname}': {str(e)}"}), 503  # Service Unavailable
+
+    # Handle the response from the external API
+    if response.status_code == 200:
+        try:
+            return response.json(), 200  # OK
+        except ValueError:
+            # Handle non-JSON responses
+            return jsonify({"status": "error","message": "Simulator server responded with non-JSON content."}), 500  # Internal Server Error
+    else:
+        # Extract error message from the response, if available
+        try:
+            error_message = response.json().get('message', 'No error message provided.')
+        except ValueError:
+            error_message = response.text
+        
+        return jsonify({"status": "error","message": f"Failed to update simulator params in the simulator server '{sim_hostname}'. "f"Status code: {response.status_code}. Error message: {error_message}"}), response.status_code
+
 
 @app.route('/dashboard', methods=['GET'])
 def dashboard():
-    print("indashboards")
     return render_template('dashboards.html')
 
 @app.route('/graphs/<path:filename>')
