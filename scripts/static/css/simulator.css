@@ -6,8 +6,13 @@
     font-size: 11px;
     border-radius: 7px;
     box-shadow: -2px 2px 5px 1px rgba(125, 125, 125, 0.3);
+    transition: transform 0.3s, box-shadow 0.3s;
+    /* transition: color 0.3s ease-in-out; */
 }
 
+.simulator_card:hover {
+    transform: scale(1.04);
+}
 .simulator_card.online{
     border: 2px solid rgb(0, 214, 7);
     box-shadow: -2px 2px 5px 1px rgba(0, 255, 42, 0.385);
