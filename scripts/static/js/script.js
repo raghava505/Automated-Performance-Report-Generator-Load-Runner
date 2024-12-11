@@ -126,12 +126,11 @@ function populateRunDropdowns(runs, run_field) {
 }
 
 
-
 function addSprintRunFields() {
     fieldCounter++;
     const container = document.getElementById('fieldsContainer');
     let newFields = `
-        <div class="form-group row inside_fields" id="sprintRunGroup_${fieldCounter}">
+        <div class="form-group form-row " id="sprintRunGroup_${fieldCounter}">
             <div class="col">
                 <label for="sprint_${fieldCounter}">Sprint Field ${fieldCounter} :</label>
                 <select class="form-control req-for-view-report" id="sprint_${fieldCounter}" name="sprint_${fieldCounter}" required>
@@ -152,13 +151,13 @@ function addSprintRunFields() {
     `;
     if (fieldCounter!=1){
         newFields = newFields + `<div>
-                                    <span><button type="button" class="remove_btn" onclick="removeFields(${fieldCounter})"><i class="fa-solid fa-xmark"></i></button></span>
+                                    <span><button type="button" class="btn btn-outline-danger btn-sm" style="font-size: 10px; padding: 0px 6px;" onclick="removeFields(${fieldCounter})"><i class="fa-solid fa-xmark"></i></button></span>
                                 </div>
                                 `
     }
     else{
         newFields = newFields + `<div class="hidden-content">
-                                    <span><button type="button" class="remove_btn" >x</button></span>
+                                    <span><button type="button" class="btn btn-outline-danger btn-sm" style="font-size: 10px; padding: 0px 6px;" >x</button></span>
                                 </div>
                                 `
     }
@@ -997,69 +996,6 @@ function showCopiedTooltip() {
         tooltip.classList.remove("show-tooltip");
     }, 2000);
 }
-// document.getElementById("toggleButton").addEventListener("click", function() {
-//     var logWindow = document.getElementById("collapsable_logs_window");
-//     var mainContent = document.getElementById("mainContent");
-
-//     // Toggle the collapsed class
-//     console.log(logWindow.classList)
-
-//     logWindow.classList.toggle("collapsed");
-//     console.log(logWindow.classList)
-    
-//     // Adjust main content position
-//     if (logWindow.classList.contains("collapsed")) {
-//         console.log("collapsed class found .. in logwindoe")
-//         // mainContent.classList.remove("contract");
-//         logWindow.classList.add("col-md-2");
-//         logWindow.classList.remove("col-md-4");
-        
-//         mainContent.classList.add("col-md-8");
-//         mainContent.classList.remove("col-md-6");
-//         this.innerHTML = '<i class="fa-solid fa-chevron-right"></i>';
-//     } else {
-//         // mainContent.classList.add("contract");
-//         logWindow.classList.remove("col-md-2");
-//         logWindow.classList.add("col-md-4");
-
-//         mainContent.classList.remove("col-md-8");
-//         mainContent.classList.add("col-md-6");
-//         this.innerHTML = '<i class="fa-solid fa-chevron-left"></i>';
-//     }
-// });
-
-function toggle_logs_window(){
-    var logWindow = document.getElementById("collapsable_logs_window");
-    var mainContent = document.getElementById("mainContent");
-    var toggleButton = document.getElementById("toggleButton");
-
-    // Toggle the collapsed class
-    console.log(logWindow.classList)
-
-    logWindow.classList.toggle("collapsed_logs_window");
-    console.log(logWindow.classList)
-    
-    // Adjust main content position
-    if (logWindow.classList.contains("collapsed_logs_window")) {
-        console.log("collapsed_logs_window class found .. in logwindoe")
-        // mainContent.classList.remove("contract");
-        logWindow.classList.add("col-md-2");
-        logWindow.classList.remove("col-md-4");
-        
-        mainContent.classList.add("col-md-8");
-        mainContent.classList.remove("col-md-6");
-        toggleButton.innerHTML = '<i class="fa-solid fa-chevron-right"></i>';
-    } else {
-        // mainContent.classList.add("contract");
-        logWindow.classList.remove("col-md-2");
-        logWindow.classList.add("col-md-4");
-
-        mainContent.classList.remove("col-md-8");
-        mainContent.classList.add("col-md-6");
-        toggleButton.innerHTML = '<i class="fa-solid fa-xmark"></i>';
-    }
-}
-
 
 function CreatePDFfromHTMLWithStyling() {
     var divContents = $("#ReportWindow").clone();

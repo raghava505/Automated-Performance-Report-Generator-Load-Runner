@@ -40,44 +40,6 @@ body {
 .notification.warning {
     background-color:  #ffa071;
 }
-.notification button {
-    background: none;
-    border: none;
-    color: rgb(117, 117, 117);
-    font-size: 1.0em;
-    /* margin-top: -10px; */
-    margin-left:15px;
-    /* font-weight: bold; */
-    cursor: pointer;
-}
-.remove_btn {
-    cursor: pointer;
-    /* margin-left: 10px; */
-    border-radius: 2px;
-    color: white;              
-    font-size: 10px;      
-    border: none;    
-    background-color: #ff6e6e; 
-    padding: 1px 5px;
-    margin: 0px 1px; 
-    transition: background-color 0.1s ease; 
-    
-}
-.remove_btn:hover{
-    background-color: rgb(255, 48, 48);
-}
-#fieldsContainer{
-    /* background-color: #cbcbcb; */
-    padding: 0px 15px;
-}
-.inside_fields{
-    /* background-color: #f0f0f0; */
-    background-color: rgb(236, 236, 255);
-    padding: 2px;
-    padding-bottom: 13px;
-    border-radius: 3px;
-    border: 1px solid rgb(203, 203, 203);
-}
 
 .hidden-content {
     visibility: hidden;
@@ -221,7 +183,7 @@ body {
 }
 
 .form-group select, .form-group input, .form-row button {
-    font-size: 14px !important;
+    font-size: 13px !important;
 }
 
 #contents_heading{
@@ -271,7 +233,6 @@ body {
 
 .line-through {
     position: absolute; 
-    /* top: 5%; */
     left: 0;
     right: 0;
     bottom: 0.001px;
@@ -291,17 +252,6 @@ body {
     transition: all 0.4s ease;
 }
 
-/* Position and style for the toggle button */
-#toggleButton {
-    font-size:11px;
-    position: sticky;
-    /* top: 50%; */
-    left: 17px;
-    z-index: 10;
-    transform: translateY(+110%);
-    /* color: red; */
-}
-
 /* Collapsed state for logs window */
 .collapsed_logs_window {
     transform: translateX(-100%);
@@ -313,44 +263,6 @@ body {
     margin-left: 13%;
     /* padding-left: -20%; */
     /* transition: margin-left 0.4s ease; */
-}
-
-/* Ensure the container adjusts accordingly */
-/* .container-fluid {
-    padding-left:5px;
-} */
-
-.recently_saved_panel{
-    background-color: #efefef;
-    border: 1px solid rgb(193, 193, 193);
-    margin: 5px;
-    padding: 26px;
-}
-
-.recently_saved_panel:hover {
-    background-color: #e1e1e1;
-}
-
-#recently_saved_to_mongo_reports{
-    max-height: 89cap;
-    /* overflow-x: auto; */
-    max-width: 100vw;
-    overflow-y: auto;
-    /* height: 752px; */
-    font-size: 11px; 
-    border: 1px solid #d3d3d3;
-
-}
-
-.right_fixed_element{
-    width:  1px;
-    /* position: fixed;
-    display: none;
-    z-index: 1000;
-    padding: 5px;
-    right: 2%; */
-    font-size: 10px;
-
 }
 
 .analysis_btn-hover-effect {
@@ -424,4 +336,16 @@ body {
 
 #button-container button {
     width: 100%; /* Buttons will stretch to fit container width */
+}
+
+.form-row{
+    padding: 3.5px;
+    margin: 7px;
+    background-color: #f8f9fa;
+    color: #0078f8;
+} 
+
+.form-row input,.form-row select{
+    border-color: #68abf3;
+    border-radius: 20px;
 }

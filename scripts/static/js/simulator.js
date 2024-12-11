@@ -8,6 +8,9 @@ document.addEventListener("DOMContentLoaded", () => {
     let simulator_refresh_button =document.getElementById('simulator_refresh_button')
     simulator_refresh_button.addEventListener('click', trigger_populateSimulatorGrid)
 
+    let active_count_id =document.getElementById('active_count_id')
+
+
     let simulators = [];
     
 
@@ -52,7 +55,8 @@ document.addEventListener("DOMContentLoaded", () => {
     const handleInputChange = () => {
         simulators=[]
         if (areBothFieldsFilled()) {
-            simulator_grid.innerHTML=""
+            simulator_grid.innerHTML = ""
+            active_count_id.innerHTML = ""
             sendPostRequest();
         }
     };
@@ -107,6 +111,8 @@ document.addEventListener("DOMContentLoaded", () => {
             showNotification(`Fetched health of all ${simulators.length} simulators`, 'success');
 
             let gridHTML = '<div class="row">';
+            let online_sims = 0
+            let offline_sims = 0
 
             results.forEach(result => {
                 const sim = result.sim;
@@ -148,7 +154,13 @@ document.addEventListener("DOMContentLoaded", () => {
                         result.error=""
                     }
                 }
-
+                
+                if (Object.keys(dataObjects["command outputs"]).length) {
+                    online_sims+=1
+                }
+                else{
+                    offline_sims+=1
+                }
                 gridHTML += `
                     <div class="card mb-2 mx-1 simulator_card ${Object.keys(dataObjects["command outputs"]).length ? 'online' : 'offline'}">
                         <span class="${Object.keys(dataObjects["command outputs"]).length ? 'online_status' : 'offline_status'}">
@@ -165,6 +177,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
             gridHTML += '</div>'; // Close the row div
             simulator_grid.innerHTML = gridHTML; // Update the HTML once all fetch requests are resolved
+            total_sims = online_sims+offline_sims
+            active_count_id.innerHTML = `(<span style="font-weight: 700;font-size: medium; color:rgb(0, 162, 0);">${online_sims}</span>/<span style="font-weight: 900;font-size: small;">${total_sims}</span>) Online`
+
         })
         .catch(error => {
             // console.error('Error rendering the simulator grid:', error);
@@ -282,6 +297,11 @@ document.addEventListener("DOMContentLoaded", () => {
         
     }
     function trigger_populateSimulatorGrid(){
+        if (!simulators || simulators.length === 0) {
+            // console.log('No simulators found. Exiting function.');
+            showNotification(`No simulators found, please select stack and loadname to view simulators associated to them`, 'warning');
+            return;
+        }
         populateSimulatorGrid(simulators);
     }
 });
