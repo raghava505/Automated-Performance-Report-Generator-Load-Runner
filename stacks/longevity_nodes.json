@@ -12,8 +12,7 @@
         "enabled": 12,
         "triggered": 12
     },
-    "execute_kafka_topics_script_in":"long-c1pn1",
-    "execute_trino_queries_in":"long-c1pn2",
+    "first_pnode":"long-c1pn1",
 
     "elastic_node_ip": "192.168.148.52",
     "pgbadger_reports_mount": "data",

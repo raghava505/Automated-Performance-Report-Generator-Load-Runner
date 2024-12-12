@@ -12,8 +12,7 @@
 
 
 
-    "execute_kafka_topics_script_in":"s18c1pn1",
-    "execute_trino_queries_in":"s18c1pn2",
+    "first_pnode":"s18c1pn1",
 
     "kubesim_nodes": [
         "s18sim1c",

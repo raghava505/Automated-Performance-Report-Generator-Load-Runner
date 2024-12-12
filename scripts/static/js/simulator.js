@@ -2,8 +2,8 @@ document.addEventListener("DOMContentLoaded", () => {
     const stackField = document.getElementById("stack_json_file");
     const loadnameField = document.getElementById("loadname");
     const simulator_grid = document.getElementById('simulator-grid');
-    let ValidateSimulatorForm_button = document.getElementById('ValidateSimulatorForm_button')
-    ValidateSimulatorForm_button.addEventListener('click', ValidateSimulatorForm)
+    let update_sim_params_button = document.getElementById('update_sim_params_button')
+    update_sim_params_button.addEventListener('click', ValidateSimulatorForm)
 
     let simulator_refresh_button =document.getElementById('simulator_refresh_button')
     simulator_refresh_button.addEventListener('click', trigger_populateSimulatorGrid)

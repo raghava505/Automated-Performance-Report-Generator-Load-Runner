@@ -26,7 +26,7 @@ class SelfManaged_Accuracy:
         self.upt_day="".join(str(self.load_start.strftime("%Y-%m-%d")).split('-'))
         self.username = ABACUS_USERNAME
         self.password  = ABACUS_PASSWORD
-        self.target_host = stack_obj.execute_trino_queries_in
+        self.target_host = stack_obj.first_pnode
         self.cloud_domain = data["domain"]
         if self.cloud_domain ==  "longevity":
             self.cloud_domain = "longevity1"

@@ -12,7 +12,7 @@ class trino_queries_class:
     def __init__(self,stack_obj):
         self.start_utc_str=stack_obj.start_time_str_utc
         self.end_utc_str=stack_obj.end_time_str_utc
-        self.dnode = stack_obj.execute_trino_queries_in
+        self.dnode = stack_obj.first_pnode
         self.stack_obj = stack_obj
 
     def get_trino_commands(self):

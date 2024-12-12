@@ -12,7 +12,6 @@
         "enabled": 36,
         "triggered": 33
     },
-    "execute_kafka_topics_script_in":"s29c1pn1",
-    "execute_trino_queries_in":"s29c1pn2",
+    "first_pnode":"s29c1pn1",
     "apiload_simulator_ip": "192.168.128.55"
 }
