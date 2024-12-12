@@ -18,8 +18,7 @@ class stack_configuration:
         self.prometheus_path = f"http://{self.monitoring_ip}:{PROMETHEUS_PORT}"
         self.kube_prometheus_path = f"http://{self.monitoring_ip}:{KUBE_PROMETHEUS_PORT}"
 
-        self.execute_kafka_topics_script_in = stack_details["execute_kafka_topics_script_in"]      
-        self.execute_trino_queries_in = stack_details["execute_trino_queries_in"]
+        self.first_pnode = stack_details["first_pnode"]      
             
         format_data = "%Y-%m-%d %H:%M"
         ist_timezone = pytz.timezone('Asia/Kolkata')

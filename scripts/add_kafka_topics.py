@@ -11,7 +11,7 @@ from kafka import KafkaAdminClient
 class kafka_topics:
     def __init__(self,stack_obj):
         self.stack_obj = stack_obj
-        self.pnode = self.stack_obj.execute_kafka_topics_script_in
+        self.pnode = self.stack_obj.first_pnode
         
     def add_topics_to_report(self):
         try:
@@ -32,10 +32,10 @@ class kafka_topics:
 if __name__ == "__main__":
     class StackObject:
         def __init__(self):
-            self.execute_kafka_topics_script_in = None  # This will hold the value 's1c1pn1'
+            self.first_pnode = None  # This will hold the value 's1c1pn1'
 
     stack_obj = StackObject()
-    stack_obj.execute_kafka_topics_script_in = "s1c1pn1"
+    stack_obj.first_pnode = "s1c1pn1"
 
     kaf = kafka_topics(stack_obj)
     print(kaf.add_topics_to_report())

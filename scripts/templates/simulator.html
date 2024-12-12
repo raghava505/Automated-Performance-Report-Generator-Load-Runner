@@ -10,7 +10,7 @@
             <h5 class="text-center">Start an Osquery Load</h5>
         </div>
         <div class="col-md-2 mb-2  text-center" id="active_count_id">
-            (<span style="font-weight: 700;font-size: medium; color:rgb(0, 162, 0);">100</span>/<span style="font-weight: 900;font-size: small;">200</span>) Online
+            <!-- (<span style="font-weight: 700;font-size: medium; color:rgb(0, 162, 0);">100</span>/<span style="font-weight: 900;font-size: small;">200</span>) Online -->
         </div>
         <div class="col-md-4 position-relative">
             <h6 class="text-left">View all simulator instances here</h6>
@@ -89,47 +89,40 @@
                         <input type="text" class="form-control" id="inputfile" name="inputfile" placeholder="Enter inputfile" min="0" required value="rhel7-6tab_12rec.log">
                         <div class="error-message"></div>
                     </div>
-                </div>          
+                </div>       
                 
-                <div >
-                    <!-- <div class=" col-md-4 text-center">
-                        <button type="button" id="ValidateSimulatorForm_button" class="btn btn-primary btn-block btn-sm">
-                            Update params
+                <div class="px-2 row" >
+                    <div class="col">
+                        <button type="button"  style="font-size: 13px;" class="btn btn-danger btn-block btn-sm" id="kill_assets_button">
+                            Kill all Assets
                         </button>
-                    </div> -->
-
+                    </div>
+                    <div class="col">
+                        <button type="button"  style="font-size: 13px;" class="btn btn-info btn-sm btn-block" id="update_sim_params_button">
+                            Update params  
+                        </button>
+                    </div>
+                    <div class="col" >
+                        <button type="button" style="font-size: 13px;" class="btn btn-primary btn-block btn-sm" id="enroll_assets_button">
+                           Enroll assets
+                        </button>
+                    </div>
+                    <div class="col" >
+                        <button type="button" style="font-size: 13px;" class="btn btn-success btn-block btn-sm" id="start_load_button">
+                           Start Load
+                        </button>
+                    </div>
                     
-                    <div class="text-center" >
-                        <button type="button" style="font-size:13px;" class="btn btn-primary col-md-3" id="ValidateSimulatorForm_button">
-                            Update params 
-                        </button>
-                    </div>
-
                     
-                    <!-- <div class="col-md-3">
-                        <button type="button" class="btn btn-primary btn-block" onclick="">
-                            Kill all assets
-                        </button>
-                    </div>
-
-                    <div class="col-md-3">
-                        <button type="button" class="btn btn-primary btn-block" onclick="">
-                            Enroll Assets 
-                        </button>
-                    </div>
-                    <div class="col-md-3">
-                        <button type="button" class="btn btn-primary btn-block" onclick="">
-                            Start Load 
-                        </button>
-                    </div> -->
                 </div>
+                
             </form>
         </div>
         <div class="col-md-6 pr-5 border d-flex" id="simulator-grid">
             
             <div class="row border">
 
-                <div class="card mb-2 mx-1 simulator_card online" >
+                <!-- <div class="card mb-2 mx-1 simulator_card online" >
                     <span class="offline_status"><i class="fa-solid fa-solid fa-ban mx-1 pt-1" style="color: red;"></i><span class="status-text">Offline</span></span>
                     <span class="online_status"><i class="fa-solid fa-circle fa-sm mx-1 pt-2" style="color: green;"></i><span class="status-text">Online</span></span>
 
@@ -296,7 +289,7 @@
                         </tbody>
                       </table>
                     </div>
-                </div>
+                </div> -->
                 
                 
             </div>

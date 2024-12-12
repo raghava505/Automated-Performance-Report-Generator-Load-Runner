@@ -30,7 +30,7 @@ class Kube_Accuracy:
         self.port = 22
         self.username = "abacus"
         self.password  = "abacus"
-        self.target_host = stack_obj.execute_trino_queries_in
+        self.target_host = stack_obj.first_pnode
         self.cloud_domain = data["domain"]
         if self.cloud_domain ==  "longevity":
             self.cloud_domain = "longevity1"

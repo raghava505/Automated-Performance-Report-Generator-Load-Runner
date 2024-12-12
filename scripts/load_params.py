@@ -59,7 +59,7 @@ class Load_Params:
 
         self.stack_obj = stack_obj
         self.upt_day="".join(str(start_time.strftime("%Y-%m-%d")).split('-'))
-        self.target_node = self.stack_obj.execute_trino_queries_in
+        self.target_node = self.stack_obj.first_pnode
         
         
     @measure_time
