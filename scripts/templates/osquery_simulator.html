@@ -75,7 +75,9 @@
             <form id="SimulatorForm" class="p-4 border rounded custom-forms" style="background-color: rgb(255, 255, 255);">
                 <div class="form-row">
                     <div class="form-group col-md-6">
-                        <label for="stack">Stack:</label>
+                        <label for="stack">
+                            <i class="fas fa-layer-group"></i> Stack:
+                        </label>
                         <select class="form-control req-for-view-report" id="stack_json_file" name="stack_json_file" required>
                             <option value="">Select Stack</option>
                             {% for stack in stack_json_options %}
@@ -85,7 +87,9 @@
                         <div class="error-message"></div>
                     </div>
                     <div class="form-group col-md-6">
-                        <label for="loadname">Load Name:</label>
+                        <label for="loadname">
+                            <i class="fas fa-truck-loading"></i> Load Name:
+                        </label>
                         <select class="form-control req-for-view-report" id="loadname" name="loadname" required>
                             <option value="">Select Load Name</option>
                             {% for loadname in load_name_options %}
@@ -94,61 +98,66 @@
                         </select>
                         <div class="error-message"></div>
                     </div>
-                    
                 </div>
                 <div class="form-row">
                     <div class="form-group col-md-6">
-                        <label for="num_customers"> Number of Customers to send load from:</label>
-                        <input type="number" class="form-control" id="num_customers" name="num_customers" value=100 placeholder="Enter Number of Customers" min="0" required oninput="this.value = this.value.replace(/[^0-9]/g, '');">
+                        <label for="num_customers">
+                            <i class="fas fa-users"></i> Number of Customers to send load from:
+                        </label>
+                        <input type="number" class="form-control" id="num_customers" name="num_customers" value="100" placeholder="Enter Number of Customers" min="0" required oninput="this.value = this.value.replace(/[^0-9]/g, '');">
                         <div class="error-message"></div>
                     </div>
                     <div class="form-group col-md-6">
-                        <label for="total_number_of_assets">Total Number of Assets to Enroll:</label>
+                        <label for="total_number_of_assets">
+                            <i class="fas fa-boxes"></i> Total Number of Assets to Enroll:
+                        </label>
                         <input type="number" class="form-control" id="total_number_of_assets" name="total_number_of_assets" value="10000" placeholder="Enter Total Number of Assets" min="0" required oninput="this.value = this.value.replace(/[^0-9]/g, '');">
                         <div class="error-message"></div>
                     </div>
                 </div>
                 <div class="form-row">
                     <div class="form-group col-md-6">
-                        <label for="first_x_customer_percentage">First X% of customers:</label>
-                        <br> Select X = <output id="first_x_customer_percentage_sliderValue" >50</output>
-                        <input type="range" class="form-range form-control ms-2"  value="50" min="10" max="90" step="10" id="first_x_customer_percentage"  name="first_x_customer_percentage"  oninput="updateSliderValue_first_x_customer_percentage(this.value)">
-                        
+                        <label for="first_x_customer_percentage">
+                            <i class="fas fa-percentage"></i> First X% of customers:
+                        </label>
+                        <br> Select X = <output id="first_x_customer_percentage_sliderValue">50</output>
+                        <input type="range" class="form-range form-control ms-2" value="50" min="10" max="90" step="10" id="first_x_customer_percentage" name="first_x_customer_percentage" oninput="updateSliderValue_first_x_customer_percentage(this.value)">
                         <div class="error-message"></div>
-                    </div>    
+                    </div>
                     <div class="form-group col-md-6">
-                        <label for="load_percentage_for_first_x_percent_customers">Gets Y% of total load: </label>
-                        <!-- <input type="number" class="form-control" value="50" id="load_percentage_for_first_x_percent_customers" name="load_percentage_for_first_x_percent_customers" placeholder="Enter y" min="0" required oninput="this.value = this.value.replace(/[^0-9]/g, '');"> -->
-                        <br> Select Y = <output id="load_percentage_for_first_x_percent_customers_sliderValue" >50</output>
-                        <input type="range" class="form-range form-control ms-2"  value="50" min="10" max="90" step="10" id="load_percentage_for_first_x_percent_customers"  name="load_percentage_for_first_x_percent_customers"  oninput="updateSliderValue_load_percentage_for_first_x_percent_customers(this.value)">
-                        
+                        <label for="load_percentage_for_first_x_percent_customers">
+                            <i class="fas fa-weight-hanging"></i> Gets Y% of total load:
+                        </label>
+                        <br> Select Y = <output id="load_percentage_for_first_x_percent_customers_sliderValue">50</output>
+                        <input type="range" class="form-range form-control ms-2" value="50" min="10" max="90" step="10" id="load_percentage_for_first_x_percent_customers" name="load_percentage_for_first_x_percent_customers" oninput="updateSliderValue_load_percentage_for_first_x_percent_customers(this.value)">
                         <div class="error-message"></div>
                     </div>
                 </div>
-                
                 <div class="form-row">
                     <div class="form-group col-md-6">
-                        <label for="endline">Endline(endline x2=Load Duration in sec):</label>
-                        <input type="number" class="form-control" id="endline" name="endline" placeholder="Enter endline" min="0" required value=18000 oninput="this.value = this.value.replace(/[^0-9]/g, '');">
+                        <label for="endline">
+                            <i class="fas fa-stopwatch"></i> Endline (endline x2 = Load Duration in sec):
+                        </label>
+                        <input type="number" class="form-control" id="endline" name="endline" placeholder="Enter endline" min="0" required value="18000" oninput="this.value = this.value.replace(/[^0-9]/g, '');">
                         <div class="error-message"></div>
                     </div>
                     <div class="form-group col-md-6">
-                        <label for="inputfile">Inputfile:</label>
-                        <input type="text" class="form-control" id="inputfile" name="inputfile" placeholder="Enter inputfile" min="0" required value="rhel7-6tab_12rec.log">
+                        <label for="inputfile">
+                            <i class="fas fa-file-alt"></i> Input File:
+                        </label>
+                        <input type="text" class="form-control" id="inputfile" name="inputfile" placeholder="Enter input file" min="0" required value="rhel7-6tab_12rec.log">
                         <div class="error-message"></div>
                     </div>
-                </div>       
-                
+                </div>
                 <div class="px-2 row d-flex justify-content-center align-items-center" style="height: 100%;">
                     <div class="col-md-4 text-center">
                         <button type="button" style="font-size: 13px;" class="btn btn-info btn-sm btn-block" id="update_sim_params_button">
-                            <i class="fa-solid fa-sliders"></i> Update Params  
+                            <i class="fas fa-sliders-h"></i> Update Params  
                         </button>
                     </div>
                 </div>
-                
-                
             </form>
+            
         </div>
 
         <div class="col-md-6  border d-flex" id="simulator-grid">
@@ -162,7 +171,7 @@
                     </div>
 
                     <div class="pt-2 text-center">
-                        <h6 class="card-title">masabathularao-mac</h6>
+                        <h6 class="card-title"><i class="fa-solid fa-desktop fa-xs"></i> masabathularao-mac</h6>
                         <div class="table-container"><div class="container"><div class="row"><div class="simulator_sub_cards col rounded py-2 text-center bg-light position-relative">
                     <h5 class="text-primary mb-1">0</h5>
 
@@ -222,7 +231,7 @@
                     </div>
 
                     <div class="pt-2 text-center">
-                        <h6 class="card-title">s1sim1a</h6>
+                        <h6 class="card-title"><i class="fa-solid fa-desktop fa-xs"></i> s1sim1a </h6>
                         <div class="table-container"></div>
                     </div>
                 </div>
