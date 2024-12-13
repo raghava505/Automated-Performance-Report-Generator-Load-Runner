@@ -1,13 +1,76 @@
-.simulator_card{
-    height: 230px; 
-    width:190px ; 
-    overflow-y: scroll; 
-    
+.simulator_card {
+    height: 250px;
+    width: 200px;
+    overflow-y: scroll;
     font-size: 11px;
     border-radius: 7px;
     box-shadow: -2px 2px 5px 1px rgba(125, 125, 125, 0.3);
     transition: transform 0.3s, box-shadow 0.3s;
-    /* transition: color 0.3s ease-in-out; */
+    position: relative;
+
+}
+
+.refresh-btn {
+    font-size: 10px;
+    top: 2px;
+    left: 2px;
+    border: none;
+    padding: 2px 6px;
+}
+
+/* General style for the loading bar */
+.loading-bar {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    height: 4px;
+    width: 100%;
+    background: linear-gradient(90deg, #ffffff, #0080ff, #0400ff); /* Modern gradient */
+    border-radius: 3px; /* Rounded corners for a smooth look */
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.2); /* Subtle shadow for depth */
+    background-size: 200%;
+    animation: loading-bar 1.5s infinite ease-in-out;
+    display: none;
+}
+
+/* To display the loading bar */
+.loading-bar.active {
+    display: block;
+}
+
+/* Animation to make the loading bar move */
+@keyframes loading-bar {
+    0% {
+        background-position: 100% 0;
+    }
+    50% {
+        background-position: 0 0;
+    }
+    100% {
+        background-position: -100% 0;
+    }
+}
+
+.simcard-notification {
+    background-color: #d1ecf1;
+    border: 1px solid #bee5eb;
+    color: #0c5460;
+    border-radius: 5px;
+    padding: 2px;
+    box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.2);
+    font-size: 7px;
+}
+.simcard-notification button {
+    /* border: 1px solid #bee5eb; */
+    color: #0c5460;
+    padding: 0px 3px;
+    /* box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.2); */
+    font-size: 7px;
+}
+
+
+.table-container{
+    font-size: 9px;
 }
 
 .simulator_card:hover {
@@ -57,3 +120,27 @@
     white-space: nowrap; /* Prevents the text from wrapping */
     /* text-overflow: ellipsis; Adds ellipsis if text overflows */
 }
+
+/* .simulator_sub_cards{
+    padding: 5px 0px;
+}
+<style> */
+.simulator_sub_cards {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    cursor:auto;
+    border: 0.4px solid rgb(172, 172, 172);
+    box-shadow: 0px -1px 4px 0px rgba(125, 125, 125, 0.3);
+
+}
+.simulator_sub_cards:hover {
+    transform: scale(1.02);
+    box-shadow: 0px 8px 20px rgba(0, 0, 0, 0.15);
+    background-color: #f8f9fa;
+}
+.simulator_sub_cards h4 {
+    font-weight: bold;
+}
+.simulator_sub_cards i {
+    z-index: 1000;
+}
+/* </style> */
