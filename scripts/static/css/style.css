@@ -9,8 +9,8 @@ body {
 
 .notification {
     position: fixed;
-    top: 20px;
-    right: 20px;
+    top: 18px;
+    right: 18px;
     z-index: 1000;
     padding: 10px;
     padding-left: 25px;
@@ -27,18 +27,18 @@ body {
 }
 
 .notification.success {
-    background-color:#7ddaaa;
+    background-color:#13bf0097;
 }
 .notification.info {
     /* background-color: #3be5ff; */
-    background-color: #83cafc;
+    background-color: #0095ff91;
 
 }
 .notification.error {
-    background-color: #ff8484;
+    background-color: #ff000098;
 }
 .notification.warning {
-    background-color:  #ffa071;
+    background-color:  #ff730098;
 }
 
 .hidden-content {

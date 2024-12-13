@@ -41,12 +41,12 @@ def get_collections():
     return jsonify({'collections': collections})
 
 
-@app.route('/simulator', methods=['GET'])
-def simulator():
+@app.route('/osquery_simulator/run_osquery_load', methods=['GET'])
+def osquery_simulator():
     all_files = os.listdir(STACK_JSONS_PATH)
     stack_json_options = sorted([(file.split('.')[0]).split('_')[0] for file in all_files if file.endswith('.json') and '_nodes' in file])
     load_name_options = ["MultiCustomer","SingleCustomer","ControlPlane"]
-    return render_template('simulator.html',stack_json_options=stack_json_options,load_name_options=load_name_options)
+    return render_template('osquery_simulator.html',stack_json_options=stack_json_options,load_name_options=load_name_options)
 
 @app.route('/get_simulators_list', methods=['GET', 'POST'])
 def get_simulators_list():
@@ -101,63 +101,39 @@ def get_simulators_list():
         return jsonify({"status": "error","message": f"An unexpected error occurred while processing the request: {e}"}), 500  # Internal Server Error
 
 
-@app.route('/call_check_sim_health', methods=['GET'])
+@app.route('/call_check_sim_health', methods=['GET','POST'])
 def call_check_sim_health():
-    sim_hostname = request.args.get('sim_hostname')
-    print(f"checking health for {sim_hostname} ")
-    url = f"http://{sim_hostname}:{SIMULATOR_SERVER_PORT}/check_sim_health"
-    try:
-        print(f"trying to {url}")
-        response = requests.get(url, timeout=10)  # Add a timeout for better reliability
-    except requests.RequestException as e:
-        return jsonify({"status": "error","message": f"Failed to connect to the simulator server '{sim_hostname}': {e}"}), 503  # Service Unavailable
-
-    # Handle the response from the external API
-    if response.status_code == 200:
-        return response.json(), 200  # OK
-    else:
-        # Extract and include the error message from the external API if available
-        try:
-            error_message = response.json().get('message', 'No error message provided.')
-        except ValueError:
-            error_message = response.text
-        return jsonify({"status": "error","message": f"Failed to fetch simulator health from the simulator server '{sim_hostname}'. "f"Status code: {response.status_code}. Error message: {error_message}"}), response.status_code
-
-@app.route('/call_update_sim_params', methods=['POST'])
-def call_update_sim_params():
-    # Extract form data from the request
-    formdata = request.form.to_dict()
-    
-    # Extract simulator hostname from query parameters
-    sim_hostname = str(request.args.get('sim_hostname')).strip()
+    sim_hostname = request.args.get('sim_hostname').strip()
     if not sim_hostname:
-        return jsonify({"status": "error","message": "Simulator hostname is required in the query parameters."}), 400  # Bad Request
+        return jsonify({"status": "error","message": "Simulator hostname is not provided in the query parameters at /call_check_sim_health."}), 400  # Bad Request
+    if request.method == 'POST':
+        formdata = request.form.to_dict()
+        update_url = f"http://{sim_hostname}:{SIMULATOR_SERVER_PORT}/update_load_params"
+        try:
+            update_response = requests.post(update_url, data=formdata, timeout=10)  # Use 'data' for form-encoded data
+        except Exception as e:
+            return jsonify({"status": "error","message": f"Failed to update: Unable to connect to  the simulator server '{update_url}': {str(e)}"}), 503  # Service Unavailable
+        if update_response.status_code != 200:
+            return update_response.json(),update_response.status_code
+        time.sleep(2)
 
-    # Construct the target URL for the external POST request
-    url = f"http://{sim_hostname}:{SIMULATOR_SERVER_PORT}/update_load_params"
-    print(f"trying to {url}")
-
+    health_url = f"http://{sim_hostname}:{SIMULATOR_SERVER_PORT}/check_sim_health"
     try:
-        response = requests.post(url, data=formdata, timeout=10)  # Use 'data' for form-encoded data
+        response = requests.get(health_url, timeout=10)  # Add a timeout for better reliability
     except requests.RequestException as e:
-        # Handle network or request-related errors
-        return jsonify({"status": "error","message": f"Failed to connect to the simulator server '{sim_hostname}': {str(e)}"}), 503  # Service Unavailable
+        return jsonify({"status": "error","message": f"Failed to connect to the simulator server '{health_url}': {e}"}), 503  # Service Unavailable
+    return response.json(),response.status_code
 
-    # Handle the response from the external API
-    if response.status_code == 200:
-        try:
-            return response.json(), 200  # OK
-        except ValueError:
-            # Handle non-JSON responses
-            return jsonify({"status": "error","message": "Simulator server responded with non-JSON content."}), 500  # Internal Server Error
-    else:
-        # Extract error message from the response, if available
-        try:
-            error_message = response.json().get('message', 'No error message provided.')
-        except ValueError:
-            error_message = response.text
-        
-        return jsonify({"status": "error","message": f"Failed to update simulator params in the simulator server '{sim_hostname}'. "f"Status code: {response.status_code}. Error message: {error_message}"}), response.status_code
+@app.route('/call_execute_shell_command', methods=['GET'])
+def call_execute_shell_command():
+    sim_hostname = request.args.get('sim_hostname').strip()
+    shell_command = request.args.get('shell_command').strip()
+    url = f"http://{sim_hostname}:{SIMULATOR_SERVER_PORT}/execute_shell_com?shell_command={shell_command}"
+    try:
+        response = requests.get(url, timeout=10)  # Add a timeout for better reliability
+    except Exception as e:
+        return jsonify({"status": "error","message": f"Failed to run {shell_command} in {sim_hostname}: Unable to connect to  the simulator server '{url}': {str(e)}"}), 503  # Service Unavailable
+    return response.json(),response.status_code
 
 
 @app.route('/dashboard', methods=['GET'])
