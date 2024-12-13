@@ -343,6 +343,7 @@ body {
     margin: 7px;
     background-color: #f8f9fa;
     color: #0078f8;
+    border: 0.1px solid rgba(0, 0, 0, 0.078);
 } 
 
 .form-row input,.form-row select{

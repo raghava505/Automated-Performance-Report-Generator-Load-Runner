@@ -83,7 +83,7 @@ document.addEventListener("DOMContentLoaded", () => {
                         </div>
 
                         <div class="pt-2 text-center">
-                            <h6 class="card-title">${sim}</h6>
+                            <h6 class="card-title"><i class="fa-solid fa-desktop fa-xs"></i> ${sim}</h6>
                             <div class="table-container">
 
                             </div>
