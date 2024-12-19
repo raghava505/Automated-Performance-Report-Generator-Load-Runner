@@ -78,7 +78,7 @@ def get_simulators_list():
         try:
             response = requests.get(url, timeout=10)  # Add a timeout for better reliability
         except requests.RequestException as e:
-            return jsonify({"status": "error","message": f"Failed to connect to the simulator server '{main_osquery_data_simulator}': {e}"}), 503  # Service Unavailable
+            return jsonify({"status": "error","message": f"Fatal. Your master simulator is down, unable to connect to the simulator server '{main_osquery_data_simulator}': {e}"}), 503  # Service Unavailable
 
         # Handle the response from the external API
         if response.status_code == 200:
@@ -108,12 +108,13 @@ def call_check_sim_health():
         return jsonify({"status": "error","message": "Simulator hostname is not provided in the query parameters at /call_check_sim_health."}), 400  # Bad Request
     if request.method == 'POST':
         formdata = request.form.to_dict()
+        only_for_validation = formdata.get("only_for_validation",False)
         update_url = f"http://{sim_hostname}:{SIMULATOR_SERVER_PORT}/update_load_params"
         try:
             update_response = requests.post(update_url, data=formdata, timeout=10)  # Use 'data' for form-encoded data
         except Exception as e:
             return jsonify({"status": "error","message": f"Failed to update: Unable to connect to  the simulator server '{update_url}': {str(e)}"}), 503  # Service Unavailable
-        if update_response.status_code != 200:
+        if update_response.status_code != 200 or only_for_validation:
             return update_response.json(),update_response.status_code
         time.sleep(2)
 

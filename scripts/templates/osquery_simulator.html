@@ -40,10 +40,21 @@
             <div class="row w-100 justify-content-around ">
                 <!-- Refresh Button -->
                 <div class="card mb-2 mr-2 flex-grow-1 text-center">
-                    <button id="main-refresh" style="font-size: 13px;" class="btn btn-info btn-sm main-refresh">
-                        <i class="fa-solid fa-arrows-rotate fa-sm"></i> Refresh Data 
+                    <button style="font-size: 13px;" class="btn btn-warning btn-sm main-refresh">
+                        <i class="fa-solid fa-wrench  fa-sm"></i> Deploy fresh server
                     </button>
                 </div>
+                <div class="card mb-2 mr-2 flex-grow-1 text-center">
+                    <button style="font-size: 13px;" class="btn btn-dark btn-sm main-refresh">
+                        <i class="fa-brands fa-github  fa-sm"></i> Pull latest code 
+                    </button>
+                </div>
+                <div class="card mb-2 mr-2 flex-grow-1 text-center">
+                    <button id="main-refresh" style="font-size: 13px;" class="btn btn-info btn-sm main-refresh">
+                        <i class="fa-solid fa-arrows-rotate fa-sm"></i> Refresh All Data 
+                    </button>
+                </div>
+                
                 <!-- Kill All Assets Button -->
                 <div class="card mb-2  mr-2 flex-grow-1 text-center">
                     <button type="button" style="font-size: 13px;" class="btn btn-danger btn-block btn-sm" id="kill_assets_button">
@@ -70,9 +81,9 @@
     
 
     <div class="row">
-        <div class="col-md-1 border"></div>
-        <div class="col-md-5 border rounded" >            
-            <form id="SimulatorForm" class="p-4 border rounded custom-forms" style="background-color: rgb(255, 255, 255);">
+        <div class="col-md-1 "></div>
+        <div class="col-md-5  rounded" >            
+            <form id="SimulatorForm" class="p-3 rounded custom-forms" style="background-color: rgb(255, 255, 255);">
                 <div class="form-row">
                     <div class="form-group col-md-6">
                         <label for="stack">
@@ -150,14 +161,22 @@
                     </div>
                 </div>
                 <div class="px-2 row d-flex justify-content-center align-items-center" style="height: 100%;">
-                    <div class="col-md-4 text-center">
+                    
+                    <div class="col-md-6 text-center">
                         <button type="button" style="font-size: 13px;" class="btn btn-info btn-sm btn-block" id="update_sim_params_button">
                             <i class="fas fa-sliders-h"></i> Update Params  
+                        </button>
+                    </div>
+                    <div class="col-md-6 text-center">
+                        <button type="button" style="font-size: 13px;" class="btn btn-success btn-sm btn-block" id="view_asset_dist_btn">
+                            <i class="fas fa-eye"></i> View and Validate Asset Distribution
                         </button>
                     </div>
                 </div>
             </form>
             
+            <div class="" style="color: #2d0095" id="view_and_validate_asset_dist">
+            </div>
         </div>
 
         <div class="col-md-6  border d-flex" id="simulator-grid">
