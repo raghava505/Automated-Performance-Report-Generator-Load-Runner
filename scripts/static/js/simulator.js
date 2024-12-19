@@ -256,14 +256,21 @@ document.addEventListener("DOMContentLoaded", () => {
             }
             else{
                 const small = document.createElement('small');
-                if (card.classList.contains("online")){
-                    offline_sims -=1
+                if (!formData){
+                    if (card.classList.contains("online")){
+                        offline_sims -=1
+                    }
+                    card.classList.remove("online");
+                    card.classList.add("offline");
+                    showNotification(`Error fetching health for ${sim}. Check the card content for detailed error.`,data.status)
                 }
-                card.classList.remove("online");
-                card.classList.add("offline");
+                else{
+                    showNotification(`Error occured while updating params for ${sim}. Check the card content for detailed error.`,data.status)
+                }
+                
                 small.innerHTML = data.message;
                 table_container.appendChild(small);
-                showNotification(`Error fetching health for ${sim}. Check the card content for detailed error.`,data.status)
+
             }
             console.log("offline sim : ",offline_sims)
             console.log("online sim : ",online_sims)
@@ -336,6 +343,133 @@ document.addEventListener("DOMContentLoaded", () => {
             }
     });
 
+    document.getElementById("view_asset_dist_btn").addEventListener("click", () => {
+        let isValid = true;
+        const fields = document.querySelectorAll('#SimulatorForm .form-control');
+
+        fields.forEach(field => {
+            const errorMessageDiv = field.nextElementSibling;
+            if (!field.value.trim()) {
+                errorMessageDiv.textContent = 'This field is required.';
+                isValid = false;
+            } else {
+                errorMessageDiv.textContent = '';
+            }
+        });
+
+        if (isValid) {
+            const form = document.getElementById('SimulatorForm');
+            const view_and_validate_asset_dist = document.getElementById('view_and_validate_asset_dist');
+            const formData = new FormData(form);
+            const stack_json_file_name = stackField.value + "_nodes.json";
+            formData.set('stack_json_file', stack_json_file_name);
+            formData.append('only_for_validation', "pass_something_to_represent_true");
+
+            fetch(`/call_check_sim_health?sim_hostname=${simulators[0]}`, {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => {
+                if (!response.ok) {
+                    return response.json().then(errorData => {
+                        throw new Error(`Error: ${errorData.message}`);
+                    });
+                }
+                return response.json();
+            })
+            .then(data => {
+                showNotification(data.message, data.status);
+                console.log("Response from server for viewing asset distribution:", data);
+            
+                // Access the asset distribution data
+                const assetDistData = data.asset_dist_data;
+
+                let htmlContent = ` <h6 class="text-center mt-4">
+                                        <i class="fas fa-network-wired fa-xs"></i> Asset Distribution Logic
+                                    </h6>
+                                    <table border="1" style="width: 100%; border-collapse: collapse;font-size:11px;background-color:white;" class="dataframe table-bordered table-sm text-center mb-5">
+                                        <tr class="">
+                                            <th>Key</th>
+                                            <th>Value</th>
+                                        </tr>`;
+            
+                // Loop through the asset distribution data
+                for (const [key, value] of Object.entries(assetDistData)) {
+                    let displayValue;
+            
+                    // Check if the value is an array (and should be displayed as a sub-table)
+                    if (Array.isArray(value)) {
+                        displayValue = '<table border="1" class="dataframe table table-bordered table-hover table-sm text-center custom-table shadow">';
+                        displayValue += `
+                            <thead>
+                                <tr>
+                                    <th class="sortable" data-column="index" data-order="desc">index</th>
+                                    <th class="sortable" data-column="domain" data-order="desc">domain</th>
+                                    <th class="sortable" data-column="assets" data-order="desc">assets</th>
+                                </tr>
+                            </thead>
+                            <tbody>`;
+
+                        // Loop through the array and display each item in a sub-table
+                        value.forEach((item, index) => {
+                            displayValue += `
+                                <tr>
+                                    <td>${index}</td>  
+                                    <td>${item[0]}</td> 
+                                    <td>${item[1]}</td> 
+                                </tr>
+                            `;
+                        });
+                        displayValue += '</tbody></table>';
+                        displayValue = `<td style="padding: 8px; text-align: center; max-height: 200px; overflow-y: auto; display: block; height: 200px;">${displayValue}</td>`;
+
+
+                    } else if (typeof value === 'string' && value.startsWith('[') && value.endsWith(']')) {
+                        const arrayValue = JSON.parse(value);
+                        displayValue = '<table border="1" class="dataframe table table-bordered table-hover table-sm text-center custom-table shadow">';
+                        displayValue += `
+                            <thead>
+                                <tr>
+                                    <th class="sortable" data-column="index" data-order="desc">index</th>
+                                    <th class="sortable" data-column="assets" data-order="desc">assets</th>
+                                </tr>
+                            </thead>
+                            <tbody>`;
+
+                        // Loop through the array and display each item in a sub-table
+                        arrayValue.forEach((item, index) => {
+                            displayValue += `
+                                <tr>
+                                    <td>${index}</td> 
+                                    <td>${item}</td> 
+                                </tr>
+                            `;
+                        });
+                        displayValue += '</tbody></table>';
+                        displayValue = `<td style="padding: 8px; text-align: center; max-height: 200px;overflow-y: auto; display: block; height: 200px;">${displayValue}</td>`;
+
+                    } else {
+                        // Otherwise, just display the value directly (if it's a string or number)
+                        displayValue = `<td style="padding: 8px; text-align: center;">${value}</td>`;
+                    }
+                    // Add the row to the main table
+                    htmlContent += `
+                        <tr>
+                            <td style="padding: 8px; text-align: center; vertical-align: top;">${key}</td>
+                            ${displayValue}
+                        </tr>
+                    `;
+                }
+                htmlContent += '</table>';
+                view_and_validate_asset_dist.innerHTML = htmlContent;
+            })
+            .catch(error => {
+                // console.error("Error:", error);
+                showNotification(`${error.message}.`, "error");
+            });
+        }
+});
+
     async function callShellCommandReq(card, command,table_container) {
         table_container.innerHTML = "";
         const sim = card.querySelector(".card-title").textContent;
@@ -350,7 +484,7 @@ document.addEventListener("DOMContentLoaded", () => {
             const data = await response.json();
             showNotification(data.message,data.status);
             small.innerHTML += data.message+"<br> output:"+data.result,data.status;
-            display_simcard_notification(card,data.message,data.status);
+            display_simcard_notification(card,data.message+data.result,data.status);
 
         } catch (error) {
             console.error(`Error executing ${command} in simulator ${sim}:`, error);
