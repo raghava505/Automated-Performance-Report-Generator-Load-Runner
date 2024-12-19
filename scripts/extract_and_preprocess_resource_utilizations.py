@@ -285,7 +285,8 @@ class complete_resource_usages:
                 else:
                     pod_name = '-'.join(line["metric"]["pod"].split('-')[:-1])
                     suffix = ""
-                unique_pod_names.add((pod_name,suffix))
+                if 'jupiter' not in pod_name:
+                    unique_pod_names.add((pod_name,suffix))
             except Exception as e:
                 self.stack_obj.log.error(f'***************** ERROR: Couldnt find host {line["metric"]["node_name"]} in host_name_type_mapping dictionary. Exception occured while calculating pod memory usage for pod:{pod}. {e}')
 
