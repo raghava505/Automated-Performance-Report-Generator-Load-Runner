@@ -9,7 +9,7 @@ class osquery_child(parent):
                 "RuleEngine and ControlPlane Load Details" : {
                     "total_number_of_customers": "100",
                     "number_of_customers_with_auto_exception_enabled": "0",
-                    "total_assets": "30K Control Plane + 10K Multi customer",
+                    "total_assets": "10K Control Plane + 10K Multi customer",
                     "assets_per_cust":"100",
                     "records_sent_per_hour_per_customer": "6.48 million", #"5.44 million", 
                     "records_sent_per_hour" : "648 million", # "653 million", 
@@ -32,7 +32,7 @@ class osquery_child(parent):
             "ControlPlane":{
                 "total_number_of_customers": "1",
                 "test_title": "Control Plane Load",
-                "total_assets": "100K",
+                "total_assets": "60K",
                 "redis_switchover_case_time_ist":""
             },
             "Testing" : {
