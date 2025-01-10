@@ -3,9 +3,9 @@ from settings import stack_configuration
 import json
 
 variables = {
-        "start_time_str_ist":"2024-12-01 23:00",
-        "load_duration_in_hrs":5/60,
-        "test_env_file_name":'s29_nodes.json'
+        "start_time_str_ist":"2025-01-06 23:00",
+        "load_duration_in_hrs":5,
+        "test_env_file_name":'s1_nodes.json'
     }
 
 stack_json_file = variables["test_env_file_name"]

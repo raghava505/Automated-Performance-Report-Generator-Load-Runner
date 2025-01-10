@@ -133,7 +133,7 @@ if __name__=='__main__':
     from settings import stack_configuration
 
     variables = {
-        "start_time_str_ist":"2024-06-24 00:00",
+        "start_time_str_ist":"2025-01-06 00:00",
         "load_duration_in_hrs":4,
         "test_env_file_name":'s1_nodes.json'
     }
@@ -141,5 +141,5 @@ if __name__=='__main__':
 
     result=extract_ram_cores_storage_details(stack_obj)
 
-    # print(result)
+    print(result)
     

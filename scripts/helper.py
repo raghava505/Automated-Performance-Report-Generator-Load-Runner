@@ -19,30 +19,39 @@ def measure_time(func):
         return result
     return wrapper
 
-def execute_command_in_node(node,command,stack_obj):
+
+def execute_command_in_node(node, command, stack_obj, timeout=30):
     try:
-        stack_obj.log.info(f"Executing the command in node : {node}")
+        stack_obj.log.info(f"Executing the command on node: {node}")
         client = paramiko.SSHClient()
-        client.load_system_host_keys() 
+        client.load_system_host_keys()
         client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+        
         try:
-            client.connect(node, SSH_PORT, ABACUS_USERNAME, ABACUS_PASSWORD)
-            stdin, stdout, stderr = client.exec_command(command)
+            client.connect(node, SSH_PORT, ABACUS_USERNAME, ABACUS_PASSWORD, timeout=timeout)
+            stdin, stdout, stderr = client.exec_command(command, timeout=timeout)
+            
             out = stdout.read().decode('utf-8').strip()
-            errors = stderr.read().decode('utf-8')
+            errors = stderr.read().decode('utf-8').strip()
+            
             if errors:
-                stack_obj.log.error("Errors:")
-                stack_obj.log.info(errors)
+                stack_obj.log.error(f"Errors on {node}: {errors}")
+                # raise RuntimeError(f"Command execution error on {node}: {errors}")
+            
+            stack_obj.log.info(f"Command output from {node}: {out}")
             return out
-                
+        
         except Exception as e:
-            stack_obj.log.exception(e)
-            raise RuntimeError(f"ERROR : Unable to connect to {node} , {e}") from e
+            stack_obj.log.exception(f"Exception during execution on {node}: {e}")
+            # raise RuntimeError(f"ERROR: Unable to execute command on {node}, {e}") from e
+        
         finally:
             client.close()
+    
     except socket.gaierror as e:
-        stack_obj.log.exception(e)
-        raise RuntimeError(f"ERROR : Unable to connect to {node} , {e}") from e
+        stack_obj.log.exception(f"Socket error on {node}: {e}")
+        # raise RuntimeError(f"ERROR: Unable to resolve host {node}, {e}") from e
+
 
 def execute_trino_query(node,query,stack_obj,schema="system"):
     if stack_obj.stack_name == "S29":
