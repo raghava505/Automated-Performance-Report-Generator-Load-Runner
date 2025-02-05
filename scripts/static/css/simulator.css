@@ -9,6 +9,16 @@
     position: relative;
 
 }
+.load_progress_widget{
+    color: rgb(0, 21, 255);
+     background-color: rgb(232, 229, 255);
+     border-radius: 4px;
+    }
+
+.load_progress_widget span {
+    font-size: 15px;
+    color: black;
+}
 
 .refresh-btn {
     font-size: 10px;

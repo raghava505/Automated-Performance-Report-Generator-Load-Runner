@@ -40,17 +40,12 @@
             <div class="row w-100 justify-content-around ">
                 <!-- Refresh Button -->
                 <div class="card mb-2 mr-2 flex-grow-1 text-center">
-                    <button style="font-size: 13px;" class="btn btn-warning btn-sm main-refresh">
-                        <i class="fa-solid fa-wrench  fa-sm"></i> Deploy fresh server
-                    </button>
-                </div>
-                <div class="card mb-2 mr-2 flex-grow-1 text-center">
-                    <button style="font-size: 13px;" class="btn btn-dark btn-sm main-refresh">
+                    <button style="font-size: 13px;" class="btn btn-dark btn-sm" id="pull_latest_code_btn">
                         <i class="fa-brands fa-github  fa-sm"></i> Pull latest code 
                     </button>
                 </div>
                 <div class="card mb-2 mr-2 flex-grow-1 text-center">
-                    <button id="main-refresh" style="font-size: 13px;" class="btn btn-info btn-sm main-refresh">
+                    <button id="main-refresh" style="font-size: 13px;" class="btn btn-info btn-sm">
                         <i class="fa-solid fa-arrows-rotate fa-sm"></i> Refresh All Data 
                     </button>
                 </div>
@@ -71,6 +66,11 @@
                 <div class="card mb-2  mr-2 flex-grow-1 text-center">
                     <button type="button" style="font-size: 13px;" class="btn btn-success btn-block btn-sm" id="start_load_button">
                         <i class="fa-solid fa-play fa-sm"></i> Start Load
+                    </button>
+                </div>
+                <div class="card mb-2  mr-2 flex-grow-1 text-center">
+                    <button type="button" style="font-size: 13px;" class="btn btn-warning btn-block btn-sm" id="stop_load_button">
+                        <i class="fa-solid fa-stop"></i> Stop Load
                     </button>
                 </div>
             </div>
@@ -146,17 +146,21 @@
                 </div>
                 <div class="form-row">
                     <div class="form-group col-md-6">
-                        <label for="endline">
-                            <i class="fas fa-stopwatch"></i> Endline (endline x2 = Load Duration in sec):
+                        <label for="how_many_msgs_to_send">
+                            <i class="fas fa-stopwatch"></i> No.of msgs (msgs x 4 = Load Duration in sec):
                         </label>
-                        <input type="number" class="form-control" id="endline" name="endline" placeholder="Enter endline" min="0" required value="18000" oninput="this.value = this.value.replace(/[^0-9]/g, '');">
+                        <input type="number" class="form-control" id="how_many_msgs_to_send" name="how_many_msgs_to_send" placeholder="Enter how_many_msgs_to_send" min="0" required value="9000" oninput="this.value = this.value.replace(/[^0-9]/g, '');">
                         <div class="error-message"></div>
                     </div>
                     <div class="form-group col-md-6">
                         <label for="inputfile">
                             <i class="fas fa-file-alt"></i> Input File:
                         </label>
-                        <input type="text" class="form-control" id="inputfile" name="inputfile" placeholder="Enter input file" min="0" required value="rhel7-6tab_12rec.log">
+                        <select class="form-control" id="inputfile" name="inputfile" required>
+                            <option value="">Select Input File</option>
+                        </select>
+
+                        <!-- <input type="text" class="form-control" id="inputfile" name="inputfile" placeholder="Enter input file" min="0" required value="rhel7-6tab_12rec.log"> -->
                         <div class="error-message"></div>
                     </div>
                 </div>
@@ -164,7 +168,7 @@
                     
                     <div class="col-md-6 text-center">
                         <button type="button" style="font-size: 13px;" class="btn btn-info btn-sm btn-block" id="update_sim_params_button">
-                            <i class="fas fa-sliders-h"></i> Update Params  
+                            <i class="fas fa-sliders-h"></i> Update Params in all Simulators 
                         </button>
                     </div>
                     <div class="col-md-6 text-center">
@@ -179,7 +183,7 @@
             </div>
         </div>
 
-        <div class="col-md-6  border d-flex" id="simulator-grid">
+        <div class="col-md-6  border d-flex" id="simulator-grid" style="height: 500px;">
             <div class="row">
                 <div class="card mb-2 mr-2 simulator_card offline">
                     <div class="loading-bar"></div>
@@ -191,13 +195,18 @@
 
                     <div class="pt-2 text-center">
                         <h6 class="card-title"><i class="fa-solid fa-desktop fa-xs"></i> masabathularao-mac</h6>
-                        <div class="table-container"><div class="container"><div class="row"><div class="simulator_sub_cards col rounded py-2 text-center bg-light position-relative">
+                        <div class="table-container">
+                            <p class="my-2 rounded load_progress_widget">
+                                <i class="fa-solid fa-circle-exclamation fa-lg"></i> load running currently!<br>
+                                <span id="countdown">01:02:37</span> remaining...
+                            </p>
+                        <div class="container"><div class="row"><div class="simulator_sub_cards col rounded py-2 text-center bg-light position-relative">
                     <h5 class="text-primary mb-1">0</h5>
 
                     <small class="text-muted" style="font-size: 8px;">assets to enroll</small>
                 </div><div class="simulator_sub_cards col rounded py-2 text-center bg-light position-relative">
                     <h5 class="text-primary mb-1">18000</h5>
-                    <small class="text-muted" style="font-size: 8px;">endline</small>
+                    <small class="text-muted" style="font-size: 8px;">how_many_msgs_to_send</small>
                 </div></div><div class="row"><div class="simulator_sub_cards col rounded py-2 text-center bg-light position-relative">
                     <h6 class="text-primary mb-1">rhel7-6tab_12rec.log</h6>
                     <small class="text-muted" style="font-size: 8px;">inputfile</small>
