@@ -37,7 +37,9 @@ document.addEventListener("DOMContentLoaded", () => {
             .then(data => {
                 showNotification(data.message, data.status);
                 console.log("Response from server:", data);
-                simulators = data.result_data
+                simulators = data.result_data;
+                input_files = data.input_files;
+                fill_inputfiles_dropdown(input_files);
                 populateSimulatorGrid(simulators);
             })
             .catch(error => {
@@ -69,33 +71,47 @@ document.addEventListener("DOMContentLoaded", () => {
         }
         showNotification(`Fetched ${simulators.length} simulators`, 'info');
     
-
         let gridHTML = '<div class="row">';
         
         simulators.forEach(sim => {            
             gridHTML += `
-                    <div class="card mb-2 mr-2 simulator_card offline">
-                        <div class="loading-bar"></div>
-                        <button class="position-absolute btn btn-sm btn-primary refresh-btn"><i class="fa-solid fa-arrows-rotate fa-xs"></i></button>
-                        <div class="text-center">
-                            <span class="offline_status"><i class="fa-solid fa-solid fa-ban mx-1 pt-1" style="color: red;"></i><span class="status-text">Offline</span></span>
-                            <span class="online_status"><i class="fa-solid fa-circle  mx-1 pt-1" style="color: green;"></i><span class="status-text">Online</span></span>
-                        </div>
-
-                        <div class="pt-2 text-center">
-                            <h6 class="card-title"><i class="fa-solid fa-desktop fa-xs"></i> ${sim}</h6>
-                            <div class="table-container">
-
-                            </div>
-                        </div>
+                <div class="card mb-2 mr-2 simulator_card offline">
+                    <div class="loading-bar"></div>
+                    <button class="position-absolute btn btn-sm btn-primary refresh-btn"><i class="fa-solid fa-arrows-rotate fa-xs"></i></button>
+                    <div class="text-center">
+                        <span class="offline_status"><i class="fa-solid fa-solid fa-ban mx-1 pt-1" style="color: red;"></i><span class="status-text">Offline</span></span>
+                        <span class="online_status"><i class="fa-solid fa-circle  mx-1 pt-1" style="color: green;"></i><span class="status-text">Online</span></span>
                     </div>
+    
+                    <div class="pt-2 text-center">
+                        <h6 class="card-title"><i class="fa-solid fa-desktop fa-xs"></i> ${sim}</h6>
+                        <div class="table-container"></div>
+                    </div>
+                </div>
             `;
         });
 
         gridHTML += '</div>'; // Close the row div
         simulator_grid.innerHTML = gridHTML; // Update the HTML once all fetch requests are resolved
         document.getElementById("main-refresh").click();
-        
+    
+        // Select all simulator cards
+        const simulatorCards = document.querySelectorAll('.simulator_card');
+    
+        // Add scroll event listener to each card
+        simulatorCards.forEach(card => {
+            card.addEventListener('scroll', (event) => {
+                // Get the current scroll position of the card that was scrolled
+                const scrollTop = event.target.scrollTop;
+                
+                // Sync all other cards' scroll positions with the card being scrolled
+                simulatorCards.forEach(otherCard => {
+                    if (otherCard !== event.target) {
+                        otherCard.scrollTop = scrollTop;
+                    }
+                });
+            });
+        });
     }
     
 
@@ -149,6 +165,19 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     });
     
+    function fill_inputfiles_dropdown(inputfiles_list){
+        console.log(inputfiles_list);
+        const loadtypeSelect = document.getElementById('inputfile');
+        loadtypeSelect.innerHTML = '<option value="">Select Input File</option>'; // Reset options
+
+        inputfiles_list.forEach(db => {
+            const option = document.createElement('option');
+            option.value = db;
+            option.textContent = db;
+            loadtypeSelect.appendChild(option);
+        });
+    
+    }
     
     // Show loading animation
     function toggleLoading(card, show) {
@@ -185,6 +214,27 @@ document.addEventListener("DOMContentLoaded", () => {
                 let row = document.createElement('div');
                 row.className = 'row';
 
+                if (data.load_remaining_dur_in_sec) {
+                    const remainingDurInSec = Number(data.load_remaining_dur_in_sec);
+                    if (remainingDurInSec === 0) {
+                        console.log("The remaining time is 0");
+                    } 
+                    else {
+                        const formatSecondsToHHMMSS = (seconds) => {
+                            const hours = String(Math.floor(seconds / 3600)).padStart(2, '0');
+                            const minutes = String(Math.floor((seconds % 3600) / 60)).padStart(2, '0');
+                            const remainingSeconds = String(seconds % 60).padStart(2, '0');
+                            return `${hours}:${minutes}:${remainingSeconds}`;
+                        };
+                    
+                        const formattedDuration = formatSecondsToHHMMSS(remainingDurInSec);
+                        duration_remaining_html = `
+                            <p class="my-2 p-1 rounded load_progress_widget"><i class="fa-solid fa-circle-exclamation fa-lg"></i> load is running currently!<br> <span>${formattedDuration}</span> remaining... </p>
+                        `;
+                        table_container.innerHTML += duration_remaining_html;
+                    }
+                }
+                
                 let count = 0;
                 data.main_params.forEach(([key, value], index) => {
                     const card = document.createElement('div');
@@ -471,7 +521,7 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
     async function callShellCommandReq(card, command,table_container) {
-        table_container.innerHTML = "";
+        // table_container.innerHTML = "";
         const sim = card.querySelector(".card-title").textContent;
         toggleLoading(card, true);
         showNotification(`Executing ${command} in ${sim}...`, 'info');
@@ -483,21 +533,84 @@ document.addEventListener("DOMContentLoaded", () => {
             
             const data = await response.json();
             showNotification(data.message,data.status);
-            small.innerHTML += data.message+"<br> output:"+data.result,data.status;
-            display_simcard_notification(card,data.message+data.result,data.status);
+            // small.innerHTML += data.message+"<br> output:"+data.result,data.status;
+            display_simcard_notification(card,data.message+". result:"+data.result,data.status);
 
         } catch (error) {
             console.error(`Error executing ${command} in simulator ${sim}:`, error);
             showNotification(error,"error");
-            small.innerHTML += `Error executing ${command} in simulator ${sim}:` + error;
+            // small.innerHTML += `Error executing ${command} in simulator ${sim}:` + error;
 
         } finally {
             toggleLoading(card, false);
         }
-        table_container.appendChild(small);
+        // table_container.appendChild(small);
     };
 
     document.getElementById("enroll_assets_button").addEventListener("click", () => {
+        if (confirm("Are you sure you want to enroll endpointsim instances?")) {
+            const simulatorCards = document.querySelectorAll(".simulator_card");
+        
+            if (simulatorCards.length === 0) {
+                showNotification('No simulators found. Please select stack and loadname to view simulators assosiated with them','warning');
+            } else {
+                simulatorCards.forEach((card) => {
+                    const table_container = card.querySelector(".table-container"); 
+                callShellCommandReq(card,"./BringUpInstances.sh",table_container);
+                });
+            }
+        }
+    });
+
+    document.getElementById("kill_assets_button").addEventListener("click", (event) => {
+
+        if (confirm("Are you sure you want to kill all endpointsim instances?")) {
+            const simulatorCards = document.querySelectorAll(".simulator_card");
+    
+            if (simulatorCards.length === 0) {
+                showNotification('No simulators found. Please select stack and loadname to view simulators assosiated with them','warning');
+            } else {
+                simulatorCards.forEach((card) => {
+                    const table_container = card.querySelector(".table-container"); 
+                callShellCommandReq(card,"killall endpointsim",table_container);
+                });
+            }
+        }
+    });
+
+    document.getElementById("start_load_button").addEventListener("click", () => {
+        if (confirm("Are you sure you want to start the load from all simulators?")) {
+            const simulatorCards = document.querySelectorAll(".simulator_card");
+        
+            if (simulatorCards.length === 0) {
+                showNotification('No simulators found. Please select stack and loadname to view simulators assosiated with them','warning');
+            } else {
+                simulatorCards.forEach((card) => {
+                    const table_container = card.querySelector(".table-container"); 
+                callShellCommandReq(card,"./SendTrigger.sh",table_container);
+                });
+            }
+        }
+    });
+    
+
+    document.getElementById("stop_load_button").addEventListener("click", () => {
+        if (confirm("Are you sure you want to stop the load from all simulators?")) {
+            const simulatorCards = document.querySelectorAll(".simulator_card");
+        
+            if (simulatorCards.length === 0) {
+                showNotification('No simulators found. Please select stack and loadname to view simulators assosiated with them','warning');
+            } else {
+                simulatorCards.forEach((card) => {
+                    const table_container = card.querySelector(".table-container"); 
+                callShellCommandReq(card,"pkill -f 'simulator/LoadTrigger.py'",table_container);
+                });
+            }
+        }
+    });
+
+    document.getElementById("pull_latest_code_btn").addEventListener("click", () => {
+
         const simulatorCards = document.querySelectorAll(".simulator_card");
     
         if (simulatorCards.length === 0) {
@@ -505,13 +618,12 @@ document.addEventListener("DOMContentLoaded", () => {
         } else {
             simulatorCards.forEach((card) => {
                 const table_container = card.querySelector(".table-container"); 
-            callShellCommandReq(card,"./BringUpInstances.sh",table_container);
+            callShellCommandReq(card,"git stash;git stash clear;git pull origin main",table_container);
             });
         }
     });
 
-
-    function display_simcard_notification(card, message,type) {
+    function display_simcard_notification(card, message, type) {
         // Remove any existing notification in the card
         const existingNotification = card.querySelector(".simcard-notification");
         if (existingNotification) {
@@ -527,8 +639,6 @@ document.addEventListener("DOMContentLoaded", () => {
         notification.style.width = "99%";
         notification.style.margin = "0 2.5%";
         notification.style.zIndex = "10";
-        // notification.className = 'notification ' + type;
-
     
         // Add the message
         notification.innerHTML = `
@@ -543,7 +653,31 @@ document.addEventListener("DOMContentLoaded", () => {
     
         // Append notification to the card
         card.appendChild(notification);
+    
+        // Automatically remove the notification after 1 minute (60000 milliseconds)
+        setTimeout(() => {
+            notification.remove();
+        }, 10000);        
     }
     
+    // Select all the simulator cards
+    const simulatorCards = document.querySelectorAll('.simulator_card');
 
+    // Function to sync scroll for all cards
+    const syncScroll = (event) => {
+        // Get the scroll position of the currently scrolled card
+        const scrollTop = event.target.scrollTop;
+
+        // Sync all other cards with the same scroll position
+        simulatorCards.forEach(card => {
+            if (card !== event.target) {
+                card.scrollTop = scrollTop;
+            }
+        });
+    };
+
+    // Add scroll event listener to each simulator card
+    simulatorCards.forEach(card => {
+        card.addEventListener('scroll', syncScroll);
+    });
 });

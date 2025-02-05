@@ -3,8 +3,13 @@ from settings import stack_configuration
 import json
 
 variables = {
+<<<<<<< HEAD
         "start_time_str_ist":"2025-01-06 23:00",
         "load_duration_in_hrs":5,
+=======
+        "start_time_str_ist":"2025-02-05 15:30",
+        "load_duration_in_hrs":10/60,
+>>>>>>> a8ceb8e (support for osquery sim)
         "test_env_file_name":'s1_nodes.json'
     }
 
@@ -28,6 +33,7 @@ elif "s1_nodes" in stack_json_file:
     # input_file_path="inputFile6tab_12rec.log"
     # input_file_path = "process_events_targeted_all_str.log"
     input_file_path="rhel7-6tab_12rec.log"
+    # input_file_path="inputfile_5min_6tab_12rec.log"
 elif "s12_nodes" in stack_json_file:
     api_file = "milkyway"
     assets_per_cust= 112
