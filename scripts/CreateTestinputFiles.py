@@ -44,7 +44,7 @@ def split_instances_nearly_equal_sum(data, simulators, return_dict):
         return_dict[f"simulator '{sim}' instance list: (assets={sublist_sums[i]})"] = combined_clients
     return sublists
 
-def create_testinput_files(updated_test_input_params, create_testinput_files = False, sim_name=None):
+def create_testinput_files(updated_test_input_params, create_and_save_files = False, sim_name=None,list_of_custom_simulators=None):
     assets_to_enrol_for_each_customer,return_dict  = return_asset_distribution(updated_test_input_params)
 
     stack_json_file_path = f"{STACK_JSONS_PATH}/{updated_test_input_params['stack_json_file']}"
@@ -52,7 +52,10 @@ def create_testinput_files(updated_test_input_params, create_testinput_files = F
 
     with open(stack_json_file_path,'r') as json_file:
         json_file = json.load(json_file)
-    simulators =  json_file["simulators"][loadname]
+    if list_of_custom_simulators:
+        simulators=list_of_custom_simulators
+    else:
+        simulators =  json_file["simulators"][loadname]
     base_domain = json_file["domain"]
     configdb_node = json_file["configdb_node"]
 
@@ -115,7 +118,7 @@ def create_testinput_files(updated_test_input_params, create_testinput_files = F
                 break
     # print(return_dict)
 
-    if not create_testinput_files:
+    if not create_and_save_files:
         return return_dict
     for one_instance_list,simulator_name in zip(split_instances,simulators):
         os.makedirs(TESTINPUT_FILES_PATH, exist_ok=True)
@@ -139,4 +142,4 @@ if __name__ == "__main__":
         # "shuffle_inputfile_if_reached_end":"false",
         # "loadname": "MultiCustomer"
     }
-    create_testinput_files(test_input_params,create_testinput_files=False)
+    create_testinput_files(test_input_params,create_and_save_files=False)

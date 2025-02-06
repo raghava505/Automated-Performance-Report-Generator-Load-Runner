@@ -103,7 +103,8 @@ def view_asset_dist():
         try:updated_params[key] = int(value)
         except:updated_params[key] = value
     try:
-        return_dict = create_testinput_files(updated_params,create_testinput_files=False)
+        list_of_custom_simulators = list(updated_params["selected_simulators"].split(','))
+        return_dict = create_testinput_files(updated_params,create_and_save_files=False,list_of_custom_simulators=list_of_custom_simulators)
         return jsonify({"status": "success","message": f"Asset distribution logic calculated." , "asset_dist_data":return_dict}), 200  # OK
     except Exception as e:
         return jsonify({"status": "error","message": f"error while creating testiinput files data. {str(e)}"}), 500
@@ -122,9 +123,10 @@ def call_check_sim_health():
             except:updated_params[key] = value
 
         print("updated updated_params after type casting : " , updated_params)
-
+        list_of_custom_simulators = list(updated_params["selected_simulators"].split(','))
+        print(list_of_custom_simulators)
         try:
-            return_dict = create_testinput_files(updated_params,create_testinput_files=False,sim_name = sim_hostname)
+            return_dict = create_testinput_files(updated_params,create_and_save_files=False,sim_name = sim_hostname,list_of_custom_simulators=list_of_custom_simulators)
         except Exception as e:
             return jsonify({"status": "error","message": f"error while creating testiinput files data. {str(e)}"}), 500
         

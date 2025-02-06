@@ -66,7 +66,7 @@ document.addEventListener("DOMContentLoaded", () => {
     function populateSimulatorGrid(simulators) {
         console.log(simulators)
         if (!simulators || simulators.length === 0) {
-            console.log('No simulators found. Exiting function.');
+            console.log('No simulators found/selected. Exiting function.');
             return;
         }
         showNotification(`Fetched ${simulators.length} simulators`, 'info');
@@ -77,14 +77,17 @@ document.addEventListener("DOMContentLoaded", () => {
             gridHTML += `
                 <div class="card mb-2 mr-2 simulator_card offline">
                     <div class="loading-bar"></div>
-                    <button class="position-absolute btn btn-sm btn-primary refresh-btn"><i class="fa-solid fa-arrows-rotate fa-xs"></i></button>
+                    <button class="position-absolute btn btn-sm btn-info refresh-btn"><i class="fa-solid fa-arrows-rotate fa-xs"></i></button>
+
+                    <input class="position-absolute btn btn-sm checkbox_class btn-primary" type="checkbox" checked>
+
                     <div class="text-center">
                         <span class="offline_status"><i class="fa-solid fa-solid fa-ban mx-1 pt-1" style="color: red;"></i><span class="status-text">Offline</span></span>
                         <span class="online_status"><i class="fa-solid fa-circle  mx-1 pt-1" style="color: green;"></i><span class="status-text">Online</span></span>
                     </div>
     
                     <div class="pt-2 text-center">
-                        <h6 class="card-title"><i class="fa-solid fa-desktop fa-xs"></i> ${sim}</h6>
+                        <h6 class="card-title name_of_the_simulator"><i class="fa-solid fa-desktop fa-xs"></i> ${sim}</h6>
                         <div class="table-container"></div>
                     </div>
                 </div>
@@ -112,6 +115,9 @@ document.addEventListener("DOMContentLoaded", () => {
                 });
             });
         });
+
+        attachCheckboxListeners();
+        attachToggleButtonListener();
     }
     
 
@@ -351,20 +357,25 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
 
-    // Refresh all simulator cards
-    document.getElementById("main-refresh").addEventListener("click", () => {
+
+      document.getElementById("main-refresh").addEventListener("click", () => {
         const simulatorCards = document.querySelectorAll(".simulator_card");
+
+        const selectedSimulatorCards = Array.from(simulatorCards).filter(card => {
+            const checkbox = card.querySelector(".checkbox_class");
+            return checkbox && checkbox.checked;
+          });
     
-        if (simulatorCards.length === 0) {
-            showNotification('No simulators found. Please select stack and loadname to view simulators assosiated with them','warning');
+        if (selectedSimulatorCards.length === 0) {
+            showNotification('No simulators found/selected. Please select stack and loadname to view simulators assosiated with them','warning');
         } else {
-            simulatorCards.forEach((card) => {
+            selectedSimulatorCards.forEach((card) => {
                 const table_container = card.querySelector(".table-container"); 
                 refreshSimulator(card, table_container);
             });
         }
     });
-    
+
 
     document.getElementById("update_sim_params_button").addEventListener("click", () => {
             let isValid = true;
@@ -381,13 +392,36 @@ document.addEventListener("DOMContentLoaded", () => {
             });
 
             if (isValid) {
-                const form = document.getElementById('SimulatorForm');
-                const formData = new FormData(form);
-                document.querySelectorAll(".simulator_card").forEach((card) => {
-
-                    const table_container = card.querySelector(".table-container"); 
-                    refreshSimulator(card,table_container,formData);
-                });
+                if (confirm("Are you sure you want to update parameters in the selected simulators? Note : The unchecked simulators will be ignored for asset distribution.")) {
+                    const form = document.getElementById('SimulatorForm');
+                    const formData = new FormData(form);
+                  
+                    // Select only checked simulator cards
+                    const simulatorCards = document.querySelectorAll(".simulator_card");
+                    const selectedSimulatorCards = Array.from(simulatorCards).filter(card => {
+                      const checkbox = card.querySelector(".checkbox_class");
+                      return checkbox && checkbox.checked;
+                    });
+                  
+                    if (selectedSimulatorCards.length === 0) {
+                      showNotification('No simulators found/selected. Please select stack and loadname to view simulators associated with them', 'warning');
+                    } else {
+                      // Extract simulator names and add to FormData
+                      const selectedSimulators = selectedSimulatorCards.map(card => {
+                        return card.querySelector(".name_of_the_simulator").textContent.trim();
+                      });
+                  
+                      // Append to formData as a comma-separated string
+                      formData.append("selected_simulators", selectedSimulators.join(','));
+                  
+                      // Refresh each selected simulator with updated form data
+                      selectedSimulatorCards.forEach(card => {
+                        const table_container = card.querySelector(".table-container");
+                        refreshSimulator(card, table_container, formData);
+                      });
+                    }
+                  }
+                  
             }
     });
 
@@ -406,9 +440,22 @@ document.addEventListener("DOMContentLoaded", () => {
         });
 
         if (isValid) {
+            const simulatorCards = document.querySelectorAll(".simulator_card");
+            const selectedSimulatorCards = Array.from(simulatorCards).filter(card => {
+                const checkbox = card.querySelector(".checkbox_class");
+                return checkbox && checkbox.checked;
+            });
+            const selectedSimulators = selectedSimulatorCards.map(card => {
+                return card.querySelector(".name_of_the_simulator").textContent.trim();
+              });
+          
+              // Append to formData as a comma-separated string
+
             const form = document.getElementById('SimulatorForm');
             const view_and_validate_asset_dist = document.getElementById('view_and_validate_asset_dist');
             const formData = new FormData(form);
+            formData.append("selected_simulators", selectedSimulators.join(','));
+
 
             fetch(`/view_asset_dist`, {
                 method: 'POST',
@@ -543,13 +590,19 @@ document.addEventListener("DOMContentLoaded", () => {
     };
 
     document.getElementById("enroll_assets_button").addEventListener("click", () => {
-        if (confirm("Are you sure you want to enroll endpointsim instances?")) {
+        if (confirm("Are you sure you want to enroll endpointsim instances in selected simulators?")) {
             const simulatorCards = document.querySelectorAll(".simulator_card");
+
+            const selectedSimulatorCards = Array.from(simulatorCards).filter(card => {
+                const checkbox = card.querySelector(".checkbox_class");
+                return checkbox && checkbox.checked;
+              });
+
         
-            if (simulatorCards.length === 0) {
-                showNotification('No simulators found. Please select stack and loadname to view simulators assosiated with them','warning');
+            if (selectedSimulatorCards.length === 0) {
+                showNotification('No simulators found/selected. Please select stack and loadname to view simulators assosiated with them','warning');
             } else {
-                simulatorCards.forEach((card) => {
+                selectedSimulatorCards.forEach((card) => {
                     const table_container = card.querySelector(".table-container"); 
                 callShellCommandReq(card,"./BringUpInstances.sh",table_container);
                 });
@@ -559,13 +612,18 @@ document.addEventListener("DOMContentLoaded", () => {
 
     document.getElementById("kill_assets_button").addEventListener("click", (event) => {
 
-        if (confirm("Are you sure you want to kill all endpointsim instances?")) {
+        if (confirm("Are you sure you want to kill all endpointsim instances in the selected simulators?")) {
             const simulatorCards = document.querySelectorAll(".simulator_card");
+
+            const selectedSimulatorCards = Array.from(simulatorCards).filter(card => {
+                const checkbox = card.querySelector(".checkbox_class");
+                return checkbox && checkbox.checked;
+              });
     
-            if (simulatorCards.length === 0) {
-                showNotification('No simulators found. Please select stack and loadname to view simulators assosiated with them','warning');
+            if (selectedSimulatorCards.length === 0) {
+                showNotification('No simulators found/selected. Please select stack and loadname to view simulators assosiated with them','warning');
             } else {
-                simulatorCards.forEach((card) => {
+                selectedSimulatorCards.forEach((card) => {
                     const table_container = card.querySelector(".table-container"); 
                 callShellCommandReq(card,"killall endpointsim",table_container);
                 });
@@ -574,29 +632,38 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     document.getElementById("start_load_button").addEventListener("click", () => {
-        if (confirm("Are you sure you want to start the load from all simulators?")) {
+        if (confirm("Are you sure you want to start the load from the selected simulators?")) {
             const simulatorCards = document.querySelectorAll(".simulator_card");
+            
+            const selectedSimulatorCards = Array.from(simulatorCards).filter(card => {
+                const checkbox = card.querySelector(".checkbox_class");
+                return checkbox && checkbox.checked;
+              });
         
-            if (simulatorCards.length === 0) {
-                showNotification('No simulators found. Please select stack and loadname to view simulators assosiated with them','warning');
+            if (selectedSimulatorCards.length === 0) {
+                showNotification('No simulators found/selected. Please select stack and loadname to view simulators assosiated with them','warning');
             } else {
-                simulatorCards.forEach((card) => {
+                selectedSimulatorCards.forEach((card) => {
                     const table_container = card.querySelector(".table-container"); 
                 callShellCommandReq(card,"./SendTrigger.sh",table_container);
                 });
             }
         }
     });
-    
 
     document.getElementById("stop_load_button").addEventListener("click", () => {
-        if (confirm("Are you sure you want to stop the load from all simulators?")) {
+        if (confirm("Are you sure you want to stop the load in the selected simulators?")) {
             const simulatorCards = document.querySelectorAll(".simulator_card");
+
+            const selectedSimulatorCards = Array.from(simulatorCards).filter(card => {
+                const checkbox = card.querySelector(".checkbox_class");
+                return checkbox && checkbox.checked;
+              });
         
-            if (simulatorCards.length === 0) {
-                showNotification('No simulators found. Please select stack and loadname to view simulators assosiated with them','warning');
+            if (selectedSimulatorCards.length === 0) {
+                showNotification('No simulators found/selected. Please select stack and loadname to view simulators assosiated with them','warning');
             } else {
-                simulatorCards.forEach((card) => {
+                selectedSimulatorCards.forEach((card) => {
                     const table_container = card.querySelector(".table-container"); 
                 callShellCommandReq(card,"pkill -f 'simulator/LoadTrigger.py'",table_container);
                 });
@@ -607,11 +674,15 @@ document.addEventListener("DOMContentLoaded", () => {
     document.getElementById("pull_latest_code_btn").addEventListener("click", () => {
 
         const simulatorCards = document.querySelectorAll(".simulator_card");
+        const selectedSimulatorCards = Array.from(simulatorCards).filter(card => {
+            const checkbox = card.querySelector(".checkbox_class");
+            return checkbox && checkbox.checked;
+          });
     
-        if (simulatorCards.length === 0) {
-            showNotification('No simulators found. Please select stack and loadname to view simulators assosiated with them','warning');
+        if (selectedSimulatorCards.length === 0) {
+            showNotification('No simulators found/selected. Please select stack and loadname to view simulators assosiated with them','warning');
         } else {
-            simulatorCards.forEach((card) => {
+            selectedSimulatorCards.forEach((card) => {
                 const table_container = card.querySelector(".table-container"); 
             callShellCommandReq(card,"git stash;git stash clear;git pull origin main",table_container);
             });
@@ -654,25 +725,55 @@ document.addEventListener("DOMContentLoaded", () => {
             notification.remove();
         }, 10000);        
     }
-    
-    // Select all the simulator cards
-    const simulatorCards = document.querySelectorAll('.simulator_card');
 
-    // Function to sync scroll for all cards
-    const syncScroll = (event) => {
-        // Get the scroll position of the currently scrolled card
-        const scrollTop = event.target.scrollTop;
 
-        // Sync all other cards with the same scroll position
-        simulatorCards.forEach(card => {
-            if (card !== event.target) {
-                card.scrollTop = scrollTop;
-            }
+
+    function updateCheckboxCounter() {
+        const checkboxes = document.querySelectorAll('.checkbox_class');
+        const checkedCount = Array.from(checkboxes).filter(checkbox => checkbox.checked).length;
+        const totalCheckboxes = checkboxes.length;
+      
+        // Display the updated count
+        const counterElement = document.getElementById('checkbox-counter');
+        counterElement.innerHTML = `<span style="font-weight: 700; font-size: medium;">${checkedCount}</span><span style="font-size: 16px; color: #888;"> / </span><span style="font-weight: 900; font-size: small;color:black">${totalCheckboxes}</span>`;
+      }
+      
+      // Attach event listeners to all checkboxes
+      function attachCheckboxListeners() {
+        const selected_count_id = document.getElementById('selected_count_id');
+      
+        const txt = `
+        <i class="fa-solid fa-check fa-2xs" style="color: rgb(19, 15, 255);"></i>
+        <span id="checkbox-counter" style="font-weight: 700; font-size: medium; color: rgb(23, 42, 255);">0</span>
+        <span class="text-muted" style="font-size: 12px;"> Simulators Selected</span>
+        `;
+        selected_count_id.innerHTML = txt;
+      
+        const checkboxes = document.querySelectorAll('.checkbox_class');
+        checkboxes.forEach(checkbox => {
+          checkbox.addEventListener('change', updateCheckboxCounter);
         });
-    };
-
-    // Add scroll event listener to each simulator card
-    simulatorCards.forEach(card => {
-        card.addEventListener('scroll', syncScroll);
-    });
+      
+        updateCheckboxCounter(); // Initial count
+      }
+      
+      // Function to toggle all checkboxes
+      function toggleCheckboxes() {
+        const checkboxes = document.querySelectorAll('.checkbox_class');
+        const areAllChecked = Array.from(checkboxes).every(checkbox => checkbox.checked);
+      
+        checkboxes.forEach(checkbox => {
+          checkbox.checked = !areAllChecked;
+        });
+      
+        updateCheckboxCounter(); // Update the counter after toggling
+      }
+      
+      // Attach event listener to the toggle button
+      function attachToggleButtonListener() {
+        const toggleButton = document.getElementById('select_deselect');
+        toggleButton.addEventListener('click', toggleCheckboxes);
+      }
+      
+    
 });
