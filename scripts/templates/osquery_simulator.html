@@ -7,7 +7,7 @@
     <div class="row">
         <div class="col-md-1"></div>
         <div class="col-md-5"></div>
-        <div class="col-md-6 mb-2 d-flex align-items-center justify-content-between">
+        <div class="col-md-3 mb-2 d-flex align-items-center justify-content-between">
             <!-- Span at the extreme left -->
             <span class="text-left" id="active_count_id">
                 <!-- <i class="fa-solid fa-circle fa-2xs" style="color: green;"></i>
@@ -16,12 +16,16 @@
                 <span style="font-weight: 900; font-size: small;">200</span> 
                 <span class="text-muted" style="font-size: 12px;">Simulators Online</span> -->
             </span>
+
+            <span class="text-left" id="selected_count_id">
+                <!-- <i class="fa-solid fa-check" style="color: rgb(19, 15, 255);"></i>
+                <span id="checkbox-counter" style="font-weight: 700; font-size: medium; color: rgb(23, 42, 255);">0</span>
+                <span class="text-muted" style="font-size: 12px;"> Simulators Selected</span> -->
+            </span>
             
-            <!-- Small text at the center -->
-            <div class="flex-grow-1 text-center">
-                <!-- <small >View all simulator instances here</small> -->
-            </div>
+            
         </div>
+        
         
     </div>
     
@@ -38,7 +42,12 @@
         <div class="col-md-6 d-flex ">
             
             <div class="row w-100 justify-content-around ">
-                <!-- Refresh Button -->
+                <div class="card mb-2 mr-2 flex-grow-1 text-center">
+                    <button style="font-size: 13px;" class="btn btn-light btn-sm" id="select_deselect">
+                        <i class="fa-solid fa-check fa-sm"></i> Toggle            
+                    </button>
+                </div>
+                
                 <div class="card mb-2 mr-2 flex-grow-1 text-center">
                     <button style="font-size: 13px;" class="btn btn-dark btn-sm" id="pull_latest_code_btn">
                         <i class="fa-brands fa-github  fa-sm"></i> Pull latest code 
@@ -168,7 +177,7 @@
                     
                     <div class="col-md-6 text-center">
                         <button type="button" style="font-size: 13px;" class="btn btn-info btn-sm btn-block" id="update_sim_params_button">
-                            <i class="fas fa-sliders-h"></i> Update Params in all Simulators 
+                            <i class="fas fa-sliders-h"></i> Update Params in selected Simulators 
                         </button>
                     </div>
                     <div class="col-md-6 text-center">
@@ -176,6 +185,8 @@
                             <i class="fas fa-eye"></i> View and Validate Asset Distribution
                         </button>
                     </div>
+                    <small class="text-muted pt-3">Note: Asset distribution will be done only on the selected simulators. So please validate the selected simulators before proceeding. </small>
+
                 </div>
             </form>
             
@@ -185,82 +196,169 @@
 
         <div class="col-md-6  border d-flex" id="simulator-grid" style="height: 500px;">
             <div class="row">
-                <div class="card mb-2 mr-2 simulator_card offline">
-                    <div class="loading-bar"></div>
-                    <button class="position-absolute btn btn-sm btn-primary refresh-btn"><i class="fa-solid fa-arrows-rotate fa-xs"></i></button>
-                    <div class="text-center">
-                        <span class="offline_status"><i class="fa-solid fa-solid fa-ban mx-1 pt-1" style="color: red;"></i><span class="status-text">Offline</span></span>
-                        <span class="online_status"><i class="fa-solid fa-circle  mx-1 pt-1" style="color: green;"></i><span class="status-text">Online</span></span>
-                    </div>
-
-                    <div class="pt-2 text-center">
-                        <h6 class="card-title"><i class="fa-solid fa-desktop fa-xs"></i> masabathularao-mac</h6>
-                        <div class="table-container">
-                            <p class="my-2 rounded load_progress_widget">
-                                <i class="fa-solid fa-circle-exclamation fa-lg"></i> load running currently!<br>
-                                <span id="countdown">01:02:37</span> remaining...
-                            </p>
-                        <div class="container"><div class="row"><div class="simulator_sub_cards col rounded py-2 text-center bg-light position-relative">
-                    <h5 class="text-primary mb-1">0</h5>
-
-                    <small class="text-muted" style="font-size: 8px;">assets to enroll</small>
-                </div><div class="simulator_sub_cards col rounded py-2 text-center bg-light position-relative">
-                    <h5 class="text-primary mb-1">18000</h5>
-                    <small class="text-muted" style="font-size: 8px;">how_many_msgs_to_send</small>
-                </div></div><div class="row"><div class="simulator_sub_cards col rounded py-2 text-center bg-light position-relative">
-                    <h6 class="text-primary mb-1">rhel7-6tab_12rec.log</h6>
-                    <small class="text-muted" style="font-size: 8px;">inputfile</small>
-                </div></div></div><table class="dataframe table table-bordered table-hover table-sm text-center custom-table simulator_card_table">
-                    <thead>
-                        <tr>
-                            <th class="sortable" data-column="" data-order="desc">domain</th>
-                            <th class="sortable" data-column="" data-order="desc">count</th>
-                        </tr>
-                    </thead>
-                <tbody>
-                        <tr>
-                            <td>jupiter6</td>
-                            <td>10</td>
-                        </tr>
-                    
-                        <tr>
-                            <td>jupiter8</td>
-                            <td>10</td>
-                        </tr>
-                    </tbody></table>
-                    
-                    <table class="dataframe table table-bordered table-hover table-sm text-center custom-table simulator_card_table">
-                    <thead>
-                        <tr>
-                            <th class="sortable" data-column="" data-order="desc">process</th>
-                            <th class="sortable" data-column="" data-order="desc">instances</th>
-                        </tr>
-                    </thead>
-                <tbody>
-                        <tr>
-                            <td>endpointsim</td>
-                            <td>0</td>
-                        </tr>
-                    
-                        <tr>
-                            <td>node</td>
-                            <td>0</td>
-                        </tr>
-                    </tbody></table></div>
-                    </div>
-                </div>
-        
                 <div class="card mb-2 mr-2 simulator_card online">
                     <div class="loading-bar"></div>
-                    <button class="position-absolute btn btn-sm btn-primary refresh-btn"><i class="fa-solid fa-arrows-rotate fa-xs"></i></button>
+                    <button class="position-absolute btn btn-sm btn-info refresh-btn"><i class="fa-solid fa-arrows-rotate fa-xs"></i></button>
+
+                    <input class="position-absolute btn btn-sm checkbox_class btn-primary" type="checkbox" checked="">
+
                     <div class="text-center">
                         <span class="offline_status"><i class="fa-solid fa-solid fa-ban mx-1 pt-1" style="color: red;"></i><span class="status-text">Offline</span></span>
                         <span class="online_status"><i class="fa-solid fa-circle  mx-1 pt-1" style="color: green;"></i><span class="status-text">Online</span></span>
                     </div>
-
+    
                     <div class="pt-2 text-center">
-                        <h6 class="card-title"><i class="fa-solid fa-desktop fa-xs"></i> s1sim1a </h6>
-                        <div class="table-container"></div>
+                        <h6 class="card-title"><i class="fa-solid fa-desktop fa-xs"></i> s1sim1a</h6>
+                        <div class="table-container"><div class="container"><div class="row"><div class="simulator_sub_cards col rounded py-2 text-center bg-light position-relative">
+                        <h5 class="text-primary mb-1">10</h5>
+                        <small class="text-muted" style="font-size: 8px;">live instances</small>
+                    </div><div class="simulator_sub_cards col rounded py-2 text-center bg-light position-relative">
+                        <h5 class="text-primary mb-1">10</h5>
+                        <small class="text-muted" style="font-size: 8px;">exp. instances</small>
+                    </div></div><div class="row"><div class="simulator_sub_cards col rounded py-2 text-center bg-light position-relative">
+                        <h5 class="text-primary mb-1">1000</h5>
+                        <small class="text-muted" style="font-size: 8px;">assets to enroll</small>
+                    </div><div class="simulator_sub_cards col rounded py-2 text-center bg-light position-relative">
+                        <h5 class="text-primary mb-1">9000</h5>
+                        <small class="text-muted" style="font-size: 8px;">msgs to send</small>
+                    </div></div><div class="row"><div class="simulator_sub_cards col rounded py-2 text-center bg-light position-relative">
+                        <h5 class="text-primary mb-1">10:00:00</h5>
+                        <small class="text-muted" style="font-size: 8px;">load duration</small>
+                    </div><div class="simulator_sub_cards col rounded py-2 text-center bg-light position-relative">
+                        <h11 class="text-primary mb-1">inputfile_10min_150msgs_formed_using_148tables_with_ratio_30:60_6tab_12rec.log</h11>
+                        <small class="text-muted" style="font-size: 8px;">inputfile</small>
+                    </div></div></div><table class="dataframe table table-bordered table-hover table-sm text-center custom-table simulator_card_table">
+                        <thead>
+                            <tr>
+                                <th class="sortable" data-column="" data-order="desc">domain</th>
+                                <th class="sortable" data-column="" data-order="desc">count</th>
+                            </tr>
+                        </thead>
+                    <tbody>
+                            <tr>
+                                <td>jupiter</td>
+                                <td>100</td>
+                            </tr>
+                        
+                            <tr>
+                                <td>jupiter10</td>
+                                <td>100</td>
+                            </tr>
+                        
+                            <tr>
+                                <td>jupiter20</td>
+                                <td>100</td>
+                            </tr>
+                        
+                            <tr>
+                                <td>jupiter30</td>
+                                <td>100</td>
+                            </tr>
+                        
+                            <tr>
+                                <td>jupiter40</td>
+                                <td>100</td>
+                            </tr>
+                        
+                            <tr>
+                                <td>jupiter50</td>
+                                <td>100</td>
+                            </tr>
+                        
+                            <tr>
+                                <td>jupiter60</td>
+                                <td>100</td>
+                            </tr>
+                        
+                            <tr>
+                                <td>jupiter70</td>
+                                <td>100</td>
+                            </tr>
+                        
+                            <tr>
+                                <td>jupiter80</td>
+                                <td>100</td>
+                            </tr>
+                        
+                            <tr>
+                                <td>jupiter90</td>
+                                <td>100</td>
+                            </tr>
+                        </tbody></table><table class="dataframe table table-bordered table-hover table-sm text-center custom-table simulator_card_table">
+                        <thead>
+                            <tr>
+                                <th class="sortable" data-column="" data-order="desc">parameter</th>
+                                <th class="sortable" data-column="" data-order="desc">value</th>
+                            </tr>
+                        </thead>
+                    <tbody>
+                            <tr>
+                                <td>first_x_customer_percentage</td>
+                                <td>50</td>
+                            </tr>
+                        
+                            <tr>
+                                <td>how_many_msgs_to_send</td>
+                                <td>9000</td>
+                            </tr>
+                        
+                            <tr>
+                                <td>inputfile</td>
+                                <td>inputfile_10min_150msgs_formed_using_148tables_with_ratio_30:60_6tab_12rec.log</td>
+                            </tr>
+                        
+                            <tr>
+                                <td>load_percentage_for_first_x_percent_customers</td>
+                                <td>50</td>
+                            </tr>
+                        
+                            <tr>
+                                <td>loadname</td>
+                                <td>MultiCustomer</td>
+                            </tr>
+                        
+                            <tr>
+                                <td>num_customers</td>
+                                <td>100</td>
+                            </tr>
+                        
+                            <tr>
+                                <td>stack_json_file</td>
+                                <td>s1_nodes.json</td>
+                            </tr>
+                        
+                            <tr>
+                                <td>total_number_of_assets</td>
+                                <td>10000</td>
+                            </tr>
+                        </tbody></table><table class="dataframe table table-bordered table-hover table-sm text-center custom-table simulator_card_table">
+                        <thead>
+                            <tr>
+                                <th class="sortable" data-column="" data-order="desc">process</th>
+                                <th class="sortable" data-column="" data-order="desc">instances</th>
+                            </tr>
+                        </thead>
+                    <tbody>
+                            <tr>
+                                <td>LoadTrigger</td>
+                                <td>0</td>
+                            </tr>
+                        
+                            <tr>
+                                <td>endpointsim</td>
+                                <td>10</td>
+                            </tr>
+                        
+                            <tr>
+                                <td>load_running_since_sec</td>
+                                <td></td>
+                            </tr>
+                        
+                            <tr>
+                                <td>node</td>
+                                <td>0</td>
+                            </tr>
+                        </tbody></table></div>
                     </div>
                 </div>
             </div>
