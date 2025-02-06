@@ -22,7 +22,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Function to handle the POST request
     const getSimulators = () => {
-        stack_json_file_name=stackField.value+"_nodes.json",
+        stack_json_file_name=stackField.value;
         loadname=loadnameField.value,
 
         fetch(`/get_simulators_list?stack_json_file_name=${stack_json_file_name}&loadname=${loadname}`)
@@ -383,8 +383,6 @@ document.addEventListener("DOMContentLoaded", () => {
             if (isValid) {
                 const form = document.getElementById('SimulatorForm');
                 const formData = new FormData(form);
-                const stack_json_file_name = stackField.value + "_nodes.json";
-                formData.set('stack_json_file', stack_json_file_name);
                 document.querySelectorAll(".simulator_card").forEach((card) => {
 
                     const table_container = card.querySelector(".table-container"); 
@@ -411,11 +409,8 @@ document.addEventListener("DOMContentLoaded", () => {
             const form = document.getElementById('SimulatorForm');
             const view_and_validate_asset_dist = document.getElementById('view_and_validate_asset_dist');
             const formData = new FormData(form);
-            const stack_json_file_name = stackField.value + "_nodes.json";
-            formData.set('stack_json_file', stack_json_file_name);
-            formData.append('only_for_validation', "pass_something_to_represent_true");
 
-            fetch(`/call_check_sim_health?sim_hostname=${simulators[0]}`, {
+            fetch(`/view_asset_dist`, {
                 method: 'POST',
                 body: formData
             })

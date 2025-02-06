@@ -18,5 +18,12 @@
     "pgbadger_reports_mount":"data",
 
     "apiload_simulator_ip": "192.168.135.52",
-    "main_osquery_data_simulator": "s1sim1a"
+
+    "configdb_node":"192.168.148.75",
+
+    "simulators":{
+        "MultiCustomer":["s1sim1a","s1sim1b","s1sim1c","s1sim1d","s1sim2a","s1sim2b","s1sim2c","s1sim2d","s1sim3a","s1sim3b", "s1sim3c","s1sim3d"],
+        "SingleCustomer":["s1sim1a","s1sim1b","s1sim1c","s1sim1d","s1sim2a","s1sim2b","s1sim2c","s1sim2d","s1sim3a","s1sim3b"],
+        "ControlPlane":["masabathularao-mac"]
+    }
 }
