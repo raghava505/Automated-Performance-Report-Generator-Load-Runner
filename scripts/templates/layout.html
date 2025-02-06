@@ -30,11 +30,11 @@
                 <li class="nav-item {{ 'active' if request.path == '/dashboard' else '' }}">
                     <a class="nav-link" href="/dashboard">Dashboards  <i class="fa-solid fa-chart-pie"></i><span class="sr-only">(current)</span></a>
                 </li>
-                <!-- <li class="nav-item {{ 'active' if request.path == '/simulator' else '' }}">
-                    <a class="nav-link" href="/simulator">Simulator  <i class="bi bi-joystick"></i><span class="sr-only">(current)</span></a>
-                </li> -->
+                <li class="nav-item {{ 'active' if request.path == '/osquery_simulator/run_osquery_load' else '' }}">
+                    <a class="nav-link" href="/osquery_simulator/run_osquery_load">Osquery Simulator<i class="bi bi-joystick"></i><span class="sr-only">(current)</span></a>
+                </li>
 
-                <li class="ml-1 nav-item dropdown {{ 'active' if request.path.startswith('/osquery_simulator') else '' }}">
+                <!-- <li class="ml-1 nav-item dropdown {{ 'active' if request.path.startswith('/osquery_simulator') else '' }}">
                     <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                     Osquery Simulator <i class="bi bi-joystick"></i><span class="sr-only">(current)</span>
                     </a>
@@ -42,7 +42,7 @@
                       <a class="dropdown-item" href="/osquery_simulator/run_osquery_load">Run osquery Load</a>
                       <a class="dropdown-item" href="#">Manage Osquery simulators</a>
                     </div>
-                </li>
+                </li> -->
 
             </ul>
         </div>

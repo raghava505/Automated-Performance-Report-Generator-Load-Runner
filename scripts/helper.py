@@ -19,10 +19,16 @@ def measure_time(func):
         return result
     return wrapper
 
+<<<<<<< HEAD
 
 def execute_command_in_node(node, command, stack_obj, timeout=30):
     try:
         stack_obj.log.info(f"Executing the command on node: {node}")
+=======
+def execute_command_in_node(node,command,stack_obj=None):
+    try:
+        if stack_obj: stack_obj.log.info(f"Executing the command in node : {node}")
+>>>>>>> e99ba32 (bring asset dist logic to UI)
         client = paramiko.SSHClient()
         client.load_system_host_keys()
         client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
@@ -35,23 +41,38 @@ def execute_command_in_node(node, command, stack_obj, timeout=30):
             errors = stderr.read().decode('utf-8').strip()
             
             if errors:
+<<<<<<< HEAD
                 stack_obj.log.error(f"Errors on {node}: {errors}")
                 # raise RuntimeError(f"Command execution error on {node}: {errors}")
             
             stack_obj.log.info(f"Command output from {node}: {out}")
+=======
+                if stack_obj: stack_obj.log.error("Errors:")
+                if stack_obj: stack_obj.log.info(errors)
+>>>>>>> e99ba32 (bring asset dist logic to UI)
             return out
         
         except Exception as e:
+<<<<<<< HEAD
             stack_obj.log.exception(f"Exception during execution on {node}: {e}")
             # raise RuntimeError(f"ERROR: Unable to execute command on {node}, {e}") from e
         
+=======
+            if stack_obj: stack_obj.log.exception(e)
+            raise RuntimeError(f"ERROR : Unable to connect to {node} , {e}") from e
+>>>>>>> e99ba32 (bring asset dist logic to UI)
         finally:
             client.close()
     
     except socket.gaierror as e:
+<<<<<<< HEAD
         stack_obj.log.exception(f"Socket error on {node}: {e}")
         # raise RuntimeError(f"ERROR: Unable to resolve host {node}, {e}") from e
 
+=======
+        if stack_obj: stack_obj.log.exception(e)
+        raise RuntimeError(f"ERROR : Unable to connect to {node} , {e}") from e
+>>>>>>> e99ba32 (bring asset dist logic to UI)
 
 def execute_trino_query(node,query,stack_obj,schema="system"):
     if stack_obj.stack_name == "S29":
@@ -63,9 +84,9 @@ def execute_trino_query(node,query,stack_obj,schema="system"):
     trino_command = f"sudo -u monkey docker exec {container} /opt/uptycs/cloud/utilities/trino-cli.sh --user uptycs --password prestossl --catalog uptycs --schema upt_{schema} --execute  \"{query}\""
     return execute_command_in_node(node,trino_command,stack_obj)
 
-def execute_configdb_query(node,query,stack_obj):
-    configdb_command = f'sudo docker exec postgres-configdb bash -c "PGPASSWORD=pguptycs psql -U postgres configdb -c \\"{query}\\""'
-    stack_obj.log.info(configdb_command)
+def execute_configdb_query(node,query,stack_obj=None):
+    configdb_command = f'sudo docker exec postgres-configdb15 bash -c "PGPASSWORD=pguptycs psql -U postgres configdb -c \\"{query}\\""'
+    if stack_obj: stack_obj.log.info(configdb_command)
     return execute_command_in_node(node,configdb_command,stack_obj)
 
 def execute_point_prometheus_query(stack_obj,timestamp,query): 

@@ -9,6 +9,7 @@ from flask_session import Session
 import json
 import pandas as pd
 import requests
+from CreateTestinputFiles import create_testinput_files
 
 app = Flask(__name__)
 # app.config['SECRET_KEY'] = '343c855017e725321cb7f35b89c98b9e'
@@ -21,6 +22,8 @@ publish_logs_user_queues = {}
 
 # MongoDB client setup
 client = MongoClient(MONGO_CONNECTION_STRING)
+
+load_name_options = ["MultiCustomer","SingleCustomer","ControlPlane"]
 
 @app.route('/get_databases', methods=['GET'])
 def get_databases():
@@ -44,8 +47,7 @@ def get_collections():
 @app.route('/osquery_simulator/run_osquery_load', methods=['GET'])
 def osquery_simulator():
     all_files = os.listdir(STACK_JSONS_PATH)
-    stack_json_options = sorted([(file.split('.')[0]).split('_')[0] for file in all_files if file.endswith('.json') and '_nodes' in file])
-    load_name_options = ["MultiCustomer","SingleCustomer","ControlPlane"]
+    stack_json_options = sorted([file for file in all_files if file.endswith('.json') and '_nodes' in file])
     return render_template('osquery_simulator.html',stack_json_options=stack_json_options,load_name_options=load_name_options)
 
 @app.route('/get_simulators_list', methods=['GET', 'POST'])
@@ -56,7 +58,6 @@ def get_simulators_list():
     if not stack_json_file_name or not loadname:
         return jsonify({"status": "error","message": "Both 'stack_json_file_name' and 'loadname' parameters are required."}), 400  # Bad Request
 
-    # Validate the stack JSON file path
     stack_json_file_path = os.path.join(STACK_JSONS_PATH, stack_json_file_name)
     if not os.path.exists(stack_json_file_path):
         return jsonify({"status": "error","message": f"The file '{stack_json_file_path}' was not found on the report UI server."}), 404  # Not Found
@@ -65,33 +66,28 @@ def get_simulators_list():
         # Read and parse the stack JSON file
         with open(stack_json_file_path, 'r') as f:
             contents = json.load(f)
-
-        try:
-            main_osquery_data_simulator = contents["main_osquery_data_simulator"]
-        except KeyError as e:
-            return jsonify({"status": "error","message": f"The key 'main_osquery_data_simulator' is missing in '{stack_json_file_path}': {e}"}), 500  # Internal Server Error
-
-        # Construct the URL for the external API call
-        url = f"http://{main_osquery_data_simulator}:{SIMULATOR_SERVER_PORT}/get_osquery_simulator_names?stack_json_file_name={stack_json_file_name}&loadname={loadname}"
-
-        # Make the GET request to the external API
-        try:
-            response = requests.get(url, timeout=10)  # Add a timeout for better reliability
-        except requests.RequestException as e:
-            return jsonify({"status": "error","message": f"Fatal. Your master simulator is down, unable to connect to the simulator server '{main_osquery_data_simulator}': {e}"}), 503  # Service Unavailable
-
-        # Handle the response from the external API
-        if response.status_code == 200:
-            return response.json(), 200  # OK
+        
+        if "simulators" not in contents:
+            return jsonify({"status": "error","message": f"Key simulators not found in '{stack_json_file_path}' in the report UI server."}), 404  # Not Found
+        elif loadname not in contents["simulators"]:
+            return jsonify({"status": "error","message": f"Key {loadname} not found in '{stack_json_file_path}[simulators]' in the report UI server."}), 404  # Not Found
         else:
-            # Extract and include the error message from the external API if available
-            try:
-                error_message = response.json().get('message', 'No error message provided.')
-            except ValueError:
-                error_message = response.text
-            return jsonify({
-                "status": "error","message": f"Failed to fetch simulator list from the simulator server '{main_osquery_data_simulator}'. "f"Status code: {response.status_code}. Error message: {error_message}"}), response.status_code
 
+            try:
+                fetch_inputfiles_url = f"http://{contents['simulators'][loadname][0]}:{SIMULATOR_SERVER_PORT}/get_input_files"
+                response = requests.get(fetch_inputfiles_url, timeout=10)  # Add a timeout for better reliability
+                inputfiles_list = response.json()["input_files"] 
+            except requests.RequestException as e:
+                inputfiles_list = [f"ERROR: fetching inputfiles list from first simulator. {e}"]
+                
+
+            return jsonify({
+                "status": "success",
+                "message": f"Successfully fetched the simulator list for {stack_json_file_name} - {loadname} load",
+                "result_data": contents["simulators"][loadname],
+                "input_files": inputfiles_list
+            }), 200
+    
     except json.JSONDecodeError as e:
         # Handle JSON parsing errors
         return jsonify({"status": "error","message": f"Failed to parse JSON from '{stack_json_file_path}': {e}"}), 400  # Bad Request
@@ -100,6 +96,18 @@ def get_simulators_list():
         # Handle unexpected errors
         return jsonify({"status": "error","message": f"An unexpected error occurred while processing the request: {e}"}), 500  # Internal Server Error
 
+@app.route('/view_asset_dist', methods=['POST'])
+def view_asset_dist():
+    updated_params = request.form.to_dict()
+    for key, value in updated_params.items():
+        try:updated_params[key] = int(value)
+        except:updated_params[key] = value
+    try:
+        return_dict = create_testinput_files(updated_params,create_testinput_files=False)
+        return jsonify({"status": "success","message": f"Asset distribution logic calculated." , "asset_dist_data":return_dict}), 200  # OK
+    except Exception as e:
+        return jsonify({"status": "error","message": f"error while creating testiinput files data. {str(e)}"}), 500
+
 
 @app.route('/call_check_sim_health', methods=['GET','POST'])
 def call_check_sim_health():
@@ -107,15 +115,28 @@ def call_check_sim_health():
     if not sim_hostname:
         return jsonify({"status": "error","message": "Simulator hostname is not provided in the query parameters at /call_check_sim_health."}), 400  # Bad Request
     if request.method == 'POST':
-        formdata = request.form.to_dict()
-        only_for_validation = formdata.get("only_for_validation",False)
-        update_url = f"http://{sim_hostname}:{SIMULATOR_SERVER_PORT}/update_load_params"
+        updated_params = request.form.to_dict()
+
+        for key, value in updated_params.items():
+            try:updated_params[key] = int(value)
+            except:updated_params[key] = value
+
+        print("updated updated_params after type casting : " , updated_params)
+
         try:
-            update_response = requests.post(update_url, data=formdata, timeout=10)  # Use 'data' for form-encoded data
+            return_dict = create_testinput_files(updated_params,create_testinput_files=False,sim_name = sim_hostname)
+        except Exception as e:
+            return jsonify({"status": "error","message": f"error while creating testiinput files data. {str(e)}"}), 500
+        
+        try:
+            update_url = f"http://{sim_hostname}:{SIMULATOR_SERVER_PORT}/update_load_params"
+            updated_params["instances"] = return_dict["instances"]
+            update_response = requests.post(update_url, json=updated_params, timeout=10)  # Use 'data' for form-encoded data
+            if update_response.status_code != 200 :
+                return update_response.json(),update_response.status_code
         except Exception as e:
             return jsonify({"status": "error","message": f"Failed to update: Unable to connect to  the simulator server '{update_url}': {str(e)}"}), 503  # Service Unavailable
-        if update_response.status_code != 200 or only_for_validation:
-            return update_response.json(),update_response.status_code
+            
         time.sleep(2)
 
     health_url = f"http://{sim_hostname}:{SIMULATOR_SERVER_PORT}/check_sim_health"
