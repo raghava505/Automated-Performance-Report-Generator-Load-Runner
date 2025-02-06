@@ -3,13 +3,8 @@ from settings import stack_configuration
 import json
 
 variables = {
-<<<<<<< HEAD
-        "start_time_str_ist":"2025-01-06 23:00",
-        "load_duration_in_hrs":5,
-=======
         "start_time_str_ist":"2025-02-05 15:30",
         "load_duration_in_hrs":10/60,
->>>>>>> a8ceb8e (support for osquery sim)
         "test_env_file_name":'s1_nodes.json'
     }
 
