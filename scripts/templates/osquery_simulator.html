@@ -44,7 +44,7 @@
             <div class="row w-100 justify-content-around ">
                 <div class="card mb-2 mr-2 flex-grow-1 text-center">
                     <button style="font-size: 13px;border-color: #000000;" class="btn btn-white btn-sm" id="select_deselect">
-                        <!-- <i class="fa-solid fa-check fa-sm"></i> -->
+                        <i class="fa-solid fa-check"></i>
                         Select all            
                     </button>
                 </div>
@@ -109,10 +109,10 @@
                     </div>
                     <div class="form-group col-md-6">
                         <label for="loadname">
-                            <i class="fas fa-truck-loading"></i> Load Name:
+                            <i class="fas fa-truck-loading"></i> Load Type:
                         </label>
                         <select class="form-control req-for-view-report" id="loadname" name="loadname" required>
-                            <option value="">Select Load Name</option>
+                            <option value="">Select Load Type</option>
                             {% for loadname in load_name_options %}
                                 <option value="{{ loadname }}">{{ loadname }}</option>
                             {% endfor %}
@@ -130,7 +130,7 @@
                     </div>
                     <div class="form-group col-md-6">
                         <label for="total_number_of_assets">
-                            <i class="fas fa-boxes"></i> Total Number of Assets to Enroll:
+                            <i class="fas fa-boxes"></i> Total Number of Assets to Simulate:
                         </label>
                         <input type="number" class="form-control" id="total_number_of_assets" name="total_number_of_assets" value="10000" placeholder="Enter Total Number of Assets" min="0" required oninput="this.value = this.value.replace(/[^0-9]/g, '');">
                         <div class="error-message"></div>

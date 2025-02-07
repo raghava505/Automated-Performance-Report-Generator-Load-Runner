@@ -10,6 +10,7 @@ import json
 import pandas as pd
 import requests
 from CreateTestinputFiles import create_testinput_files
+# from input import load_type_options
 
 app = Flask(__name__)
 # app.config['SECRET_KEY'] = '343c855017e725321cb7f35b89c98b9e'
@@ -23,7 +24,8 @@ publish_logs_user_queues = {}
 # MongoDB client setup
 client = MongoClient(MONGO_CONNECTION_STRING)
 
-load_name_options = ["MultiCustomer","SingleCustomer","ControlPlane"]
+# load_name_options=list(load_type_options.keys())
+load_name_options = ["Osquery"]
 
 @app.route('/get_databases', methods=['GET'])
 def get_databases():

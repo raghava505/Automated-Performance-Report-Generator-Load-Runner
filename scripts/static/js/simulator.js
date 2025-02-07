@@ -96,6 +96,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         gridHTML += '</div>'; // Close the row div
         simulator_grid.innerHTML = gridHTML; // Update the HTML once all fetch requests are resolved
+        document.getElementById("pull_latest_code_btn").click();
         document.getElementById("main-refresh").click();
     
         // Select all simulator cards
