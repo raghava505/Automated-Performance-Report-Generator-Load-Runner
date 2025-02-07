@@ -34,3 +34,5 @@ SIMULATOR_SERVER_PORT = 8123
 
 SECRETS_JSONS_PATH = os.path.join(ROOT_PATH,'secrets')
 TESTINPUT_FILES_PATH = os.path.join(ROOT_PATH,'testinput_json_files')
+
+MAX_CLIENTS_PER_INSTANCE = 300

@@ -28,6 +28,21 @@
     padding: 2px 6px;
 }
 
+.card-notfication.success {
+    color:#0b6b00;
+}
+.card-notfication.info {
+    /* background-color: #3be5ff; */
+    color: #005694;
+
+}
+.card-notfication.error {
+    color: #8d0000;
+}
+.card-notfication.warning {
+    color:  #af4f00;
+}
+
 .checkbox_class{
     font-size: 10px;
     top: 3px;
