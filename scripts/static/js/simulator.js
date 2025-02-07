@@ -563,30 +563,42 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
     async function callShellCommandReq(card, command,table_container) {
-        // table_container.innerHTML = "";
+        table_container.innerHTML = "";
         const sim = card.querySelector(".card-title").textContent;
         toggleLoading(card, true);
         showNotification(`Executing ${command} in ${sim}...`, 'info');
         const small = document.createElement('small');
+        fetch(`/call_execute_shell_command?sim_hostname=${sim}&shell_command=${command}`)
+            .then(response => {
+                if (!response.ok) {
+                return response.json().then(errorData => {
+                    throw new Error(`Error: ${errorData.message}`);
+                });
+                }
+                return response.json();
+            })
+            .then(data => {
+                showNotification(data.message, data.status);
+                small.innerHTML += `status : ${data.status}<br> Output : ${data.output}<br> ${data.message}`;
+                small.classList.add("card-notfication",data.status) 
+                // small.style.color = "green";
+                // display_simcard_notification(card,data.message+". result:"+data.result,data.status);
 
-        try {
-            let response;
-            response = await fetch(`/call_execute_shell_command?sim_hostname=${sim}&shell_command=${command}`);
-            
-            const data = await response.json();
-            showNotification(data.message,data.status);
-            // small.innerHTML += data.message+"<br> output:"+data.result,data.status;
-            display_simcard_notification(card,data.message+". result:"+data.result,data.status);
+            })
+            .catch(error => {
+                console.error(`Error executing ${command} in simulator ${sim}:`, error);
+                showNotification(error.message, "error");
+                small.innerHTML += `Error executing ${command} in simulator ${sim}. <br> ${error.message}`;
+                small.classList.add("card-notfication","error") 
 
-        } catch (error) {
-            console.error(`Error executing ${command} in simulator ${sim}:`, error);
-            showNotification(error,"error");
-            // small.innerHTML += `Error executing ${command} in simulator ${sim}:` + error;
+                // small.style.color = "red";
+            })
+            .finally(() => {
+                toggleLoading(card, false);
+            });
 
-        } finally {
-            toggleLoading(card, false);
-        }
-        // table_container.appendChild(small);
+        table_container.appendChild(small);
+
     };
 
     document.getElementById("enroll_assets_button").addEventListener("click", () => {
@@ -665,7 +677,10 @@ document.addEventListener("DOMContentLoaded", () => {
             } else {
                 selectedSimulatorCards.forEach((card) => {
                     const table_container = card.querySelector(".table-container"); 
-                callShellCommandReq(card,"pkill -f 'simulator/LoadTrigger.py'",table_container);
+                // callShellCommandReq(card,"pkill -f 'simulator/LoadTrigger.py'",table_container);
+                
+                // callShellCommandReq(card,"kill $(pgrep -f 'simulator/LoadTrigger.py')",table_container);
+                callShellCommandReq(card,"kill $(pgrep -f LoadTrigger.py)",table_container);
                 });
             }
         }
@@ -684,7 +699,9 @@ document.addEventListener("DOMContentLoaded", () => {
         } else {
             selectedSimulatorCards.forEach((card) => {
                 const table_container = card.querySelector(".table-container"); 
-            callShellCommandReq(card,"git stash;git stash clear;git pull origin main",table_container);
+            // callShellCommandReq(card,"git stash;git stash clear;git pull origin main",table_container);
+            callShellCommandReq(card,"git stash;git pull origin main;",table_container);
+
             });
         }
     });

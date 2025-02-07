@@ -100,11 +100,11 @@ def create_testinput_files(updated_test_input_params, create_and_save_files = Fa
                 "instanceid":i+1,
                 "domain":domain,
                 "secret":secrets_dict[domain],
-                "clients":300 if clients_to_enrol_to_this_cust>=300 else clients_to_enrol_to_this_cust,
+                "clients":MAX_CLIENTS_PER_INSTANCE if clients_to_enrol_to_this_cust>=MAX_CLIENTS_PER_INSTANCE else clients_to_enrol_to_this_cust,
                 "port":30001+i,
                 # "names":"names.txt"
             })
-            clients_to_enrol_to_this_cust-=300
+            clients_to_enrol_to_this_cust-=MAX_CLIENTS_PER_INSTANCE
             i+=1
 
     # split_instances = np.array_split(instances, len(simulators))
