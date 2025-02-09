@@ -96,7 +96,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         gridHTML += '</div>'; // Close the row div
         simulator_grid.innerHTML = gridHTML; // Update the HTML once all fetch requests are resolved
-        document.getElementById("pull_latest_code_btn").click();
+        // document.getElementById("pull_latest_code_btn").click();
         document.getElementById("main-refresh").click();
     
         // Select all simulator cards
@@ -122,55 +122,50 @@ document.addEventListener("DOMContentLoaded", () => {
     }
     
 
-    $(document).on('click', '.sortable', function() {
+    $(document).on('click', '.sortable', function () {
         var $this = $(this);
         var order = $this.data('order');
-
+    
         // Get the parent table of the clicked header
         var $table = $this.closest('table');
-        var $rows = $table.find('tbody tr').toArray();
-
+    
+        // Select immediate rows of the tbody to avoid affecting nested tables
+        var $rows = $table.children('tbody').children('tr').filter(function () {
+            return !$(this).find('table').length; // Exclude rows containing nested tables
+        }).toArray();
+    
         // Sort rows based on the column and order
-        $rows.sort(function(a, b) {
-            // Extract text from the corresponding column in both rows
+        $rows.sort(function (a, b) {
             var aText = $(a).find('td').eq($this.index()).text().trim();
             var bText = $(b).find('td').eq($this.index()).text().trim();
-
-            // Ensure aText and bText are strings, else set them to empty strings
-            aText = typeof aText === 'string' ? aText : '';
-            bText = typeof bText === 'string' ? bText : '';
-
-            // Handle special values like NaN
+    
+            // Handle special values and numeric comparisons
             if (aText === "NaN") aText = Number.NEGATIVE_INFINITY;
             if (bText === "NaN") bText = Number.NEGATIVE_INFINITY;
-
-            // Remove special characters like arrows and extract numeric values
+    
             var aNumeric = parseFloat(aText.replace(/[^0-9.-]+/g, ''));
             var bNumeric = parseFloat(bText.replace(/[^0-9.-]+/g, ''));
-
-            // Compare numeric values if both are valid numbers
+    
             if (!isNaN(aNumeric) && !isNaN(bNumeric)) {
                 return (order === 'desc' ? (bNumeric - aNumeric) : (aNumeric - bNumeric));
             }
-
-            // Fallback to string comparison if the values are not numeric
+    
             return (order === 'desc' ? (aText > bText) : (aText < bText)) ? 1 : -1;
         });
-
+    
         // Reverse the order for the next click
         $this.data('order', order === 'desc' ? 'asc' : 'desc');
-
+    
         // Remove existing sort classes from all headers in the same table
         $this.closest('tr').find('.sortable').removeClass('asc desc');
-
-        // Add the sort class to the clicked header
         $this.addClass(order === 'desc' ? 'asc' : 'desc');
-
-        // Append sorted rows to the table body
-        $.each($rows, function(index, row) {
+    
+        // Append sorted rows to the table body without disrupting nested tables
+        $.each($rows, function (index, row) {
             $table.children('tbody').append(row);
         });
     });
+    
     
     function fill_inputfiles_dropdown(inputfiles_list){
         console.log(inputfiles_list);
@@ -793,5 +788,117 @@ document.addEventListener("DOMContentLoaded", () => {
         toggleButton.addEventListener('click', toggleCheckboxes);
       }
       
+
+      document.getElementById('moreAboutInputFileBtn').addEventListener('click', async () => {
+        const inputFileSelect = document.getElementById('inputfile');
+        const selectedInputFile = inputFileSelect.value;
+    
+        if (!selectedInputFile) {
+            alert('Please select an input file before clicking the "More about inputfile" button.');
+            return;
+        }
+    
+        // Programmatically trigger the modal only after validation
+        $('#InputFiles_Modal').modal('show');
+    
+        // Update modal title with the selected input file
+        document.getElementById('InputFiles_ModalTitle').textContent = `Metadata for  '${selectedInputFile}'`;
+
+        fetch(`/get_inputfile_metadata_from_sim?inputfile_name=${encodeURIComponent(selectedInputFile)}&sim_hostname=${simulators[0]}`)
+            .then(response => {
+                if (!response.ok) {
+                    return response.json().then(errorData => {
+                        throw new Error(`Error: ${errorData.message}`);
+                    });
+                }
+                return response.json();
+            })
+            .then(data => {
+                showNotification(data.message, data.status);
+                console.log("inputfile metadata Response from server:", data);
+                const metadataContent = formatMetadataToHTML(data.input_file_details);
+                document.getElementById('inputFileMetadataContent').innerHTML = metadataContent;
+                attachToggleListeners(); // Attach toggle functionality after setting the content
+                
+            })
+            .catch(error => {
+                // console.error("Error:", error);
+                document.getElementById('inputFileMetadataContent').innerHTML = '<div class="alert alert-danger">Error fetching metadata. Please try again.</div>';
+                console.log(error);
+                showNotification(`${error.message}.`, "error");
+            });
+    });
+    
+    function formatMetadataToHTML(data) {
+        let html = `
+            <table class="table table-bordered table-sm text-center" style="width: 100%; table-layout: auto;">
+        `;
+    
+        function formatValue(key, value, parentId) {
+            if (typeof value === 'object' && value !== null) {
+                const nestedTableId = `${parentId}-${key.replace(/\s+/g, '-')}`;
+                return `
+                    <button type="button" class="btn btn-link btn-sm p-0 toggle-nested" data-target="#${nestedTableId}" style="font-size: 13px;">
+                        Show Details
+                    </button>
+                    <div id="${nestedTableId}" class="nested-table-container" style="display: none;">
+                        ${generateNestedTable(value, nestedTableId)}
+                    </div>
+                `;
+            }
+            return value !== undefined ? value.toString() : 'N/A';
+        }
+    
+        function generateNestedTable(obj, parentId) {
+            let nestedHtml = `
+                <table border="1" class="dataframe table table-bordered table-hover table-sm text-center" style="width: 100%; table-layout: auto;">
+                <thead><tr>
+                    <th class="sortable" data-column="" data-order="desc">sort</th>
+                    <th class="sortable" data-column="" data-order="desc">sort</th>
+                </tr>
+                </thead>
+                <tbody>
+            `;
+            for (const [nestedKey, nestedValue] of Object.entries(obj)) {
+                nestedHtml += `
+                    
+                    <tr>
+                        <td style="word-break: break-word;">${nestedKey}</td>
+                        <td style="word-break: break-word;">${formatValue(nestedKey, nestedValue, parentId)}</td>
+                    </tr>
+                `;
+            }
+            nestedHtml += '</table>';
+            return nestedHtml;
+        }
+    
+        for (const [key, value] of Object.entries(data)) {
+            html += `
+                <tr>
+                    <th style="width:25%;">${key}</th>
+                    <td style="word-break: break-word;">${formatValue(key, value, 'root')}</td>
+                </tr>
+            `;
+        }
+    
+        html += '</tbody></table>';
+    
+        return html;
+    }
+    
+    
+    // Attach event listeners after the modal content is set
+    function attachToggleListeners() {
+        document.querySelectorAll('.toggle-nested').forEach(button => {
+            button.addEventListener('click', function (event) {
+                event.preventDefault();
+                const target = document.querySelector(this.dataset.target);
+                if (target) {
+                    target.style.display = target.style.display === 'none' ? 'block' : 'none';
+                    this.textContent = target.style.display === 'none' ? 'Show Details' : 'Hide Details';
+                }
+            });
+        });
+    }
     
 });
