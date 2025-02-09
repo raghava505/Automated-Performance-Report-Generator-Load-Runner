@@ -2,7 +2,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const stackField = document.getElementById("stack_json_file");
     const loadnameField = document.getElementById("loadname");
     const simulator_grid = document.getElementById('simulator-grid');
-
+    let selected_count_id = document.getElementById('selected_count_id');
     let active_count_id =document.getElementById('active_count_id')
 
     let simulators = [];
@@ -23,8 +23,9 @@ document.addEventListener("DOMContentLoaded", () => {
     // Function to handle the POST request
     const getSimulators = () => {
         stack_json_file_name=stackField.value;
-        loadname=loadnameField.value,
-
+        loadname=loadnameField.value;
+        const simulators_loading_animation = document.getElementById("simulators_loading_animation");
+        simulators_loading_animation.style.display = 'block';
         fetch(`/get_simulators_list?stack_json_file_name=${stack_json_file_name}&loadname=${loadname}`)
             .then(response => {
                 if (!response.ok) {
@@ -41,10 +42,12 @@ document.addEventListener("DOMContentLoaded", () => {
                 input_files = data.input_files;
                 fill_inputfiles_dropdown(input_files);
                 populateSimulatorGrid(simulators);
+                simulators_loading_animation.style.display = 'none';
             })
             .catch(error => {
                 // console.error("Error:", error);
                 showNotification(`${error.message}.`, "error");
+                simulators_loading_animation.style.display = 'none';
             });
         
     };
@@ -54,8 +57,9 @@ document.addEventListener("DOMContentLoaded", () => {
         online_sims=0
         offline_sims=0
         if (areBothFieldsFilled()) {
-            simulator_grid.innerHTML = ""
-            active_count_id.innerHTML = ""
+            simulator_grid.innerHTML = "";
+            active_count_id.innerHTML = "";
+            selected_count_id.innerHTML = "";
             getSimulators();
         }
     };
@@ -753,7 +757,7 @@ document.addEventListener("DOMContentLoaded", () => {
       
       // Attach event listeners to all checkboxes
       function attachCheckboxListeners() {
-        const selected_count_id = document.getElementById('selected_count_id');
+        // const selected_count_id = document.getElementById('selected_count_id');
       
         const txt = `
         <i class="fa-solid fa-check fa-2xs" style="color: rgb(19, 15, 255);"></i>
@@ -792,6 +796,7 @@ document.addEventListener("DOMContentLoaded", () => {
       document.getElementById('moreAboutInputFileBtn').addEventListener('click', async () => {
         const inputFileSelect = document.getElementById('inputfile');
         const selectedInputFile = inputFileSelect.value;
+        document.getElementById('inputFileMetadataContent').innerHTML = "Fetching metadata..."
     
         if (!selectedInputFile) {
             alert('Please select an input file before clicking the "More about inputfile" button.');
