@@ -98,6 +98,20 @@ def get_simulators_list():
         # Handle unexpected errors
         return jsonify({"status": "error","message": f"An unexpected error occurred while processing the request: {e}"}), 500  # Internal Server Error
 
+
+@app.route('/get_inputfile_metadata_from_sim' , methods = ['GET'])
+def get_inputfile_metadata_from_sim():
+    sim_hostname = request.args.get('sim_hostname')
+    inputfile_name = request.args.get('inputfile_name')
+
+    try:
+        metadata_url = f"http://{sim_hostname}:{SIMULATOR_SERVER_PORT}/get_inputfile_metadata?inputfile_name={inputfile_name}"
+        update_response = requests.get(metadata_url, timeout=10) 
+        return update_response.json(),update_response.status_code
+    except Exception as e:
+        return jsonify({"status": "error","message": f"Unable to connect to  the simulator server '{metadata_url}': {str(e)}"}), 503  # Service Unavailable
+ 
+
 @app.route('/view_asset_dist', methods=['POST'])
 def view_asset_dist():
     updated_params = request.form.to_dict()
