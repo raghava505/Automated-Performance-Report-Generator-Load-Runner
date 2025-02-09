@@ -79,7 +79,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     <div class="loading-bar"></div>
                     <button class="position-absolute btn btn-sm btn-info refresh-btn"><i class="fa-solid fa-arrows-rotate fa-xs"></i></button>
 
-                    <input class="position-absolute btn btn-sm checkbox_class btn-primary" type="checkbox" checked>
+                    <input class="position-absolute btn btn-sm checkbox_class btn-uptycs" type="checkbox" checked>
 
                     <div class="text-center">
                         <span class="offline_status"><i class="fa-solid fa-solid fa-ban mx-1 pt-1" style="color: red;"></i><span class="status-text">Offline</span></span>
@@ -245,7 +245,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     value_font_factor = Math.floor(String(value).length / 12);
                     console.log(value_font_factor,key,value)
                     card.innerHTML = `
-                        <h${value_font_factor+5} class="text-primary mb-1">${value}</h${value_font_factor+5}>
+                        <h${value_font_factor+5} class="text-uptycs mb-1">${value}</h${value_font_factor+5}>
                         <small class="text-muted" style="font-size: 8px;">${key}</small>
                     `;
                 
@@ -757,7 +757,7 @@ document.addEventListener("DOMContentLoaded", () => {
       
         const txt = `
         <i class="fa-solid fa-check fa-2xs" style="color: rgb(19, 15, 255);"></i>
-        <span id="checkbox-counter" style="font-weight: 700; font-size: medium; color: rgb(23, 42, 255);">0</span>
+        <span id="checkbox-counter" style="font-weight: 700; font-size: medium; color: rgba(105,16,217,255);">0</span>
         <span class="text-muted" style="font-size: 12px;"> Simulators Selected</span>
         `;
         selected_count_id.innerHTML = txt;
@@ -802,7 +802,6 @@ document.addEventListener("DOMContentLoaded", () => {
         $('#InputFiles_Modal').modal('show');
     
         // Update modal title with the selected input file
-        document.getElementById('InputFiles_ModalTitle').textContent = `Metadata for  '${selectedInputFile}'`;
 
         fetch(`/get_inputfile_metadata_from_sim?inputfile_name=${encodeURIComponent(selectedInputFile)}&sim_hostname=${simulators[0]}`)
             .then(response => {
@@ -817,6 +816,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 showNotification(data.message, data.status);
                 console.log("inputfile metadata Response from server:", data);
                 const metadataContent = formatMetadataToHTML(data.input_file_details);
+                document.getElementById('InputFiles_ModalTitle').textContent = `${data.modal_heading}`;
                 document.getElementById('inputFileMetadataContent').innerHTML = metadataContent;
                 attachToggleListeners(); // Attach toggle functionality after setting the content
                 
