@@ -43,7 +43,7 @@
             
             <div class="row w-100 justify-content-around ">
                 <div class="card mb-2 mr-2 flex-grow-1 text-center">
-                    <button style="font-size: 13px;border-color: #000000;" class="btn btn-white btn-sm" id="select_deselect">
+                    <button style="font-size: 13px;border-color: #000000;" class="btn btn-uptycs btn-sm" id="select_deselect">
                         <i class="fa-solid fa-check"></i>
                         Select all            
                     </button>
@@ -63,7 +63,7 @@
                 <!-- Kill All Assets Button -->
                 <div class="card mb-2  mr-2 flex-grow-1 text-center">
                     <button type="button" style="font-size: 13px;" class="btn btn-danger btn-block btn-sm" id="kill_assets_button">
-                        <i class="fa-solid fa-skull-crossbones fa-sm"></i> Kill Assets
+                        <i class="fa-solid fa-skull-crossbones fa-sm"></i> Kill Instances
                     </button>
                 </div>
                 <!-- Enroll Assets Button -->
@@ -177,27 +177,27 @@
                 <div class="px-2 pt-4 row d-flex justify-content-center align-items-center" style="height: 100%;">
                     
                     <div class="col-md-4 text-center">
-                        <button type="button" style="font-size: 13px;" class="btn btn-info btn-sm btn-block" id="update_sim_params_button">
+                        <button type="button" style="font-size: 13px;" class="btn btn-uptycs btn-sm btn-block" id="update_sim_params_button">
                             <i class="fas fa-sliders-h fa-sm"></i> Update Params in Sims 
                         </button>
                     </div>
                     <div class="col-md-4 text-center">
-                        <button type="button" style="font-size: 13px;" class="btn btn-success btn-sm btn-block" id="view_asset_dist_btn">
+                        <button type="button" style="font-size: 13px;" class="btn btn-uptycs btn-sm btn-block" id="view_asset_dist_btn">
                             <i class="fas fa-eye fa-sm"></i> View Asset Distribution
                         </button>
                     </div>
                     <div class="col-md-4 text-center">
-                        <button type="button" style="font-size: 13px;" class="btn btn-dark btn-sm btn-block" id="moreAboutInputFileBtn">
+                        <button type="button" style="font-size: 13px;" class="btn btn-uptycs btn-sm btn-block" id="moreAboutInputFileBtn">
                             <i class="fas fa-file fa-sm"></i> More about inputfile
                         </button>
                     
                         <!-- Modal -->
                         <div class="modal fade" id="InputFiles_Modal" tabindex="-1" role="dialog" aria-labelledby="InputFiles_ModalTitle" aria-hidden="true">
-                            <div class="modal-dialog modal-lg custom-modal-width" role="document">
+                            <div class="modal-dialog modal-lg custom-modal-width mt-5 pt-5" role="document">
                                 <div class="modal-content">
-                                    <div class="modal-header">
+                                    <div class="modal-header" style="background-color: rgba(105,16,216,255); color: rgba(226,208,249,255);">
                                         <h5 class="modal-title" id="InputFiles_ModalTitle">Input File Metadata</h5>
-                                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                        <button type="button" class="close" data-dismiss="modal" aria-label="Close" style="color: white;">
                                             <span aria-hidden="true">&times;</span>
                                         </button>
                                     </div>
@@ -205,7 +205,7 @@
                                         <div id="inputFileMetadataContent">Fetching metadata...</div>
                                     </div>
                                     <div class="modal-footer">
-                                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                                        <button type="button" class="btn btn-uptycs btn-sm" data-dismiss="modal">Close</button>
                                     </div>
                                 </div>
                             </div>
@@ -216,7 +216,7 @@
                     <style>
                         /* Center modal and set width to 70% */
                         .custom-modal-width {
-                            max-width: 50%;
+                            max-width: 65%;
                             margin: auto;
                         }
                     </style>
@@ -236,7 +236,7 @@
                     <div class="loading-bar"></div>
                     <button class="position-absolute btn btn-sm btn-info refresh-btn"><i class="fa-solid fa-arrows-rotate fa-xs"></i></button>
 
-                    <input class="position-absolute btn btn-sm checkbox_class btn-primary" type="checkbox" checked="">
+                    <input class="position-absolute btn btn-sm checkbox_class btn-uptycs" type="checkbox" checked>
 
                     <div class="text-center">
                         <span class="offline_status"><i class="fa-solid fa-solid fa-ban mx-1 pt-1" style="color: red;"></i><span class="status-text">Offline</span></span>
