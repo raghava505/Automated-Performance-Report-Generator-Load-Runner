@@ -46,7 +46,7 @@
 
             
         <!-- <div class="col-md-6  rounded" style="background-color: rgb(255, 255, 255);">             -->
-            <form id="inputForm" class="p-3 rounded custom-forms col-md-6" style="background-color: rgb(255, 255, 255);">
+            <form id="inputForm" class="p-4 rounded custom-forms col-md-6" style="background-color: rgb(255, 255, 255);">
     
                 <div class="form-row">
                     <div class="form-group col-md-6">
@@ -76,11 +76,13 @@
                 <div id="fieldsContainer">
                     <!-- Initial set of 'sprint' and 'run' fields will be added here -->
                 </div>
-                <div class="text-center" >
-                    <button type="button" style="font-size:11px;" class="btn btn-sm btn-outline-uptycs col-md-1 mb-1" onclick="addSprintRunFields()">Add <i class="fa-solid fa-square-plus fa-lg"></i></button>
+                
+                <!-- <div class="text-center" >
+                    <button type="button" style="font-size:11px;" class="btn btn-sm btn-outline-uptycs mb-1" onclick="addSprintRunFields()"><i class="fa-solid fa-square-plus fa-lg"></i></button>
                 </div>                
             
-            
+             -->
+                <hr/>
                 <div class="form-row">
                     <div class="form-group col-md-6">
                         <label for="url"><i class="fa-solid fa-link fa-xs"></i> Confluence URL :</label>
@@ -123,14 +125,14 @@
                 
                 <div class="px-2 row">
                     <div class="col-md-6">
-                        <button type="button" class="btn btn-uptycs btn-sm btn-block" onclick="validateViewReport()">
-                            View Report <i class="fa-solid fa-eye fa-sm"></i>
+                        <button type="button" class="btn btn-success btn-sm btn-block" onclick="validateViewReport()">
+                             <i class="fa-solid fa-eye fa-sm"></i> View Report
                         </button>
                     </div>
     
                     <div class="col-md-6">
                         <button type="button" class="btn btn-uptycs btn-block btn-sm" onclick="validatePublishForm()">
-                            Publish to Confluence <i class="fa-solid fa-paper-plane fa-sm"></i>
+                            <i class="fa-solid fa-paper-plane fa-sm"></i> Publish to Confluence 
                         </button>
                     </div>
                 </div>
@@ -161,7 +163,7 @@
 
 
 
-<div class="pb-3 mt-5 rounded container-fluid">
+<div class="pb-3 mt-4 rounded container-fluid">
     <div class="row pb-1">
         <div class="col-md-2 d-flex  rounded align-items-center justify-content-center">
             <!-- <h5 class="text-center mt-1 mr-3"><i class="fa-solid fa-list"></i>  Contents </h5> -->

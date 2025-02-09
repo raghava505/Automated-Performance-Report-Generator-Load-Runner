@@ -161,11 +161,11 @@ body {
 
 
 #logWindow {
-    max-height: 104cap;
+    max-height: 103cap;
     overflow-x: auto; /* Prevent horizontal scrolling unless absolutely necessary */
     max-width: 105vw;
     overflow-y: auto; /* Enable vertical scrolling */
-    height: 104cap;
+    height: 103cap;
     /* margin: 10px 0px; */
     font-family: 'Courier New', Courier, monospace;
     font-size: 11px;
