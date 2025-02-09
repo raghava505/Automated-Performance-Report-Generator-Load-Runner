@@ -97,7 +97,7 @@ class ViewReportClass:
                 <div class="d-flex justify-content-between">
                     <button type="button" class="ml-2 btn btn-success save_table" style="font-size:10px;" id>Save</button>
                     
-                    <button type="button" class="btn mr-1 btn-primary btn-sm add_new_row" style="font-size:10px;" data-table-id="{uuid_table}">Add Row</button>
+                    <button type="button" class="btn mr-1 btn-uptycs btn-sm add_new_row" style="font-size:10px;" data-table-id="{uuid_table}">Add Row</button>
                 </div>            
             </form>"""
 
