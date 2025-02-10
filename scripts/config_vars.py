@@ -25,6 +25,7 @@ BASE_GRAPHS_PATH = os.path.join(os.path.dirname(ROOT_PATH),'graphs')
 BASE_HTMLS_PATH = os.path.join(os.path.dirname(ROOT_PATH),'htmls')
 BASE_PDFS_PATH = os.path.join(os.path.dirname(ROOT_PATH),'pdfs')
 BASE_LOGS_PATH = os.path.join(ROOT_PATH,'logs')
+INPUTFILES_METADATA_PATH = os.path.join(ROOT_PATH,'inputfiles_metadata')
 
 # REPORT UI
 LOCAL_PGBADGER_REPORT_PORT = 8011
@@ -32,7 +33,9 @@ REPORT_UI_PORT = 8012
 MONGO_CONNECTION_STRING = "mongodb://mongo-report:8013"  #use "mongo" when mongo is running  in a container, use "localhost" if running in machine
 SIMULATOR_SERVER_PORT = 8123
 
+# osquery simulator
 SECRETS_JSONS_PATH = os.path.join(ROOT_PATH,'secrets')
 TESTINPUT_FILES_PATH = os.path.join(ROOT_PATH,'testinput_json_files')
 
 MAX_CLIENTS_PER_INSTANCE = 150
+DELAY_BETWEEN_TRIGGER_TO_USE_FOR_ACCURACIES = 4 
