@@ -39,7 +39,7 @@
         <div class="col-md-1"></div>
         <div class="col-md-5">
             <h5 class="text-center">
-                <i class="fa-solid fa-sliders fa-sm"></i>  View and Update simulator parameters for Osquery Load
+                <i class="fa-solid fa-sliders fa-sm"></i>  View and Update Simulator Parameters
             </h5>
         </div>
         
@@ -106,6 +106,24 @@
             <form id="SimulatorForm" class="p-4 rounded custom-forms" style="background-color: rgb(255, 255, 255);">
                 <div class="form-row">
                     <div class="form-group col-md-6">
+                        <label for="loadname">
+                            <i class="fas fa-truck-loading"></i> Load Type:
+                        </label>
+                        <select class="form-control req-for-view-report" id="loadname" name="loadname" required>
+                            <option value="">Select Load Type</option>
+                            <!-- {% for loadname in load_name_options %}
+                                <option value="{{ loadname }}">{{ loadname }}</option>
+                            {% endfor %} -->
+                            <option value="Osquery" selected>Osquery</option>
+                            <option value="Osquery">CloudQuery</option>
+                            <option value="Osquery">KubeQuery</option>
+                            <option value="Osquery">SelfManaged</option>
+                            <option value="Osquery">ApiLoad</option>
+
+                        </select>
+                        <div class="error-message"></div>
+                    </div>
+                    <div class="form-group col-md-6">
                         <label for="stack">
                             <i class="fas fa-layer-group"></i> Stack:
                         </label>
@@ -117,122 +135,112 @@
                         </select>
                         <div class="error-message"></div>
                     </div>
-                    <div class="form-group col-md-6">
-                        <label for="loadname">
-                            <i class="fas fa-truck-loading"></i> Load Type:
-                        </label>
-                        <select class="form-control req-for-view-report" id="loadname" name="loadname" required>
-                            <option value="">Select Load Type</option>
-                            {% for loadname in load_name_options %}
-                                <option value="{{ loadname }}">{{ loadname }}</option>
-                            {% endfor %}
-                        </select>
-                        <div class="error-message"></div>
-                    </div>
                 </div>
-                <div class="form-row">
-                    <div class="form-group col-md-6">
-                        <label for="num_customers">
-                            <i class="fas fa-users"></i> Number of Customers to send load from:
-                        </label>
-                        <input type="number" class="form-control" id="num_customers" name="num_customers" value="100" placeholder="Enter Number of Customers" min="0" required oninput="this.value = this.value.replace(/[^0-9]/g, '');">
-                        <div class="error-message"></div>
+                <div class="osquery_part_of_the_form">
+                    <div class="form-row">
+                        <div class="form-group col-md-6">
+                            <label for="num_customers">
+                                <i class="fas fa-users"></i> Number of Customers to send load to:
+                            </label>
+                            <input type="number" class="form-control" id="num_customers" name="num_customers" value="100" placeholder="Enter Number of Customers" min="0" required oninput="this.value = this.value.replace(/[^0-9]/g, '');">
+                            <div class="error-message"></div>
+                        </div>
+                        <div class="form-group col-md-6">
+                            <label for="total_number_of_assets">
+                                <i class="fas fa-boxes"></i> Total Number of Assets to Simulate:
+                            </label>
+                            <input type="number" class="form-control" id="total_number_of_assets" name="total_number_of_assets" value="10000" placeholder="Enter Total Number of Assets" min="0" required oninput="this.value = this.value.replace(/[^0-9]/g, '');">
+                            <div class="error-message"></div>
+                        </div>
                     </div>
-                    <div class="form-group col-md-6">
-                        <label for="total_number_of_assets">
-                            <i class="fas fa-boxes"></i> Total Number of Assets to Simulate:
-                        </label>
-                        <input type="number" class="form-control" id="total_number_of_assets" name="total_number_of_assets" value="10000" placeholder="Enter Total Number of Assets" min="0" required oninput="this.value = this.value.replace(/[^0-9]/g, '');">
-                        <div class="error-message"></div>
+                    <div class="form-row">
+                        <div class="form-group col-md-6">
+                            <label for="first_x_customer_percentage">
+                                <i class="fas fa-percentage"></i> First X% of customers:
+                            </label>
+                            <br> Select X = <output id="first_x_customer_percentage_sliderValue">50</output>
+                            <input type="range" class="form-range form-control ms-2" value="50" min="10" max="90" step="10" id="first_x_customer_percentage" name="first_x_customer_percentage" oninput="updateSliderValue_first_x_customer_percentage(this.value)">
+                            <div class="error-message"></div>
+                        </div>
+                        <div class="form-group col-md-6">
+                            <label for="load_percentage_for_first_x_percent_customers">
+                                <i class="fas fa-weight-hanging"></i> Gets Y% of total load:
+                            </label>
+                            <br> Select Y = <output id="load_percentage_for_first_x_percent_customers_sliderValue">50</output>
+                            <input type="range" class="form-range form-control ms-2" value="50" min="10" max="90" step="10" id="load_percentage_for_first_x_percent_customers" name="load_percentage_for_first_x_percent_customers" oninput="updateSliderValue_load_percentage_for_first_x_percent_customers(this.value)">
+                            <div class="error-message"></div>
+                        </div>
                     </div>
-                </div>
-                <div class="form-row">
-                    <div class="form-group col-md-6">
-                        <label for="first_x_customer_percentage">
-                            <i class="fas fa-percentage"></i> First X% of customers:
-                        </label>
-                        <br> Select X = <output id="first_x_customer_percentage_sliderValue">50</output>
-                        <input type="range" class="form-range form-control ms-2" value="50" min="10" max="90" step="10" id="first_x_customer_percentage" name="first_x_customer_percentage" oninput="updateSliderValue_first_x_customer_percentage(this.value)">
-                        <div class="error-message"></div>
-                    </div>
-                    <div class="form-group col-md-6">
-                        <label for="load_percentage_for_first_x_percent_customers">
-                            <i class="fas fa-weight-hanging"></i> Gets Y% of total load:
-                        </label>
-                        <br> Select Y = <output id="load_percentage_for_first_x_percent_customers_sliderValue">50</output>
-                        <input type="range" class="form-range form-control ms-2" value="50" min="10" max="90" step="10" id="load_percentage_for_first_x_percent_customers" name="load_percentage_for_first_x_percent_customers" oninput="updateSliderValue_load_percentage_for_first_x_percent_customers(this.value)">
-                        <div class="error-message"></div>
-                    </div>
-                </div>
-                <div class="form-row">
-                    <div class="form-group col-md-6">
-                        <label for="how_many_msgs_to_send">
-                            <i class="fas fa-stopwatch"></i> No.of msgs (msgs x 4 = Load Duration in sec):
-                        </label>
-                        <input type="number" class="form-control" id="how_many_msgs_to_send" name="how_many_msgs_to_send" placeholder="Enter how_many_msgs_to_send" min="0" required value="9000" oninput="this.value = this.value.replace(/[^0-9]/g, '');">
-                        <div class="error-message"></div>
-                    </div>
-                    <div class="form-group col-md-6">
-                        <label for="inputfile">
-                            <i class="fas fa-file-alt"></i> Input File:
-                        </label>
-                        <select class="form-control" id="inputfile" name="inputfile" required>
-                            <option value="">Select Input File</option>
-                        </select>
+                    <div class="form-row">
+                        <div class="form-group col-md-6">
+                            <label for="how_many_msgs_to_send">
+                                <i class="fas fa-stopwatch"></i> No.of msgs (msgs x 4 = Load Duration in seconds):
+                            </label>
+                            <input type="number" class="form-control" id="how_many_msgs_to_send" name="how_many_msgs_to_send" placeholder="Enter how_many_msgs_to_send" min="0" required value="9000" oninput="this.value = this.value.replace(/[^0-9]/g, '');">
+                            <div class="error-message"></div>
+                        </div>
+                        <div class="form-group col-md-6">
+                            <label for="inputfile">
+                                <i class="fas fa-file-alt"></i> Input File:
+                            </label>
+                            <select class="form-control" id="inputfile" name="inputfile" required>
+                                <option value="">Select Input File</option>
+                            </select>
 
-                        <!-- <input type="text" class="form-control" id="inputfile" name="inputfile" placeholder="Enter input file" min="0" required value="rhel7-6tab_12rec.log"> -->
-                        <div class="error-message"></div>
+                            <!-- <input type="text" class="form-control" id="inputfile" name="inputfile" placeholder="Enter input file" min="0" required value="rhel7-6tab_12rec.log"> -->
+                            <div class="error-message"></div>
+                        </div>
                     </div>
-                </div>
-                <div class="px-2 pt-4 row d-flex justify-content-center align-items-center" style="height: 100%;">
-                    
-                    <div class="col-md-4 text-center">
-                        <button type="button" style="font-size: 13px;" class="btn btn-uptycs btn-sm btn-block" id="update_sim_params_button">
-                            <i class="fas fa-sliders-h fa-sm"></i> Update Params in Sims 
-                        </button>
-                    </div>
-                    <div class="col-md-4 text-center">
-                        <button type="button" style="font-size: 13px;" class="btn btn-uptycs btn-sm btn-block" id="view_asset_dist_btn">
-                            <i class="fas fa-eye fa-sm"></i> View Asset Distribution
-                        </button>
-                    </div>
-                    <div class="col-md-4 text-center">
-                        <button type="button" style="font-size: 13px;" class="btn btn-uptycs btn-sm btn-block" id="moreAboutInputFileBtn">
-                            <i class="fas fa-file fa-sm"></i> More about inputfile
-                        </button>
-                    
-                        <!-- Modal -->
-                        <div class="modal fade" id="InputFiles_Modal" tabindex="-1" role="dialog" aria-labelledby="InputFiles_ModalTitle" aria-hidden="true">
-                            <div class="modal-dialog modal-lg custom-modal-width mt-5 pt-5" role="document">
-                                <div class="modal-content">
-                                    <div class="modal-header" style="background-color: rgba(105,16,216,255); color: rgba(226,208,249,255);">
-                                        <h5 class="modal-title" id="InputFiles_ModalTitle">Input File Metadata</h5>
-                                        <button type="button" class="close" data-dismiss="modal" aria-label="Close" style="color: white;">
-                                            <span aria-hidden="true">&times;</span>
-                                        </button>
-                                    </div>
-                                    <div class="modal-body">
-                                        <div id="inputFileMetadataContent">Fetching metadata...</div>
-                                    </div>
-                                    <div class="modal-footer">
-                                        <button type="button" class="btn btn-uptycs btn-sm" data-dismiss="modal">Close</button>
+                    <div class="px-2 pt-4 row d-flex justify-content-center align-items-center" style="height: 100%;">
+                        
+                        <div class="col-md-4 text-center">
+                            <button type="button" style="font-size: 13px;" class="btn btn-uptycs btn-sm btn-block" id="update_sim_params_button">
+                                <i class="fas fa-sliders-h fa-sm"></i> Update Params in Sims 
+                            </button>
+                        </div>
+                        <div class="col-md-4 text-center">
+                            <button type="button" style="font-size: 13px;" class="btn btn-uptycs btn-sm btn-block" id="view_asset_dist_btn">
+                                <i class="fas fa-eye fa-sm"></i> View Asset Distribution
+                            </button>
+                        </div>
+                        <div class="col-md-4 text-center">
+                            <button type="button" style="font-size: 13px;" class="btn btn-uptycs btn-sm btn-block" id="moreAboutInputFileBtn">
+                                <i class="fas fa-file fa-sm"></i> More about inputfile
+                            </button>
+                        
+                            <!-- Modal -->
+                            <div class="modal fade" id="InputFiles_Modal" tabindex="-1" role="dialog" aria-labelledby="InputFiles_ModalTitle" aria-hidden="true">
+                                <div class="modal-dialog modal-lg custom-modal-width mt-5 pt-5" role="document">
+                                    <div class="modal-content">
+                                        <div class="modal-header" style="background-color: rgba(105,16,216,255); color: rgba(226,208,249,255);">
+                                            <h5 class="modal-title" id="InputFiles_ModalTitle">Input File Metadata</h5>
+                                            <button type="button" class="close" data-dismiss="modal" aria-label="Close" style="color: white;">
+                                                <span aria-hidden="true">&times;</span>
+                                            </button>
+                                        </div>
+                                        <div class="modal-body">
+                                            <div id="inputFileMetadataContent">Fetching metadata...</div>
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-uptycs btn-sm" data-dismiss="modal">Close</button>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
-                    
-                    <!-- Custom Styles -->
-                    <style>
-                        /* Center modal and set width to 70% */
-                        .custom-modal-width {
-                            max-width: 65%;
-                            margin: auto;
-                        }
-                    </style>
-                    
-                    <small class="text-muted pt-3">Note: Asset distribution will be done only on the selected simulators. So please validate the selected simulators before proceeding. </small>
+                        
+                        <!-- Custom Styles -->
+                        <style>
+                            /* Center modal and set width to 70% */
+                            .custom-modal-width {
+                                max-width: 65%;
+                                margin: auto;
+                            }
+                        </style>
+                        
+                        <small class="text-muted pt-3">Note: Asset distribution will be done only on the selected simulators. So please validate the selected simulators before proceeding. </small>
 
+                    </div>
                 </div>
             </form>
             
