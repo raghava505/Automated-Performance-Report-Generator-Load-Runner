@@ -180,3 +180,15 @@
     z-index: 1000;
 }
 /* </style> */
+
+.chart-container {
+    overflow: hidden;
+    opacity: 1;
+    height: auto;
+    transition: opacity 0.3s ease, max-height 0.3s ease;
+  }
+  
+  .chart-hidden {
+    opacity: 0;
+    max-height: 0;
+  }

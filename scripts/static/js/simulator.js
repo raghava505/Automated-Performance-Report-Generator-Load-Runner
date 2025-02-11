@@ -219,13 +219,15 @@ document.addEventListener("DOMContentLoaded", () => {
                 // Initialize row for cards
                 let row = document.createElement('div');
                 row.className = 'row';
-
+                let chart_hidden = true;
                 if (data.load_remaining_dur_in_sec) {
                     const remainingDurInSec = Number(data.load_remaining_dur_in_sec);
                     if (remainingDurInSec === 0) {
                         console.log("The remaining time is 0");
+                        chart_hidden = true
                     } 
                     else {
+                        chart_hidden = false
                         const formatSecondsToHHMMSS = (seconds) => {
                             const hours = String(Math.floor(seconds / 3600)).padStart(2, '0');
                             const minutes = String(Math.floor((seconds % 3600) / 60)).padStart(2, '0');
@@ -240,6 +242,18 @@ document.addEventListener("DOMContentLoaded", () => {
                         table_container.innerHTML += duration_remaining_html;
                     }
                 }
+
+                if (data.cpu_stats) {
+
+                    const chartClass = chart_hidden ? "chart-hidden" : "";
+                    table_container.innerHTML += `
+                      <div class="simulator_sub_cards">
+                        <div class="chart-container ${chartClass}" style="display: block;">
+                          <canvas id="cpuUsageChart_${sim}" width="400" height="300" style="height: 300px;"></canvas>
+                        </div>
+                      </div>
+                    `;
+                  }
                 
                 let count = 0;
                 data.main_params.forEach(([key, value], index) => {
@@ -309,6 +323,9 @@ document.addEventListener("DOMContentLoaded", () => {
                 }
                 card.classList.add("online");
                 card.classList.remove("offline");
+
+                cpuUsageChart = initialize_chart(`cpuUsageChart_${sim}`)
+                updateChart(cpuUsageChart, data.cpu_stats);
             }
             else{
                 const small = document.createElement('small');
@@ -355,6 +372,27 @@ document.addEventListener("DOMContentLoaded", () => {
             refreshSimulator(card, table_container);
         }
     });
+
+    document.getElementById(`toggle_cpu_charts`).addEventListener('click', function () {
+        const chartContainers = document.querySelectorAll('.chart-container');
+        let isAnyVisible = Array.from(chartContainers).some(container => !container.classList.contains('chart-hidden'));
+      
+        chartContainers.forEach(container => {
+          if (isAnyVisible) {
+            container.classList.add('chart-hidden');
+          } else {
+            container.classList.remove('chart-hidden');
+          }
+        });
+
+        // chartContainers.forEach(container => {
+        //     if (!container.classList.contains('chart-hidden')) {
+        //       container.classList.add('chart-hidden');
+        //     } else {
+        //       container.classList.remove('chart-hidden');
+        //     }
+        //   });
+      });
 
 
 
@@ -637,7 +675,7 @@ document.addEventListener("DOMContentLoaded", () => {
             } else {
                 selectedSimulatorCards.forEach((card) => {
                     const table_container = card.querySelector(".table-container"); 
-                callShellCommandReq(card,"killall endpointsim",table_container);
+                callShellCommandReq(card,"killall endpointsim;kill $(pgrep -f InitiateLoad.py)",table_container);
                 });
             }
         }
@@ -700,7 +738,7 @@ document.addEventListener("DOMContentLoaded", () => {
             selectedSimulatorCards.forEach((card) => {
                 const table_container = card.querySelector(".table-container"); 
             // callShellCommandReq(card,"git stash;git stash clear;git pull origin main",table_container);
-            callShellCommandReq(card,"git stash;git pull origin main;",table_container);
+            callShellCommandReq(card,"git stash; git fetch; git checkout origin/main -- requirements.txt; pip3 install -r requirements.txt; git pull origin main; ",table_container);
 
             });
         }
@@ -905,5 +943,83 @@ document.addEventListener("DOMContentLoaded", () => {
             });
         });
     }
+    // Initialize the chart when the page loads
+    function initialize_chart(chart_id){
+        const ctx = document.getElementById(chart_id).getContext('2d');
     
+        let cpuUsageChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+            labels: [],
+            datasets: [{
+                label: 'CPU Usage %',
+                data: [],
+                backgroundColor: 'rgba(138, 43, 226, 0.3)',
+                borderColor: 'rgba(138, 43, 226, 1)',
+                borderWidth: 0.4,
+                fill: true,
+                pointRadius: 0.9, // Remove the dots from the chart
+                cubicInterpolationMode: 'monotone' // Smoothen the curve
+            }]
+            },
+            options: {
+            responsive: true,
+            scales: {
+                x: {
+                ticks: {
+                    callback: function (value, index, ticks) {
+                        const totalLabels = cpuUsageChart.data.labels.length;
+
+                        if (totalLabels > 5) {
+                        const interval = Math.floor(totalLabels / 10); // Split data evenly into 5 ticks
+                        return index % interval === 0 ? this.getLabelForValue(value) : '';
+                        }
+                        return this.getLabelForValue(value); // Show all labels if <= 5
+                    },
+                    maxTicksLimit: 5,  // Additional safeguard to enforce 5 ticks
+                    font: {
+                        size: 6 // Keep the font size smaller
+                    }
+                    }
+                },
+                y: {
+                beginAtZero: true,
+                suggestedMax: 100,
+                ticks: {
+                    font: {
+                    size: 6 // Set the y-tick font size to a smaller value
+                    }
+                }
+                }
+            },
+            plugins: {
+                legend: { display: false },
+                title: {
+                  display: true,
+                  text: 'CPU busy %',
+                  font: {
+                    size: 10, // Set a smaller font size
+                    weight: 'normal' // Make the title non-bold
+                  }
+                }
+              }
+              
+            }
+        });
+        return cpuUsageChart
+    }
+
+    function updateChart(chart, data) {
+        data.forEach(point => {
+        chart.data.labels.push(point.time);
+        chart.data.datasets[0].data.push(point.value);
+        });
+    
+        // Maintain only the last 300 values
+        if (chart.data.labels.length > 300) {
+        chart.data.labels.splice(0, chart.data.labels.length - 300);
+        chart.data.datasets[0].data.splice(0, chart.data.datasets[0].data.length - 300);
+        }
+        chart.update();
+    }    
 });
