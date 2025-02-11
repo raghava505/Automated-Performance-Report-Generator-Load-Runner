@@ -6,6 +6,7 @@ from settings import stack_configuration
 import pandas as pd
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from io import StringIO
+import math, re
 
 class osquery_accuracy:
     def __init__(self, stack_obj, assets_per_cust_dict, trans, input_file):
@@ -36,12 +37,14 @@ class osquery_accuracy:
                 end_time = end_time_utc + timedelta(minutes=40)
                 self.end_time = end_time.strftime(format_data)
                 self.stack_obj = stack_obj
+                self.hours = stack_obj.hours
 
 
                 self.upt_day="".join(str(start_time_utc.strftime("%Y-%m-%d")).split('-'))
 
                 self.expected_records_for_each_table_per_asset = self.metadata_contents["expected_records_for_each_table"]
-                self.expected_events_count_per_asset = self.metadata_contents["expected_events_counts"]
+                expected_events_count_per_asset = self.metadata_contents["expected_events_counts"]
+                self.expected_events_df = pd.DataFrame(list(expected_events_count_per_asset.items()), columns=["code", "expected"])
 
                 self.expected_records_for_each_table_per_asset["process_open_sockets"] += self.expected_records_for_each_table_per_asset["process_open_sockets_local"] + self.expected_records_for_each_table_per_asset["process_open_sockets_remote"]
                 self.expected_records_for_each_table_per_asset.pop("process_open_sockets_local")
@@ -124,46 +127,74 @@ class osquery_accuracy:
             "data": table_accuracies_for_each_domain,
         }
 
+    def get_utc_days_involved(self):
+        time_format='%Y-%m-%d %H:%M'
+        start_utc = datetime.strptime(self.start_time, time_format)
+        end_utc = datetime.strptime(self.end_time, time_format)
+        days_involved = 0
+        current_date = start_utc.date()
+        while current_date < end_utc.date():
+            days_involved += 1
+            current_date += timedelta(days=1)
+        return days_involved
+
     def calculate_events_accuracy(self,alert_rules_triggered_per_cust,event_rules_triggered_per_cust):
         event_accuracies_for_each_domain = {}
         for domain, assets in self.assets_per_cust_dict.items():
-            result_single_domain = {}
-
             events_tables=["upt_events_data","alerts","incidents"]
-            print(self.expected_events_count_per_asset)
+
             for table in events_tables:
                 if table == "upt_events_data":
-                    query="select count(*) from {} where upt_day>={} and upt_time >= timestamp '{}' and upt_time < timestamp '{}' and code like '%-builder-added%'".format(table,self.upt_day,self.start_time,self.end_time)
+                    query=f"select code,count(*) from {table} where upt_day>={self.upt_day} and upt_time >= timestamp '{self.start_time}' and upt_time < timestamp '{self.end_time}' and code like '%-builder-added%' group by code"
 
-                    actual = execute_trino_query(stack_obj.first_pnode, query, stack_obj=stack_obj, schema=domain)
+                    output = execute_trino_query(stack_obj.first_pnode, query, stack_obj=stack_obj, schema=domain)
+                    stringio = StringIO(output)
+                    actual_events_df = pd.read_csv(stringio, header=None, names=["code","actual"])
+                    merged_df = pd.merge(actual_events_df, self.expected_events_df, on='code', how='outer')
 
-                    # stringio = StringIO(output)
-                    # df = pd.read_csv(stringio, header=None, names=columns)
-                    # Clean and validate the result
-                    clean_actual = actual.strip('"').strip()  # Remove surrounding quotes and extra spaces
-
-                    # Handle different cases
-                    if not clean_actual or not clean_actual.isdigit():
-                        clean_actual = 0  # Default to 0 for empty or invalid values
-                    expected = sum(self.expected_events_count_per_asset.values()) * assets * self.iterations_made_by_input_file
+                    # Update expected values
+                    merged_df["expected"] = merged_df["expected"] * assets * self.iterations_made_by_input_file
+                    expected_total = merged_df["expected"].sum()
+                    actual_total = merged_df["actual"].sum()
+                    
                 
-                # if table == "alerts":
-                #     # utc_days = self.get_utc_days_involved()
-                #     # expected = alert_rules_triggered_per_cust*1000*(utc_days+1)
-                #     expected
-                    result_single_domain[table] = {
-                        "expected": expected,
-                        "actual": int(clean_actual)
+                if table == "alerts":
+                    # utc_days = self.get_utc_days_involved()
+                    # expected_total = alert_rules_triggered_per_cust*1000*(utc_days+1)
+                    expected_total = alert_rules_triggered_per_cust * 50 * math.ceil(self.hours)
+                    query=f"select count(*) from {table} where  created_at >= timestamp '{self.start_time}' and created_at < timestamp '{self.end_time}' and code like '%-builder-added%' and customer_id=(select id from customers where domain='{domain}')"
+                    output = execute_configdb_query(self.stack_obj.configdb_node, query)
+                    match = re.search(r"\d+", output)
+                    if match:
+                        actual_total = int(match.group())
+                        print(f"{table} actual count for {domain} : {actual_total}")
+                    else:
+                        print(f"configdb output for {table} actual count for {domain} not found")
+                        actual_total = -1
+
+                if table == "incidents":
+                    query=f"select count(*) from {table} where  created_at >= timestamp '{self.start_time}' and created_at < timestamp '{self.end_time}' and customer_id=(select id from customers where domain='{domain}')"
+                    output = execute_configdb_query(self.stack_obj.configdb_node, query)
+                    match = re.search(r"\d+", output)
+                    if match:
+                        actual_total = int(match.group())
+                        print(f"{table} actual count for {domain} : {actual_total}")
+                    else:
+                        print(f"configdb output for {table} actual count for {domain} not found")
+                        actual_total = -1
+                    expected_total = None
+
+                total_row = {
+                        "code": f"Total {table} Triggered",
+                        "expected": expected_total,
+                        "actual": actual_total
                     }
-           
 
-            # Process results and calculate accuracy
-            df = pd.DataFrame(result_single_domain).T
-            df["accuracy"] = df["actual"] * 100 / df["expected"]
+                merged_df = merged_df._append(total_row, ignore_index=True)
 
+            merged_df["accuracy"] = merged_df["actual"] * 100 / merged_df["expected"]
             print(f"Events Accuracy for {domain} customer:")
-            print(df)
-
+            print(merged_df)
             event_accuracies_for_each_domain[domain] = {
                 "format": "table",
                 "collapse": True,
@@ -171,7 +202,7 @@ class osquery_accuracy:
                     "merge_on_cols": [],
                     "compare_cols": [],
                 },
-                "data": df.to_dict(orient="records"),
+                "data": merged_df.to_dict(orient="records"),
             }
 
         return {
@@ -195,7 +226,7 @@ if __name__ == "__main__":
 
     accuracy_obj= osquery_accuracy(stack_obj,assets_per_cust_dict=assets_per_cust_dict,trans=True,input_file="inputfile_10min_150msgs_formed_using_155tables_with_ratio_30:60_6tab_12rec.json")
     if accuracy_obj.continue_to_calculate_accuracy:
-        # Osquery_table_accuracies = accuracy_obj.calculate_hdfs_tables_accuracy()
+        Osquery_table_accuracies = accuracy_obj.calculate_hdfs_tables_accuracy()
         Osquery_event_accuracies = accuracy_obj.calculate_events_accuracy(alert_rules_triggered_per_cust,event_rules_triggered_per_cust)
 
     # print(result)
