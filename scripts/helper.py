@@ -59,6 +59,7 @@ def execute_trino_query(node,query,stack_obj=None,schema="system"):
     return execute_command_in_node(node,trino_command,stack_obj)
 
 def execute_configdb_query(node,query,stack_obj=None):
+    print(query)
     configdb_command = f'sudo docker exec postgres-configdb15 bash -c "PGPASSWORD=pguptycs psql -U postgres configdb -c \\"{query}\\""'
     if stack_obj: stack_obj.log.info(configdb_command)
     return execute_command_in_node(node,configdb_command,stack_obj)
