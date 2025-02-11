@@ -675,7 +675,7 @@ document.addEventListener("DOMContentLoaded", () => {
             } else {
                 selectedSimulatorCards.forEach((card) => {
                     const table_container = card.querySelector(".table-container"); 
-                callShellCommandReq(card,"killall endpointsim;kill $(pgrep -f InitiateLoad.py)",table_container);
+                callShellCommandReq(card,"./KillInstances.sh",table_container);
                 });
             }
         }
@@ -715,10 +715,7 @@ document.addEventListener("DOMContentLoaded", () => {
             } else {
                 selectedSimulatorCards.forEach((card) => {
                     const table_container = card.querySelector(".table-container"); 
-                // callShellCommandReq(card,"pkill -f 'simulator/LoadTrigger.py'",table_container);
-                
-                // callShellCommandReq(card,"kill $(pgrep -f 'simulator/LoadTrigger.py')",table_container);
-                callShellCommandReq(card,"kill $(pgrep -f LoadTrigger.py)",table_container);
+                callShellCommandReq(card,"./StopTrigger.sh",table_container);
                 });
             }
         }
@@ -737,8 +734,7 @@ document.addEventListener("DOMContentLoaded", () => {
         } else {
             selectedSimulatorCards.forEach((card) => {
                 const table_container = card.querySelector(".table-container"); 
-            // callShellCommandReq(card,"git stash;git stash clear;git pull origin main",table_container);
-            callShellCommandReq(card,"git stash; git fetch; git checkout origin/main -- requirements.txt; pip3 install -r requirements.txt; git pull origin main; ",table_container);
+                callShellCommandReq(card,"./PullLatestCode.sh",table_container);
 
             });
         }
