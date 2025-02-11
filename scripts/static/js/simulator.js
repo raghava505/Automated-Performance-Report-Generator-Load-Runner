@@ -944,82 +944,174 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
     // Initialize the chart when the page loads
-    function initialize_chart(chart_id){
-        const ctx = document.getElementById(chart_id).getContext('2d');
+    // function initialize_chart(chart_id){
+    //     const ctx = document.getElementById(chart_id).getContext('2d');
     
-        let cpuUsageChart = new Chart(ctx, {
-            type: 'line',
-            data: {
+    //     let cpuUsageChart = new Chart(ctx, {
+    //         type: 'line',
+    //         data: {
+    //         labels: [],
+    //         datasets: [{
+    //             label: 'CPU Usage %',
+    //             data: [],
+    //             backgroundColor: 'rgba(138, 43, 226, 0.3)',
+    //             borderColor: 'rgba(138, 43, 226, 1)',
+    //             borderWidth: 0.4,
+    //             fill: true,
+    //             pointRadius: 0.9, // Remove the dots from the chart
+    //             cubicInterpolationMode: 'monotone' // Smoothen the curve
+    //         }]
+    //         },
+    //         options: {
+    //         responsive: true,
+    //         scales: {
+    //             x: {
+    //             ticks: {
+    //                 callback: function (value, index, ticks) {
+    //                     const totalLabels = cpuUsageChart.data.labels.length;
+
+    //                     if (totalLabels > 5) {
+    //                     const interval = Math.floor(totalLabels / 10); // Split data evenly into 5 ticks
+    //                     return index % interval === 0 ? this.getLabelForValue(value) : '';
+    //                     }
+    //                     return this.getLabelForValue(value); // Show all labels if <= 5
+    //                 },
+    //                 maxTicksLimit: 5,  // Additional safeguard to enforce 5 ticks
+    //                 font: {
+    //                     size: 6 // Keep the font size smaller
+    //                 }
+    //                 }
+    //             },
+    //             y: {
+    //             beginAtZero: true,
+    //             suggestedMax: 100,
+    //             ticks: {
+    //                 font: {
+    //                 size: 6 // Set the y-tick font size to a smaller value
+    //                 }
+    //             }
+    //             }
+    //         },
+    //         plugins: {
+    //             legend: { display: false },
+    //             title: {
+    //               display: true,
+    //               text: 'CPU busy %',
+    //               font: {
+    //                 size: 10, // Set a smaller font size
+    //                 weight: 'normal' // Make the title non-bold
+    //               }
+    //             }
+    //           }
+              
+    //         }
+    //     });
+    //     return cpuUsageChart
+    // }
+
+    // function updateChart(chart, data) {
+    //     data.forEach(point => {
+    //     chart.data.labels.push(point.time);
+    //     chart.data.datasets[0].data.push(point.value);
+    //     });
+    
+    //     // Maintain only the last 300 values
+    //     if (chart.data.labels.length > 300) {
+    //     chart.data.labels.splice(0, chart.data.labels.length - 300);
+    //     chart.data.datasets[0].data.splice(0, chart.data.datasets[0].data.length - 300);
+    //     }
+    //     chart.update();
+    // }    
+
+
+    function initialize_chart(chart_id) {
+        const ctx = document.getElementById(chart_id).getContext('2d');
+      
+        let usageChart = new Chart(ctx, {
+          type: 'line',
+          data: {
             labels: [],
-            datasets: [{
+            datasets: [
+              {
                 label: 'CPU Usage %',
                 data: [],
                 backgroundColor: 'rgba(138, 43, 226, 0.3)',
                 borderColor: 'rgba(138, 43, 226, 1)',
                 borderWidth: 0.4,
                 fill: true,
-                pointRadius: 0.9, // Remove the dots from the chart
-                cubicInterpolationMode: 'monotone' // Smoothen the curve
-            }]
-            },
-            options: {
+                pointRadius: 0.9,
+                cubicInterpolationMode: 'monotone'
+              },
+              {
+                label: 'Memory Usage (GB)',
+                data: [],
+                backgroundColor: 'rgba(34, 139, 34, 0.3)',
+                borderColor: 'rgba(34, 139, 34, 1)',
+                borderWidth: 0.4,
+                fill: true,
+                pointRadius: 0.9,
+                cubicInterpolationMode: 'monotone'
+              }
+            ]
+          },
+          options: {
             responsive: true,
             scales: {
-                x: {
+              x: {
                 ticks: {
-                    callback: function (value, index, ticks) {
-                        const totalLabels = cpuUsageChart.data.labels.length;
-
-                        if (totalLabels > 5) {
-                        const interval = Math.floor(totalLabels / 10); // Split data evenly into 5 ticks
-                        return index % interval === 0 ? this.getLabelForValue(value) : '';
-                        }
-                        return this.getLabelForValue(value); // Show all labels if <= 5
-                    },
-                    maxTicksLimit: 5,  // Additional safeguard to enforce 5 ticks
-                    font: {
-                        size: 6 // Keep the font size smaller
+                  callback: function (value, index, ticks) {
+                    const totalLabels = usageChart.data.labels.length;
+      
+                    if (totalLabels > 5) {
+                      const interval = Math.floor(totalLabels / 10);
+                      return index % interval === 0 ? this.getLabelForValue(value) : '';
                     }
-                    }
-                },
-                y: {
+                    return this.getLabelForValue(value);
+                  },
+                  maxTicksLimit: 5,
+                  font: { size: 6 }
+                }
+              },
+              y: {
                 beginAtZero: true,
                 suggestedMax: 100,
                 ticks: {
-                    font: {
-                    size: 6 // Set the y-tick font size to a smaller value
-                    }
-                }
-                }
-            },
-            plugins: {
-                legend: { display: false },
-                title: {
-                  display: true,
-                  text: 'CPU busy %',
-                  font: {
-                    size: 10, // Set a smaller font size
-                    weight: 'normal' // Make the title non-bold
-                  }
+                  font: { size: 6 }
                 }
               }
-              
+            },
+            plugins: {
+              legend: {
+                labels: {
+                  font: { size: 6 },
+                  boxWidth: 5, // Small legend color box size
+                  boxHeight: 5
+                }
+              }
             }
+          }
         });
-        return cpuUsageChart
-    }
-
-    function updateChart(chart, data) {
+      
+        return usageChart;
+      }
+      
+      function updateChart(chart, data) {
         data.forEach(point => {
-        chart.data.labels.push(point.time);
-        chart.data.datasets[0].data.push(point.value);
+          chart.data.labels.push(point.time);
+          chart.data.datasets[0].data.push(point.cpu); 
+          chart.data.datasets[1].data.push(point.memory); 
         });
-    
+      
         // Maintain only the last 300 values
         if (chart.data.labels.length > 300) {
-        chart.data.labels.splice(0, chart.data.labels.length - 300);
-        chart.data.datasets[0].data.splice(0, chart.data.datasets[0].data.length - 300);
+          chart.data.labels.splice(0, chart.data.labels.length - 300);
+          chart.data.datasets[0].data.splice(0, chart.data.datasets[0].data.length - 300);
+          chart.data.datasets[1].data.splice(0, chart.data.datasets[1].data.length - 300);
         }
+      
         chart.update();
-    }    
+      }
+      
+
+
 });
