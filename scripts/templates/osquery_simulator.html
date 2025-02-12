@@ -7,7 +7,7 @@
     <div class="row">
         <div class="col-md-1"></div>
         <div class="col-md-5"></div>
-        <div class="col-md-3 mb-2 d-flex align-items-center justify-content-between">
+        <div class="col-md-3 mb-2 d-flex align-items-center justify-content-between text-center">
             <!-- Span at the extreme left -->
             <span class="text-left" id="active_count_id">
                 <!-- <i class="fa-solid fa-circle fa-2xs" style="color: green;"></i>
@@ -23,15 +23,20 @@
                 <span class="text-muted" style="font-size: 12px;"> Simulators Selected</span> -->
             </span>
             <div class="text-center" id="simulators_loading_animation" style=" display: none;">
-                <button class="btn btn-primary" type="button" disabled>
+                <button class="btn btn-primary btn-sm" type="button" disabled>
                     <span class="spinner-grow spinner-grow-sm" role="status" aria-hidden="true"></span>
                     Loading...
                   </button>
             </div>
             
         </div>
-        
-        
+
+        <!-- <div class="col text-center ">
+            <span class="text-right" id="live_assets_in_configdb_count">
+                <span style="font-weight: 700; font-size: medium; color: rgb(0, 156, 0);">100</span>
+            <span class="text-muted" style="font-size: 12px;"> Live assets in configdb </span></span>
+            <i class="fa-solid fa-sync fa-sm"></i>
+        </div> -->
     </div>
     
 
@@ -111,14 +116,16 @@
                         </label>
                         <select class="form-control req-for-view-report" id="loadname" name="loadname" required>
                             <option value="">Select Load Type</option>
-                            <!-- {% for loadname in load_name_options %}
-                                <option value="{{ loadname }}">{{ loadname }}</option>
-                            {% endfor %} -->
-                            <option value="Osquery" selected>Osquery</option>
+                            {% for loadname in load_name_options %}
+                                <option value="{{ loadname }}" {% if loadname == default_loadname %}selected{% endif %}>
+                                    {{ loadname }}
+                                </option>
+                            {% endfor %}
+
+                            <!-- <option value="Osquery" selected>Osquery</option>
                             <option value="Osquery">CloudQuery</option>
                             <option value="Osquery">KubeQuery</option>
-                            <option value="Osquery">SelfManaged</option>
-                            <option value="Osquery">ApiLoad</option>
+                            <option value="Osquery">SelfManaged</option> -->
 
                         </select>
                         <div class="error-message"></div>
@@ -136,7 +143,7 @@
                         <div class="error-message"></div>
                     </div>
                 </div>
-                <div class="osquery_part_of_the_form">
+                <div id="osquery_part_of_the_form" class="sub_load_form"  style="display: none;">
                     <div class="form-row">
                         <div class="form-group col-md-6">
                             <label for="num_customers">
@@ -242,6 +249,37 @@
 
                     </div>
                 </div>
+
+                <div id="cloudquery_part_of_the_form" class="sub_load_form" style="display: none;">
+                    <div class="form-row">
+                        <div class="form-group col-md-6">
+                            <label for="num_customers">
+                                <i class="fas fa-users"></i> Number of Customers to send load to:
+                            </label>
+                            <input type="number" class="form-control" id="num_customers" name="num_customers" value="100" placeholder="Enter Number of Customers" min="0" required oninput="this.value = this.value.replace(/[^0-9]/g, '');">
+                            <div class="error-message"></div>
+                        </div>
+                        <div class="form-group col-md-6">
+                            <label for="how_many_msgs_to_send">
+                                <i class="fas fa-stopwatch"></i> Load Duration in seconds:
+                            </label>
+                            <input type="number" class="form-control" id="how_many_msgs_to_send" name="how_many_msgs_to_send" placeholder="Enter how_many_msgs_to_send" min="0" required value="9000" oninput="this.value = this.value.replace(/[^0-9]/g, '');">
+                            <div class="error-message"></div>
+                        </div>
+                        
+                    </div>
+                   
+                    
+                    <div class="px-2 pt-4 row d-flex justify-content-center align-items-center" style="height: 100%;">
+                        
+                        <div class="col-md-4 text-center">
+                            <button type="button" style="font-size: 13px;" class="btn btn-uptycs btn-sm btn-block" id="update_sim_params_button">
+                                <i class="fas fa-sliders-h fa-sm"></i> Update Params in Sims 
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
             </form>
             
             <div class="" style="color: #2d0095" id="view_and_validate_asset_dist">

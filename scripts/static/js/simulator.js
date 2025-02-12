@@ -64,8 +64,19 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     };
 
+    const DynamicForm = () => {
+        let selected_value = loadnameField.value.trim().toLowerCase()
+        document.querySelectorAll(".sub_load_form").forEach(sub_load_form => {
+            sub_load_form.style.display = "none";
+        });
+        document.getElementById(`${selected_value}_part_of_the_form`).style.display = "block";
+    }
+
     stackField.addEventListener("change", handleInputChange);
     loadnameField.addEventListener("change", handleInputChange);
+    loadnameField.addEventListener("change", DynamicForm);
+    DynamicForm();
+
 
     function populateSimulatorGrid(simulators) {
         console.log(simulators)
@@ -1029,7 +1040,7 @@ document.addEventListener("DOMContentLoaded", () => {
             labels: [],
             datasets: [
               {
-                label: 'CPU Usage %',
+                label: 'Average CPU Usage %',
                 data: [],
                 backgroundColor: 'rgba(138, 43, 226, 0.3)',
                 borderColor: 'rgba(138, 43, 226, 1)',
@@ -1039,7 +1050,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 cubicInterpolationMode: 'monotone'
               },
               {
-                label: 'Memory Usage (GB)',
+                label: 'Average Memory Usage (GB)',
                 data: [],
                 backgroundColor: 'rgba(34, 139, 34, 0.3)',
                 borderColor: 'rgba(34, 139, 34, 1)',
