@@ -3,8 +3,11 @@ document.addEventListener("DOMContentLoaded", () => {
     const loadnameField = document.getElementById("loadname");
     const simulator_grid = document.getElementById('simulator-grid');
     let selected_count_id = document.getElementById('selected_count_id');
-    let active_count_id =document.getElementById('active_count_id')
-
+    let live_assets_in_configdb_count = document.getElementById('live_assets_in_configdb_count');
+    let active_count_id =document.getElementById('active_count_id');
+    let fetched_live_asset_count =document.getElementById('fetched_live_asset_count');
+    let live_assets_loading = document.getElementById('live_assets_loading');
+    
     let simulators = [];
     let online_sims = 0;
     let offline_sims = 0;
@@ -43,6 +46,8 @@ document.addEventListener("DOMContentLoaded", () => {
                 fill_inputfiles_dropdown(input_files);
                 populateSimulatorGrid(simulators);
                 simulators_loading_animation.style.display = 'none';
+                live_assets_in_configdb_count.style.display = "block";
+                button_to_get_live_assets_count_from_configdb.click();
             })
             .catch(error => {
                 // console.error("Error:", error);
@@ -372,6 +377,67 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     };
 
+    document.getElementById('button_to_get_live_assets_count_from_configdb').addEventListener('click', async () => {
+        await fetchLiveAssetsCount("",button_to_get_live_assets_count_from_configdb,live_assets_loading);
+
+            const simulatorCards = document.querySelectorAll(".simulator_card");
+    
+            const selectedSimulatorCards = Array.from(simulatorCards).filter(card => {
+                const checkbox = card.querySelector(".checkbox_class");
+                return checkbox && checkbox.checked;
+              });
+        
+            if (selectedSimulatorCards.length === 0) {
+                showNotification('No simulators found/selected. Please select stack and loadname to view simulators assosiated with them','warning');
+            } else {
+                selectedSimulatorCards.forEach((card) => {
+                    // const table_container = card.querySelector(".table-container"); 
+                    const simname = card.querySelector(".card-title").textContent;
+                    fetchLiveAssetsCount(simname, button, loader);
+                });
+            }
+
+
+    });
+    
+    async function fetchLiveAssetsCount(sim_hostname,button,loader) {
+        const stack_json_file = stackField.value.trim();
+    
+        if (stack_json_file === "") {
+            showNotification("Empty stack field found to fetch live assets count.", "info");
+            return;
+        }
+        button.style.display = "none";
+        loader.style.display = "inline";
+    
+        try {
+            const response = await fetch(`/get_live_assets_count_from_configdb?stack_json_file=${stack_json_file}&sim_hostname=${sim_hostname}`, {
+                method: 'GET',
+            });
+    
+            console.log("Fetched data:", response);
+    
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(`Error: ${errorData.message}`);
+            }
+    
+            const data = await response.json();
+            showNotification(data.message, data.status);
+    
+            fetched_live_asset_count.innerHTML = `<span style="font-weight: 700; font-size: medium; color: rgb(0, 156, 0);">${data.count}</span>`;
+    
+        } catch (error) {
+            console.error(`Could not connect to API for fetching live asset count for ${stack_json_file}:`, error);
+            showNotification(`Could not connect to API for fetching live asset count.`, "error");
+    
+            fetched_live_asset_count.innerHTML = `<span style="font-weight: 700; font-size: medium; color: red;">Error</span>`;
+        } finally {
+            button.style.display = "inline";
+            loader.style.display = "none";
+        }
+    }
+    
 
     // Add event listener to the parent container or document
     document.addEventListener('click', (e) => {
