@@ -199,7 +199,7 @@ def get_live_assets_count_from_configdb():
         if "configdb_node" in contents:
             node = contents["configdb_node"]
             if sim_hostname and sim_hostname != "":
-                query = f"select count(*) from assets where live and status='active' and hostname like '%{sim_hostname}%'"
+                query = f"select count(*) from assets where live and status='active' and host_name like '%-{sim_hostname.strip()}-%'"
             else:
                 query = f"select count(*) from assets where live and status='active'"
 
@@ -208,8 +208,7 @@ def get_live_assets_count_from_configdb():
             match = re.search(r"\d+", result)
             if match:
                 result = int(match.group())
-            print(result)
-            return jsonify({"status": "success","message": f"Live asset count for {stack_json_file} fetched." , "count":result}), 200  # OK
+            return jsonify({"status": "success","message": f"Live asset count for {stack_json_file} {sim_hostname} fetched." , "count":result}), 200  # OK
 
         else:
             return jsonify({"status": "warning","message": f"configdb ip not found in {stack_json_file}."}), 500  # Internal Server Error

@@ -5,8 +5,6 @@ document.addEventListener("DOMContentLoaded", () => {
     let selected_count_id = document.getElementById('selected_count_id');
     let live_assets_in_configdb_count = document.getElementById('live_assets_in_configdb_count');
     let active_count_id =document.getElementById('active_count_id');
-    let fetched_live_asset_count =document.getElementById('fetched_live_asset_count');
-    let live_assets_loading = document.getElementById('live_assets_loading');
     
     let simulators = [];
     let online_sims = 0;
@@ -108,6 +106,27 @@ document.addEventListener("DOMContentLoaded", () => {
     
                     <div class="pt-2 text-center">
                         <h6 class="card-title name_of_the_simulator"><i class="fa-solid fa-desktop fa-xs"></i> ${sim}</h6>
+
+
+                        <div class="col text-center main_live_assets_element">
+                            <button style="background: none; border: none; padding: 0; cursor: pointer;" class="live_assets_btn">
+                                <i class="fa-solid fa-sync fa-sm"></i>
+                            </button>
+                            <div class="live_assets_loader" style="display:none;">
+                                <div class="spinner-border spinner-border-sm" role="status">
+                                    <span class="sr-only">Loading...</span>
+                                </div>
+                            </div>
+                
+                            <span class="text-right">
+                                <span class="store_live_count_in">
+                                    <span style="font-weight: 700; font-size: medium; color: rgb(0, 156, 0);">0</span>
+                                </span>
+                                <span class="text-muted" style="font-size: 12px;"> Live assets in configdb </span>
+                            </span>
+                        </div>
+
+
                         <div class="table-container"></div>
                     </div>
                 </div>
@@ -376,46 +395,70 @@ document.addEventListener("DOMContentLoaded", () => {
             toggleLoading(card, false);
         }
     };
-
     document.getElementById('button_to_get_live_assets_count_from_configdb').addEventListener('click', async () => {
-        await fetchLiveAssetsCount("",button_to_get_live_assets_count_from_configdb,live_assets_loading);
-
-            const simulatorCards = document.querySelectorAll(".simulator_card");
-    
-            const selectedSimulatorCards = Array.from(simulatorCards).filter(card => {
-                const checkbox = card.querySelector(".checkbox_class");
-                return checkbox && checkbox.checked;
-              });
-        
-            if (selectedSimulatorCards.length === 0) {
-                showNotification('No simulators found/selected. Please select stack and loadname to view simulators assosiated with them','warning');
-            } else {
-                selectedSimulatorCards.forEach((card) => {
-                    // const table_container = card.querySelector(".table-container"); 
-                    const simname = card.querySelector(".card-title").textContent;
-                    fetchLiveAssetsCount(simname, button, loader);
-                });
-            }
-
-
-    });
-    
-    async function fetchLiveAssetsCount(sim_hostname,button,loader) {
         const stack_json_file = stackField.value.trim();
     
         if (stack_json_file === "") {
             showNotification("Empty stack field found to fetch live assets count.", "info");
             return;
         }
+    
+        // Fetch for the main live assets count (runs asynchronously, does NOT block execution)
+        const mainLiveAssetsPromise = fetchLiveAssetsCount("", live_assets_in_configdb_count);
+    
+        const simulatorCards = document.querySelectorAll(".simulator_card");
+    
+        const selectedSimulatorCards = Array.from(simulatorCards).filter(card => {
+            const checkbox = card.querySelector(".checkbox_class");
+            return checkbox && checkbox.checked;
+        });
+    
+        if (selectedSimulatorCards.length === 0) {
+            showNotification('No simulators found/selected. Please select stack and loadname to view simulators associated with them', 'warning');
+        } else {
+            // Fetch live asset count for selected simulator cards in parallel (does NOT wait for mainLiveAssetsPromise)
+            const simulatorPromises = selectedSimulatorCards.map(async (card) => {
+                const simname = card.querySelector(".card-title")?.textContent?.trim();
+                const main_live_assets_element = card.querySelector(".main_live_assets_element");
+    
+                if (simname && main_live_assets_element) {
+                    return fetchLiveAssetsCount(simname, main_live_assets_element);
+                } else {
+                    console.warn("Missing simulator name or main live assets element in card:", card);
+                    return null;
+                }
+            });
+    
+            // Wait for all simulator fetches to complete
+            await Promise.all(simulatorPromises);
+        }
+    
+        // We do NOT await mainLiveAssetsPromise before starting simulatorPromises, so it runs in parallel
+        await mainLiveAssetsPromise;
+    });
+    
+    async function fetchLiveAssetsCount(sim_hostname, live_assets_in_configdb_count_element) {
+        if (!live_assets_in_configdb_count_element) {
+            console.error("Invalid live_assets_in_configdb_count_element:", live_assets_in_configdb_count_element);
+            return;
+        }
+    
+        const button = live_assets_in_configdb_count_element.querySelector(".live_assets_btn");
+        const loader = live_assets_in_configdb_count_element.querySelector(".live_assets_loader");
+        const store_live_count_in = live_assets_in_configdb_count_element.querySelector(".store_live_count_in");
+    
+        if (!button || !loader || !store_live_count_in) {
+            console.error("One or more elements are missing inside live_assets_in_configdb_count_element:", live_assets_in_configdb_count_element);
+            return;
+        }
+    
         button.style.display = "none";
         loader.style.display = "inline";
     
         try {
-            const response = await fetch(`/get_live_assets_count_from_configdb?stack_json_file=${stack_json_file}&sim_hostname=${sim_hostname}`, {
+            const response = await fetch(`/get_live_assets_count_from_configdb?stack_json_file=${stackField.value.trim()}&sim_hostname=${sim_hostname}`, {
                 method: 'GET',
             });
-    
-            console.log("Fetched data:", response);
     
             if (!response.ok) {
                 const errorData = await response.json();
@@ -423,20 +466,33 @@ document.addEventListener("DOMContentLoaded", () => {
             }
     
             const data = await response.json();
+            console.log("Fetched data for:", sim_hostname, "is -", data);
             showNotification(data.message, data.status);
     
-            fetched_live_asset_count.innerHTML = `<span style="font-weight: 700; font-size: medium; color: rgb(0, 156, 0);">${data.count}</span>`;
+            store_live_count_in.innerHTML = `<span style="font-weight: 700; font-size: medium; color: rgb(0, 156, 0);">${data.count}</span>`;
     
         } catch (error) {
-            console.error(`Could not connect to API for fetching live asset count for ${stack_json_file}:`, error);
+            console.error(`Could not connect to API for fetching live asset count for ${sim_hostname}:`, error);
             showNotification(`Could not connect to API for fetching live asset count.`, "error");
     
-            fetched_live_asset_count.innerHTML = `<span style="font-weight: 700; font-size: medium; color: red;">Error</span>`;
+            store_live_count_in.innerHTML = `<span style="font-weight: 700; font-size: medium; color: red;">Error</span>`;
         } finally {
+            console.log("Reached finally for:", sim_hostname);
             button.style.display = "inline";
             loader.style.display = "none";
         }
     }
+
+    // Add event listener to the parent container or document
+    document.addEventListener('click', (e) => {
+        // Check if the clicked element is a refresh button
+        if (e.target.closest('.live_assets_btn')) {
+            const card = e.target.closest('.simulator_card');
+            const simname = card.querySelector(".card-title")?.textContent?.trim();
+            const main_live_assets_element = card.querySelector(".main_live_assets_element");
+            fetchLiveAssetsCount(simname, main_live_assets_element);
+        }
+    });
     
 
     // Add event listener to the parent container or document
