@@ -45,6 +45,10 @@ def load_distribution(num_customers,first_x_customer_percentage,load_percentage_
         optimal_exponent = 1
         print(f"Distrituting all assets to a single customer.., optimal_exponent : {optimal_exponent}")
         return softmax(x, optimal_exponent)
+    elif first_x_customer_percentage == load_percentage_for_first_x_percent_customers:
+        optimal_exponent = 1
+        print(f"Distrituting all assets uniformly.., optimal_exponent : {optimal_exponent}")
+        return softmax(x, optimal_exponent)
     else:
         if math.floor(num_customers*first_x_customer_percentage/100)<1 :
             raise ValueError("Input error: first_x_customer_percentage should cover alteast 1 customer")
@@ -107,13 +111,13 @@ def return_asset_distribution(updated_test_input_params):
 
     print("Initial Allocation : ",initial_allocation)
 
-    if num_customers >1 :
+    if num_customers >1 and (int(first_x_customer_percentage) != int(load_percentage_for_first_x_percent_customers) or (total_assets%num_customers)!=0):
         assets_to_enrol_for_each_customer_part1 = adjust_allocation_to_match_total(int(total_assets*load_percentage_for_first_x_percent_customers/100),initial_allocation[:cutoff_idx])
         assets_to_enrol_for_each_customer_part2 = adjust_allocation_to_match_total(int(total_assets*(100-load_percentage_for_first_x_percent_customers)/100),initial_allocation[cutoff_idx:])
         assets_to_enrol_for_each_customer = assets_to_enrol_for_each_customer_part1 + assets_to_enrol_for_each_customer_part2
         assets_to_enrol_for_each_customer = [int(value) for value in assets_to_enrol_for_each_customer]
     else:
-        assets_to_enrol_for_each_customer = initial_allocation
+        assets_to_enrol_for_each_customer = list(initial_allocation)
     if min(assets_to_enrol_for_each_customer) == 0:
         raise ValueError(f"{assets_to_enrol_for_each_customer.count(0)} customers are getting 0 assets. Each customer should get at least one asset allocated.")
     # print("Total assets to allocate to all customers : ",sum(assets_to_enrol_for_each_customer))
