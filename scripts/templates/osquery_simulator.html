@@ -31,12 +31,24 @@
             
         </div>
 
-        <!-- <div class="col text-center ">
-            <span class="text-right" id="live_assets_in_configdb_count">
-                <span style="font-weight: 700; font-size: medium; color: rgb(0, 156, 0);">100</span>
-            <span class="text-muted" style="font-size: 12px;"> Live assets in configdb </span></span>
-            <i class="fa-solid fa-sync fa-sm"></i>
-        </div> -->
+        <div class="col text-center" id="live_assets_in_configdb_count" style="display: none;">
+            <button style="background: none; border: none; padding: 0; cursor: pointer;" id="button_to_get_live_assets_count_from_configdb">
+                <i class="fa-solid fa-sync fa-sm"></i>
+            </button>
+            <div  id="live_assets_loading">
+                <div class="spinner-border spinner-border-sm" role="status">
+                    <span class="sr-only">Loading...</span>
+                </div>
+            </div>
+
+            <span class="text-right">
+                <span id="fetched_live_asset_count">
+                    <span style="font-weight: 700; font-size: medium; color: rgb(0, 156, 0);">0</span>
+                </span>
+                <span class="text-muted" style="font-size: 12px;"> Live assets in configdb </span>
+            </span>
+        </div>
+        
     </div>
     
 
@@ -288,7 +300,7 @@
         <div class="col-md-6  d-flex justify-content-center" id="simulator-grid" style="height: 500px;">
             <span class="text-center mt-5"><i class="fa-solid fa-desktop fa-xs"></i> View all your simulator instances here.</span>
             <div class="row">
-              <!-- <div class="card mb-2 mr-2 simulator_card online">
+              <div class="card mb-2 mr-2 simulator_card online">
                 <div class="loading-bar"></div>
                 <button class="position-absolute btn btn-sm btn-info refresh-btn">
                   <i class="fa-solid fa-arrows-rotate fa-xs"></i>
@@ -313,7 +325,7 @@
                   </h6>
                   <div class="table-container"></div>
                 </div>
-              </div> -->
+              </div>
             </div>
           </div>
 

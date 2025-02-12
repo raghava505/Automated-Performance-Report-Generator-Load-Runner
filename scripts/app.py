@@ -10,6 +10,8 @@ import json
 import pandas as pd
 import requests
 from CreateTestinputFiles import create_testinput_files
+from helper import execute_configdb_query
+import re
 # from input import load_type_options
 
 app = Flask(__name__)
@@ -176,6 +178,45 @@ def call_execute_shell_command():
         return jsonify({"status": "error","message": f"Failed to run {shell_command} in {sim_hostname}: Unable to connect to  the simulator server '{url}': {str(e)}"}), 503  # Service Unavailable
     return response.json(),response.status_code
 
+
+@app.route('/get_live_assets_count_from_configdb' , methods=['GET'])
+def get_live_assets_count_from_configdb():
+    stack_json_file = request.args.get("stack_json_file").strip()
+    sim_hostname = request.args.get("sim_hostname")
+
+    if not stack_json_file :
+        return jsonify({"status": "error","message": "stack_json_file is required to get live assets from configdb."}), 400  # Bad Request
+
+    stack_json_file_path = os.path.join(STACK_JSONS_PATH, stack_json_file)
+    if not os.path.exists(stack_json_file_path):
+        return jsonify({"status": "error","message": f"The file '{stack_json_file_path}' was not found on the report UI server."}), 404  # Not Found
+
+    try:
+        # Read and parse the stack JSON file
+        with open(stack_json_file_path, 'r') as f:
+            contents = json.load(f)
+
+        if "configdb_node" in contents:
+            node = contents["configdb_node"]
+            if sim_hostname and sim_hostname != "":
+                query = f"select count(*) from assets where live and status='active' and hostname like '%{sim_hostname}%'"
+            else:
+                query = f"select count(*) from assets where live and status='active'"
+
+            result = execute_configdb_query(node , query)
+
+            match = re.search(r"\d+", result)
+            if match:
+                result = int(match.group())
+            print(result)
+            return jsonify({"status": "success","message": f"Live asset count for {stack_json_file} fetched." , "count":result}), 200  # OK
+
+        else:
+            return jsonify({"status": "warning","message": f"configdb ip not found in {stack_json_file}."}), 500  # Internal Server Error
+        
+    except Exception as e:
+        # Handle unexpected errors
+        return jsonify({"status": "error","message": f"An unexpected error occurred while fetching configdb assets count : {e}"}), 500  # Internal Server Error
 
 @app.route('/dashboard', methods=['GET'])
 def dashboard():
