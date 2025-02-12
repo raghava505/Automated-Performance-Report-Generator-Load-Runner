@@ -548,53 +548,62 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
 
-    document.getElementById("update_sim_params_button").addEventListener("click", () => {
-            let isValid = true;
-            const fields = document.querySelectorAll('#SimulatorForm .form-control');
+   // Function to handle all button clicks
+function handleUpdateParams(buttonType) {
+    let isValid = true;
+    const fields = document.querySelectorAll('#SimulatorForm .form-control');
 
-            fields.forEach(field => {
-                const errorMessageDiv = field.nextElementSibling;
-                if (!field.value.trim()) {
-                    errorMessageDiv.textContent = 'This field is required.';
-                    isValid = false;
-                } else {
-                    errorMessageDiv.textContent = '';
-                }
+    fields.forEach(field => {
+        const errorMessageDiv = field.nextElementSibling;
+        if (!field.value.trim()) {
+            errorMessageDiv.textContent = 'This field is required.';
+            isValid = false;
+        } else {
+            errorMessageDiv.textContent = '';
+        }
+    });
+
+    if (isValid) {
+        if (confirm("Are you sure you want to update parameters in the selected simulators? Note: The unchecked simulators will be ignored for asset distribution.")) {
+            const form = document.getElementById('SimulatorForm');
+            const formData = new FormData(form);
+            
+            // Append the clicked button type to formData
+            formData.append("button_clicked", buttonType);
+
+            // Select only checked simulator cards
+            const simulatorCards = document.querySelectorAll(".simulator_card");
+            const selectedSimulatorCards = Array.from(simulatorCards).filter(card => {
+                const checkbox = card.querySelector(".checkbox_class");
+                return checkbox && checkbox.checked;
             });
 
-            if (isValid) {
-                if (confirm("Are you sure you want to update parameters in the selected simulators? Note : The unchecked simulators will be ignored for asset distribution.")) {
-                    const form = document.getElementById('SimulatorForm');
-                    const formData = new FormData(form);
-                  
-                    // Select only checked simulator cards
-                    const simulatorCards = document.querySelectorAll(".simulator_card");
-                    const selectedSimulatorCards = Array.from(simulatorCards).filter(card => {
-                      const checkbox = card.querySelector(".checkbox_class");
-                      return checkbox && checkbox.checked;
-                    });
-                  
-                    if (selectedSimulatorCards.length === 0) {
-                      showNotification('No simulators found/selected. Please select stack and loadname to view simulators associated with them', 'warning');
-                    } else {
-                      // Extract simulator names and add to FormData
-                      const selectedSimulators = selectedSimulatorCards.map(card => {
-                        return card.querySelector(".name_of_the_simulator").textContent.trim();
-                      });
-                  
-                      // Append to formData as a comma-separated string
-                      formData.append("selected_simulators", selectedSimulators.join(','));
-                  
-                      // Refresh each selected simulator with updated form data
-                      selectedSimulatorCards.forEach(card => {
-                        const table_container = card.querySelector(".table-container");
-                        refreshSimulator(card, table_container, formData);
-                      });
-                    }
-                  }
-                  
+            if (selectedSimulatorCards.length === 0) {
+                showNotification('No simulators found/selected. Please select stack and loadname to view simulators associated with them', 'warning');
+            } else {
+                // Extract simulator names and add to FormData
+                const selectedSimulators = selectedSimulatorCards.map(card => {
+                    return card.querySelector(".name_of_the_simulator").textContent.trim();
+                });
+
+                // Append to formData as a comma-separated string
+                formData.append("selected_simulators", selectedSimulators.join(','));
+
+                // Refresh each selected simulator with updated form data
+                selectedSimulatorCards.forEach(card => {
+                    const table_container = card.querySelector(".table-container");
+                    refreshSimulator(card, table_container, formData);
+                });
             }
-    });
+        }
+    }
+}
+
+// Attach event listeners to all buttons
+document.getElementById("update_sim_params_button").addEventListener("click", () => handleUpdateParams("update_all"));
+document.getElementById("update_num_msgs").addEventListener("click", () => handleUpdateParams("update_num_msgs"));
+document.getElementById("update_inputfile").addEventListener("click", () => handleUpdateParams("update_inputfile"));
+
 
     document.getElementById("view_asset_dist_btn").addEventListener("click", () => {
         let isValid = true;
