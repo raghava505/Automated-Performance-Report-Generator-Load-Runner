@@ -87,25 +87,25 @@ def create_testinput_files(updated_test_input_params, create_and_save_files = Fa
 
     
     instances = []
-
-    for i in range(updated_test_input_params["num_customers"]):
-        if i==0:
+    instance_id = 1
+    for cust_id in range(updated_test_input_params["num_customers"]):
+        if cust_id==0:
             domain = base_domain
         else:
-            domain = base_domain+str(i)
+            domain = base_domain+str(cust_id)
 
-        clients_to_enrol_to_this_cust = int(assets_to_enrol_for_each_customer[i])
+        clients_to_enrol_to_this_cust = int(assets_to_enrol_for_each_customer[cust_id])
         while clients_to_enrol_to_this_cust>0:
             instances.append({
-                "instanceid":i+1,
+                "instanceid":instance_id,
                 "domain":domain,
                 "secret":secrets_dict[domain],
                 "clients":MAX_CLIENTS_PER_INSTANCE if clients_to_enrol_to_this_cust>=MAX_CLIENTS_PER_INSTANCE else clients_to_enrol_to_this_cust,
-                "port":30001+i,
+                "port":30000 + instance_id,
                 # "names":"names.txt"
             })
             clients_to_enrol_to_this_cust-=MAX_CLIENTS_PER_INSTANCE
-            i+=1
+            instance_id+=1
 
     # split_instances = np.array_split(instances, len(simulators))
     # split_instances = [list(arr) for arr in split_instances]
