@@ -39,3 +39,11 @@ TESTINPUT_FILES_PATH = os.path.join(ROOT_PATH,'testinput_json_files')
 
 MAX_CLIENTS_PER_INSTANCE = 150
 DELAY_BETWEEN_TRIGGER_TO_USE_FOR_ACCURACIES = 4 
+
+# osquery simulator UI
+load_type_port_mapping = {
+    "Osquery" : 8123,
+    "CloudQuery":8124,
+    "KubeQuery":8125,
+    "SelfManaged":8126
+}

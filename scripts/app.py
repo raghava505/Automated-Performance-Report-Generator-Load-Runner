@@ -2,7 +2,7 @@ from flask import Flask, render_template, request, jsonify, Response, send_from_
 from publish_perf_load_report import perf_load_report_publish
 import ast,os
 from pymongo import MongoClient
-from config_vars import MONGO_CONNECTION_STRING, REPORT_UI_PORT, BASE_GRAPHS_PATH,STACK_JSONS_PATH,SIMULATOR_SERVER_PORT
+from config_vars import MONGO_CONNECTION_STRING, REPORT_UI_PORT, BASE_GRAPHS_PATH,STACK_JSONS_PATH,SIMULATOR_SERVER_PORT, load_type_port_mapping
 import time
 from queue import Queue
 from flask_session import Session 
@@ -25,7 +25,8 @@ publish_logs_user_queues = {}
 client = MongoClient(MONGO_CONNECTION_STRING)
 
 # load_name_options=list(load_type_options.keys())
-load_name_options = ["Osquery"]
+# load_name_options = ["Osquery"]
+load_name_options = list(load_type_port_mapping.keys())
 
 @app.route('/get_databases', methods=['GET'])
 def get_databases():
@@ -50,7 +51,7 @@ def get_collections():
 def osquery_simulator():
     all_files = os.listdir(STACK_JSONS_PATH)
     stack_json_options = sorted([file for file in all_files if file.endswith('.json') and '_nodes' in file])
-    return render_template('osquery_simulator.html',stack_json_options=stack_json_options,load_name_options=load_name_options)
+    return render_template('osquery_simulator.html',stack_json_options=stack_json_options,load_name_options=load_name_options,default_loadname=load_name_options[0])
 
 @app.route('/get_simulators_list', methods=['GET', 'POST'])
 def get_simulators_list():
