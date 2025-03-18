@@ -128,7 +128,10 @@ class osq_accuracy:
         self.api_path=api_path
         self.domain=domain
         self.hours=stack_obj.hours
-        self.endline=1800*self.hours
+        delay_between_trigger = 4
+        number_of_msgs_in_single_inputfile = 150
+        self.msgs_sent=(self.hours*60*60)//delay_between_trigger  #900 msgs are sent every 1hr by default. 
+        self.inputfile_iterations_made =  self.msgs_sent//number_of_msgs_in_single_inputfile
         self.assets_per_cust=assets_per_cust
         self.ext=ext
         self.trans=trans
@@ -155,17 +158,17 @@ class osq_accuracy:
             current_date += timedelta(days=1)
         return days_involved
     def expected_events(self):
-        input_lines =self.endline
+        input_lines =self.msgs_sent
         dns_lookup_events = {'dns_lookup_events-builder-added':0, 'dns_lookup_events_1-builder-added':0, 'dns_lookup_events_2-builder-added':0, 'dns_lookup_events_3-builder-added':0, 'dns_lookup_events_4-builder-added':0,'dns_lookup_events_5-builder-added':0,'dns_lookup_events_6-builder-added':0}
         process_events = {'process_events-builder-added':0, 'process_events_1-builder-added':0, 'process_events_2-builder-added':0, 'process_events_3-builder-added':0, 'process_events_4-builder-added':0, 'process_events_5-builder-added':0, 'process_events_6-builder-added':0, 'process_events_7-builder-added':0, 'process_events_8-builder-added':0, 'process_events_9-builder-added':0, 'process_events_10-builder-added':0}
         socket_events = {'socket_events-builder-added':0, 'socket_events_1-builder-added':0, 'socket_events_2-builder-added':0, 'socket_events_3-builder-added':0, 'socket_events_4-builder-added':0, 'socket_events_5-builder-added':0, 'socket_events_6-builder-added':0,'socket_events_7-builder-added':0}
         process_file_events = {'process_file_events-builder-added':0, 'process_file_events_3-builder-added':0, 'process_file_events_4-builder-added':0, 'process_file_events_5-builder-added':0, 'process_file_events_6-builder-added':0, 'process_file_events_7-builder-added':0, 'process_file_events_8-builder-added':0, 'process_file_events_9-builder-added':0, 'process_file_events_10-builder-added':0}
         req_tables = ['process_events', 'process_file_events', 'socket_events', 'dns_lookup_events']
-        increment=self.assets_per_cust
+        increment=self.assets_per_cust * self.inputfile_iterations_made
         with open(self.input_file, "r") as fin:
             line_no = 1
             for line in fin:
-                if line_no % 2 == 0 and line_no <= input_lines: 
+                if line_no <= input_lines: 
                     lines = json.loads(line)
                     #print(line)
                     #print(len(lines["data"]))
@@ -275,7 +278,7 @@ class osq_accuracy:
                    if events in transformations:
                        dict1[events]=0        
             return dict1
-    def get_expected_tables(self,endline):
+    def get_expected_tables(self,msgs_sent):
         with open(self.input_file, "r") as fin:
             line_no = 1
             count=0
@@ -284,7 +287,7 @@ class osq_accuracy:
             #print(f"no of inputfile lines {len(lines_1)}")
             for line in fin:
                 #print(line)
-                if line_no % 2 == 0 and line_no <= endline: 
+                if  line_no <= msgs_sent: 
                     lines = json.loads(line)
                     count=count+1
                     for table_details in lines["data"]:
@@ -297,19 +300,19 @@ class osq_accuracy:
         return output_log
     def run_table_accuracy(self,query,table,accuracy,expected,api):
         actual=http_query(api, query,self.ext,self.stack_obj)
-        expect=expected[table]*(self.assets_per_cust)
+        expect=expected[table]*(self.assets_per_cust) * self.inputfile_iterations_made
         accuracy[table]={"actual":actual,"expected":expect,"accuracy":(actual/expect)*100}
     def table_accuracy(self,cust=0):
         api_config=self.api_keys()
-        expected_tables=self.get_expected_tables(self.endline)
+        expected_tables=self.get_expected_tables(self.msgs_sent)
         self.stack_obj.log.info(expected_tables)
         if cust==0:
             api=api_config[self.domain]
         else:
             api=api_config[self.domain+str(cust)]
         
-        expected_tables["process_open_sockets"]={}
-        expected_tables["process_open_sockets"]=expected_tables["process_open_sockets_remote"]+expected_tables["process_open_sockets_local"]
+        # expected_tables["process_open_sockets"]={}
+        expected_tables["process_open_sockets"]+=expected_tables["process_open_sockets_remote"]+expected_tables["process_open_sockets_local"]
         thread_list=[]
         accuracy={}
         tables=["processes","process_open_files","load_average","interface_details","dns_lookup_events","process_open_sockets","process_file_events","process_events","socket_events","sensitive_scan_events"]

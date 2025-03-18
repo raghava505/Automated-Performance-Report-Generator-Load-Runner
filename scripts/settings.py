@@ -14,6 +14,7 @@ class stack_configuration:
         with open(self.test_env_file_path , 'r') as file:
             stack_details = json.load(file)
         self.stack_name = stack_details["stack"]
+        self.configdb_node = stack_details["configdb_node"]
         self.monitoring_ip=  stack_details["monitoring_node_ip"]
         self.prometheus_path = f"http://{self.monitoring_ip}:{PROMETHEUS_PORT}"
         self.kube_prometheus_path = f"http://{self.monitoring_ip}:{KUBE_PROMETHEUS_PORT}"
