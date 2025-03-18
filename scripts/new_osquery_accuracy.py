@@ -213,13 +213,13 @@ class osquery_accuracy:
 
 if __name__ == "__main__":
     variables = {
-        "start_time_str_ist":"2025-02-10 20:30",
-        "load_duration_in_hrs":10,
+        "start_time_str_ist":"2025-02-13 00:20",
+        "load_duration_in_hrs":600/60,
         "test_env_file_name":'s1_nodes.json'
     }
     stack_obj=stack_configuration(variables)
     # assets_per_cust_dict = {"jupiter":10, "jupiter1":10,"jupiter2":10, "jupiter3":10,"jupiter4":10}
-    assets_per_cust_dict = {"jupiter":10}
+    assets_per_cust_dict = {"jupiter7":100}
 
     alert_rules_triggered_per_cust=16
     event_rules_triggered_per_cust=34  

@@ -3,8 +3,8 @@ from settings import stack_configuration
 import json
 
 variables = {
-        "start_time_str_ist":"2025-02-05 15:30",
-        "load_duration_in_hrs":10/60,
+        "start_time_str_ist":"2025-02-12 20:59",
+        "load_duration_in_hrs":1,
         "test_env_file_name":'s1_nodes.json'
     }
 
@@ -20,14 +20,14 @@ if "longevity_nodes" in stack_json_file:
     input_file_path="rhel7-6tab_12rec.log"
 elif "s1_nodes" in stack_json_file:
     api_file = "jupiter"
-    assets_per_cust= 100
+    assets_per_cust= 623
     base_domain='jupiter'
     extension='net'
     alert_rules_triggered_per_cust=16
     event_rules_triggered_per_cust=34  
     # input_file_path="inputFile6tab_12rec.log"
     # input_file_path = "process_events_targeted_all_str.log"
-    input_file_path="rhel7-6tab_12rec.log"
+    input_file_path="inputfile_10min_150msgs_formed_using_155tables_with_ratio_30:60_6tab_12rec.log"
     # input_file_path="inputfile_5min_6tab_12rec.log"
 elif "s12_nodes" in stack_json_file:
     api_file = "milkyway"
