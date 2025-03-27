@@ -1,4 +1,4 @@
-[View the PDF](presentation.pdf)
+[View website screenshots](presentation.pdf)
 
 # Setup and Install Report Generator tool
 1. set ```REPORT_GENERATOR_ROOT_PATH```  and  ```LOCAL_IP_ADDRESS``` environment variables in your machine.
