@@ -27,3 +27,4 @@ scripts/flask_session/
 flask_session/
 scripts/test.py
 .*log
+report-automation-website/
