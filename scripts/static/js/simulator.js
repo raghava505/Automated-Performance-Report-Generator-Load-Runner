@@ -41,7 +41,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 console.log("Response from server:", data);
                 simulators = data.result_data;
                 input_files = data.input_files;
-                fill_inputfiles_dropdown(input_files);
+                // fill_inputfiles_dropdown(input_files);
                 populateSimulatorGrid(simulators);
                 simulators_loading_animation.style.display = 'none';
                 live_assets_in_configdb_count.style.display = "block";
