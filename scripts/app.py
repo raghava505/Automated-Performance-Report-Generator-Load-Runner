@@ -2,7 +2,7 @@ from flask import Flask, render_template, request, jsonify, Response, send_from_
 from publish_perf_load_report import perf_load_report_publish
 import ast,os
 from pymongo import MongoClient
-from config_vars import MONGO_CONNECTION_STRING, REPORT_UI_PORT, BASE_GRAPHS_PATH,STACK_JSONS_PATH,SIMULATOR_SERVER_PORT, load_type_port_mapping
+from config_vars import *
 import time
 from queue import Queue
 from flask_session import Session 
@@ -13,6 +13,7 @@ from CreateTestinputFiles import create_testinput_files
 from helper import execute_configdb_query
 import re
 # from input import load_type_options
+import joblib, math
 
 app = Flask(__name__)
 # app.config['SECRET_KEY'] = '343c855017e725321cb7f35b89c98b9e'
@@ -122,8 +123,36 @@ def view_asset_dist():
         try:updated_params[key] = int(value)
         except:updated_params[key] = value
     try:
+        lasso = joblib.load(f"{os.path.join(MODELS_PATH,'lasso_model.pkl')}")
+        # ridge = joblib.load("ridge_model.pkl")
+        scaler = joblib.load(f"{os.path.join(MODELS_PATH,'scaler.pkl')}")
+        poly = joblib.load(f"{os.path.join(MODELS_PATH,'poly.pkl')}")
+
+        # New data point (replace with actual values)
+        new_data = pd.DataFrame({
+            "num_assets": [updated_params["total_number_of_assets"]],
+            "num_customers": [updated_params["num_customers"]],
+            "memory_gb": [8],
+            "cpu_cores": [4],
+            "first_x": [50],
+            "gets_y": [50]
+        })
+
+        # Transform input data using the saved preprocessor
+        X_poly_new = poly.transform(new_data)
+        X_scaled_new = scaler.transform(X_poly_new)
+
+        # Make predictions
+        # ridge_prediction = ridge.predict(X_scaled_new)
+        lasso_prediction = lasso.predict(X_scaled_new)
+
+        # print(f"Predicted num_simulators (Ridge): {ridge_prediction[0]:.2f}")
+        # print(f"Predicted num_simulators (Lasso): {lasso_prediction[0]:.2f}")
+
+
         list_of_custom_simulators = list(updated_params["selected_simulators"].split(','))
         return_dict = create_testinput_files(updated_params,create_and_save_files=False,list_of_custom_simulators=list_of_custom_simulators)
+        return_dict["Predicted optimal number of simulators"] = f"{math.ceil(lasso_prediction[0])}"
         return jsonify({"status": "success","message": f"Asset distribution logic calculated." , "asset_dist_data":return_dict}), 200  # OK
     except Exception as e:
         return jsonify({"status": "error","message": f"error while creating testiinput files data. {str(e)}"}), 500

@@ -21,6 +21,7 @@ KUBE_METRICS = ["container_memory_working_set_bytes","container_cpu_usage_second
 #dynamic
 ROOT_PATH = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
 STACK_JSONS_PATH = os.path.join(ROOT_PATH,'stacks')
+MODELS_PATH = os.path.join(ROOT_PATH,'scripts','models')
 BASE_GRAPHS_PATH = os.path.join(os.path.dirname(ROOT_PATH),'graphs')
 BASE_HTMLS_PATH = os.path.join(os.path.dirname(ROOT_PATH),'htmls')
 BASE_PDFS_PATH = os.path.join(os.path.dirname(ROOT_PATH),'pdfs')

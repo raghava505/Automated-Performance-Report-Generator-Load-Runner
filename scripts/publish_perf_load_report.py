@@ -4,13 +4,16 @@ from pymongo import MongoClient
 import numpy as np
 import os
 from create_piechart_for_analysis import analysis_main
-from config_vars import MONGO_CONNECTION_STRING
+from config_vars import MONGO_CONNECTION_STRING, MODELS_PATH
 import uuid
 import json
 import io
 import base64
 import pandas as pd
 import re
+import joblib
+
+
 class custom_string(str):
     def __init__(self, value=""):
         self.value = value
@@ -428,6 +431,162 @@ class perf_load_report_publish:
         html_text=html_text.replace('style="text-align: right;"', '')
         return html_text
 
+    def make_prediction(self,model,label_encoder,mem,cpu):
+        new_data = {
+            "CPU_Usage(%)": int(cpu),
+            "Memory_Usage(MB)": int(mem)*1024/10,
+            "Disk_IO(MB/s)": 60,
+            "Network_Usage(Mbps)": 90,
+            "GPU_Utilization(%)": 25,
+            "Execution_Time(sec)": 4,
+            "Response_Time(ms)": 250,
+            "Requests_per_sec": 180,
+            "Error_Rate(%)": 1.2,
+            "Crash_Frequency": 0.5,
+            "Memory_Leak_Rate(MB/sec)": 0.4,
+            "User_Load": 320,
+            "Peak_Idle_Ratio": 0.35
+        }
+        new_df = pd.DataFrame([new_data])
+
+        # # Predict numerical class
+        # predicted_class = model.predict(new_df)[0]
+
+        # # Convert to readable label
+        # predicted_label = label_encoder.inverse_transform([predicted_class])[0]
+        # return predicted_label
+    
+
+        # Define class score mapping
+        score_mapping = {
+            "Efficient": 0.0,
+            "Moderate": 0.5,
+            "Resource-Intensive": 1.0
+        }
+
+        # Get probabilities for each class
+        proba = model.predict_proba(new_df)[0]
+
+        # Map labels to numeric scores
+        class_labels = label_encoder.classes_
+        class_scores = [score_mapping[label] for label in class_labels]
+
+        # Calculate weighted score
+        final_score = sum(p * s for p, s in zip(proba, class_scores))
+
+        # Predicted label (for display)
+        predicted_label = label_encoder.inverse_transform([model.predict(new_df)[0]])[0]
+
+        # Output
+        # print(f"Predicted Category: {predicted_label}")
+        # print(f"Weighted Performance Score: {final_score:.2f}")
+        return predicted_label, final_score
+
+    def hex_to_rgb(self,hex_color):
+        """Convert hex to RGB tuple"""
+        hex_color = hex_color.lstrip('#')
+        return tuple(int(hex_color[i:i+2], 16) for i in (0, 2, 4))
+
+    def rgb_to_hex(self,rgb):
+        """Convert RGB tuple to hex"""
+        return f"#{rgb[0]:02x}{rgb[1]:02x}{rgb[2]:02x}"
+
+    def interpolate_color(self,score):
+        """Return a color from green → yellow → red based on score (0 to 1)"""
+        green = self.hex_to_rgb("#2ecc71")
+        yellow = self.hex_to_rgb("#f1c40f")
+        red = self.hex_to_rgb("#e74c3c")
+        
+        if score <= 0.5:
+            # Interpolate green to yellow
+            ratio = score / 0.5
+            rgb = tuple(int(g + (y - g) * ratio) for g, y in zip(green, yellow))
+        else:
+            # Interpolate yellow to red
+            ratio = (score - 0.5) / 0.5
+            rgb = tuple(int(y + (r - y) * ratio) for y, r in zip(yellow, red))
+            
+        return self.rgb_to_hex(rgb)
+    
+    def dataframe_to_gradient_list(self, df):
+        count_mapping = {
+            "Efficient": 0,
+            "Moderate": 0,
+            "Resource-Intensive": 0
+        }
+
+        html = "<h4 class='mb-4'>Predicted Performance Categories for each Application with Scores</h4>"
+
+        # First pass: count categories
+        for _, row in df.iterrows():
+            label = row['label']
+            count_mapping[label] += 1
+
+        # Add summary cards
+        html += '''
+        <div class="row mb-4">
+            <div class="col-md-4">
+                <div class="card" style="background-color: #cdf0e4; border: none; border-radius: 1rem;">
+                    <div class="card-body text-center py-3">
+                        <h5 class="card-title" style="color: #4cae8c; font-size: 1rem;">
+                            <i class="fas fa-circle-check me-2"></i> Efficient
+                        </h5>
+                        <p class="card-text" style="font-size: 1.3rem; color: #4cae8c;">{}</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card" style="background-color: #ffe0b9; border: none; border-radius: 1rem;">
+                    <div class="card-body text-center py-3">
+                        <h5 class="card-title" style="color: #db9848; font-size: 1rem;">
+                            <i class="fas fa-circle-half-stroke me-2"></i> Moderate
+                        </h5>
+                        <p class="card-text" style="font-size: 1.3rem; color: #db9848;">{}</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card" style="background-color: #feccd5; border: none; border-radius: 1rem;">
+                    <div class="card-body text-center py-3">
+                        <h5 class="card-title" style="color: #da5062; font-size: 1rem;">
+                            <i class="fas fa-fire me-2"></i> Resource-Intensive
+                        </h5>
+                        <p class="card-text" style="font-size: 1.3rem; color: #da5062;">{}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        '''.format(
+            count_mapping["Efficient"],
+            count_mapping["Moderate"],
+            count_mapping["Resource-Intensive"]
+        )
+
+
+        # List of apps
+        html += '<ul class="list-group">\n'
+        for _, row in df.iterrows():
+            app = row['application']
+            label = row['label']
+            score = float(row['score'])
+            color = self.interpolate_color(score)
+
+            badge_html = f'''
+            <span class="badge rounded-pill"
+                style="background-color: {color}; color: white;
+                        font-size: 0.8rem; padding: 0.6em 1em;">
+                {label} ({score:.2f})
+            </span>
+            '''
+
+            html += f'''
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+                {app}
+                {badge_html}
+            </li>'''
+        html += '\n</ul>'
+        return html
+
 
     def extract_all_variables_and_publish(self, url_for):
         try:
@@ -448,6 +607,33 @@ class perf_load_report_publish:
                 data = json.dumps({"status": "info", "message": f"<div style='text-align: center; margin-top:10px;'><h3>{load_type} - {str(test_title).capitalize()} Performance Report</h3>{sprint_runs_text}</div><hr style='border: 0; height: 2px; background: linear-gradient(to right, black, #0000ff);'><br>"})
                                                                                                                                                                                                         
                 yield f'data: {data}\n\n'
+            if self.isViewReport:
+                mem_dict = self.main_result["memory_usages"]["data"]["application_level_usages"]["data"]
+                mem_df = pd.DataFrame(mem_dict)
+                cpu_dict = self.main_result["cpu_usages"]["data"]["application_level_usages"]["data"]
+                cpu_df = pd.DataFrame(cpu_dict)
+                merged = pd.merge(mem_df,cpu_df,on="application",how="inner", suffixes=["_mem","_cpu"])
+
+                # Load the saved model and label encoder
+                model = joblib.load(os.path.join(MODELS_PATH,"app_perf_classifier_model.joblib"))
+                label_encoder = joblib.load(os.path.join(MODELS_PATH,"app_classify_label_encoder.joblib"))
+
+                merged[["label", "score"]] = merged.apply(
+                    lambda row: pd.Series(self.make_prediction(model, label_encoder, row["avg_mem"], row["avg_cpu"])),
+                    axis=1
+                )
+                merged.drop(columns=["avg_mem","avg_cpu"] , inplace=True)
+
+                html_text = custom_string()
+                # html_text+=ViewReportClass().add_table_from_dataframe(f"<h3>{self.captilise_heading('App-wise Classification')}</h3>", merged, collapse=False,isEditable=False,key_name="sample", dbname = self.dbname, collname = self.collname, sprint = self.main_sprint, run = self.main_run)
+                html_text += self.dataframe_to_gradient_list(merged)
+                html_text+='<hr style="border: 0; height: 2px; background: linear-gradient(to right, black, #0000ff);">'
+                json_data = json.dumps({
+                    "status": "info",
+                    "message": html_text
+                })
+                yield f'data: {json_data}\n\n'
+
             for key_name in self.all_keys:
                 # if key_name not in ['cpu_usages']:continue
                 try:
