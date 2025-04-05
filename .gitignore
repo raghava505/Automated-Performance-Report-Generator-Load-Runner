@@ -29,3 +29,5 @@ scripts/test.py
 .*log
 report-automation-website/
 charts_classification_training_images/
+scripts/models/chart_classification_model.h5
+*.h5
