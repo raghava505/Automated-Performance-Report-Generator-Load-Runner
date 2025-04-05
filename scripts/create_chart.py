@@ -82,45 +82,41 @@ def create_images_and_save(path, label, doc_id=None, collection=None, fs=None, v
     
 
     if all(v is None for v in [doc_id, collection, fs, variables, end_time_str, run, stack, test_title, step_factor, stack_obj]):        
+        fig_width=7
         # Fake x values across 10 hours (every 30 minutes = 20 points)
         start_time = datetime.now().replace(minute=0, second=0, microsecond=0)
         x = [start_time + timedelta(minutes=5 * i) for i in range(120)]
         # y = np.random.normal(loc=50, scale=10, size=num_points)
 
         num_points = len(x)
-        trend = np.random.uniform(-0.03, 0.03, num_points).cumsum()
-        y = np.zeros_like(x)
-        y = np.random.randint(20,50) + trend * 10 + np.random.normal(0, np.random.randint(1,2), num_points)
-
-        if label == "leak":
-            # More controlled gradual increase with irregular pattern
-
-            noise = np.linspace(np.random.uniform(0, 15), np.random.uniform(40, 60), num_points)
-            y += noise
-
-        elif label == "spikes":
-            num_spikes = np.random.randint(3, 7)  # Random number of spikes
-            for _ in range(num_spikes):
-                start = np.random.randint(0, num_points)
-                duration = np.random.randint(5, 40)  # Random duration of spike
-                y[start:start+duration] += np.random.randint(30, 60)  # Random spike intensity
-        elif label == "no_issue":
-            pass
-        else:
-            print(f"Valid class not provided : {label}.. exiiting...")
-        x_values_utc = date2num(x)
-        x_values_ist = x_values_utc + (offset_ist_minutes / (60 * 24))  # Apply IST offset
-
-        # Plot
         plt.figure(figsize=(fig_width, fig_width * 8 / 16))
-        line_plot, = plt.plot_date(x_values_ist, y, linestyle='solid', label='Fake Data', markersize=0.1, linewidth=fig_width / 21)
+        for _ in range(np.random.randint(1,6)):
+            trend = np.random.uniform(-0.1, 0.1, num_points).cumsum()
+            y = np.zeros_like(x)
+            y = np.random.randint(20,50) + trend * 10 + np.random.normal(0, 1, num_points)
 
-        line_color = line_plot.get_color()
-        plt.fill_between(x_values_ist, y, color=line_color, alpha=0.1)
-        plt.text(x_values_ist[0], y[0], 'Fake Data', fontsize=10, verticalalignment='bottom', horizontalalignment='left',
-                color='black', bbox=dict(facecolor=line_color, edgecolor='none', boxstyle='round,pad=0.1'))
-        plt.text(x_values_ist[-1], y[-1], 'Fake Data', fontsize=10, verticalalignment='bottom', horizontalalignment='right',
-                color='black', bbox=dict(facecolor=line_color, edgecolor='none', boxstyle='round,pad=0.1'))
+            if label == "leak":
+                # More controlled gradual increase with irregular pattern
+
+                noise = np.linspace(np.random.uniform(1, 20), np.random.uniform(40, 60), num_points)
+                y += noise
+
+            elif label == "spikes":
+                num_spikes = np.random.randint(1, 6)  # Random number of spikes
+                for _ in range(num_spikes):
+                    start = np.random.randint(0, num_points)
+                    duration = np.random.randint(5, 30)  # Random duration of spike
+                    y[start:start+duration] += np.random.randint(20, 40)  # Random spike intensity
+            elif label == "no_issue":
+                pass
+            else:
+                print(f"Valid class not provided : {label}.. exiiting...")
+            x_values_utc = date2num(x)
+            x_values_ist = x_values_utc + (offset_ist_minutes / (60 * 24))  # Apply IST offset
+
+            # Plot
+            
+            line_plot, = plt.plot_date(x_values_ist, y, linestyle='solid', label='Fake Data', markersize=0.1, linewidth=fig_width / 8)
 
         # Axis formatting (30-minute interval)
         x_date_formatter = DateFormatter('%m/%d \n%H:%M')
@@ -134,25 +130,17 @@ def create_images_and_save(path, label, doc_id=None, collection=None, fs=None, v
         for legobj in leg.legendHandles:
             legobj.set_linewidth(fig_width / 6)
 
-        # Axis styling
-        plt.xticks(fontsize=fig_width / 1.935, color=text_color)
-        plt.yticks(fontsize=fig_width / 1.935, color=text_color)
-        plt.tight_layout()
-        plt.gcf().set_facecolor(outer_background_color)
         ax = plt.gca()
-        for spine in ax.spines.values():
-            spine.set_color(gridline_color)
-        ax.spines['right'].set_visible(False)
-        ax.spines['left'].set_visible(False)
-        ax.spines['top'].set_visible(False)
 
         # X-axis limit: 10 hours from start
         x_start = date2num(start_time) + (offset_ist_minutes / (60 * 24))
         x_end = date2num(start_time + timedelta(hours=10)) + (offset_ist_minutes / (60 * 24))
         plt.xlim((x_start, x_end))
+        # Set Y-axis limits
+        y_min = 0
+        y_max = max(100, max(y))  # Ensures axis goes to 100% or above if data exceeds it
+        plt.ylim(y_min, y_max)
 
-        # Save
-        # plt.savefig(f"{path}/sample_chart.png", bbox_inches='tight', pad_inches=0.1, format='webp')
         if tight_plot_only:
             plt.axis('off')  # Turn off axis lines and ticks
             for spine in ax.spines.values():
@@ -302,14 +290,14 @@ if __name__=="__main__":
     delete_image_data=True
 
     data_dir = "charts_classification_training_images"
-    classes = ["leak", "spikes", "no_issue"]
+    classes = ['leak', 'no_issue', 'spikes']
 
     # create_images_and_save("sample_folder/asdasd.png","memory_spikes")
     def generate_charts_data():
         # Generate and save images
         for cls in classes:
             os.makedirs(os.path.join(data_dir, cls), exist_ok=True)
-        num_samples_for_each_class = 200
+        num_samples_for_each_class = 20
         for cls in classes:
             for i in range(num_samples_for_each_class):
                 path = os.path.join(data_dir, cls, f"{cls}_{i}.png")

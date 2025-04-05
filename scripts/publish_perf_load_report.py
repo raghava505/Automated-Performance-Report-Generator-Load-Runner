@@ -16,10 +16,10 @@ from tensorflow.keras.models import load_model # type: ignore
 import cv2
 
 data_dir = "/Users/raghava/Documents/Projects/4-Report Generator and Load Runner/charts_classification_training_images"
-classes = ["leak", "spikes", "no_issue"]
+classes = ['leak', 'no_issue', 'spikes']
 model_name = "chart_classification_model.h5"
 
-img_height, img_width = 448, 224
+img_height, img_width = 256,128
 
 def predict(image_path, loaded_model):
     def preprocess_image(image_path):
