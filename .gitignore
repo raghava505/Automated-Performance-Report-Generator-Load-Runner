@@ -28,3 +28,4 @@ flask_session/
 scripts/test.py
 .*log
 report-automation-website/
+charts_classification_training_images/

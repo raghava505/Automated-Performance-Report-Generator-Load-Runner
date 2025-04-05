@@ -12,7 +12,39 @@ import base64
 import pandas as pd
 import re
 import joblib
+from tensorflow.keras.models import load_model # type: ignore
+import cv2
 
+data_dir = "/Users/raghava/Documents/Projects/4-Report Generator and Load Runner/charts_classification_training_images"
+classes = ["leak", "spikes", "no_issue"]
+model_name = "chart_classification_model.h5"
+
+img_height, img_width = 448, 224
+
+def predict(image_path, loaded_model):
+    def preprocess_image(image_path):
+        img = cv2.imread(image_path)  # Load the image
+        # if img is None:
+        #     return f"cv2 failed to read the image. Path exists? {os.path.exists(image_path)}. path : {image_path} Exact path: {repr(image_path)}"
+        # else:
+            # return f"Image loaded successfully. Shape: {img.shape}"
+        img = cv2.resize(img, (img_width, img_height))  # Resize to (width, height)
+        img = img / 255.0  # Normalize pixel values
+        img = np.expand_dims(img, axis=0)  # Add batch dimension
+        return img
+
+    processed_image = preprocess_image(image_path)
+
+    prediction = loaded_model.predict(processed_image)
+    class_index = np.argmax(prediction)
+
+    predicted_label = classes[class_index]
+
+    return_string = f"Predicted Class: {predicted_label}.\nConfidence {prediction[0][class_index]*100:.2f}%\n"
+    # for i, label in enumerate(classes):
+    #     return_string += f"{label}: {prediction[0][i]*100:.2f}% confidence\n"
+
+    return return_string
 
 class custom_string(str):
     def __init__(self, value=""):
@@ -201,6 +233,7 @@ class ViewReportClass:
                     </div>
                 """
     def attach_saved_charts(self, dict_of_list_of_filepaths, base_graphs_path, url_for, document_ids_mapping, main_doc_id):
+        loaded_model = load_model(os.path.join(MODELS_PATH,model_name))
         html_text = ""
         for main_heading in dict_of_list_of_filepaths:
             unique_id = str(uuid.uuid4())
@@ -254,10 +287,13 @@ class ViewReportClass:
                         curr_filepath = filepath.replace(main_doc_id, document_id)
                         active_class = "show active" if index == 0 else ""
 
+                        complete_filepath = os.path.join("/Users/raghava/Documents/Projects/graphs/",curr_filepath)
+                        predicted_text = predict(complete_filepath, loaded_model)
                         html_text += f"""
                             <div class="mb-4 tab-pane fade {active_class} images_transition_over_sprints" id="tab-content-{unique_id_for_each_image}-{index}" 
                                 role="tabpanel" aria-labelledby="tab-{unique_id_for_each_image}-{index}">
-                                <img src="{url_for('serve_image', filename=curr_filepath)}" alt="{curr_filepath}" class="img-fluid w-100" />                                                
+                                {predicted_text}
+                                <img src="{url_for('serve_image', filename=curr_filepath)}" alt="{curr_filepath}" class="img-fluid w-100" />    
                             </div>
                         """
                     html_text += "</div>"

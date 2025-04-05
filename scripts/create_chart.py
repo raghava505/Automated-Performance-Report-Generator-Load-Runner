@@ -7,6 +7,9 @@ from matplotlib.dates import date2num, DateFormatter, MinuteLocator
 from matplotlib.ticker import FuncFormatter
 import numpy as np
 # import pandas as pd
+from datetime import datetime, timedelta
+
+tight_plot_only = False 
 
 area_fill_titles=["No.of active connections group by application for configdb on master"]
 
@@ -68,15 +71,111 @@ initial_legend_fontsize=fig_width/1.90
 fontsize_decrease_rate_with_rows=fig_width/165
 ncol_increase_rate_with_rows=8000
 
-def create_images_and_save(path,doc_id,collection,fs,variables,end_time_str,run,stack,test_title,step_factor,stack_obj):
-    duration = variables['load_duration_in_hrs']
-    stack_obj.log.info(f"Delete saved images data set to : {delete_image_data}")
+def create_images_and_save(path, label, doc_id=None, collection=None, fs=None, variables=None, end_time_str=None, run=None, stack=None, test_title=None, step_factor=None, stack_obj=None):
+    # Set plotting styles
     sns.set_style("darkgrid")
     sns.plotting_context("talk")
     sns.set(rc={"text.color": text_color})
     sns.set_style({"axes.facecolor": inner_background_color})
     sns.set_style({"grid.color": gridline_color})
     sns.set_style({"grid.linewidth": gridline_width})
+    
+
+    if all(v is None for v in [doc_id, collection, fs, variables, end_time_str, run, stack, test_title, step_factor, stack_obj]):        
+        # Fake x values across 10 hours (every 30 minutes = 20 points)
+        start_time = datetime.now().replace(minute=0, second=0, microsecond=0)
+        x = [start_time + timedelta(minutes=5 * i) for i in range(120)]
+        # y = np.random.normal(loc=50, scale=10, size=num_points)
+
+        num_points = len(x)
+        trend = np.random.uniform(-0.03, 0.03, num_points).cumsum()
+        y = np.zeros_like(x)
+        y = np.random.randint(20,50) + trend * 10 + np.random.normal(0, np.random.randint(1,2), num_points)
+
+        if label == "leak":
+            # More controlled gradual increase with irregular pattern
+
+            noise = np.linspace(np.random.uniform(0, 15), np.random.uniform(40, 60), num_points)
+            y += noise
+
+        elif label == "spikes":
+            num_spikes = np.random.randint(3, 7)  # Random number of spikes
+            for _ in range(num_spikes):
+                start = np.random.randint(0, num_points)
+                duration = np.random.randint(5, 40)  # Random duration of spike
+                y[start:start+duration] += np.random.randint(30, 60)  # Random spike intensity
+        elif label == "no_issue":
+            pass
+        else:
+            print(f"Valid class not provided : {label}.. exiiting...")
+        x_values_utc = date2num(x)
+        x_values_ist = x_values_utc + (offset_ist_minutes / (60 * 24))  # Apply IST offset
+
+        # Plot
+        plt.figure(figsize=(fig_width, fig_width * 8 / 16))
+        line_plot, = plt.plot_date(x_values_ist, y, linestyle='solid', label='Fake Data', markersize=0.1, linewidth=fig_width / 21)
+
+        line_color = line_plot.get_color()
+        plt.fill_between(x_values_ist, y, color=line_color, alpha=0.1)
+        plt.text(x_values_ist[0], y[0], 'Fake Data', fontsize=10, verticalalignment='bottom', horizontalalignment='left',
+                color='black', bbox=dict(facecolor=line_color, edgecolor='none', boxstyle='round,pad=0.1'))
+        plt.text(x_values_ist[-1], y[-1], 'Fake Data', fontsize=10, verticalalignment='bottom', horizontalalignment='right',
+                color='black', bbox=dict(facecolor=line_color, edgecolor='none', boxstyle='round,pad=0.1'))
+
+        # Axis formatting (30-minute interval)
+        x_date_formatter = DateFormatter('%m/%d \n%H:%M')
+        plt.gca().xaxis.set_major_locator(MinuteLocator(interval=30))
+        plt.gca().xaxis.set_major_formatter(x_date_formatter)
+        plt.gca().get_yaxis().set_major_formatter(FuncFormatter(lambda value, pos: format_y_ticks(value, pos, '')))
+
+        # Titles
+        plt.title(f"Sample Chart for label {label}", fontsize=fig_width / 1.48, pad=fig_width / 0.9, y=1)
+        leg = plt.legend(loc='upper center', bbox_to_anchor=(0.5, -0.050), ncol=1, fontsize=fig_width / 2.5, handlelength=1, frameon=False)
+        for legobj in leg.legendHandles:
+            legobj.set_linewidth(fig_width / 6)
+
+        # Axis styling
+        plt.xticks(fontsize=fig_width / 1.935, color=text_color)
+        plt.yticks(fontsize=fig_width / 1.935, color=text_color)
+        plt.tight_layout()
+        plt.gcf().set_facecolor(outer_background_color)
+        ax = plt.gca()
+        for spine in ax.spines.values():
+            spine.set_color(gridline_color)
+        ax.spines['right'].set_visible(False)
+        ax.spines['left'].set_visible(False)
+        ax.spines['top'].set_visible(False)
+
+        # X-axis limit: 10 hours from start
+        x_start = date2num(start_time) + (offset_ist_minutes / (60 * 24))
+        x_end = date2num(start_time + timedelta(hours=10)) + (offset_ist_minutes / (60 * 24))
+        plt.xlim((x_start, x_end))
+
+        # Save
+        # plt.savefig(f"{path}/sample_chart.png", bbox_inches='tight', pad_inches=0.1, format='webp')
+        if tight_plot_only:
+            plt.axis('off')  # Turn off axis lines and ticks
+            for spine in ax.spines.values():
+                spine.set_visible(False)
+            plt.subplots_adjust(left=0, right=1, top=1, bottom=0)  # Remove all margins
+            plt.savefig(path, bbox_inches='tight', pad_inches=0, format='webp', transparent=True)
+        else:
+            plt.xticks(fontsize=fig_width / 1.935, color=text_color)
+            plt.yticks(fontsize=fig_width / 1.935, color=text_color)
+            plt.tight_layout()
+            plt.gcf().set_facecolor(outer_background_color)
+            for spine in ax.spines.values():
+                spine.set_color(gridline_color)
+            ax.spines['right'].set_visible(False)
+            ax.spines['left'].set_visible(False)
+            ax.spines['top'].set_visible(False)
+            plt.savefig(path, bbox_inches='tight', pad_inches=0.1, format='webp')
+        plt.close()
+        print(f"Sample chart for {label} created and saved at {path}.")
+        return
+
+    duration = variables['load_duration_in_hrs']
+    stack_obj.log.info(f"Delete saved images data set to : {delete_image_data}")
     cursor=collection.find_one({"_id" : ObjectId(doc_id)})
     total_charts=0
     charts_data=cursor["charts"]["data"]
@@ -201,39 +300,56 @@ def create_images_and_save(path,doc_id,collection,fs,variables,end_time_str,run,
 if __name__=="__main__":
     global delete_image_data
     delete_image_data=True
-    import time,pymongo
-    from gridfs import GridFS
-    from settings import stack_configuration
-    import pytz
-    from capture_charts_data import Charts
-    from parent_load_details import parent as load_cls
-    s_at = time.perf_counter()
-    client = pymongo.MongoClient("mongodb://localhost:8013")
-    database = client["Osquery_LoadTests"]
-    fs = GridFS(database)
 
-    variables = {
-        "start_time_str_ist":"2024-11-26 21:28",
-        "load_duration_in_hrs":2,
-        "test_env_file_name":'s29_nodes.json',
-        "build":"153105",
+    data_dir = "charts_classification_training_images"
+    classes = ["leak", "spikes", "no_issue"]
 
-    }
-    stack_obj = stack_configuration(variables)
+    # create_images_and_save("sample_folder/asdasd.png","memory_spikes")
+    def generate_charts_data():
+        # Generate and save images
+        for cls in classes:
+            os.makedirs(os.path.join(data_dir, cls), exist_ok=True)
+        num_samples_for_each_class = 200
+        for cls in classes:
+            for i in range(num_samples_for_each_class):
+                path = os.path.join(data_dir, cls, f"{cls}_{i}.png")
+                create_images_and_save(path, label=cls)
 
-    print("Fetching charts data ...")
-    charts_obj = Charts(stack_obj=stack_obj,fs=fs)
+    generate_charts_data()
+
+    # import time,pymongo
+    # from gridfs import GridFS
+    # from settings import stack_configuration
+    # import pytz
+    # from capture_charts_data import Charts
+    # from parent_load_details import parent as load_cls
+    # s_at = time.perf_counter()
+    # client = pymongo.MongoClient("mongodb://localhost:8013")
+    # database = client["Osquery_LoadTests"]
+    # fs = GridFS(database)
+
+    # variables = {
+    #     "start_time_str_ist":"2024-11-26 21:28",
+    #     "load_duration_in_hrs":2,
+    #     "test_env_file_name":'s29_nodes.json',
+    #     "build":"153105",
+
+    # }
+    # stack_obj = stack_configuration(variables)
+
+    # print("Fetching charts data ...")
+    # charts_obj = Charts(stack_obj=stack_obj,fs=fs)
     
-    step_factor=variables["load_duration_in_hrs"]/10 if variables["load_duration_in_hrs"]>10 else 1
-    # complete_charts_data_dict,all_gridfs_fileids=charts_obj.capture_charts_and_save(load_cls.get_all_chart_queries(),step_factor=step_factor)
-    complete_charts_data_dict,all_gridfs_fileids=charts_obj.capture_charts_and_save({"live Charts":load_cls.get_basic_chart_queries()},step_factor=step_factor)
-    print("Saved charts data successfully !")
-    path = "/Users/masabathulararao/Documents/Loadtest/save-report-data-to-mongo/publish_practice/images"
-    collection = database["Testing"]
-    inserted_id = collection.insert_one({"charts":{"data":complete_charts_data_dict}})    
-    create_images_and_save(path,str(inserted_id.inserted_id),collection,fs,variables,stack_obj.end_time_str_ist,1,"Longevity","Multiple Customer Rule Engine, Control Plane, CloudQuery, KubeQuery and SelfManaged Load",step_factor,stack_obj)
+    # step_factor=variables["load_duration_in_hrs"]/10 if variables["load_duration_in_hrs"]>10 else 1
+    # # complete_charts_data_dict,all_gridfs_fileids=charts_obj.capture_charts_and_save(load_cls.get_all_chart_queries(),step_factor=step_factor)
+    # complete_charts_data_dict,all_gridfs_fileids=charts_obj.capture_charts_and_save({"live Charts":load_cls.get_basic_chart_queries()},step_factor=step_factor)
+    # print("Saved charts data successfully !")
+    # path = "/Users/masabathulararao/Documents/Loadtest/save-report-data-to-mongo/publish_practice/images"
+    # collection = database["Testing"]
+    # inserted_id = collection.insert_one({"charts":{"data":complete_charts_data_dict}})    
+    # create_images_and_save(path,str(inserted_id.inserted_id),collection,fs,variables,stack_obj.end_time_str_ist,1,"Longevity","Multiple Customer Rule Engine, Control Plane, CloudQuery, KubeQuery and SelfManaged Load",step_factor,stack_obj)
 
-    f3_at = time.perf_counter()
-    print(f"Collecting the report data took : {round(f3_at - s_at,2)} seconds in total")
+    # f3_at = time.perf_counter()
+    # print(f"Collecting the report data took : {round(f3_at - s_at,2)} seconds in total")
 else:
     delete_image_data=True
