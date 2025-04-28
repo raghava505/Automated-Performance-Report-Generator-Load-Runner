@@ -1,11 +1,10 @@
 ## 📄 Project Presentation
 
+[Tableau Dashboard Presentation (PDF)](Tableau%20Dashboard%20for%20Performance%20Analytics%20and%20Visualisation.pdf)
 
-[Tableau Dashboard Presentation (PDF)](Tableau Dashboard for Performance Analytics and Visualisation.pdf)
+[Predictive Models Integrated into Website (PDF)](Predictive%20models%20to%20classify%20resource%20chart%20images,%20and%20performance%20of%20applications.pdf)
 
-[Predictive models integrated to Website (PDF)](Predictive models to classify resource chart images, and performance of applications.pdf)
-
-[Performance Analytics and Visualization Website (PDF)](Performance Analytics Website with embedded Machine Learning Models.pdf)
+[Performance Analytics and Visualization Website (PDF)](Performance%20Analytics%20Website%20with%20embedded%20Machine%20Learning%20Models.pdf)
 
 # Setup and Install Report Generator tool
 1. set ```REPORT_GENERATOR_ROOT_PATH```  and  ```LOCAL_IP_ADDRESS``` environment variables in your machine.
